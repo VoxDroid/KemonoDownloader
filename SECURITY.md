@@ -32,7 +32,7 @@ If you discover a security vulnerability in KemonoDownloader, we encourage respo
 ### Guidelines
 - **Responsible Disclosure**: Do not publicly share details of the vulnerability until we have addressed it.
 - **No Exploitation**: Avoid exploiting vulnerabilities in ways that harm users, creators, or the project (e.g., unauthorized data access or disruption).
-- **Ethical Use**: Respect the intellectual property rights of creators and adhere to the terms of service of Kemono.su and related platforms (e.g., Patreon, Pixiv Fanbox), as outlined in our [README](README.md).
+- **Ethical Use**: Respect the intellectual property rights of creators and adhere to the terms of service of Kemono.cr and related platforms (e.g., Patreon, Pixiv Fanbox), as outlined in our [README](README.md).
 - **Follow Community Standards**: Adhere to our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md). Do not include unverified links or promotional content in reports, as they will be considered spam and may lead to restrictions.
 
 ## Security Best Practices

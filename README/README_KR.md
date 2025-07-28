@@ -1,4 +1,4 @@
-<h1 align="center">Kemono.su 다운로더</h1>
+<h1 align="center">Kemono.cr 다운로더</h1>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/VoxDroid/KemonoDownloader/refs/heads/main/assets/img/KemonoDownloader.png" alt="Kemono Downloader" width="600"/>
@@ -73,7 +73,7 @@
 
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
-**Kemono 다운로더**에 오신 것을 환영합니다. 이 도구는 PyQt6로 제작된 다기능 Python 기반 데스크톱 애플리케이션으로, [Kemono.su](https://kemono.su)에서 콘텐츠를 다운로드하도록 설계되었습니다. 사용자는 Patreon, Fanbox 등에서 개별 게시물이나 크리에이터의 전체 프로필을 아카이브할 수 있으며, 다양한 파일 유형을 지원하고 사용자 맞춤 설정 및 고급 기능을 제공합니다.
+**Kemono 다운로더**에 오신 것을 환영합니다. 이 도구는 PyQt6로 제작된 다기능 Python 기반 데스크톱 애플리케이션으로, [Kemono.cr](https://kemono.cr)에서 콘텐츠를 다운로드하도록 설계되었습니다. 사용자는 Patreon, Fanbox 등에서 개별 게시물이나 크리에이터의 전체 프로필을 아카이브할 수 있으며, 다양한 파일 유형을 지원하고 사용자 맞춤 설정 및 고급 기능을 제공합니다.
 
 ## 중요 공지
 
@@ -95,8 +95,8 @@ KemonoDownloader는 Kemono.su의 콘텐츠와 상호작용하며, 여기에는 P
 ### 위험 및 제한
 
 - **법적 위험**: Kemono.su에서 콘텐츠를 다운로드하면 저작권법이나 원래 플랫폼의 이용 약관을 위반할 수 있습니다. 이 도구를 사용하는 모든 법적 위험은 사용자가 부담합니다.
-- **Kemono.su 의존성**: KemonoDownloader는 Kemono.su에 의존하며, Kemono.su는 업데이트가 불규칙하고 다운타임이 발생한 이력이 있습니다. Kemono.su가 사용 불가능해지면 이 도구의 기능도 상실됩니다.
-- **속도 제한 및 오류**: Kemono.su는 속도 제한이나 기타 제약을 부과할 수 있으며, 이는 다운로드 성능에 영향을 미칠 수 있습니다. 관리자는 Kemono.su 콘텐츠에 대한 중단 없는 접근을 보장할 수 없습니다.
+- **Kemono.cr 의존성**: KemonoDownloader는 Kemono.su에 의존하며, Kemono.su는 업데이트가 불규칙하고 다운타임이 발생한 이력이 있습니다. Kemono.su가 사용 불가능해지면 이 도구의 기능도 상실됩니다.
+- **속도 제한 및 오류**: Kemono.su는 속도 제한이나 기타 제약을 부과할 수 있으며, 이는 다운로드 성능에 영향을 미칠 수 있습니다. 관리자는 Kemono.cr 콘텐츠에 대한 중단 없는 접근을 보장할 수 없습니다.
 
 ## 커뮤니티 기준
 
@@ -178,13 +178,13 @@ Kemono Downloader는 [Briefcase](https://briefcase.readthedocs.io/)를 사용하
 
 ### 시작하기
 - 애플리케이션은 지정된 저장 위치에 기본 디렉토리(`Downloads`, `Cache`, `Other Files`)를 생성합니다.
-- Kemono.su 콘텐츠에 접근하려면 활성 인터넷 연결을 유지하세요.
+- Kemono.cr 콘텐츠에 접근하려면 활성 인터넷 연결을 유지하세요.
 - 자세한 지침과 문제 해결 팁은 도움말 탭을 탐색하세요.
 
 ### 게시물 다운로더 탭
 - **목적**: Kemono.su의 개별 게시물에서 파일 다운로드.
 - **사용 방법**:
-  1. "게시물 URL 입력" 필드에 게시물 URL(예: `https://kemono.su/patreon/user/123456789/post/123456789`)을 입력하세요.
+  1. "게시물 URL 입력" 필드에 게시물 URL(예: `https://kemono.cr/patreon/user/123456789/post/123456789`)을 입력하세요.
   2. "큐에 추가"를 클릭하여 목록에 추가하세요.
   3. 눈 아이콘을 클릭하여 파일을 보고, 유형(예: JPG, ZIP)으로 필터링한 후 다운로드할 파일을 선택하세요.
   4. "다운로드"를 클릭하여 시작하고 진행률 막대와 콘솔로 진행 상황을 모니터링하세요.
@@ -192,7 +192,7 @@ Kemono Downloader는 [Briefcase](https://briefcase.readthedocs.io/)를 사용하
 ### 크리에이터 다운로더 탭
 - **목적**: 크리에이터 프로필에서 콘텐츠를 대량 다운로드.
 - **사용 방법**:
-  1. "크리에이터 URL 입력" 필드에 크리에이터 URL(예: `https://kemono.su/patreon/user/123456789`)을 입력하세요.
+  1. "크리에이터 URL 입력" 필드에 크리에이터 URL(예: `https://kemono.cr/patreon/user/123456789`)을 입력하세요.
   2. "큐에 추가"를 클릭하여 목록에 추가하세요.
   3. 눈 아이콘을 클릭하여 게시물을 가져오고, 옵션(메인 파일, 첨부 파일, 콘텐츠 이미지)을 설정한 후 게시물을 선택하세요.
   4. "다운로드"를 클릭하여 시작하고 인터페이스를 통해 진행 상황을 추적하세요.

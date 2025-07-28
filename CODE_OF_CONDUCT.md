@@ -4,7 +4,7 @@
 
 We, as contributors and maintainers of the KemonoDownloader project, pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, gender identity and expression, level of experience, nationality, personal appearance, race, religion, or sexual identity and orientation.
 
-We are committed to fostering an open and welcoming environment where all participants can collaborate constructively to improve KemonoDownloader, a tool for downloading content from Kemono.su.
+We are committed to fostering an open and welcoming environment where all participants can collaborate constructively to improve KemonoDownloader, a tool for downloading content from Kemono.cr.
 
 ## Our Standards
 
@@ -28,7 +28,7 @@ Examples of unacceptable behavior include:
 - Publicly disclosing security vulnerabilities without coordination, as outlined in our [Security Policy](SECURITY.md).
 - Other conduct which could reasonably be considered inappropriate in a professional setting.
 
-Given that KemonoDownloader interacts with content from Kemono.su, we expect all participants to respect the intellectual property rights of creators and adhere to ethical standards when using the tool. Misuse of the tool to harm creators or violate their rights will not be tolerated.
+Given that KemonoDownloader interacts with content from Kemono.cr, we expect all participants to respect the intellectual property rights of creators and adhere to ethical standards when using the tool. Misuse of the tool to harm creators or violate their rights will not be tolerated.
 
 ## Scope
 

@@ -1,6 +1,6 @@
 # Contributing to KemonoDownloader
 
-Thank you for your interest in contributing to KemonoDownloader! We welcome contributions from the community to help improve this tool for downloading content from Kemono.su. Whether you’re fixing bugs, adding features, or improving documentation, your efforts are greatly appreciated.
+Thank you for your interest in contributing to KemonoDownloader! We welcome contributions from the community to help improve this tool for downloading content from Kemono.cr. Whether you’re fixing bugs, adding features, or improving documentation, your efforts are greatly appreciated.
 
 ## Table of Contents
 - [Community Guidelines](#community-guidelines)
@@ -22,7 +22,7 @@ Thank you for your interest in contributing to KemonoDownloader! We welcome cont
 To maintain a safe and productive environment, please adhere to the following rules:
 - **No Spam or Unverified Links**: Do not post links to unverified or external tools, as they may pose security risks. Such actions will be considered spam and may lead to removal of comments, temporary or permanent bans, or reporting to GitHub.
 - **Provide Constructive Feedback**: When reporting issues, include detailed information, reproducible steps, or code samples. Avoid vague or promotional content.
-- **Respect Intellectual Property**: Contributions must comply with intellectual property laws and the terms of service of Kemono.su, as outlined in our [README](README.md).
+- **Respect Intellectual Property**: Contributions must comply with intellectual property laws and the terms of service of Kemono.cr, as outlined in our [README](README.md).
 - **Respect the Community**: Be respectful in all interactions.
 
 Violations of these guidelines may result in warnings, removal of comments, temporary or permanent bans from contributing, or reporting to GitHub for further action. If you notice violations, report them to [izeno.contact@gmail.com](mailto:izeno.contact@gmail.com) or open a private issue labeled "Code of Conduct Violation."

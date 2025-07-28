@@ -1,4 +1,4 @@
-<h1 align="center">Kemono.su ダウンローダー</h1>
+<h1 align="center">Kemono.cr ダウンローダー</h1>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/VoxDroid/KemonoDownloader/refs/heads/main/assets/img/KemonoDownloader.png" alt="Kemono Downloader" width="600"/>
@@ -73,7 +73,7 @@
 
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
-**Kemono ダウンローダー**へようこそ。これは、[Kemono.su](https://kemono.su)からコンテンツをダウンロードするために設計された、PyQt6で構築された多機能なPythonベースのデスクトップアプリケーションです。このツールを使用すると、PatreonやFanboxなどのサービスから個々の投稿やクリエイターのプロフィールをアーカイブでき、さまざまなファイルタイプをサポートし、カスタマイズ可能な設定と高度な機能を提供します。
+**Kemono ダウンローダー**へようこそ。これは、[Kemono.cr](https://kemono.cr)からコンテンツをダウンロードするために設計された、PyQt6で構築された多機能なPythonベースのデスクトップアプリケーションです。このツールを使用すると、PatreonやFanboxなどのサービスから個々の投稿やクリエイターのプロフィールをアーカイブでき、さまざまなファイルタイプをサポートし、カスタマイズ可能な設定と高度な機能を提供します。
 
 ## 重要なお知らせ
 
@@ -184,7 +184,7 @@ Kemono Downloaderは[Briefcase](https://briefcase.readthedocs.io/)を使用し�
 ### 投稿ダウンローダータブ
 - **目的**: Kemono.suの個々の投稿からファイルをダウンロード。
 - **使い方**:
-  1. 「投稿URLを入力」欄に投稿URL（例: `https://kemono.su/patreon/user/123456789/post/123456789`）を入力。
+  1. 「投稿URLを入力」欄に投稿URL（例: `https://kemono.cr/patreon/user/123456789/post/123456789`）を入力。
   2. 「キューに追加」をクリックしてリストに追加。
   3. 目アイコンをクリックしてファイルを確認し、タイプ（例: JPG、ZIP）でフィルタリングし、ダウンロードするファイルを選択。
   4. 「ダウンロード」をクリックして開始し、進捗バーとコンソールで進捗を監視。
@@ -192,7 +192,7 @@ Kemono Downloaderは[Briefcase](https://briefcase.readthedocs.io/)を使用し�
 ### クリエイターダウンローダータブ
 - **目的**: クリエイターのプロフィールからコンテンツを一括ダウンロード。
 - **使い方**:
-  1. 「クリエイターURLを入力」欄にクリエイターURL（例: `https://kemono.su/patreon/user/123456789`）を入力。
+  1. 「クリエイターURLを入力」欄にクリエイターURL（例: `https://kemono.cr/patreon/user/123456789`）を入力。
   2. 「キューに追加」をクリックしてリストに追加。
   3. 目アイコンをクリックして投稿を取得し、オプション（メインファイル、添付ファイル、コンテンツ画像）を設定し、投稿を選択。
   4. 「ダウンロード」をクリックして開始し、インターフェースで進捗を追跡。
