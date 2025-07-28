@@ -944,7 +944,8 @@ class CreatorDownloaderTab(QWidget):
             '.rar': QCheckBox("RAR"),
             '.mov': QCheckBox("MOV"),
             '.docx': QCheckBox("DOCX"),
-            '.psd': QCheckBox("PSD")
+            '.psd': QCheckBox("PSD"),
+            '.clip': QCheckBox("CLIP")
         }
         for i, (ext, check) in enumerate(self.creator_ext_checks.items()):
             check.setChecked(True)

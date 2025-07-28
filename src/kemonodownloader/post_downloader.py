@@ -550,7 +550,7 @@ class PostDetectionThread(QThread):
     def detect_files(self, post):
         detected_files = []
         allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.zip', '.mp4', '.pdf', '.7z', 
-                              '.mp3', '.wav', '.rar', '.mov', '.docx', '.psd']
+                              '.mp3', '.wav', '.rar', '.mov', '.docx', '.psd', '.clip']
 
         def get_effective_extension(file_path, file_name):
             name_ext = os.path.splitext(file_name)[1].lower()
@@ -1098,7 +1098,8 @@ class PostDownloaderTab(QWidget):
             '.zip': QCheckBox("ZIP"), '.mp4': QCheckBox("MP4"), '.gif': QCheckBox("GIF"),
             '.pdf': QCheckBox("PDF"), '.7z': QCheckBox("7Z"),
             '.mp3': QCheckBox("MP3"), '.wav': QCheckBox("WAV"), '.rar': QCheckBox("RAR"),
-            '.mov': QCheckBox("MOV"), '.docx': QCheckBox("DOCX"), '.psd': QCheckBox("PSD")
+            '.mov': QCheckBox("MOV"), '.docx': QCheckBox("DOCX"), '.psd': QCheckBox("PSD"), 
+            '.clip': QCheckBox("CLIP")
         }
         for i, (ext, check) in enumerate(self.post_filter_checks.items()):
             check.setChecked(True)
@@ -1931,7 +1932,7 @@ class PostDownloaderTab(QWidget):
     def view_current_item(self):
         if self.current_preview_url:
             ext = os.path.splitext(self.current_preview_url.lower())[1]
-            unsupported_extensions = ['.zip', '.psd', '.docx', '.7z', '.rar']
+            unsupported_extensions = ['.zip', '.psd', '.docx', '.7z', '.rar', '.clip']
             supported_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mov', '.mp3', '.wav']
 
             if ext in unsupported_extensions:
@@ -1969,4 +1970,3 @@ class PostDownloaderTab(QWidget):
     def append_log_to_console(self, message, level="INFO"):
         color = {"INFO": "green", "WARNING": "yellow", "ERROR": "red"}.get(level, "white")
         self.post_console.append(f"<span style='color:{color}'>{message}</span>")
-
