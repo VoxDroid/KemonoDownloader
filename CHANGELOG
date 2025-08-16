@@ -1,5 +1,12 @@
 # Kemono Downloader Release Notes
 
+## v5.0.0 (17 August 2025)
+**feat: Improve API request robustness and gzip handling**
+- Enhances API request logic in creator_downloader.py and post_downloader.py by adding multiple endpoint attempts, robust header management, and retry mechanisms. 
+- Adds gzip decompression for API responses, improves error handling and logging, and refactors code to use shared request and response parsing utilities. 
+- Also updates UI logic for checkbox toggling and file preparation threads for better reliability.
+- Add ".JPE" extension.
+
 ## v4.3.0 (28 July 2025)
 **feat: Add auto rename functionality to both post and creator downloaders**
 - Add auto rename checkbox to both downloader tabs with default enabled state

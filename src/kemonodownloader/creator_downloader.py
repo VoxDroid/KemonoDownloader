@@ -43,7 +43,7 @@ user_agent = ua.chrome
 HEADERS = {
     "User-Agent": user_agent,
     "Referer": "https://kemono.cr/", 
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "Accept": "text/css",
     "Accept-Language": accept_language, 
     "Accept-Encoding": "gzip, deflate",  
     "Connection": "keep-alive",
@@ -156,7 +156,11 @@ class PostDetectionThread(QThread):
             self.error.emit(translate("invalid_url_format"))
             return
         service, creator_id = parts[-3], parts[-1]
+        
+        self.log.emit(translate("log_debug", f"Parsed URL - Service: {service}, Creator ID: {creator_id}"), "INFO")
+        
         base_api_url = f"{API_BASE}/{service}/user/{creator_id}"
+        self.log.emit(translate("log_debug", f"Base API URL: {base_api_url}"), "INFO")
 
         all_posts = []
         offset = 0
@@ -165,80 +169,111 @@ class PostDetectionThread(QThread):
 
         attempt = 1
         while attempt <= max_attempts and self.is_running:
-            api_url = f"{base_api_url}?o={offset}"
-            self.log.emit(translate("log_debug", f"Fetching page {attempt} (offset {offset}) from {api_url}"), "INFO")
+            alternative_urls = [
+                f"{API_BASE}/{service}/user/{creator_id}/posts?o={offset}",  # Try with /posts suffix
+                f"{base_api_url}?o={offset}",  # Original format as fallback
+                f"https://kemono.cr/api/{service}/user/{creator_id}?o={offset}",  # Try without v1
+                f"{base_api_url}?offset={offset}&limit={page_size}",  # Try different parameter names
+            ]
             
-            try:
-                response = requests.get(api_url, headers=HEADERS, timeout=10)
-                if response.status_code != 200:
-                    self.log.emit(translate("log_info", translate("first_validation_failed", api_url)), "INFO")
-                    # Fallback validation
-                    self.log.emit(translate("log_info", translate("attempting_fallback_validation", api_url)), "INFO")
-                    fallback_headers = {
-                        'User-Agent': user_agent,
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                        'Accept-Language': accept_language,
-                        'Connection': 'keep-alive',
-                        'Upgrade-Insecure-Requests': '1',
-                        'Cache-Control': 'max-age=0'
-                    }
-                    try:
-                        direct_response = requests.get(self.url, headers=fallback_headers, timeout=10)
-                        if direct_response.status_code == 200 and 'kemono' in direct_response.text.lower():
-                            self.log.emit(translate("log_info", translate("url_validated_fallback", self.url)), "INFO")
-                            break 
-                        else:
-                            self.log.emit(translate("log_error", f"Fallback validation failed for {self.url} - Status code: {direct_response.status_code}"), "ERROR")
-                            break
-                    except requests.RequestException as fallback_e:
-                        self.log.emit(translate("log_error", translate("fallback_validation_failed", str(fallback_e))), "ERROR")
-                        break
-                    
-                posts_data = response.json()
-                if not isinstance(posts_data, list):
-                    self.log.emit(translate("log_error", "Invalid posts data returned! Response: " + json.dumps(posts_data, indent=2)), "ERROR")
-                    break
-
-                self.log.emit(translate("log_debug", f"Fetched {len(posts_data)} posts at offset {offset}"), "INFO")
-                for post in posts_data:
-                    post_id = post.get('id')
-                    title = post.get('title', f"Post {post_id}")
-                    self.log.emit(translate("log_debug", f"Post ID: {post_id}, Title: {title}"), "INFO")
-                    # Store title in shared post_titles_map
-                    self.post_titles_map[(service, creator_id, post_id)] = sanitize_filename(title)
-
-                if not posts_data:
-                    self.log.emit(translate("log_info", f"No more posts to fetch at offset {offset}. Stopping pagination."), "INFO")
-                    break
-
-                all_posts.extend(posts_data)
-                offset += page_size
-                attempt += 1
-                time.sleep(0.5)
-
-            except requests.RequestException as e:
-                self.log.emit(translate("log_info", translate("first_validation_failed_exception", api_url)), "INFO")
-                # Fallback validation on exception
-                self.log.emit(translate("log_info", translate("attempting_fallback_validation", api_url)), "INFO")
+            success = False
+            response = None
+            
+            for alt_url in alternative_urls:
+                if not self.is_running:
+                    return
+                self.log.emit(translate("log_debug", f"Trying endpoint: {alt_url}"), "DEBUG")
+                
                 fallback_headers = {
                     'User-Agent': user_agent,
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept': 'text/css',
                     'Accept-Language': accept_language,
                     'Connection': 'keep-alive',
-                    'Upgrade-Insecure-Requests': '1',
                     'Cache-Control': 'max-age=0'
                 }
+                
                 try:
-                    direct_response = requests.get(self.url, headers=fallback_headers, timeout=10)
-                    if direct_response.status_code == 200 and 'kemono' in direct_response.text.lower():
-                        self.log.emit(translate("log_info", translate("url_validated_fallback", self.url)), "INFO")
-                        break  
-                    else:
-                        self.log.emit(translate("log_error", f"Fallback validation failed for {self.url} - Status code: {direct_response.status_code}"), "ERROR")
+                    alt_response = requests.get(alt_url, headers=fallback_headers, timeout=15)
+                    if alt_response.status_code == 200:
+                        response = alt_response
+                        self.log.emit(translate("log_info", f"Endpoint successful: {alt_url}"), "INFO")
+                        success = True
                         break
-                except requests.RequestException as fallback_e:
-                    self.log.emit(translate("log_error", translate("fallback_validation_failed", str(fallback_e))), "ERROR")
+                    else:
+                        self.log.emit(translate("log_debug", f"Endpoint failed: {alt_url} - Status: {alt_response.status_code}"), "DEBUG")
+                except requests.RequestException as alt_e:
+                    self.log.emit(translate("log_debug", f"Endpoint error: {alt_url} - {str(alt_e)}"), "DEBUG")
+            
+            if not success:
+                self.log.emit(translate("log_error", f"All API endpoints failed for creator {creator_id}"), "ERROR")
+                break
+                
+            try:
+                response_text = None
+                
+                # First, try to detect if content is actually gzipped by checking magic number
+                is_gzipped = response.content[:2] == b'\x1f\x8b'
+                
+                if is_gzipped:
+                    try:
+                        import gzip
+                        decompressed = gzip.decompress(response.content)
+                        response_text = decompressed.decode('utf-8')
+                        self.log.emit(translate("log_debug", "Successfully decompressed gzipped response"), "DEBUG")
+                    except (gzip.BadGzipFile, UnicodeDecodeError) as e:
+                        self.log.emit(translate("log_warning", f"Gzip decompression failed, trying plain text: {str(e)}"), "WARNING")
+                        response_text = response.text
+                else:
+                    # Content is not gzipped, use as plain text
+                    response_text = response.text
+                
+                # Check if response is empty or just whitespace
+                if not response_text.strip():
+                    self.log.emit(translate("log_info", f"Empty response at offset {offset}. No more posts available."), "INFO")
                     break
+                
+                posts_data = json.loads(response_text)
+                
+            except (json.JSONDecodeError, UnicodeDecodeError) as e:
+                self.log.emit(translate("log_error", f"Failed to parse response: {str(e)}"), "ERROR")
+                self.log.emit(translate("log_debug", f"Response content (first 500 chars): {response.text[:500]}"), "DEBUG")
+                break
+                
+            if not isinstance(posts_data, list):
+                # Sometimes the API returns an object with a posts array
+                if isinstance(posts_data, dict):
+                    if 'posts' in posts_data:
+                        posts_data = posts_data['posts']
+                    elif 'data' in posts_data:
+                        posts_data = posts_data['data']
+                    else:
+                        self.log.emit(translate("log_error", f"Unexpected response structure: {list(posts_data.keys()) if posts_data else 'empty dict'}"), "ERROR")
+                        break
+                else:
+                    self.log.emit(translate("log_error", f"Invalid posts data type: {type(posts_data)}"), "ERROR")
+                    break
+
+            self.log.emit(translate("log_debug", f"Fetched {len(posts_data)} posts at offset {offset}"), "DEBUG")
+            
+            for post in posts_data:
+                if not isinstance(post, dict):
+                    continue
+                post_id = post.get('id')
+                if not post_id:
+                    continue
+                title = post.get('title', f"Post {post_id}")
+                self.log.emit(translate("log_debug", f"Post ID: {post_id}, Title: {title}"), "DEBUG")
+                # Store title in shared post_titles_map
+                self.post_titles_map[(service, creator_id, post_id)] = sanitize_filename(title)
+
+            if not posts_data:
+                self.log.emit(translate("log_info", f"No more posts to fetch at offset {offset}. Stopping pagination."), "INFO")
+                break
+
+            all_posts.extend(posts_data)
+            offset += page_size
+            attempt += 1
+            time.sleep(0.5)
 
         if self.is_running:
             detected_posts = []
@@ -818,17 +853,41 @@ class ValidationThread(QThread):
             self.result.emit(False)
             return
             
-        service, creator_id = parts[-3], parts[-1]
-        api_url = f"{API_BASE}/{service}/user/{creator_id}"
+        max_retries = 3
+        retry_delay = 2
         
-        try:
-            response = requests.get(api_url, headers=HEADERS, timeout=5)
-            valid = response.status_code == 200
-            self.log.emit(translate("log_info", f"Validated URL {self.url}: {'Valid' if valid else 'Invalid'}"), "INFO")
-            self.result.emit(valid)
-        except requests.RequestException as e:
-            self.log.emit(translate("log_error", f"Failed to validate {self.url}: {str(e)}"), "ERROR")
-            self.result.emit(False)
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Use fallback validation with robust headers
+                fallback_headers = {
+                    'User-Agent': user_agent,
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': accept_language,
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Cache-Control': 'max-age=0'
+                }
+                
+                direct_response = requests.get(self.url, headers=fallback_headers, timeout=10)
+                if direct_response.status_code == 200 and 'kemono' in direct_response.text.lower():
+                    self.log.emit(translate("log_info", f"Successfully validated URL {self.url}"), "INFO")
+                    self.result.emit(True)
+                    return
+                
+                if attempt < max_retries:
+                    self.log.emit(translate("log_warning", f"Validation attempt {attempt} failed, retrying in {retry_delay}s..."), "WARNING")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2  # Exponential backoff
+                
+            except requests.RequestException as e:
+                if attempt < max_retries:
+                    self.log.emit(translate("log_warning", f"Network error on attempt {attempt}: {str(e)}, retrying..."), "WARNING")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2
+                else:
+                    self.log.emit(translate("log_error", f"Failed to validate {self.url} after {max_retries} attempts: {str(e)}"), "ERROR")
+        
+        self.result.emit(False)
 
 class CheckboxToggleThread(QThread):
     finished = pyqtSignal(dict, list)
@@ -970,7 +1029,8 @@ class CreatorDownloaderTab(QWidget):
             '.mov': QCheckBox("MOV"),
             '.docx': QCheckBox("DOCX"),
             '.psd': QCheckBox("PSD"),
-            '.clip': QCheckBox("CLIP")
+            '.clip': QCheckBox("CLIP"),
+            '.jpe':QCheckBox("JPE")
         }
         for i, (ext, check) in enumerate(self.creator_ext_checks.items()):
             check.setChecked(True)
@@ -1468,7 +1528,7 @@ class CreatorDownloaderTab(QWidget):
             # Transfer failed files from thread to tab
             if isinstance(thread, CreatorDownloadThread):
                 self.failed_files.update(thread.failed_files)
-                self.append_log_to_console(translate("log_debug", f"Transferred {len(thread.failed_files)} failed files from {thread.__class__.__name__}"), "INFO")
+                self.append_log_to_console(translate("log_debug", f"Transferred {len(thread.failed_files)} from {thread.__class__.__name__}"), "INFO")
         
         # Check if all files for the current creator have been attempted
         if self.total_files_to_download > 0 and len(self.completed_files) + len(self.failed_files) >= self.total_files_to_download:
@@ -1680,7 +1740,7 @@ class CreatorDownloaderTab(QWidget):
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))
         visible_count = sum(1 for i in range(self.creator_post_list.count()) if not self.creator_post_list.item(i).isHidden())
-        self.append_log_to_console(translate("log_debug", f"Check ALL toggle finished, checked posts: {len(self.posts_to_download)}, visible posts: {visible_count}"), "INFO")
+        self.append_log_to_console(translate("log_debug", f"Checkbox toggle finished, checked posts: {len(self.posts_to_download)}, visible posts: {visible_count}"), "INFO")
 
     def update_checked_posts(self):
         self.posts_to_download = []
@@ -1742,6 +1802,22 @@ class CreatorDownloaderTab(QWidget):
         item.setData(Qt.UserRole, url)  
         post_id = self.post_url_map[text][0]
         item.setData(Qt.UserRole + 1, post_id) 
+        widget = QWidget()
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(5)
+
+        check_box = QCheckBox()
+        check_box.setStyleSheet("color: white;")
+        check_box.setChecked(is_checked)
+        check_box.clicked.connect(lambda: self.toggle_checkbox_state(text))
+        layout.addWidget(check_box)
+
+        label = QLabel(text)
+        label.setStyleSheet("color: white;")
+        label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        layout.addWidget(label, stretch=1)
+
         widget = QWidget()
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)

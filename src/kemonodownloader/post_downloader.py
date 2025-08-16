@@ -21,6 +21,7 @@ from kemonodownloader.kd_language import translate
 import locale
 import ctypes
 from fake_useragent import UserAgent
+import gzip
 
 try:
     locale.setlocale(locale.LC_ALL, '')
@@ -43,7 +44,7 @@ user_agent = ua.chrome
 HEADERS = {
     "User-Agent": user_agent,
     "Referer": "https://kemono.cr/", 
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "Accept": "text/css",
     "Accept-Language": accept_language, 
     "Accept-Encoding": "gzip, deflate",  
     "Connection": "keep-alive",
@@ -503,29 +504,21 @@ class PostDetectionThread(QThread):
         self.log.emit(translate("log_info", "PostDetectionThread cancellation initiated"), "INFO")
 
     def run(self):
-        self.log.emit(translate("log_info", f"Checking post with URL: {self.url}"), "INFO")
-        if not self.is_running:
-            self.log.emit(translate("log_info", "PostDetectionThread stopped before starting"), "INFO")
-            return
-
         parts = self.url.split('/')
-        if len(parts) < 7 or 'kemono.cr' not in self.url:
-            self.error.emit(translate("invalid_url_format"))
-            return
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
         api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
 
         try:
-            response = requests.get(api_url, headers=HEADERS, timeout=10)
+            response = self.make_robust_request(api_url)
             if not self.is_running:
                 self.log.emit(translate("log_info", "PostDetectionThread stopped during request"), "INFO")
                 return
-            if response.status_code != 200:
-                self.log.emit(translate("log_error", f"Failed to fetch post - Status code: {response.status_code}"), "ERROR")
-                self.error.emit(translate("failed_to_fetch_post", response.status_code))
+            if response is None:
+                self.log.emit(translate("log_error", "Failed to fetch post - No valid response"), "ERROR")
+                self.error.emit(translate("failed_to_fetch_post", "No response"))
                 return
 
-            post_data = response.json()
+            post_data = self.parse_response_content(response)
             if not post_data or (isinstance(post_data, list) and not post_data) or (isinstance(post_data, dict) and not post_data):
                 self.log.emit(translate("log_error", "No valid post data returned! Response: " + json.dumps(post_data, indent=2)), "ERROR")
                 self.error.emit(translate("no_valid_post_data"))
@@ -542,15 +535,53 @@ class PostDetectionThread(QThread):
             else:
                 self.log.emit(translate("log_info", "PostDetectionThread stopped before emitting results"), "INFO")
 
-        except requests.RequestException as e:
+        except Exception as e:
             self.log.emit(translate("log_error", f"Failed to fetch post: {str(e)}"), "ERROR")
             self.error.emit(translate("failed_to_fetch_post_error", str(e)))
             return
 
+    def make_robust_request(self, url, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, headers=HEADERS, timeout=10)
+                if response.status_code == 200:
+                    return response
+                elif response.status_code == 403:
+                    # Try with alternative headers
+                    alt_headers = HEADERS.copy()
+                    alt_headers["Accept"] = "text/css"
+                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    if response.status_code == 200:
+                        return response
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    self.log.emit(translate("log_error", f"Request failed after {max_retries} attempts: {str(e)}"), "ERROR")
+                    return None
+                time.sleep(2 ** attempt)  # Exponential backoff
+        return None
+
+    def parse_response_content(self, response):
+        try:
+            content = response.content
+            # Check if content is gzipped by looking for gzip magic number
+            if content.startswith(b'\x1f\x8b'):
+                try:
+                    content = gzip.decompress(content)
+                except Exception:
+                    pass  # If decompression fails, use original content
+            
+            # Try to parse as JSON
+            if isinstance(content, bytes):
+                content = content.decode('utf-8')
+            return json.loads(content)
+        except Exception as e:
+            self.log.emit(translate("log_error", f"Failed to parse response: {str(e)}"), "ERROR")
+            return None
+
     def detect_files(self, post):
         detected_files = []
         allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.zip', '.mp4', '.pdf', '.7z', 
-                              '.mp3', '.wav', '.rar', '.mov', '.docx', '.psd', '.clip']
+                              '.mp3', '.wav', '.rar', '.mov', '.docx', '.psd', '.clip','.jpe']
 
         def get_effective_extension(file_path, file_name):
             name_ext = os.path.splitext(file_name)[1].lower()
@@ -604,6 +635,7 @@ class FilePreparationThread(QThread):
         self.file_url_map = file_url_map
         self.max_concurrent = max_concurrent
         self.is_running = True
+        self.url = None
 
     def stop(self):
         self.is_running = False
@@ -667,32 +699,28 @@ class FilePreparationThread(QThread):
         self.log.emit(translate("log_debug", f"Total files detected: {len(files_to_download)}"), "INFO")
         return list(dict.fromkeys(files_to_download))
 
-    def fetch_and_detect_files(self, post_id, post_url):
-        if not self.is_running:
-            self.log.emit(translate("log_info", "FilePreparationThread stopped during fetch"), "INFO")
-            return None
-
-        parts = post_url.split('/')
+    def fetch_post_data(self, post_id, max_retries=3, retry_delay_seconds=5):
+        parts = self.url.split('/')
         service, creator_id = parts[-5], parts[-3]
         api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
-        max_retries = 50
-        retry_delay_seconds = 5
+        
         for attempt in range(1, max_retries + 1):
             try:
-                response = requests.get(api_url, headers=HEADERS)
+                response = self.make_robust_request(api_url)
                 if not self.is_running:
                     self.log.emit(translate("log_info", "FilePreparationThread stopped during request"), "INFO")
                     return None
-                if response.status_code != 200:
-                    if response.status_code == 429 and attempt < max_retries:
-                        self.log.emit(translate("log_warning", f"Rate limit hit for {api_url} (attempt {attempt}/{max_retries}). Retrying..."), "WARNING")
+                if response is None:
+                    if attempt < max_retries:
+                        self.log.emit(translate("log_warning", f"Failed to fetch {api_url} (attempt {attempt}/{max_retries}). Retrying..."), "WARNING")
                         for i in range(retry_delay_seconds, 0, -1):
                             self.log.emit(translate("log_info", f"Trying again in {i}"), "INFO")
                             time.sleep(1)
                         continue
-                    self.log.emit(translate("log_error", f"Failed to fetch {api_url} - Status code: {response.status_code}"), "ERROR")
+                    self.log.emit(translate("log_error", f"Failed to fetch {api_url} after {max_retries} attempts"), "ERROR")
                     return None
-                post_data = response.json()
+                
+                post_data = self.parse_response_content(response)
                 post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
                 self.log.emit(translate("log_debug", f"Post data for {post_id}: {json.dumps(post, indent=2)}"), "INFO")
                 allowed_extensions = [ext.lower() for ext, check in self.post_ext_checks.items() if check]
@@ -708,6 +736,38 @@ class FilePreparationThread(QThread):
                     self.log.emit(translate("log_info", f"Trying again in {i}"), "INFO")
                     time.sleep(1)
 
+    def make_robust_request(self, url, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, headers=HEADERS, timeout=10)
+                if response.status_code == 200:
+                    return response
+                elif response.status_code == 403:
+                    alt_headers = HEADERS.copy()
+                    alt_headers["Accept"] = "text/css"
+                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    if response.status_code == 200:
+                        return response
+            except Exception:
+                if attempt == max_retries - 1:
+                    return None
+                time.sleep(2 ** attempt)
+        return None
+
+    def parse_response_content(self, response):
+        try:
+            content = response.content
+            if content.startswith(b'\x1f\x8b'):
+                try:
+                    content = gzip.decompress(content)
+                except Exception:
+                    pass
+            if isinstance(content, bytes):
+                content = content.decode('utf-8')
+            return json.loads(content)
+        except Exception:
+            return None
+
     def run(self):
         files_to_download = []
         files_to_posts_map = {}
@@ -718,7 +778,7 @@ class FilePreparationThread(QThread):
         completed_posts = 0
 
         with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
-            future_to_post = {executor.submit(self.fetch_and_detect_files, post_id, post_url): post_id
+            future_to_post = {executor.submit(self.fetch_post_data, post_id): post_id
                              for post_url, posts in self.all_files_map.items()
                              for _, post_id in posts
                              if post_id in self.post_ids}
@@ -800,17 +860,49 @@ class DownloadThread(QThread):
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
         api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
         try:
-            response = requests.get(api_url, headers=HEADERS, timeout=10)
-            if response.status_code == 200:
-                post_data = response.json()
+            response = self.make_robust_request(api_url)
+            if response and response.status_code == 200:
+                post_data = self.parse_response_content(response)
                 post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
                 self.post_title = sanitize_filename(post.get('title', f"Post_{post_id}"))
             else:
-                self.log.emit(translate("log_error", f"Failed to fetch post title - Status code: {response.status_code}"), "ERROR")
+                self.log.emit(translate("log_error", f"Failed to fetch post title - No valid response"), "ERROR")
                 self.post_title = f"Post_{post_id}"
-        except requests.RequestException as e:
+        except Exception as e:
             self.log.emit(translate("log_error", f"Error fetching post info: {str(e)}"), "ERROR")
             self.post_title = f"Post_{post_id}"
+
+    def make_robust_request(self, url, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, headers=HEADERS, timeout=10)
+                if response.status_code == 200:
+                    return response
+                elif response.status_code == 403:
+                    alt_headers = HEADERS.copy()
+                    alt_headers["Accept"] = "text/css"
+                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    if response.status_code == 200:
+                        return response
+            except Exception:
+                if attempt == max_retries - 1:
+                    return None
+                time.sleep(2 ** attempt)
+        return None
+
+    def parse_response_content(self, response):
+        try:
+            content = response.content
+            if content.startswith(b'\x1f\x8b'):
+                try:
+                    content = gzip.decompress(content)
+                except Exception:
+                    pass
+            if isinstance(content, bytes):
+                content = content.decode('utf-8')
+            return json.loads(content)
+        except Exception:
+            return None
 
     def extract_service_from_url(self, url):
         parts = url.split('/')
@@ -1113,7 +1205,8 @@ class PostDownloaderTab(QWidget):
             '.pdf': QCheckBox("PDF"), '.7z': QCheckBox("7Z"),
             '.mp3': QCheckBox("MP3"), '.wav': QCheckBox("WAV"), '.rar': QCheckBox("RAR"),
             '.mov': QCheckBox("MOV"), '.docx': QCheckBox("DOCX"), '.psd': QCheckBox("PSD"), 
-            '.clip': QCheckBox("CLIP")
+            '.clip': QCheckBox("CLIP"),
+            '.jpe':QCheckBox("JPE")
         }
         for i, (ext, check) in enumerate(self.post_filter_checks.items()):
             check.setChecked(True)
@@ -1234,24 +1327,13 @@ class PostDownloaderTab(QWidget):
         parts = url.split('/')
         if len(parts) < 7 or 'kemono.cr' not in url:
             return False
-        service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
-        api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
-        
-        try:
-            response = requests.get(api_url, headers=HEADERS, timeout=5)
-            if response.status_code == 200:
-                return True
-            
-            self.append_log_to_console(translate("log_info", translate("first_validation_failed", url)), "INFO")
-        except requests.RequestException:
-            self.append_log_to_console(translate("log_info", translate("first_validation_failed_exception", url)), "INFO")
         
         try:
             self.append_log_to_console(translate("log_info", translate("attempting_fallback_validation", url)), "INFO")
             
             fallback_headers = {
                 'User-Agent': user_agent,
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept': 'text/css',
                 'Accept-Language': accept_language,
                 'Connection': 'keep-alive',
                 'Upgrade-Insecure-Requests': '1',
@@ -1408,22 +1490,55 @@ class PostDownloaderTab(QWidget):
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
         api_url = f"{API_BASE}/{service}/user/{creator_id}/post/{post_id}"
         try:
-            response = requests.get(api_url, headers=HEADERS)
-            if response.status_code != 200:
-                self.append_log_to_console(translate("log_error", f"Failed to fetch {api_url} - Status code: {response.status_code}"), "ERROR")
+            response = self.make_robust_request(api_url)
+            if not response or response.status_code != 200:
+                self.append_log_to_console(translate("log_error", f"Failed to fetch {api_url} - No valid response"), "ERROR")
                 return
-            post_data = response.json()
+            post_data = self.parse_response_content(response)
             post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
             allowed_extensions = [ext.lower() for ext, check in self.post_filter_checks.items() if check.isChecked()]
             self.all_detected_files = self.detect_files(post, allowed_extensions)
             self.file_url_map = {file_name: file_url for file_name, file_url in self.all_detected_files}
             self.checked_urls.clear()
+
             for file_name, file_url in self.all_detected_files:
                 self.checked_urls[file_url] = True
                 self.add_list_item(file_name, file_url)
             self.update_checked_files()
         except Exception as e:
             self.append_log_to_console(translate("log_error", f"Error fetching files for post {url}: {str(e)}"), "ERROR")
+
+    def make_robust_request(self, url, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, headers=HEADERS, timeout=10)
+                if response.status_code == 200:
+                    return response
+                elif response.status_code == 403:
+                    alt_headers = HEADERS.copy()
+                    alt_headers["Accept"] = "text/css"
+                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    if response.status_code == 200:
+                        return response
+            except Exception:
+                if attempt == max_retries - 1:
+                    return None
+                time.sleep(2 ** attempt)
+        return None
+
+    def parse_response_content(self, response):
+        try:
+            content = response.content
+            if content.startswith(b'\x1f\x8b'):
+                try:
+                    content = gzip.decompress(content)
+                except Exception:
+                    pass
+            if isinstance(content, bytes):
+                content = content.decode('utf-8')
+            return json.loads(content)
+        except Exception:
+            return None
 
     def detect_files(self, post, allowed_extensions):
         detected_files = []
@@ -1593,6 +1708,7 @@ class PostDownloaderTab(QWidget):
             self.file_url_map,
             max_concurrent=5
         )
+        self.file_preparation_thread.url = urls[0] if urls else None
         self.file_preparation_thread.progress.connect(self.update_background_progress)
         self.file_preparation_thread.finished.connect(lambda files, files_map: self.on_file_preparation_finished(urls, files, files_map))
         self.file_preparation_thread.log.connect(self.append_log_to_console)
@@ -1948,7 +2064,7 @@ class PostDownloaderTab(QWidget):
     def view_current_item(self):
         if self.current_preview_url:
             ext = os.path.splitext(self.current_preview_url.lower())[1]
-            unsupported_extensions = ['.zip', '.psd', '.docx', '.7z', '.rar', '.clip']
+            unsupported_extensions = ['.zip', '.psd', '.docx', '.7z', '.rar', '.clip','jpe']
             supported_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.mp4', '.mov', '.mp3', '.wav']
 
             if ext in unsupported_extensions:
