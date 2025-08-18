@@ -33,6 +33,13 @@ class KDLanguage:
                 "korean": "자동 이름 바꾸기 및 순서별 파일 이름 정렬",
                 "chinese-simplified": "自动重命名并按顺序排序文件名"
             },
+
+            "open_directory": {
+                "english": "Open Directory",
+                "japanese": "ディレクトリを開く",
+                "korean": "디렉토리 열기",
+                "chinese-simplified": "打开目录"
+            },
             
             "download_failed_retrying": {
                 "english": "Download failed for {0}, attempt {1}/{2}: {3}",

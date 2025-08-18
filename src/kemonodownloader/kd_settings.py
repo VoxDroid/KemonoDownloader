@@ -1,5 +1,6 @@
 import os
 import sys
+import subprocess
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, 
     QGroupBox, QGridLayout, QLabel, QSlider, QSpinBox, 
@@ -82,6 +83,11 @@ class SettingsTab(QWidget):
         self.browse_button.setStyleSheet("background: #4A5B7A; padding: 5px; border-radius: 5px;")
         self.browse_button.clicked.connect(self.browse_directory)
         folder_layout.addWidget(self.browse_button, 1, 2)
+        
+        self.open_directory_button = QPushButton()
+        self.open_directory_button.setStyleSheet("background: #4A5B7A; padding: 5px; border-radius: 5px;")
+        self.open_directory_button.clicked.connect(self.open_app_directory)
+        folder_layout.addWidget(self.open_directory_button, 1, 3)
         
         self.folder_group.setLayout(folder_layout)
         layout.addWidget(self.folder_group)
@@ -188,6 +194,28 @@ class SettingsTab(QWidget):
         if directory:
             self.directory_input.setText(directory)
             self.update_temp_setting("base_directory", directory)
+
+    def open_app_directory(self):
+        """Open the current app directory in the system file explorer."""
+        directory = os.path.join(self.temp_settings["base_directory"], self.temp_settings["base_folder_name"])
+        
+        # Create directory if it doesn't exist
+        if not os.path.exists(directory):
+            try:
+                os.makedirs(directory, exist_ok=True)
+            except OSError:
+                QMessageBox.warning(self, translate("error"), f"Could not create directory: {directory}")
+                return
+        
+        try:
+            if sys.platform == "win32":  # Windows
+                os.startfile(directory)
+            elif sys.platform == "darwin":  # macOS
+                subprocess.call(["open", directory])
+            else:  # Linux and other Unix-like systems
+                subprocess.call(["xdg-open", directory])
+        except Exception as e:
+            QMessageBox.warning(self, translate("error"), f"Could not open directory: {str(e)}")
 
     def update_temp_setting(self, key, value):
         self.temp_settings[key] = value
@@ -318,6 +346,7 @@ class SettingsTab(QWidget):
         self.folder_name_label.setText(translate("folder_name"))
         self.directory_label.setText(translate("save_directory"))
         self.browse_button.setText(translate("browse"))
+        self.open_directory_button.setText(translate("open_directory"))  # Added text for open directory button
 
         self.download_group.setTitle(translate("download_settings"))
         self.simultaneous_downloads_label.setText(translate("simultaneous_downloads"))
