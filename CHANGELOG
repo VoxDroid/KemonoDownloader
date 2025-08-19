@@ -1,5 +1,11 @@
 # Kemono Downloader Release Notes
 
+## v5.1.0 (20 August 2025)
+**feat: Enhanced last page detection, expanded logging capabilities, and a new feature to open directories**
+- Enhanced tracking to accurately detect the last page based on previous fetches, eliminating confusing "failed" messages.
+- Added expand logs functionality for both creator and post downloader, improving debugging and user experience.
+- Added an "Open Directory" button in the Settings tab to directly open the file explorer.
+
 ## v5.0.0 (17 August 2025)
 **feat: Improve API request robustness and gzip handling**
 - Enhances API request logic in creator_downloader.py and post_downloader.py by adding multiple endpoint attempts, robust header management, and retry mechanisms. 
