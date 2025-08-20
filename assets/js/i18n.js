@@ -3,25 +3,25 @@ const translations = {
     en: {
       // Header
       appTitle: "Kemono Downloader",
-      appDescription: "A cross-platform Python app built with PyQt6 to download content from Kemono.su",
+      appDescription: "A cross-platform Python app built with PyQt6 to download content from Kemono.cr",
       githubRepo: "GitHub Repository",
   
       // Overview
       overviewTitle: "Overview",
       overviewDescription:
-        'Kemono Downloader is a versatile Python-based desktop application built with PyQt6, designed to download content from <a href="https://kemono.su" target="_blank">Kemono.su</a>. This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.',
+        'Kemono Downloader is a versatile Python-based desktop application built with PyQt6, designed to download content from <a href="https://kemono.cr" target="_blank">Kemono.cr</a>. This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.',
   
       // Important Notices
       importantNoticesTitle: "Important Notices",
       disclaimerTitle: "Disclaimer",
       disclaimerText1:
-        "KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.su. The maintainers of this project <strong>do not condone or support the unauthorized distribution of copyrighted material</strong>. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.su, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).",
+        "KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.cr. The maintainers of this project <strong>do not condone or support the unauthorized distribution of copyrighted material</strong>. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.cr, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).",
       disclaimerText2:
         "<strong>Misuse of this tool to infringe on creators' rights, violate copyright laws, or breach terms of service is strictly prohibited.</strong> The maintainers are not liable for any misuse of KemonoDownloader or any consequences arising from its use, including but not limited to legal action, financial loss, or damage to third parties.",
   
       ethicalUseTitle: "Ethical Use Guidelines",
       ethicalUseText1:
-        "KemonoDownloader interacts with content from Kemono.su, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.",
+        "KemonoDownloader interacts with content from Kemono.cr, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.",
       ethicalUseText2: "We strongly encourage users to:",
       ethicalUseList1: "Use KemonoDownloader responsibly and only for content you have the legal right to access.",
       ethicalUseList2:
@@ -31,13 +31,13 @@ const translations = {
       risksTitle: "Risks and Limitations",
       risksLegalTitle: "Legal Risks",
       risksLegalText:
-        "Downloading content from Kemono.su may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.",
-      risksDependencyTitle: "Dependency on Kemono.su",
+        "Downloading content from Kemono.cr may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.",
+      risksDependencyTitle: "Dependency on Kemono.cr",
       risksDependencyText:
-        "KemonoDownloader relies on Kemono.su, which has a history of inconsistent updates and downtime. If Kemono.su becomes unavailable, this tool will lose its functionality.",
+        "KemonoDownloader relies on Kemono.cr, which has a history of inconsistent updates and downtime. If Kemono.cr becomes unavailable, this tool will lose its functionality.",
       risksRateLimitsTitle: "Rate Limits and Errors",
       risksRateLimitsText:
-        "Kemono.su may impose rate limits or other restrictions that affect download performance. The maintainers cannot guarantee uninterrupted access to Kemono.su's content.",
+        "Kemono.cr may impose rate limits or other restrictions that affect download performance. The maintainers cannot guarantee uninterrupted access to Kemono.cr's content.",
   
       communityTitle: "Community Standards",
       communityText1:
@@ -51,7 +51,7 @@ const translations = {
       // Features
       featuresTitle: "Features",
       featurePostDownloading: "Post Downloading",
-      featurePostDownloadingDesc: "Easily download files from specific Kemono.su posts using their URLs.",
+      featurePostDownloadingDesc: "Easily download files from specific Kemono.cr posts using their URLs.",
       featureCreatorArchiving: "Creator Archiving",
       featureCreatorArchivingDesc: "Bulk download all posts and files from a creator's profile with a single click.",
       featureFileTypeSupport: "File Type Support",
@@ -92,7 +92,7 @@ const translations = {
       installStep5: "Build the application:",
       installStep6: "Run the application:",
       installNote: "Note",
-      installNoteText: "An internet connection is required to fetch content from Kemono.su.",
+      installNoteText: "An internet connection is required to fetch content from Kemono.cr.",
   
       // Pre-compiled binaries
       installWindows:
@@ -143,16 +143,16 @@ const translations = {
       // Usage steps
       usageStep1:
         "The application creates default directories (`Downloads`, `Cache`, `Other Files`) in the specified save location.",
-      usageStep2: "Ensure an active internet connection to access Kemono.su content.",
+      usageStep2: "Ensure an active internet connection to access Kemono.cr content.",
       usageStep3: "Explore the Help tab for detailed instructions and troubleshooting tips.",
       postDownloaderStep1:
-        'Enter a post URL (e.g., `https://kemono.su/patreon/user/123456789/post/123456789`) in the "Enter post URL" field.',
+        'Enter a post URL (e.g., `https://kemono.cr/patreon/user/123456789/post/123456789`) in the "Enter post URL" field.',
       postDownloaderStep2: 'Click "Add to Queue" to add it to the list.',
       postDownloaderStep3:
         "Click the eye icon to view files, filter by type (e.g., JPG, ZIP), and select files to download.",
       postDownloaderStep4: 'Click "Download" to start, and monitor progress with the progress bars and console.',
       creatorDownloaderStep1:
-        'Enter a creator URL (e.g., `https://kemono.su/patreon/user/123456789`) in the "Enter creator URL" field.',
+        'Enter a creator URL (e.g., `https://kemono.cr/patreon/user/123456789`) in the "Enter creator URL" field.',
       creatorDownloaderStep2: 'Click "Add to Queue" to add it to the list.',
       creatorDownloaderStep3:
         "Click the eye icon to fetch posts, configure options (Main File, Attachments, Content Images), and select posts.",
@@ -206,25 +206,25 @@ const translations = {
       // Header
       appTitle: "ケモノダウンローダー",
       appDescription:
-        "Kemono.suからコンテンツをダウンロードするためのPyQt6で構築されたクロスプラットフォームPythonアプリ",
+        "Kemono.crからコンテンツをダウンロードするためのPyQt6で構築されたクロスプラットフォームPythonアプリ",
       githubRepo: "GitHubリポジトリ",
   
       // Overview
       overviewTitle: "概要",
       overviewDescription:
-        'ケモノダウンローダーは、<a href="https://kemono.su" target="_blank">Kemono.su</a>からコンテンツをダウンロードするために設計された、PyQt6で構築された多目的なPythonベースのデスクトップアプリケーションです。このツールを使用すると、ユーザーはPatreon、Fanboxなどのサービスから個々の投稿やクリエイターのプロフィール全体をアーカイブできます。カスタマイズ可能な設定と高度な機能を備えた幅広いファイルタイプをサポートしています。',
+        'ケモノダウンローダーは、<a href="https://kemono.cr" target="_blank">Kemono.cr</a>からコンテンツをダウンロードするために設計された、PyQt6で構築された多目的なPythonベースのデスクトップアプリケーションです。このツールを使用すると、ユーザーはPatreon、Fanboxなどのサービスから個々の投稿やクリエイターのプロフィール全体をアーカイブできます。カスタマイズ可能な設定と高度な機能を備えた幅広いファイルタイプをサポートしています。',
   
       // Important Notices
       importantNoticesTitle: "重要なお知らせ",
       disclaimerTitle: "免責事項",
       disclaimerText1:
-        "ケモノダウンローダーは、Kemono.suからコンテンツをダウンロードするユーザーを支援するための個人的および教育的使用のみを目的としたツールです。このプロジェクトのメンテナーは、<strong>著作権で保護されたマテリアルの不正な配布を容認または支持しません</strong>。ユーザーは、Kemono.suからコンテンツにアクセスおよびダウンロードする法的権利を確保し、適用されるすべての法律、およびコンテンツの元のプラットフォーム（Patreon、Pixiv Fanbox、Gumroadなど）のサービス利用規約を遵守する責任があります。",
+        "ケモノダウンローダーは、Kemono.crからコンテンツをダウンロードするユーザーを支援するための個人的および教育的使用のみを目的としたツールです。このプロジェクトのメンテナーは、<strong>著作権で保護されたマテリアルの不正な配布を容認または支持しません</strong>。ユーザーは、Kemono.crからコンテンツにアクセスおよびダウンロードする法的権利を確保し、適用されるすべての法律、およびコンテンツの元のプラットフォーム（Patreon、Pixiv Fanbox、Gumroadなど）のサービス利用規約を遵守する責任があります。",
       disclaimerText2:
         "<strong>このツールを使用してクリエイターの権利を侵害したり、著作権法に違反したり、サービス利用規約に違反したりすることは固く禁じられています。</strong>メンテナーは、ケモノダウンローダーの誤用や、法的措置、経済的損失、第三者への損害を含むがこれらに限定されない、その使用から生じる結果について責任を負いません。",
   
       ethicalUseTitle: "倫理的使用ガイドライン",
       ethicalUseText1:
-        "ケモノダウンローダーは、Kemono.suのコンテンツと対話します。これには、PatreonやPixiv Fanbox、Gumroadなどの有料プラットフォームに元々投稿されたマテリアルが含まれる場合があります。これらのプラットフォームの多くのクリエイターは、生計を立てるために有料サブスクリプションに依存しています。許可なくコンテンツをダウンロードして再配布すると、クリエイターが創作を続ける能力を損なう可能性があります。",
+        "ケモノダウンローダーは、Kemono.crのコンテンツと対話します。これには、PatreonやPixiv Fanbox、Gumroadなどの有料プラットフォームに元々投稿されたマテリアルが含まれる場合があります。これらのプラットフォームの多くのクリエイターは、生計を立てるために有料サブスクリプションに依存しています。許可なくコンテンツをダウンロードして再配布すると、クリエイターが創作を続ける能力を損なう可能性があります。",
       ethicalUseText2: "ユーザーに強く推奨します：",
       ethicalUseList1:
         "ケモノダウンローダーを責任を持って使用し、アクセスする法的権利があるコンテンツにのみ使用してください。",
@@ -236,13 +236,13 @@ const translations = {
       risksTitle: "リスクと制限",
       risksLegalTitle: "法的リスク",
       risksLegalText:
-        "Kemono.suからコンテンツをダウンロードすると、著作権法や元のプラットフォームのサービス利用規約に違反する可能性があります。ユーザーはこのツールを使用することに関連するすべての法的リスクを負います。",
-      risksDependencyTitle: "Kemono.suへの依存",
+        "Kemono.crからコンテンツをダウンロードすると、著作権法や元のプラットフォームのサービス利用規約に違反する可能性があります。ユーザーはこのツールを使用することに関連するすべての法的リスクを負います。",
+      risksDependencyTitle: "Kemono.crへの依存",
       risksDependencyText:
-        "ケモノダウンローダーはKemono.suに依存しており、Kemono.suは一貫性のない更新とダウンタイムの履歴があります。Kemono.suが利用できなくなった場合、このツールは機能を失います。",
+        "ケモノダウンローダーはKemono.crに依存しており、Kemono.crは一貫性のない更新とダウンタイムの履歴があります。Kemono.crが利用できなくなった場合、このツールは機能を失います。",
       risksRateLimitsTitle: "レート制限とエラー",
       risksRateLimitsText:
-        "Kemono.suはダウンロードパフォーマンスに影響を与えるレート制限やその他の制限を課す場合があります。メンテナーはKemono.suのコンテンツへの中断のないアクセスを保証できません。",
+        "Kemono.crはダウンロードパフォーマンスに影響を与えるレート制限やその他の制限を課す場合があります。メンテナーはKemono.crのコンテンツへの中断のないアクセスを保証できません。",
   
       communityTitle: "コミュニティ基準",
       communityText1:
@@ -256,7 +256,7 @@ const translations = {
       // Features
       featuresTitle: "機能",
       featurePostDownloading: "投稿ダウンロード",
-      featurePostDownloadingDesc: "URLを使用して特定のKemono.su投稿からファイルを簡単にダウンロードできます。",
+      featurePostDownloadingDesc: "URLを使用して特定のKemono.cr投稿からファイルを簡単にダウンロードできます。",
       featureCreatorArchiving: "クリエイターアーカイブ",
       featureCreatorArchivingDesc: "クリエイターのプロフィールからすべての投稿とファイルを一度にダウンロードできます。",
       featureFileTypeSupport: "ファイルタイプサポート",
@@ -297,7 +297,7 @@ const translations = {
       installStep5: "アプリケーションをビルドします：",
       installStep6: "アプリケーションを実行します：",
       installNote: "注意",
-      installNoteText: "Kemono.suからコンテンツを取得するにはインターネット接続が必要です。",
+      installNoteText: "Kemono.crからコンテンツを取得するにはインターネット接続が必要です。",
   
       // Pre-compiled binaries
       installWindows:
@@ -348,16 +348,16 @@ const translations = {
       // Usage steps
       usageStep1:
         "アプリケーションは指定された保存場所にデフォルトのディレクトリ（`Downloads`、`Cache`、`Other Files`）を作成します。",
-      usageStep2: "Kemono.suのコンテンツにアクセスするには、アクティブなインターネット接続が必要です。",
+      usageStep2: "Kemono.crのコンテンツにアクセスするには、アクティブなインターネット接続が必要です。",
       usageStep3: "詳細な説明やトラブルシューティングのヒントについては、ヘルプタブを参照してください。",
       postDownloaderStep1:
-        "「投稿URLを入力」フィールドに投稿URL（例：`https://kemono.su/patreon/user/123456789/post/123456789`）を入力します。",
+        "「投稿URLを入力」フィールドに投稿URL（例：`https://kemono.cr/patreon/user/123456789/post/123456789`）を入力します。",
       postDownloaderStep2: "「キューに追加」をクリックしてリストに追加します。",
       postDownloaderStep3:
         "目のアイコンをクリックしてファイルを表示し、タイプ（JPG、ZIPなど）でフィルタリングし、ダウンロードするファイルを選択します。",
       postDownloaderStep4: "「ダウンロード」をクリックして開始し、プログレスバーとコンソールで進行状況を監視します。",
       creatorDownloaderStep1:
-        "「クリエイターURLを入力」フィールドにクリエイターURL（例：`https://kemono.su/patreon/user/123456789`）を入力します。",
+        "「クリエイターURLを入力」フィールドにクリエイターURL（例：`https://kemono.cr/patreon/user/123456789`）を入力します。",
       creatorDownloaderStep2: "「キューに追加」をクリックしてリストに追加します。",
       creatorDownloaderStep3:
         "目のアイコンをクリックして投稿を取得し、オプション（メインファイル、添付ファイル、コンテンツ画像）を設定し、投稿を選択します。",
@@ -411,25 +411,25 @@ const translations = {
     ko: {
       // Header
       appTitle: "케모노 다운로더",
-      appDescription: "Kemono.su에서 콘텐츠를 다운로드하기 위해 PyQt6로 구축된 크로스 플랫폼 Python 앱",
+      appDescription: "Kemono.cr에서 콘텐츠를 다운로드하기 위해 PyQt6로 구축된 크로스 플랫폼 Python 앱",
       githubRepo: "GitHub 저장소",
   
       // Overview
       overviewTitle: "개요",
       overviewDescription:
-        '케모노 다운로더는 <a href="https://kemono.su" target="_blank">Kemono.su</a>에서 콘텐츠를 다운로드하도록 설계된 PyQt6로 구축된 다목적 Python 기반 데스크톱 애플리케이션입니다. 이 도구를 사용하면 사용자가 Patreon, Fanbox 등과 같은 서비스에서 개별 게시물이나 전체 크리에이터 프로필을 보관할 수 있으며, 사용자 정의 가능한 설정과 고급 기능으로 다양한 파일 유형을 지원합니다.',
+        '케모노 다운로더는 <a href="https://kemono.cr" target="_blank">Kemono.cr</a>에서 콘텐츠를 다운로드하도록 설계된 PyQt6로 구축된 다목적 Python 기반 데스크톱 애플리케이션입니다. 이 도구를 사용하면 사용자가 Patreon, Fanbox 등과 같은 서비스에서 개별 게시물이나 전체 크리에이터 프로필을 보관할 수 있으며, 사용자 정의 가능한 설정과 고급 기능으로 다양한 파일 유형을 지원합니다.',
   
       // Important Notices
       importantNoticesTitle: "중요 공지사항",
       disclaimerTitle: "면책 조항",
       disclaimerText1:
-        "케모노 다운로더는 Kemono.su에서 콘텐츠를 다운로드하는 사용자를 지원하기 위한 개인 및 교육용으로만 설계된 도구입니다. 이 프로젝트의 관리자는 <strong>저작권이 있는 자료의 무단 배포를 용인하거나 지원하지 않습니다</strong>. 사용자는 Kemono.su에서 콘텐츠에 접근하고 다운로드할 법적 권리를 확보하고, 모든 관련 법률 및 콘텐츠가 발생한 원본 플랫폼(예: Patreon, Pixiv Fanbox, Gumroad)의 서비스 약관을 준수할 책임이 있습니다.",
+        "케모노 다운로더는 Kemono.cr에서 콘텐츠를 다운로드하는 사용자를 지원하기 위한 개인 및 교육용으로만 설계된 도구입니다. 이 프로젝트의 관리자는 <strong>저작권이 있는 자료의 무단 배포를 용인하거나 지원하지 않습니다</strong>. 사용자는 Kemono.cr에서 콘텐츠에 접근하고 다운로드할 법적 권리를 확보하고, 모든 관련 법률 및 콘텐츠가 발생한 원본 플랫폼(예: Patreon, Pixiv Fanbox, Gumroad)의 서비스 약관을 준수할 책임이 있습니다.",
       disclaimerText2:
         "<strong>이 도구를 크리에이터의 권리를 침해하거나, 저작권법을 위반하거나, 서비스 약관을 위반하는 데 오용하는 것은 엄격히 금지됩니다.</strong> 관리자는 케모노 다운로더의 오용이나 법적 조치, 재정적 손실, 제3자에 대한 손해를 포함하되 이에 국한되지 않는 사용으로 인한 결과에 대해 책임을 지지 않습니다.",
   
       ethicalUseTitle: "윤리적 사용 지침",
       ethicalUseText1:
-        "케모노 다운로더는 Kemono.su의 콘텐츠와 상호 작용하며, 여기에는 Patreon, Pixiv Fanbox, Gumroad와 같은 유료 플랫폼에 원래 게시된 자료가 포함될 수 있습니다. 이러한 플랫폼의 많은 크리에이터들은 생계를 위해 유료 구독에 의존합니다. 허가 없이 콘텐츠를 다운로드하고 재배포하면 크리에이터가 계속 창작할 수 있는 능력을 해칠 수 있습니다.",
+        "케모노 다운로더는 Kemono.cr의 콘텐츠와 상호 작용하며, 여기에는 Patreon, Pixiv Fanbox, Gumroad와 같은 유료 플랫폼에 원래 게시된 자료가 포함될 수 있습니다. 이러한 플랫폼의 많은 크리에이터들은 생계를 위해 유료 구독에 의존합니다. 허가 없이 콘텐츠를 다운로드하고 재배포하면 크리에이터가 계속 창작할 수 있는 능력을 해칠 수 있습니다.",
       ethicalUseText2: "사용자에게 강력히 권장합니다:",
       ethicalUseList1: "케모노 다운로더를 책임감 있게 사용하고 접근할 법적 권리가 있는 콘텐츠에만 사용하세요.",
       ethicalUseList2:
@@ -439,13 +439,13 @@ const translations = {
       risksTitle: "위험 및 제한 사항",
       risksLegalTitle: "법적 위험",
       risksLegalText:
-        "Kemono.su에서 콘텐츠를 다운로드하면 저작권법이나 원본 플랫폼의 서비스 약관을 위반할 수 있습니다. 사용자는 이 도구 사용과 관련된 모든 법적 위험을 감수합니다.",
-      risksDependencyTitle: "Kemono.su에 대한 의존성",
+        "Kemono.cr에서 콘텐츠를 다운로드하면 저작권법이나 원본 플랫폼의 서비스 약관을 위반할 수 있습니다. 사용자는 이 도구 사용과 관련된 모든 법적 위험을 감수합니다.",
+      risksDependencyTitle: "Kemono.cr에 대한 의존성",
       risksDependencyText:
-        "케모노 다운로더는 Kemono.su에 의존하며, Kemono.su는 일관성 없는 업데이트와 다운타임 이력이 있습니다. Kemono.su를 사용할 수 없게 되면 이 도구는 기능을 잃게 됩니다.",
+        "케모노 다운로더는 Kemono.cr에 의존하며, Kemono.cr는 일관성 없는 업데이트와 다운타임 이력이 있습니다. Kemono.cr를 사용할 수 없게 되면 이 도구는 기능을 잃게 됩니다.",
       risksRateLimitsTitle: "속도 제한 및 오류",
       risksRateLimitsText:
-        "Kemono.su는 다운로드 성능에 영향을 미치는 속도 제한이나 기타 제한을 부과할 수 있습니다. 관리자는 Kemono.su 콘텐츠에 대한 중단 없는 접근을 보장할 수 없습니다.",
+        "Kemono.cr는 다운로드 성능에 영향을 미치는 속도 제한이나 기타 제한을 부과할 수 있습니다. 관리자는 Kemono.cr 콘텐츠에 대한 중단 없는 접근을 보장할 수 없습니다.",
   
       communityTitle: "커뮤니티 표준",
       communityText1:
@@ -458,7 +458,7 @@ const translations = {
       // Features
       featuresTitle: "기능",
       featurePostDownloading: "게시물 다운로드",
-      featurePostDownloadingDesc: "URL을 사용하여 특정 Kemono.su 게시물에서 파일을 쉽게 다운로드할 수 있습니다.",
+      featurePostDownloadingDesc: "URL을 사용하여 특정 Kemono.cr 게시물에서 파일을 쉽게 다운로드할 수 있습니다.",
       featureCreatorArchiving: "크리에이터 아카이빙",
       featureCreatorArchivingDesc: "한 번의 클릭으로 크리에이터 프로필에서 모든 게시물과 파일을 일괄 다운로드합니다.",
       featureFileTypeSupport: "파일 유형 지원",
@@ -498,7 +498,7 @@ const translations = {
       installStep5: "애플리케이션을 빌드합니다:",
       installStep6: "애플리케이션을 실행합니다:",
       installNote: "참고",
-      installNoteText: "Kemono.su에서 콘텐츠를 가져오려면 인터넷 연결이 필요합니다.",
+      installNoteText: "Kemono.cr에서 콘텐츠를 가져오려면 인터넷 연결이 필요합니다.",
   
       // Pre-compiled binaries
       installWindows:
@@ -548,16 +548,16 @@ const translations = {
   
       // Usage steps
       usageStep1: "애플리케이션은 지정된 저장 위치에 기본 디렉토리(`Downloads`, `Cache`, `Other Files`)를 생성합니다.",
-      usageStep2: "Kemono.su 콘텐츠에 접근하려면 활성 인터넷 연결이 필요합니다.",
+      usageStep2: "Kemono.cr 콘텐츠에 접근하려면 활성 인터넷 연결이 필요합니다.",
       usageStep3: "자세한 지침과 문제 해결 팁은 도움말 탭을 참조하세요.",
       postDownloaderStep1:
-        '"게시물 URL 입력" 필드에 게시물 URL(예: `https://kemono.su/patreon/user/123456789/post/123456789`)을 입력합니다.',
+        '"게시물 URL 입력" 필드에 게시물 URL(예: `https://kemono.cr/patreon/user/123456789/post/123456789`)을 입력합니다.',
       postDownloaderStep2: '"대기열에 추가"를 클릭하여 목록에 추가합니다.',
       postDownloaderStep3:
         "눈 아이콘을 클릭하여 파일을 보고, 유형(예: JPG, ZIP)으로 필터링하고, 다운로드할 파일을 선택합니다.",
       postDownloaderStep4: '"다운로드"를 클릭하여 시작하고, 진행 표시줄과 콘솔로 진행 상황을 모니터링합니다.',
       creatorDownloaderStep1:
-        '"크리에이터 URL 입력" 필드에 크리에이터 URL(예: `https://kemono.su/patreon/user/123456789`)을 입력합니다.',
+        '"크리에이터 URL 입력" 필드에 크리에이터 URL(예: `https://kemono.cr/patreon/user/123456789`)을 입력합니다.',
       creatorDownloaderStep2: '"대기열에 추가"를 클릭하여 목록에 추가합니다.',
       creatorDownloaderStep3:
         "눈 아이콘을 클릭하여 게시물을 가져오고, 옵션(메인 파일, 첨부 파일, 콘텐츠 이미지)을 구성하고, 게시물을 선택합니다.",
