@@ -1,4 +1,4 @@
-<h1 align="center">Kemono.su Downloader</h1>
+<h1 align="center">Kemono.cr Downloader</h1>
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/VoxDroid/KemonoDownloader/refs/heads/main/assets/img/KemonoDownloader.png" alt="Kemono Downloader" width="600"/>
@@ -82,19 +82,19 @@
 
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
-Welcome to **Kemono Downloader**, a versatile Python-based desktop application built with PyQt6, designed to download content from [Kemono.su](https://kemono.su). This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.
+Welcome to **Kemono Downloader**, a versatile Python-based desktop application built with PyQt6, designed to download content from [Kemono.cr](https://kemono.cr). This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.
 
 ## Important Notices
 
 ### Disclaimer
 
-KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.su. The maintainers of this project **do not condone or support the unauthorized distribution of copyrighted material**. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.su, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).
+KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.cr. The maintainers of this project **do not condone or support the unauthorized distribution of copyrighted material**. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.cr, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).
 
 **Misuse of this tool to infringe on creators’ rights, violate copyright laws, or breach terms of service is strictly prohibited.** The maintainers are not liable for any misuse of KemonoDownloader or any consequences arising from its use, including but not limited to legal action, financial loss, or damage to third parties.
 
 ### Ethical Use Guidelines
 
-KemonoDownloader interacts with content from Kemono.su, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.
+KemonoDownloader interacts with content from Kemono.cr, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.
 
 We strongly encourage users to:
 - Use KemonoDownloader responsibly and only for content you have the legal right to access.
@@ -103,9 +103,9 @@ We strongly encourage users to:
 
 ### Risks and Limitations
 
-- **Legal Risks**: Downloading content from Kemono.su may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.
-- **Dependency on Kemono.su**: KemonoDownloader relies on Kemono.su, which has a history of inconsistent updates and downtime. If Kemono.su becomes unavailable, this tool will lose its functionality.
-- **Rate Limits and Errors**: Kemono.su may impose rate limits or other restrictions that affect download performance. The maintainers cannot guarantee uninterrupted access to Kemono.su’s content.
+- **Legal Risks**: Downloading content from Kemono.cr may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.
+- **Dependency on Kemono.cr**: KemonoDownloader relies on Kemono.cr, which has a history of inconsistent updates and downtime. If Kemono.cr becomes unavailable, this tool will lose its functionality.
+- **Rate Limits and Errors**: Kemono.cr may impose rate limits or other restrictions that affect download performance. The maintainers cannot guarantee uninterrupted access to Kemono.su’s content.
 
 ## Community Standards
 
@@ -141,7 +141,7 @@ We are committed to fostering a welcoming and respectful community around Kemono
   - [Star History](#star-history)
 
 ## Features
-- **Post Downloading**: Easily download files from specific Kemono.su posts using their URLs.
+- **Post Downloading**: Easily download files from specific Kemono.cr posts using their URLs.
 - **Creator Archiving**: Bulk download all posts and files from a creator's profile with a single click.
 - **File Type Support**: Handle images (JPG, PNG, GIF), videos (MP4), archives (ZIP, 7Z), PDFs, and more.
 - **Concurrent Downloads**: Adjust the number of simultaneous downloads (1-10) for optimal performance.
@@ -181,7 +181,7 @@ Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedoc
    - **macOS**: `briefcase run macos`
    - **Linux**: `briefcase run linux`
    - **General**: `briefcase dev` *(Recommended)*
-   - **Note**: An internet connection is required to fetch content from Kemono.su.
+   - **Note**: An internet connection is required to fetch content from Kemono.cr.
 
 ### Pre-Compiled Binaries
 - **Windows**: Download the latest `.exe` (portable) or `.msi` (installer) tagged with [**`W`**] for windows, from the [Releases page](https://github.com/VoxDroid/KemonoDownloader/releases). Run the msi installer or use the portable version for no-setup runs.
@@ -193,13 +193,13 @@ Upon launching, you’ll see an introductory screen with a "Launch" button. Clic
 
 ### Getting Started
 - The application creates default directories (`Downloads`, `Cache`, `Other Files`) in the specified save location.
-- Ensure an active internet connection to access Kemono.su content.
+- Ensure an active internet connection to access Kemono.cr content.
 - Explore the Help tab for detailed instructions and troubleshooting tips.
 
 ### Post Downloader Tab
-- **Purpose**: Download files from individual Kemono.su posts.
+- **Purpose**: Download files from individual Kemono.cr posts.
 - **How to Use**:
-  1. Enter a post URL (e.g., `https://kemono.su/patreon/user/123456789/post/123456789`) in the "Enter post URL" field.
+  1. Enter a post URL (e.g., `https://kemono.cr/patreon/user/123456789/post/123456789`) in the "Enter post URL" field.
   2. Click "Add to Queue" to add it to the list.
   3. Click the eye icon to view files, filter by type (e.g., JPG, ZIP), and select files to download.
   4. Click "Download" to start, and monitor progress with the progress bars and console.
@@ -207,7 +207,7 @@ Upon launching, you’ll see an introductory screen with a "Launch" button. Clic
 ### Creator Downloader Tab
 - **Purpose**: Bulk download content from a creator's profile.
 - **How to Use**:
-  1. Enter a creator URL (e.g., `https://kemono.su/patreon/user/123456789`) in the "Enter creator URL" field.
+  1. Enter a creator URL (e.g., `https://kemono.cr/patreon/user/123456789`) in the "Enter creator URL" field.
   2. Click "Add to Queue" to add it to the list.
   3. Click the eye icon to fetch posts, configure options (Main File, Attachments, Content Images), and select posts.
   4. Click "Download" to begin, and track progress via the interface.
