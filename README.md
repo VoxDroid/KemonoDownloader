@@ -163,13 +163,15 @@ Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedoc
    git clone https://github.com/VoxDroid/KemonoDownloader.git
    cd KemonoDownloader
    ```
-3. Install Briefcase and dependencies:
+3. Create and activate virtual environment:
+  ```bash
+  python -m venv .venv
+  .venv/Scripts/activate # Windows 
+  source .venv/bin/activate # Linux
+  ```
+4. Install dependencies:
    ```bash
    python -m pip install -r requirements.txt
-   ```
-4. Initialize the Briefcase project (if not already set up):
-   ```bash
-   briefcase create
    ```
 5. Build the application:
    - **Windows**: `briefcase build windows`
