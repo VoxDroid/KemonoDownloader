@@ -11,6 +11,12 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPush
                              QLabel, QDialog, QSlider, QComboBox, QApplication)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QUrl, QSize, QTimer
 from PyQt6.QtGui import QColor, QPixmap, QMovie
+try:
+    from PIL import Image
+    import io
+    WEBP_SUPPORT = True
+except ImportError:
+    WEBP_SUPPORT = False
 import qtawesome as qta
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
@@ -87,7 +93,17 @@ class PreviewThread(QThread):
         ext = os.path.splitext(self.url.lower())[1]
         cache_key = hashlib.md5(self.url.encode()).hexdigest() + ext
         cache_path = os.path.join(self.cache_dir, cache_key)
-        
+
+        # Use a PNG cache for webp previews for easier loading
+        if ext == '.webp':
+            preview_cache_path = os.path.join(self.cache_dir, hashlib.md5(self.url.encode()).hexdigest() + '.png')
+            if os.path.exists(preview_cache_path):
+                pixmap = QPixmap()
+                if pixmap.load(preview_cache_path):
+                    self.preview_ready.emit(self.url, pixmap)
+                    return
+
+
         if os.path.exists(cache_path):
             if ext in ['.jpg', '.jpeg', '.png']:
                 pixmap = QPixmap()
@@ -106,6 +122,7 @@ class PreviewThread(QThread):
             response.raise_for_status()
             self.total_size = int(response.headers.get('content-length', 0)) or 1
             downloaded_data = bytearray()
+            # Save the original file data to cache first
             with open(cache_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
@@ -120,9 +137,32 @@ class PreviewThread(QThread):
                 if not pixmap.loadFromData(downloaded_data):
                     self.error.emit(f"{translate('error_loading_image')}: {self.url}: {translate('invalid_image_data')}")
                     return
+                # Overwrite cache with scaled version for faster loading next time
                 scaled_pixmap = pixmap.scaled(800, 800, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
                 scaled_pixmap.save(cache_path)
                 self.preview_ready.emit(self.url, scaled_pixmap)
+            elif ext == '.webp':
+                if not WEBP_SUPPORT:
+                    self.error.emit("WEBP preview requires Pillow. Run: pip install Pillow")
+                    return
+                try:
+                    img = Image.open(io.BytesIO(downloaded_data))
+                    if img.mode != 'RGBA':
+                        img = img.convert('RGBA')
+                    qimage = QImage(img.tobytes("raw", "RGBA"), img.width, img.height, QImage.Format.Format_RGBA8888)
+                    pixmap = QPixmap.fromImage(qimage)
+                    if pixmap.isNull():
+                        self.error.emit(f"Failed to convert WEBP image from {self.url}")
+                        return
+
+                    scaled_pixmap = pixmap.scaled(800, 800, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                    # Save a PNG version for caching the preview
+                    preview_cache_path = os.path.join(self.cache_dir, hashlib.md5(self.url.encode()).hexdigest() + '.png')
+                    scaled_pixmap.save(preview_cache_path, "PNG")
+                    self.preview_ready.emit(self.url, scaled_pixmap)
+                except Exception as e:
+                    self.error.emit(f"Failed to process WEBP image {self.url}: {str(e)}")
+
             elif ext == '.gif':
                 self.preview_ready.emit(self.url, cache_path)
             else: 
@@ -241,7 +281,7 @@ class MediaPreviewModal(QDialog):
     def start_preview(self):
         ext = os.path.splitext(self.media_url.lower())[1]
 
-        if ext in ['.jpg', '.jpeg', '.png', '.gif']:
+        if ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
             self.preview_thread = PreviewThread(self.media_url, self.cache_dir)
             self.preview_thread.preview_ready.connect(self.display_image)
             self.preview_thread.progress.connect(self.update_progress)
@@ -600,7 +640,7 @@ class PostDetectionThread(QThread):
     def detect_files(self, post):
         detected_files = []
         allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.zip', '.mp4', '.pdf', '.7z', 
-                              '.mp3', '.wav', '.rar', '.mov', '.docx', '.psd', '.clip','.jpe']
+                              '.mp3', '.wav', '.rar', '.mov', '.docx', '.psd', '.clip','.jpe','.webp']
 
         def get_effective_extension(file_path, file_name):
             name_ext = os.path.splitext(file_name)[1].lower()
@@ -1315,12 +1355,12 @@ class PostDownloaderTab(QWidget):
             '.mp3': QCheckBox("MP3"), '.wav': QCheckBox("WAV"), '.rar': QCheckBox("RAR"),
             '.mov': QCheckBox("MOV"), '.docx': QCheckBox("DOCX"), '.psd': QCheckBox("PSD"), 
             '.clip': QCheckBox("CLIP"),
-            '.jpe':QCheckBox("JPE")
+            '.jpe':QCheckBox("JPE"), '.webp': QCheckBox("WEBP")
         }
         for i, (ext, check) in enumerate(self.post_filter_checks.items()):
             check.setChecked(True)
             check.stateChanged.connect(self.filter_items)
-            filter_layout.addWidget(check, i // 4, i % 4)
+            filter_layout.addWidget(check, i // 5, i % 5)
         self.post_filter_group.setLayout(filter_layout)
         file_list_layout.addWidget(self.post_filter_group)
 

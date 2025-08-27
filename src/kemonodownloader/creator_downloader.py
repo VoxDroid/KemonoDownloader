@@ -12,6 +12,12 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPush
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QColor, QPixmap
 import qtawesome as qta
+try:
+    from PIL import Image
+    import io
+    WEBP_SUPPORT = True
+except ImportError:
+    WEBP_SUPPORT = False
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 from kemonodownloader.kd_language import translate
@@ -85,6 +91,13 @@ class PreviewThread(QThread):
     def run(self):
         if self.url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
             cache_key = hashlib.md5(self.url.encode()).hexdigest() + os.path.splitext(self.url)[1]
+        ext = os.path.splitext(self.url.lower())[1]
+        is_webp = ext == '.webp'
+
+        if self.url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+            # Use PNG cache for webp, otherwise use original extension for cache
+            cache_ext = '.png' if is_webp else ext
+            cache_key = hashlib.md5(self.url.encode()).hexdigest() + cache_ext
             cache_path = os.path.join(self.cache_dir, cache_key)
             if os.path.exists(cache_path):
                 pixmap = QPixmap()
@@ -104,10 +117,27 @@ class PreviewThread(QThread):
                         progress = int((self.downloaded_size / self.total_size) * 100)
                         self.progress.emit(min(progress, 100))
                 pixmap = QPixmap()
-                if not pixmap.loadFromData(downloaded_data):
+                if is_webp:
+                    if not WEBP_SUPPORT:
+                        self.error.emit("WEBP preview requires the Pillow library. Please install it.")
+                        return
+                    # Convert webp data to a pixmap
+                    img = Image.open(io.BytesIO(downloaded_data))
+                    if img.mode != 'RGBA':
+                        img = img.convert('RGBA')
+                    from PyQt6.QtGui import QImage
+                    qimage = QImage(img.tobytes("raw", "RGBA"), img.width, img.height, QImage.Format.Format_RGBA8888)
+                    pixmap = QPixmap.fromImage(qimage)
+                else: # Standard images
+                    if not pixmap.loadFromData(downloaded_data):
+                        self.error.emit(translate("failed_to_download", f"{self.url}: {translate('invalid_image_data')}"))
+                        return
+
+                if pixmap.isNull():
                     self.error.emit(translate("failed_to_download", f"{self.url}: {translate('invalid_image_data')}"))
                     return
                 scaled_pixmap = pixmap.scaled(800, 800, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+                # Save to cache path (which will be .png for webp)
                 scaled_pixmap.save(cache_path)
                 self.preview_ready.emit(self.url, scaled_pixmap)
             except requests.RequestException as e:
@@ -1171,7 +1201,8 @@ class CreatorDownloaderTab(QWidget):
             '.docx': QCheckBox("DOCX"),
             '.psd': QCheckBox("PSD"),
             '.clip': QCheckBox("CLIP"),
-            '.jpe':QCheckBox("JPE")
+            '.jpe':QCheckBox("JPE"),
+            '.webp': QCheckBox("WEBP")
         }
         for i, (ext, check) in enumerate(self.creator_ext_checks.items()):
             check.setChecked(True)
@@ -2055,7 +2086,7 @@ class CreatorDownloaderTab(QWidget):
 
     def view_current_item(self):
         if self.current_preview_url:
-            if self.current_preview_url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
+            if self.current_preview_url.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
                 modal = ImageModal(self.current_preview_url, self.cache_dir, self)
                 modal.exec()
             else:
