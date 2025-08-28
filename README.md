@@ -66,16 +66,13 @@
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
 <div align="center">
- <a href="https://sourceforge.net/p/kemonodownloader/"><img alt="Download KemonoDownloader" src="https://sourceforge.net/sflogo.php?type=18&amp;group_id=3859460" width=200></a>
+ <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://sourceforge.net/sflogo.php?type=18&amp;group_id=3859460" width=200></a>
  <br>
  <br>
- <a href="https://sourceforge.net/projects/kemonodownloader/files/latest/download"><img alt="Download KemonoDownloader" src="https://a.fsdn.com/con/app/sf-download-button" width=276 height=48 srcset="https://a.fsdn.com/con/app/sf-download-button?button_size=2x 2x"></a>
+ <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://a.fsdn.com/con/app/sf-download-button" width=276 height=48 srcset="https://a.fsdn.com/con/app/sf-download-button?button_size=2x 2x"></a>
  <br>
  <br>
- <a href="https://sourceforge.net/projects/kemonodownloader/files/latest/download"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dt/kemonodownloader.svg" ></a>
- <a href="https://sourceforge.net/projects/kemonodownloader/files/latest/download"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dd/kemonodownloader.svg" ></a>
- <a href="https://sourceforge.net/projects/kemonodownloader/files/latest/download"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dw/kemonodownloader.svg" ></a>
- <a href="https://sourceforge.net/projects/kemonodownloader/files/latest/download"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dm/kemonodownloader.svg" ></a>
+ <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dt/kemonodownloader.svg" ></a>
 </div>
 
 <br>
@@ -156,6 +153,23 @@ We are committed to fostering a welcoming and respectful community around Kemono
 ## Installation
 Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedocs.io/), making it easier to run or distribute as a native application across platforms. You can either build from source or use pre-compiled binaries where available.
 
+### Pre-Compiled Binaries - **.EXE file**
+Pre-compiled binaries are available through contributions on **Ko-fi**. If you’d like the convenience of ready-to-run executables instead of building from source, please support the project here: **[Get binaries on Ko-fi](https://ko-fi.com/izeno/shop)**  
+
+#### Available Binaries
+- **Windows**:  
+  - **Portable**: `W-KemonoDownloader-x86_64-Portable.exe`  
+  - **Installer**: `W-KemonoDownloader-x86_64.msi`  
+- **macOS**:  
+  - `M-KemonoDownloader-arm64.dmg` (Apple Silicon)  
+  - `M-KemonoDownloader-x86_64.dmg` (Intel)  
+- **Linux**:  
+  - `L-KemonoDownloader-x86_64.pkg.tar.zst` (Arch-based)  
+  - `L-KemonoDownloader-x86_64.rpm` (Fedora/Red Hat based)  
+  - `L-KemonoDownloader-amd64.deb` (Debian/Ubuntu based)  
+
+Support ongoing development and get access here: **[Ko-fi Binaries Page](https://ko-fi.com/izeno/shop)**
+
 ### Building with Briefcase (All Platforms)
 1. Ensure you have **Python 3.9+** installed on your system (Windows, macOS, Linux).
 2. Clone this repository:
@@ -184,11 +198,6 @@ Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedoc
    - **Linux**: `briefcase run linux`
    - **General**: `briefcase dev` *(Recommended)*
    - **Note**: An internet connection is required to fetch content from Kemono.cr.
-
-### Pre-Compiled Binaries
-- **Windows**: Download the latest `.exe` (portable) or `.msi` (installer) tagged with [**`W`**] for windows, from the [Releases page](https://github.com/VoxDroid/KemonoDownloader/releases). Run the msi installer or use the portable version for no-setup runs.
-- **macOS**: Download the latest universal `.dmg` (x86_64 and Apple Silicon) tagged with [**`M`**] for MacOS, from the [Releases page](https://github.com/VoxDroid/KemonoDownloader/releases). Open the DMG, drag the app to Applications, and launch it.
-- **Linux**: Download the latest `.rpm` (for Fedora/Red Hat), `.deb` (for Debian/Ubuntu), or `.pkg.tar.zst` (for Arch/Pacman) tagged with [**`L`**] for Linux, from the [Releases page](https://github.com/VoxDroid/KemonoDownloader/releases). Run the installer and launch the app.
 
 ## Usage
 Upon launching, you’ll see an introductory screen with a "Launch" button. Click it to enter the main interface, featuring four tabs: **Post Downloader**, **Creator Downloader**, **Settings**, and **Help**. The in-app Help tab contains a comprehensive user manual.
