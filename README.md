@@ -164,11 +164,11 @@ Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedoc
    cd KemonoDownloader
    ```
 3. Create and activate virtual environment:
-  ```bash
-  python -m venv .venv
-  .venv/Scripts/activate # Windows 
-  source .venv/bin/activate # Linux
-  ```
+    ```bash
+    python -m venv .venv
+    .venv/Scripts/activate # Windows 
+    source .venv/bin/activate # Linux
+    ```
 4. Install dependencies:
    ```bash
    python -m pip install -r requirements.txt
