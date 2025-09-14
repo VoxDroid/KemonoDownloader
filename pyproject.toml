@@ -86,6 +86,7 @@ linuxdeploy_plugins = [
 ]
 
 [tool.briefcase.app.kemonodownloader.linux.flatpak]
+finish_arg."filesystem=home" = true
 flatpak_runtime = "org.kde.Platform"
 flatpak_runtime_version = "6.7"
 flatpak_sdk = "org.kde.Sdk"
