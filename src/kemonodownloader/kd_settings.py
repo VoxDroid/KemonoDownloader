@@ -22,7 +22,11 @@ class SettingsTab(QWidget):
             "base_directory": self.get_default_base_directory(),
             "simultaneous_downloads": 5,
             "auto_check_updates": True,
-            "language": "english"
+            "language": "english",
+            "creator_posts_max_attempts": 200,
+            "post_data_max_retries": 7,
+            "file_download_max_retries": 50,
+            "api_request_max_retries": 3
         }
         self.settings = self.load_settings()
         self.temp_settings = self.settings.copy()
@@ -47,6 +51,10 @@ class SettingsTab(QWidget):
         settings_dict["simultaneous_downloads"] = self.qsettings.value("simultaneous_downloads", self.default_settings["simultaneous_downloads"], type=int)
         settings_dict["auto_check_updates"] = self.qsettings.value("auto_check_updates", self.default_settings["auto_check_updates"], type=bool)
         settings_dict["language"] = self.qsettings.value("language", self.default_settings["language"], type=str)
+        settings_dict["creator_posts_max_attempts"] = self.qsettings.value("creator_posts_max_attempts", self.default_settings["creator_posts_max_attempts"], type=int)
+        settings_dict["post_data_max_retries"] = self.qsettings.value("post_data_max_retries", self.default_settings["post_data_max_retries"], type=int)
+        settings_dict["file_download_max_retries"] = self.qsettings.value("file_download_max_retries", self.default_settings["file_download_max_retries"], type=int)
+        settings_dict["api_request_max_retries"] = self.qsettings.value("api_request_max_retries", self.default_settings["api_request_max_retries"], type=int)
         return settings_dict
 
     def save_settings(self):
@@ -55,6 +63,10 @@ class SettingsTab(QWidget):
         self.qsettings.setValue("simultaneous_downloads", self.settings["simultaneous_downloads"])
         self.qsettings.setValue("auto_check_updates", self.settings["auto_check_updates"])
         self.qsettings.setValue("language", self.settings["language"])
+        self.qsettings.setValue("creator_posts_max_attempts", self.settings["creator_posts_max_attempts"])
+        self.qsettings.setValue("post_data_max_retries", self.settings["post_data_max_retries"])
+        self.qsettings.setValue("file_download_max_retries", self.settings["file_download_max_retries"])
+        self.qsettings.setValue("api_request_max_retries", self.settings["api_request_max_retries"])
         self.qsettings.sync()
 
     def setup_ui(self):
@@ -115,6 +127,50 @@ class SettingsTab(QWidget):
         
         self.download_group.setLayout(download_layout)
         layout.addWidget(self.download_group)
+
+        # Retry Settings Group
+        self.retry_group = QGroupBox()
+        self.retry_group.setStyleSheet("QGroupBox { color: white; font-weight: bold; padding: 10px; }")
+        retry_layout = QGridLayout()
+
+        self.creator_posts_max_attempts_label = QLabel()
+        retry_layout.addWidget(self.creator_posts_max_attempts_label, 0, 0)
+        self.creator_posts_max_attempts_spinbox = QSpinBox()
+        self.creator_posts_max_attempts_spinbox.setRange(1, 1000)
+        self.creator_posts_max_attempts_spinbox.setValue(self.temp_settings["creator_posts_max_attempts"])
+        self.creator_posts_max_attempts_spinbox.setStyleSheet("padding: 5px; border-radius: 5px;")
+        self.creator_posts_max_attempts_spinbox.valueChanged.connect(lambda value: self.update_temp_setting("creator_posts_max_attempts", value))
+        retry_layout.addWidget(self.creator_posts_max_attempts_spinbox, 0, 1)
+
+        self.post_data_max_retries_label = QLabel()
+        retry_layout.addWidget(self.post_data_max_retries_label, 1, 0)
+        self.post_data_max_retries_spinbox = QSpinBox()
+        self.post_data_max_retries_spinbox.setRange(1, 100)
+        self.post_data_max_retries_spinbox.setValue(self.temp_settings["post_data_max_retries"])
+        self.post_data_max_retries_spinbox.setStyleSheet("padding: 5px; border-radius: 5px;")
+        self.post_data_max_retries_spinbox.valueChanged.connect(lambda value: self.update_temp_setting("post_data_max_retries", value))
+        retry_layout.addWidget(self.post_data_max_retries_spinbox, 1, 1)
+
+        self.file_download_max_retries_label = QLabel()
+        retry_layout.addWidget(self.file_download_max_retries_label, 2, 0)
+        self.file_download_max_retries_spinbox = QSpinBox()
+        self.file_download_max_retries_spinbox.setRange(1, 200)
+        self.file_download_max_retries_spinbox.setValue(self.temp_settings["file_download_max_retries"])
+        self.file_download_max_retries_spinbox.setStyleSheet("padding: 5px; border-radius: 5px;")
+        self.file_download_max_retries_spinbox.valueChanged.connect(lambda value: self.update_temp_setting("file_download_max_retries", value))
+        retry_layout.addWidget(self.file_download_max_retries_spinbox, 2, 1)
+
+        self.api_request_max_retries_label = QLabel()
+        retry_layout.addWidget(self.api_request_max_retries_label, 3, 0)
+        self.api_request_max_retries_spinbox = QSpinBox()
+        self.api_request_max_retries_spinbox.setRange(1, 50)
+        self.api_request_max_retries_spinbox.setValue(self.temp_settings["api_request_max_retries"])
+        self.api_request_max_retries_spinbox.setStyleSheet("padding: 5px; border-radius: 5px;")
+        self.api_request_max_retries_spinbox.valueChanged.connect(lambda value: self.update_temp_setting("api_request_max_retries", value))
+        retry_layout.addWidget(self.api_request_max_retries_spinbox, 3, 1)
+
+        self.retry_group.setLayout(retry_layout)
+        layout.addWidget(self.retry_group)
 
         # Update Settings Group
         self.update_group = QGroupBox()
@@ -324,14 +380,18 @@ class SettingsTab(QWidget):
     def reset_to_defaults(self):
         """Reset temp_settings to default values and update UI."""
         self.temp_settings = self.default_settings.copy()
-        
+
         # Update UI elements to reflect default values
         self.folder_name_input.setText(self.temp_settings["base_folder_name"])
         self.directory_input.setText(self.temp_settings["base_directory"])
         self.download_slider.setValue(self.temp_settings["simultaneous_downloads"])
         self.download_spinbox.setValue(self.temp_settings["simultaneous_downloads"])
         self.auto_update_checkbox.setChecked(self.temp_settings["auto_check_updates"])
-        
+        self.creator_posts_max_attempts_spinbox.setValue(self.temp_settings["creator_posts_max_attempts"])
+        self.post_data_max_retries_spinbox.setValue(self.temp_settings["post_data_max_retries"])
+        self.file_download_max_retries_spinbox.setValue(self.temp_settings["file_download_max_retries"])
+        self.api_request_max_retries_spinbox.setValue(self.temp_settings["api_request_max_retries"])
+
         # Update language combo box
         self.update_language_combo()
         
@@ -351,6 +411,12 @@ class SettingsTab(QWidget):
         self.download_group.setTitle(translate("download_settings"))
         self.simultaneous_downloads_label.setText(translate("simultaneous_downloads"))
 
+        self.retry_group.setTitle(translate("retry_settings"))
+        self.creator_posts_max_attempts_label.setText(translate("creator_posts_max_attempts"))
+        self.post_data_max_retries_label.setText(translate("post_data_max_retries"))
+        self.file_download_max_retries_label.setText(translate("file_download_max_retries"))
+        self.api_request_max_retries_label.setText(translate("api_request_max_retries"))
+
         self.update_group.setTitle(translate("update_settings"))
         self.auto_update_label.setText(translate("auto_check_updates"))
 
@@ -366,3 +432,15 @@ class SettingsTab(QWidget):
 
     def is_auto_check_updates_enabled(self):
         return self.settings["auto_check_updates"]
+
+    def get_creator_posts_max_attempts(self):
+        return self.settings["creator_posts_max_attempts"]
+
+    def get_post_data_max_retries(self):
+        return self.settings["post_data_max_retries"]
+
+    def get_file_download_max_retries(self):
+        return self.settings["file_download_max_retries"]
+
+    def get_api_request_max_retries(self):
+        return self.settings["api_request_max_retries"]

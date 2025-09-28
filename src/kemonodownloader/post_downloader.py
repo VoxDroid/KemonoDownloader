@@ -559,7 +559,9 @@ class PostDetectionThread(QThread):
             self.error.emit(translate("failed_to_fetch_post_error", str(e)))
             return
 
-    def make_robust_request(self, url, max_retries=3):
+    def make_robust_request(self, url, max_retries=None):
+        if max_retries is None:
+            max_retries = self.parent.settings_tab.get_api_request_max_retries()
         for attempt in range(max_retries):
             try:
                 response = requests.get(url, headers=HEADERS, timeout=10)
@@ -719,7 +721,9 @@ class FilePreparationThread(QThread):
         self.log.emit(translate("log_debug", f"Total files detected: {len(files_to_download)}"), "INFO")
         return list(dict.fromkeys(files_to_download))
 
-    def fetch_post_data(self, post_id, max_retries=3, retry_delay_seconds=5):
+    def fetch_post_data(self, post_id, max_retries=None, retry_delay_seconds=5):
+        if max_retries is None:
+            max_retries = self.parent.settings_tab.get_post_data_max_retries()
         parts = self.url.split('/')
         service, creator_id = parts[-5], parts[-3]
         api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
@@ -756,7 +760,9 @@ class FilePreparationThread(QThread):
                     self.log.emit(translate("log_info", f"Trying again in {i}"), "INFO")
                     time.sleep(1)
 
-    def make_robust_request(self, url, max_retries=3):
+    def make_robust_request(self, url, max_retries=None):
+        if max_retries is None:
+            max_retries = self.parent.settings_tab.get_api_request_max_retries()
         for attempt in range(max_retries):
             try:
                 response = requests.get(url, headers=HEADERS, timeout=10)
@@ -893,7 +899,9 @@ class DownloadThread(QThread):
             self.log.emit(translate("log_error", f"Error fetching post info: {str(e)}"), "ERROR")
             self.post_title = f"Post_{post_id}"
 
-    def make_robust_request(self, url, max_retries=3):
+    def make_robust_request(self, url, max_retries=None):
+        if max_retries is None:
+            max_retries = self.parent.settings_tab.get_api_request_max_retries()
         for attempt in range(max_retries):
             try:
                 response = requests.get(url, headers=HEADERS, timeout=10)
@@ -1002,7 +1010,7 @@ class DownloadThread(QThread):
 
         self.log.emit(translate("log_info", translate("starting_download", file_index + 1, total_files, file_url, post_folder)), "INFO")
         
-        max_retries = 50
+        max_retries = self.parent.settings_tab.get_file_download_max_retries()
         for attempt in range(1, max_retries + 1):
             try:
                 response = requests.get(file_url, headers=HEADERS, stream=True)
@@ -1621,7 +1629,9 @@ class PostDownloaderTab(QWidget):
         except Exception as e:
             self.append_log_to_console(translate("log_error", f"Error fetching files for post {url}: {str(e)}"), "ERROR")
 
-    def make_robust_request(self, url, max_retries=3):
+    def make_robust_request(self, url, max_retries=None):
+        if max_retries is None:
+            max_retries = self.parent.settings_tab.get_api_request_max_retries()
         for attempt in range(max_retries):
             try:
                 response = requests.get(url, headers=HEADERS, timeout=10)

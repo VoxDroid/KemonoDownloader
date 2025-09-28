@@ -184,7 +184,7 @@ class PostDetectionThread(QThread):
         all_posts = []
         offset = 0
         page_size = 50
-        max_attempts = 200
+        max_attempts = self.parent.settings_tab.get_creator_posts_max_attempts()
 
         attempt = 1
         while attempt <= max_attempts and self.is_running:
@@ -470,7 +470,7 @@ class FilePreparationThread(QThread):
         service, creator_id = parts[-3], parts[-1]
         domain_config = get_domain_config(creator_url)
         api_url = f"{domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
-        max_retries = 50
+        max_retries = self.parent.settings_tab.get_post_data_max_retries()
         retry_delay_seconds = 5
         for attempt in range(1, max_retries + 1):
             try:
@@ -736,7 +736,7 @@ class CreatorDownloadThread(QThread):
 
         self.log.emit(translate("log_info", translate("starting_download", file_index + 1, total_files, file_url, post_folder)), "INFO")
         
-        max_retries = 50
+        max_retries = self.parent.settings_tab.get_file_download_max_retries()
         file_handle = None
         for attempt in range(1, max_retries + 1):
             try:
@@ -912,7 +912,7 @@ class ValidationThread(QThread):
             self.result.emit(False)
             return
             
-        max_retries = 3
+        max_retries = self.parent.settings_tab.get_api_request_max_retries()
         retry_delay = 2
         
         for attempt in range(1, max_retries + 1):

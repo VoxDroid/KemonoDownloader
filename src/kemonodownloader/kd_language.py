@@ -1153,6 +1153,36 @@ class KDLanguage:
                 "korean": "동시 다운로드:",
                 "chinese-simplified": "并行下载数:"
             },
+            "retry_settings": {
+                "english": "Retry Settings",
+                "japanese": "リトライ設定",
+                "korean": "재시도 설정",
+                "chinese-simplified": "重试设置"
+            },
+            "creator_posts_max_attempts": {
+                "english": "Creator Posts Max Attempts:",
+                "japanese": "クリエイター投稿最大試行回数:",
+                "korean": "크리에이터 게시물 최대 시도 횟수:",
+                "chinese-simplified": "创作者帖子最大尝试次数:"
+            },
+            "post_data_max_retries": {
+                "english": "Post Data Max Retries:",
+                "japanese": "投稿データ最大リトライ回数:",
+                "korean": "게시물 데이터 최대 재시도 횟수:",
+                "chinese-simplified": "帖子数据最大重试次数:"
+            },
+            "file_download_max_retries": {
+                "english": "File Download Max Retries:",
+                "japanese": "ファイルダウンロード最大リトライ回数:",
+                "korean": "파일 다운로드 최대 재시도 횟수:",
+                "chinese-simplified": "文件下载最大重试次数:"
+            },
+            "api_request_max_retries": {
+                "english": "API Request Max Retries:",
+                "japanese": "APIリクエスト最大リトライ回数:",
+                "korean": "API 요청 최대 재시도 횟수:",
+                "chinese-simplified": "API请求最大重试次数:"
+            },
             "update_settings": {
                 "english": "Update Settings",
                 "japanese": "更新設定",
