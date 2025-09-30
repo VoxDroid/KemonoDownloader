@@ -21,6 +21,7 @@ from fake_useragent import UserAgent
 import asyncio
 import aiohttp
 from aiohttp import ClientSession, ClientTimeout
+import threading
 
 
 class ThreadSettings:
@@ -616,6 +617,11 @@ class CreatorDownloadThread(QThread):
         self.auto_rename_enabled = auto_rename_enabled
         self.post_file_counters = {}  # Track file counter per post for auto-rename
         self.domain_config = self._get_domain_config_from_files()
+        # Locks for thread-safe access to shared dictionaries
+        self.failed_files_lock = threading.Lock()
+        self.post_file_counters_lock = threading.Lock()
+        self.completed_files_lock = threading.Lock()
+        self.file_hashes_lock = threading.Lock()
 
     def _get_domain_config_from_files(self):
         """Determine domain configuration from the files to download"""
@@ -707,7 +713,8 @@ class CreatorDownloadThread(QThread):
         except OSError as e:
             error_msg = translate("failed_to_create_post_folder", post_folder, str(e))
             self.log.emit(translate("log_error", error_msg), "ERROR")
-            self.failed_files[file_url] = error_msg
+            with self.failed_files_lock:
+                self.failed_files[file_url] = error_msg
             self.file_completed.emit(file_index, file_url, False)
             self.check_post_completion(file_url)
             return
@@ -717,35 +724,42 @@ class CreatorDownloadThread(QThread):
         # Apply auto rename if enabled
         if self.auto_rename_enabled:
             # Initialize counter for this post if not exists
-            if post_id not in self.post_file_counters:
-                self.post_file_counters[post_id] = 0
-            
-            # Increment counter for this post
-            self.post_file_counters[post_id] += 1
+            with self.post_file_counters_lock:
+                if post_id not in self.post_file_counters:
+                    self.post_file_counters[post_id] = 0
+
+                # Increment counter for this post
+                self.post_file_counters[post_id] += 1
+                file_counter = self.post_file_counters[post_id]
             
             # Get file extension
             file_ext = os.path.splitext(filename)[1]
             # Get original filename without extension
             original_name = os.path.splitext(filename)[0]
             # Create new filename with counter and original name
-            filename = f"{self.post_file_counters[post_id]}_{original_name}{file_ext}"
+            filename = f"{file_counter}_{original_name}{file_ext}"
         
         full_path = os.path.join(post_folder, filename.replace('/', '_'))
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
-        file_hashes_keys = list(self.file_hashes.keys())
+        with self.file_hashes_lock:
+            file_hashes_keys = list(self.file_hashes.keys())
+
         for hash_key in file_hashes_keys:
             if hash_key == url_hash:
-                existing_path = self.file_hashes[hash_key]["file_path"]
+                with self.file_hashes_lock:
+                    existing_path = self.file_hashes[hash_key]["file_path"]
                 if os.path.exists(existing_path):
                     with open(existing_path, 'rb') as f:
                         file_hash = hashlib.md5(f.read()).hexdigest()
-                    stored_hash = self.file_hashes[hash_key]["file_hash"]
+                    with self.file_hashes_lock:
+                        stored_hash = self.file_hashes[hash_key]["file_hash"]
                     if file_hash == stored_hash:
                         self.log.emit(translate("log_info", translate("file_already_downloaded", filename, existing_path)), "INFO")
                         self.file_progress.emit(file_index, 100)
                         self.file_completed.emit(file_index, file_url, True)
-                        self.completed_files.add(file_url)
+                        with self.completed_files_lock:
+                            self.completed_files.add(file_url)
                         self.check_post_completion(file_url)
                         return
 
@@ -772,7 +786,8 @@ class CreatorDownloadThread(QThread):
                                     os.remove(full_path)
                                 except OSError as e:
                                     self.log.emit(translate("log_error", translate("failed_to_remove_interrupted_file", full_path, str(e))), "ERROR")
-                            self.failed_files[file_url] = "Download interrupted by user"
+                            with self.failed_files_lock:
+                                self.failed_files[file_url] = "Download interrupted by user"
                             self.file_completed.emit(file_index, file_url, False)
                             self.check_post_completion(file_url)
                             return
@@ -788,14 +803,16 @@ class CreatorDownloadThread(QThread):
                     file_handle = None
                     with open(full_path, 'rb') as f:
                         file_hash = hashlib.md5(f.read()).hexdigest()
-                    self.file_hashes[url_hash] = {
-                        "file_path": full_path,
-                        "file_hash": file_hash,
-                        "url": file_url
-                    }
-                    self.save_hashes()
+                    with self.file_hashes_lock:
+                        self.file_hashes[url_hash] = {
+                            "file_path": full_path,
+                            "file_hash": file_hash,
+                            "url": file_url
+                        }
+                        self.save_hashes()
                     self.log.emit(translate("log_info", translate("successfully_downloaded", full_path)), "INFO")
-                    self.completed_files.add(file_url)
+                    with self.completed_files_lock:
+                        self.completed_files.add(file_url)
                     self.file_completed.emit(file_index, file_url, True)
                     self.check_post_completion(file_url)
                     return
@@ -807,7 +824,8 @@ class CreatorDownloadThread(QThread):
                 if attempt == max_retries:
                     error_msg = translate("error_downloading_after_retries", file_url, max_retries, str(e))
                     self.log.emit(translate("log_error", error_msg), "ERROR")
-                    self.failed_files[file_url] = str(e)
+                    with self.failed_files_lock:
+                        self.failed_files[file_url] = str(e)
                     self.file_progress.emit(file_index, 0)
                     self.file_completed.emit(file_index, file_url, False)
                     self.check_post_completion(file_url)
@@ -820,7 +838,8 @@ class CreatorDownloadThread(QThread):
                     file_handle.close()
                     file_handle = None
                 self.log.emit(translate("log_error", translate("unexpected_error_downloading", file_url, str(e))), "ERROR")
-                self.failed_files[file_url] = str(e)
+                with self.failed_files_lock:
+                    self.failed_files[file_url] = str(e)
                 self.file_progress.emit(file_index, 0)
                 self.file_completed.emit(file_index, file_url, False)
                 self.check_post_completion(file_url)
@@ -1100,6 +1119,9 @@ class CreatorDownloaderTab(QWidget):
         self.total_files_to_download = 0
         self.completed_files = set()
         self.failed_files = {}  # Map file_url to error message
+        # Locks for thread-safe access to shared data structures
+        self.completed_files_lock = threading.Lock()
+        self.failed_files_lock = threading.Lock()
         self.validation_thread = None
         self.post_detection_thread = None
         self.post_population_thread = None
@@ -1788,9 +1810,10 @@ class CreatorDownloaderTab(QWidget):
 
     def update_file_completion(self, file_index, file_url, success):
         """Update file completion status and check overall progress."""
-        if file_url not in self.completed_files and file_url not in self.failed_files:
-            if success:
-                self.completed_files.add(file_url)
+        with self.completed_files_lock, self.failed_files_lock:
+            if file_url not in self.completed_files and file_url not in self.failed_files:
+                if success:
+                    self.completed_files.add(file_url)
                 self.append_log_to_console(translate("log_debug", translate("file_completed", file_url, len(self.completed_files), self.total_files_to_download)), "INFO")
             else:
                 # Find the CreatorDownloadThread to get the error message
