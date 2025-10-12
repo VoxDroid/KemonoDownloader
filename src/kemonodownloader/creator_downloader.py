@@ -2056,10 +2056,11 @@ class CreatorDownloaderTab(QWidget):
 
     def cleanup_filter_thread(self):
         """Clean up the filter thread after it finishes."""
-        if self.filter_thread in self.active_threads:
-            self.active_threads.remove(self.filter_thread)
-        self.filter_thread.deleteLater()
-        self.filter_thread = None
+        if self.filter_thread is not None:
+            if self.filter_thread in self.active_threads:
+                self.active_threads.remove(self.filter_thread)
+            self.filter_thread.deleteLater()
+            self.filter_thread = None
             
     def add_list_item(self, text, url, is_checked):
         item = QListWidgetItem()
