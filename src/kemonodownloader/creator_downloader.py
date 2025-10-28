@@ -22,7 +22,7 @@ import asyncio
 import aiohttp
 from aiohttp import ClientSession, ClientTimeout
 import threading
-
+import base64
 
 class ThreadSettings:
     """Settings container for thread operations"""
@@ -493,6 +493,36 @@ class FilePreparationThread(QThread):
                     self.log.emit(translate("log_debug", translate("added_content_image", img_name)), "INFO")
                     files_to_download.append((img_name, img_url))
 
+        # External link detection from 'embed' object
+        if 'embed' in post and post['embed'] and 'url' in post['embed']:
+            embed_url = post['embed']['url']
+            subject = post['embed'].get('subject', 'external_link')
+            link_filename = f"{sanitize_filename(subject)}_link.txt"
+            
+            # Use a special prefix to identify this as a link to be saved, not downloaded
+            special_url = f"save_link_to_txt:{embed_url}"
+
+            # Check if TXT files are allowed
+            if '.txt' in allowed_extensions:
+                self.log.emit(translate("log_debug", f"Added external link: {link_filename}"), "INFO")
+                files_to_download.append((link_filename, special_url))
+
+        if self.creator_content_check and 'content' in post and post['content']:
+            soup = BeautifulSoup(post['content'], 'html.parser')
+            plain_text = soup.get_text(separator='\n').strip()
+            if plain_text:
+                content_filename = "post_content.txt"
+                
+                # Encode the content to safely pass it in the URL-like string
+                encoded_content = base64.b64encode(plain_text.encode('utf-8')).decode('utf-8')
+                special_url = f"save_content_to_txt:{encoded_content}"
+
+                if '.txt' in allowed_extensions:
+                    self.log.emit(translate("log_debug", f"Added text content file: {content_filename}"), "INFO")
+                    files_to_download.append((content_filename, special_url))
+
+                
+        
         self.log.emit(translate("log_debug", translate("total_files_detected", len(files_to_download))), "INFO")
         return list(dict.fromkeys(files_to_download))
 
@@ -572,7 +602,7 @@ class FilePreparationThread(QThread):
                     post_id, detected_files = result
                     for file_name, file_url in detected_files:
                         self.log.emit(translate("log_debug", translate("detected_file", file_name, file_url)), "INFO")
-                        files_to_download.append(file_url)
+                        files_to_download.append((file_name, file_url))
                         files_to_posts_map[file_url] = post_id
                     completed_posts += 1
                     progress = min(int((completed_posts / total_posts) * 100), 100)
@@ -649,7 +679,7 @@ class CreatorDownloadThread(QThread):
 
     def build_post_files_map(self):
         post_files_map = {post_id: [] for post_id in self.selected_posts}
-        for file_url in self.files_to_download:
+        for _, file_url in self.files_to_download:
             post_id = self.files_to_posts_map.get(file_url)
             if post_id in post_files_map:
                 post_files_map[post_id].append(file_url)
@@ -714,8 +744,8 @@ class CreatorDownloadThread(QThread):
     def stop(self):
         self.is_running = False
 
-    async def download_file(self, file_url, folder, file_index, total_files, session):
-        if not self.is_running or file_url not in self.files_to_download:
+    async def download_file(self, filename, file_url, folder, file_index, total_files, session):
+        if not self.is_running:
             self.log.emit(translate("log_info", f"Skipping {file_url}"), "INFO")
             return
 
@@ -735,27 +765,60 @@ class CreatorDownloadThread(QThread):
             self.check_post_completion(file_url)
             return
 
-        filename = file_url.split('f=')[-1] if 'f=' in file_url else file_url.split('/')[-1].split('?')[0]
-
         # Apply auto rename if enabled
         if self.auto_rename_enabled:
-            # Initialize counter for this post if not exists
             with self.post_file_counters_lock:
                 if post_id not in self.post_file_counters:
                     self.post_file_counters[post_id] = 0
-
-                # Increment counter for this post
                 self.post_file_counters[post_id] += 1
                 file_counter = self.post_file_counters[post_id]
-            
-            # Get file extension
             file_ext = os.path.splitext(filename)[1]
-            # Get original filename without extension
             original_name = os.path.splitext(filename)[0]
-            # Create new filename with counter and original name
             filename = f"{file_counter}_{original_name}{file_ext}"
-        
+
         full_path = os.path.join(post_folder, filename.replace('/', '_'))
+
+        # Handle saving links to .txt files
+        if file_url.startswith("save_link_to_txt:"):
+            real_url = file_url.replace("save_link_to_txt:", "", 1)
+            try:
+                with open(full_path, 'w', encoding='utf-8') as f:
+                    f.write(real_url)
+                self.log.emit(translate("log_info", f"Saved link to {full_path}"), "INFO")
+                with self.completed_files_lock:
+                    self.completed_files.add(file_url)
+                self.file_completed.emit(file_index, file_url, True)
+                self.check_post_completion(file_url)
+            except Exception as e:
+                error_msg = f"Failed to save link to {full_path}: {str(e)}"
+                self.log.emit(translate("log_error", error_msg), "ERROR")
+                with self.failed_files_lock:
+                    self.failed_files[file_url] = str(e)
+                self.file_completed.emit(file_index, file_url, False)
+                self.check_post_completion(file_url)
+            return
+            
+        elif file_url.startswith("save_content_to_txt:"):
+            encoded_content = file_url.replace("save_content_to_txt:", "", 1)
+            try:
+                content_bytes = base64.b64decode(encoded_content)
+                with open(full_path, 'wb') as f: # Write as bytes
+                    f.write(content_bytes)
+                self.log.emit(translate("log_info", f"Saved post content to {full_path}"), "INFO")
+                with self.completed_files_lock:
+                    self.completed_files.add(file_url)
+                self.file_completed.emit(file_index, file_url, True)
+                self.check_post_completion(file_url)
+            except Exception as e:
+                error_msg = f"Failed to save post content to {full_path}: {str(e)}"
+                self.log.emit(translate("log_error", error_msg), "ERROR")
+                with self.failed_files_lock:
+                    self.failed_files[file_url] = str(e)
+                self.file_completed.emit(file_index, file_url, False)
+                self.check_post_completion(file_url)
+            return
+
+        # Normal file download logic
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
         with self.file_hashes_lock:
@@ -818,18 +881,15 @@ class CreatorDownloadThread(QThread):
                     file_handle.close()
                     file_handle = None
 
-                    # Validate downloaded size matches content-length
                     if file_size > 0 and downloaded_size != file_size:
                         error_msg = translate("size_mismatch_error", downloaded_size, file_size, file_url)
                         self.log.emit(translate("log_warning", error_msg), "WARNING")
-                        # Delete incomplete file
                         if os.path.exists(full_path):
                             try:
                                 os.remove(full_path)
                                 self.log.emit(translate("log_info", translate("deleted_incomplete_file", full_path)), "INFO")
                             except OSError as e:
                                 self.log.emit(translate("log_error", translate("failed_to_delete_incomplete_file", full_path, str(e))), "ERROR")
-                        # Raise exception to trigger retry
                         raise Exception(f"Size mismatch: downloaded {downloaded_size} bytes, expected {file_size} bytes")
 
                     with open(full_path, 'rb') as f:
@@ -879,7 +939,6 @@ class CreatorDownloadThread(QThread):
                 if file_handle:
                     file_handle.close()
                     file_handle = None
-
     def check_post_completion(self, file_url):
         post_id = self.files_to_posts_map.get(file_url)
         if post_id in self.post_files_map:
@@ -890,8 +949,8 @@ class CreatorDownloadThread(QThread):
     async def download_worker(self, queue, folder, total_files, session):
         while self.is_running:
             try:
-                file_index, file_url = await queue.get()
-                await self.download_file(file_url, folder, file_index, total_files, session)
+                file_index, filename, file_url = await queue.get()
+                await self.download_file(filename, file_url, folder, file_index, total_files, session)
                 queue.task_done()
             except asyncio.QueueEmpty:
                 break
@@ -923,8 +982,9 @@ class CreatorDownloadThread(QThread):
             asyncio.set_event_loop(loop)
             try:
                 queue = asyncio.Queue()
-                for i, file_url in enumerate(self.files_to_download):
-                    queue.put_nowait((i, file_url))
+                for i, (filename, file_url) in enumerate(self.files_to_download):
+                    queue.put_nowait((i, filename, file_url))
+
 
                 async def main():
                     async with ClientSession() as session:
@@ -1272,12 +1332,13 @@ class CreatorDownloaderTab(QWidget):
             '.psd': QCheckBox("PSD"),
             '.clip': QCheckBox("CLIP"),
             '.jpe':QCheckBox("JPE"),
-            '.webp':QCheckBox("WEBP")
+            '.webp':QCheckBox("WEBP"),
+            '.txt': QCheckBox("TXT")
         }
         for i, (ext, check) in enumerate(self.creator_ext_checks.items()):
             check.setChecked(True)
             check.stateChanged.connect(self.filter_items)
-            creator_ext_layout.addWidget(check, i // 5, i % 5)
+            creator_ext_layout.addWidget(check, i // 6, i % 6)
         self.creator_ext_group.setLayout(creator_ext_layout)
         creator_options_layout.addWidget(self.creator_ext_group)
         self.creator_options_group.setLayout(creator_options_layout)

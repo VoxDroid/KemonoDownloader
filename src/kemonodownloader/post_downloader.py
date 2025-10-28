@@ -23,7 +23,7 @@ import ctypes
 from fake_useragent import UserAgent
 import gzip
 import threading
-
+import base64
 
 class ThreadSettings:
     """Settings container for thread operations"""
@@ -654,6 +654,23 @@ class PostDetectionThread(QThread):
                 if img_ext in allowed_extensions:
                     detected_files.append((img_name, img_url))
 
+        if 'content' in post and post['content']:
+            soup = BeautifulSoup(post['content'], 'html.parser')
+            plain_text = soup.get_text(separator='\n').strip()
+            if plain_text:
+                content_filename = "post_content.txt"
+                encoded_content = base64.b64encode(plain_text.encode('utf-8')).decode('utf-8')
+                special_url = f"save_content_to_txt:{encoded_content}"
+                detected_files.append((content_filename, special_url))
+                
+                
+        if 'embed' in post and post['embed'] and 'url' in post['embed']:
+            embed_url = post['embed']['url']
+            subject = post['embed'].get('subject', 'external_link')
+            link_filename = f"{sanitize_filename(subject)}_link.txt"
+            special_url = f"save_link_to_txt:{embed_url}"
+            detected_files.append((link_filename, special_url))
+            
         return list(dict.fromkeys(detected_files))
 
 class FilePreparationThread(QThread):
@@ -733,6 +750,18 @@ class FilePreparationThread(QThread):
                     self.log.emit(translate("log_debug", f"Added content image: {img_name}"), "INFO")
                     files_to_download.append((img_name, img_url))
 
+        # External link detection from 'embed' object
+        if 'embed' in post and post['embed'] and 'url' in post['embed']:
+            embed_url = post['embed']['url']
+            subject = post['embed'].get('subject', 'external_link')
+            link_filename = f"{sanitize_filename(subject)}_link.txt"
+            special_url = f"save_link_to_txt:{embed_url}"
+
+            if '.txt' in allowed_extensions:
+                self.log.emit(translate("log_debug", f"Added external link: {link_filename}"), "INFO")
+                files_to_download.append((link_filename, special_url))
+                
+                
         self.log.emit(translate("log_debug", f"Total files detected: {len(files_to_download)}"), "INFO")
         return list(dict.fromkeys(files_to_download))
 
@@ -833,7 +862,7 @@ class FilePreparationThread(QThread):
                     post_id, detected_files = result
                     for file_name, file_url in detected_files:
                         self.log.emit(translate("log_debug", f"Detected file: {file_name} from {file_url}"), "INFO")
-                        files_to_download.append(file_url)
+                        files_to_download.append((file_name, file_url))
                         files_to_posts_map[file_url] = post_id
                 completed_posts += 1
                 progress = min(int((completed_posts / total_posts) * 100), 100)
@@ -960,7 +989,7 @@ class DownloadThread(QThread):
 
     def build_post_files_map(self):
         post_files_map = {self.post_id: []}
-        for file_url in self.selected_files:
+        for _, file_url in self.selected_files:
             post_id = self.files_to_posts_map.get(file_url)
             if post_id == self.post_id:
                 post_files_map[post_id].append(file_url)
@@ -989,8 +1018,8 @@ class DownloadThread(QThread):
         self.is_running = False
         self.log.emit(translate("log_info", "DownloadThread cancellation initiated"), "INFO")
 
-    def download_file(self, file_url, folder, file_index, total_files):
-        if not self.is_running or file_url not in self.selected_files:
+    def download_file(self, filename, file_url, folder, file_index, total_files):
+        if not self.is_running:
             self.log.emit(translate("log_info", f"Skipping {file_url} due to cancellation"), "INFO")
             return
 
@@ -999,8 +1028,6 @@ class DownloadThread(QThread):
         post_folder_name = f"{post_id}_{self.post_title}"
         post_folder = os.path.join(service_folder, post_folder_name)
         os.makedirs(post_folder, exist_ok=True)
-
-        filename = file_url.split('f=')[-1] if 'f=' in file_url else file_url.split('/')[-1].split('?')[0]
         
         # Handle auto rename if enabled
         if hasattr(self, 'auto_rename') and self.auto_rename:
@@ -1009,6 +1036,39 @@ class DownloadThread(QThread):
             filename = f"{file_index + 1}_{base_name}{file_extension}"
         
         full_path = os.path.join(post_folder, filename.replace('/', '_'))
+
+        # Handle saving links to .txt files
+        if file_url.startswith("save_link_to_txt:"):
+            real_url = file_url.replace("save_link_to_txt:", "", 1)
+            try:
+                with open(full_path, 'w', encoding='utf-8') as f:
+                    f.write(real_url)
+                self.log.emit(translate("log_info", f"Saved link to {full_path}"), "INFO")
+                with self.completed_files_lock:
+                    self.completed_files.add(file_url)
+                self.file_completed.emit(file_index, file_url)
+                self.check_post_completion(file_url)
+            except Exception as e:
+                self.log.emit(translate("log_error", f"Failed to save link to {full_path}: {str(e)}"), "ERROR")
+                self.file_progress.emit(file_index, 0)
+            return
+        elif file_url.startswith("save_content_to_txt:"):
+            encoded_content = file_url.replace("save_content_to_txt:", "", 1)
+            try:
+                content_bytes = base64.b64decode(encoded_content)
+                with open(full_path, 'wb') as f: # Write as bytes
+                    f.write(content_bytes)
+                self.log.emit(translate("log_info", f"Saved post content to {full_path}"), "INFO")
+                with self.completed_files_lock:
+                    self.completed_files.add(file_url)
+                self.file_completed.emit(file_index, file_url)
+                self.check_post_completion(file_url)
+            except Exception as e:
+                self.log.emit(translate("log_error", f"Failed to save post content to {full_path}: {str(e)}"), "ERROR")
+                self.file_progress.emit(file_index, 0)
+            return
+
+        # Normal file download logic
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
         with self.file_hashes_lock:
@@ -1056,18 +1116,15 @@ class DownloadThread(QThread):
                             if progress == 100:
                                 self.file_completed.emit(file_index, file_url)
 
-                # Validate downloaded size matches content-length
                 if file_size > 0 and downloaded_size != file_size:
                     error_msg = translate("size_mismatch_error", downloaded_size, file_size, file_url)
                     self.log.emit(translate("log_warning", error_msg), "WARNING")
-                    # Delete incomplete file
                     if os.path.exists(full_path):
                         try:
                             os.remove(full_path)
                             self.log.emit(translate("log_info", translate("deleted_incomplete_file", full_path)), "INFO")
                         except OSError as e:
                             self.log.emit(translate("log_error", translate("failed_to_delete_incomplete_file", full_path, str(e))), "ERROR")
-                    # Raise exception to trigger retry
                     raise Exception(f"Size mismatch: downloaded {downloaded_size} bytes, expected {file_size} bytes")
 
                 with open(full_path, 'rb') as f:
@@ -1120,8 +1177,8 @@ class DownloadThread(QThread):
 
         if total_files > 0:
             with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
-                futures = {executor.submit(self.download_file, file_url, self.download_folder, i, total_files): i
-                           for i, file_url in enumerate(self.selected_files)}
+                futures = {executor.submit(self.download_file, filename, file_url, self.download_folder, i, total_files): i
+                           for i, (filename, file_url) in enumerate(self.selected_files)}
                 for future in as_completed(futures):
                     if not self.is_running:
                         break
@@ -1235,6 +1292,7 @@ class PostDownloaderTab(QWidget):
         self.current_post_url = None
         self.all_files_map = {}
         self.all_detected_posts = []
+        self.url_file_map = {}
         self.post_url_map = {}
         self.total_files_to_download = 0
         self.completed_files = set()
@@ -1372,12 +1430,13 @@ class PostDownloaderTab(QWidget):
             '.pdf': QCheckBox("PDF"), '.7z': QCheckBox("7Z"),
             '.mp3': QCheckBox("MP3"), '.wav': QCheckBox("WAV"), '.rar': QCheckBox("RAR"),
             '.mov': QCheckBox("MOV"), '.docx': QCheckBox("DOCX"), '.psd': QCheckBox("PSD"), 
-            '.clip': QCheckBox("CLIP"), '.jpe':QCheckBox("JPE"), '.webp':QCheckBox("WEBP")
+            '.clip': QCheckBox("CLIP"), '.jpe':QCheckBox("JPE"), '.webp':QCheckBox("WEBP"),
+            '.txt': QCheckBox("TXT")
         }
         for i, (ext, check) in enumerate(self.post_filter_checks.items()):
             check.setChecked(True)
             check.stateChanged.connect(self.filter_items)
-            filter_layout.addWidget(check, i // 4, i % 4)
+            filter_layout.addWidget(check, i // 5, i % 5)
         self.post_filter_group.setLayout(filter_layout)
         file_list_layout.addWidget(self.post_filter_group)
 
@@ -1668,8 +1727,9 @@ class PostDownloaderTab(QWidget):
             post_data = self.parse_response_content(response)
             post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
             allowed_extensions = [ext.lower() for ext, check in self.post_filter_checks.items() if check.isChecked()]
-            self.all_detected_files = self.detect_files(post, allowed_extensions)
+            self.all_detected_files = self.detect_files(post, allowed_extensions) 
             self.file_url_map = {file_name: file_url for file_name, file_url in self.all_detected_files}
+            self.url_file_map = {file_url: file_name for file_name, file_url in self.all_detected_files}
             self.checked_urls.clear()
 
             for file_name, file_url in self.all_detected_files:
@@ -1759,6 +1819,25 @@ class PostDownloaderTab(QWidget):
                     detected_files.append((img_name, img_url))
                 elif img_ext in allowed_extensions:
                     detected_files.append((img_name, img_url))
+
+        if 'content' in post and post['content']:
+            soup = BeautifulSoup(post['content'], 'html.parser')
+            plain_text = soup.get_text(separator='\n').strip()
+            if plain_text:
+                content_filename = "post_content.txt"
+                encoded_content = base64.b64encode(plain_text.encode('utf-8')).decode('utf-8')
+                special_url = f"save_content_to_txt:{encoded_content}"
+                if '.txt' in allowed_extensions:
+                    detected_files.append((content_filename, special_url))
+                    
+                    
+        if 'embed' in post and post['embed'] and 'url' in post['embed']:
+            embed_url = post['embed']['url']
+            subject = post['embed'].get('subject', 'external_link')
+            link_filename = f"{sanitize_filename(subject)}_link.txt"
+            special_url = f"save_link_to_txt:{embed_url}"
+            if '.txt' in allowed_extensions:
+                detected_files.append((link_filename, special_url))
 
         return list(dict.fromkeys(detected_files))
 
@@ -1900,25 +1979,24 @@ class PostDownloaderTab(QWidget):
 
     def on_file_preparation_finished(self, urls, files_to_download, files_to_posts_map):
         self.append_log_to_console(translate("log_debug", f"Files prepared for URLs: {urls}, Total files: {len(files_to_download)}"), "INFO")
-        for file_url in files_to_download:
+        for file_name, file_url in files_to_download:
+            self.url_file_map[file_url] = file_name
             if file_url not in self.checked_urls:
                 self.checked_urls[file_url] = True
         self.append_log_to_console(translate("log_debug", f"Updated checked_urls after preparation: {self.checked_urls}"), "INFO")
 
         active_filters = [ext.lower() for ext, check in self.post_filter_checks.items() if check.isChecked()]
-        checked_files = []
-        for file_url in files_to_download:
+        checked_files_with_names = []
+        for file_name, file_url in files_to_download:
             if not self.checked_urls.get(file_url, False):
                 continue
-            file_name = file_url.split('f=')[-1] if 'f=' in file_url else file_url.split('/')[-1]
             file_ext = os.path.splitext(file_name)[1].lower()
             if not active_filters or file_ext in active_filters or (file_ext == '.jpeg' and '.jpg' in active_filters):
-                checked_files.append(file_url)
+                checked_files_with_names.append((file_name, file_url))
 
-        self.append_log_to_console(translate("log_debug", f"Checked files after filtering: {len(checked_files)}"), "INFO")
-        self.append_log_to_console(translate("log_debug", f"Checked files list: {checked_files}"), "INFO")
+        self.append_log_to_console(translate("log_debug", f"Checked files after filtering: {len(checked_files_with_names)}"), "INFO")
 
-        if not checked_files:
+        if not checked_files_with_names:
             self.append_log_to_console(translate("log_warning", f"No files to download for URLs: {urls}. Proceeding to next post."), "WARNING")
             self.process_next_post(urls[1:] if len(urls) > 1 else [])
             return
@@ -1932,7 +2010,8 @@ class PostDownloaderTab(QWidget):
         settings = self._create_thread_settings()
         max_concurrent = settings.simultaneous_downloads
         auto_rename = self.auto_rename_checkbox.isChecked()
-        self.thread = DownloadThread(url, self.parent.download_folder, checked_files, files_to_posts_map,
+        
+        self.thread = DownloadThread(url, self.parent.download_folder, checked_files_with_names, files_to_posts_map,
                                     self.post_console, self.other_files_dir, post_id, settings, max_concurrent, auto_rename)
         self.active_threads.append(self.thread)
         self.thread.file_progress.connect(self.update_file_progress)
