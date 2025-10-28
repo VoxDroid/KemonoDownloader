@@ -453,7 +453,7 @@ class FilePreparationThread(QThread):
             if 'f=' not in file_url and file_name:
                 file_url += f"?f={file_name}"
             self.log.emit(translate("log_debug", translate("checking_main_file", file_name, file_ext)), "INFO")
-            if '.jpg' in allowed_extensions and file_ext in ['.jpg', '.jpeg']:
+            if '.jpg' in allowed_extensions and file_ext in ['.jpg', '.jpeg', '.jfif']:
                 self.log.emit(translate("log_debug", translate("added_main_file", file_name)), "INFO")
                 files_to_download.append((file_name, file_url))
             elif file_ext in allowed_extensions:
@@ -471,7 +471,7 @@ class FilePreparationThread(QThread):
                     if 'f=' not in attachment_url and attachment_name:
                         attachment_url += f"?f={attachment_name}"
                     self.log.emit(translate("log_debug", translate("checking_attachment", attachment_name, attachment_ext)), "INFO")
-                    if '.jpg' in allowed_extensions and attachment_ext in ['.jpg', '.jpeg']:
+                    if '.jpg' in allowed_extensions and attachment_ext in ['.jpg', '.jpeg', '.jfif']:
                         self.log.emit(translate("log_debug", translate("added_attachment", attachment_name)), "INFO")
                         files_to_download.append((attachment_name, attachment_url))
                     elif attachment_ext in allowed_extensions:
@@ -486,7 +486,7 @@ class FilePreparationThread(QThread):
                 img_ext = os.path.splitext(img_url)[1].lower()
                 img_name = os.path.basename(img_url)
                 self.log.emit(translate("log_debug", translate("checking_content_image", img_name, img_ext)), "INFO")
-                if '.jpg' in allowed_extensions and img_ext in ['.jpg', '.jpeg']:
+                if '.jpg' in allowed_extensions and img_ext in ['.jpg', '.jpeg', '.jfif']:
                     self.log.emit(translate("log_debug", translate("added_content_image", img_name)), "INFO")
                     files_to_download.append((img_name, img_url))
                 elif img_ext in allowed_extensions:
@@ -1317,7 +1317,7 @@ class CreatorDownloaderTab(QWidget):
         creator_ext_layout.setHorizontalSpacing(20)
         creator_ext_layout.setVerticalSpacing(10)
         self.creator_ext_checks = {
-            '.jpg': QCheckBox("JPG/JPEG"),
+            '.jpg': QCheckBox("JPG/JPEG/JFIF"),
             '.png': QCheckBox("PNG"),
             '.zip': QCheckBox("ZIP"),
             '.mp4': QCheckBox("MP4"),
