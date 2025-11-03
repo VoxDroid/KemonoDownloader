@@ -39,7 +39,7 @@ test_requires = [
 ]
 
 [tool.briefcase.app.kemonodownloader.macOS]
-universal_build = true
+universal_build = false
 requires = [
 ]
 
