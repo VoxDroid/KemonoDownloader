@@ -9,6 +9,83 @@ class KDLanguage:
         self.current_language = "english"  # Default language
         self.translations = {
             
+            # Add links from txt file
+            "add_links_from_file": {
+                "english": "Add links from .txt file. Each link should be on a new line.",
+                "japanese": ".txtファイルからリンクを追加します。各リンクは新しい行に配置してください。",
+                "korean": ".txt 파일에서 링크를 추가합니다. 각 링크는 새 줄에 있어야 합니다.",
+                "chinese-simplified": "从 .txt 文件添加链接。每个链接应位于新行上。"
+            },
+            "add_links_from_file_title": {
+                "english": "Import from TXT File.",
+                "japanese": "TXTファイルからインポート。",
+                "korean": "TXT 파일에서 가져오기.",
+                "chinese-simplified": "从 TXT 文件导入。"
+            },
+            
+            "select_links_file": {
+                "english": "Select .txt file containing creator URLs",
+                "japanese": ".txtファイルからクリエイターのURLを含むファイルを選択してください",
+                "korean": ".txt 파일에서 크리에이터 URL을 포함하는 파일을 선택하세요",
+                "chinese-simplified": "选择包含创作者URL的.txt文件"
+            },
+            
+            "url_already_in_queue": {
+                "english": "URL is already in the download queue",
+                "japanese": "URLはすでにダウンロードキューにあります",
+                "korean": "URL은 이미 다운로드 대기열에 있습니다",
+                "chinese-simplified": "URL已在下载队列中"
+            },
+            
+            "added_to_queue": {
+                "english": "Added to queue",
+                "japanese": "キューに追加されました",
+                "korean": "대기열에 추가됨",
+                "chinese-simplified": "已添加到队列"
+            },
+            
+            "invalid_url_format_from_txt": {
+                "english": "Invalid URL format, skipping",
+                "japanese": "無効なURL形式、スキップします",
+                "korean": "잘못된 URL 형식, 건너뜁니다",
+                "chinese-simplified": "无效的URL格式，跳过"
+            },
+            
+            "error_processing_url": {
+                "english": "Error processing URL",
+                "japanese": "URL処理中にエラーが発生しました",
+                "korean": "URL 처리 중 오류 발생",
+                "chinese-simplified": "处理URL时出错"
+            },
+            
+            "bulk_add_summary": {
+                "english": "Added {0} link(s) to queue. Skipped {1} link(s).",
+                "japanese": "キューに {0} 件のリンクを追加しました。{1} 件のリンクをスキップしました。",
+                "korean": "대기열에 {0}개의 링크를 추가했습니다. {1}개의 링크를 건너뛰었습니다.",
+                "chinese-simplified": "已将 {0} 个链接添加到队列。跳过了 {1} 个链接。"
+            },
+            
+            "bulk_add_complete": { 
+                "english": "Bulk Add Complete",
+                "japanese": "一括追加完了",
+                "korean": "대량 추가 완료",
+                "chinese-simplified": "批量添加完成"
+            },
+            
+            "file_read_error": {
+                "english": "Error reading file: {0}",
+                "japanese": "ファイルの読み取りエラー：{0}",
+                "korean": "파일 읽기 오류: {0}",
+                "chinese-simplified": "读取文件时出错：{0}"
+            },
+            
+            "file_read_error_title": {
+                "english": "File Read Error",
+                "japanese": "ファイル読み取りエラー",
+                "korean": "파일 읽기 오류",
+                "chinese-simplified": "文件读取错误"
+            },
+
             # Log Texts
             "checking_creator_with_url": {
                 "english": "Checking creator with URL: {0}",
