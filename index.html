@@ -40,7 +40,7 @@
     </div>
     <img src="assets/img/KemonoDownloader.png" alt="Kemono Downloader" class="app-image floating-element">
     <h1 class="glow-text" data-i18n="appTitle">Kemono Downloader</h1>
-    <p data-i18n="appDescription">A cross-platform Python app built with PyQt6 to download content from Kemono.cr</p>
+    <p data-i18n="appDescription">A cross-platform Python app built with PyQt6 to download content from Kemono.cr and Coomer.st</p>
     
     <!-- Language Selector -->
     <div class="language-selector">
@@ -152,7 +152,7 @@
 <section class="bg-light-section">
     <div class="container section-content">
         <h2 class="text-center" data-aos="fade-up" data-i18n="overviewTitle">Overview</h2>
-        <p class="lead text-center" data-aos="fade-up" data-aos-delay="100" data-i18n="overviewDescription">Kemono Downloader is a versatile Python-based desktop application built with PyQt6, designed to download content from <a href="https://kemono.cr" target="_blank">Kemono.cr</a>. This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.</p>
+        <p class="lead text-center" data-aos="fade-up" data-aos-delay="100" data-i18n="overviewDescription">Kemono Downloader is a versatile Python-based desktop application built with PyQt6, designed to download content from <a href="https://kemono.cr" target="_blank">Kemono.cr</a> and <a href="https://coomer.st" target="_blank">Coomer.st</a>. This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.</p>
     </div>
 </section>
 
@@ -166,13 +166,13 @@
         
         <div class="notice-box" data-aos="fade-up" data-aos-delay="100">
             <h4><i class="fas fa-exclamation-triangle"></i> <span data-i18n="disclaimerTitle">Disclaimer</span></h4>
-            <p data-i18n="disclaimerText1">KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.cr. The maintainers of this project <strong>do not condone or support the unauthorized distribution of copyrighted material</strong>. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.cr, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).</p>
+            <p data-i18n="disclaimerText1">KemonoDownloader is a tool designed for personal and educational use only, to assist users in downloading content from Kemono.cr and Coomer.st. The maintainers of this project <strong>do not condone or support the unauthorized distribution of copyrighted material</strong>. Users are solely responsible for ensuring they have the legal right to access and download content from Kemono.cr and Coomer.st, and for complying with all applicable laws, as well as the terms of service of the original platforms from which the content originates (e.g., Patreon, Pixiv Fanbox, Gumroad).</p>
             <p data-i18n="disclaimerText2"><strong>Misuse of this tool to infringe on creators' rights, violate copyright laws, or breach terms of service is strictly prohibited.</strong> The maintainers are not liable for any misuse of KemonoDownloader or any consequences arising from its use, including but not limited to legal action, financial loss, or damage to third parties.</p>
         </div>
         
         <div class="notice-box" data-aos="fade-up" data-aos-delay="200">
             <h4><i class="fas fa-heart"></i> <span data-i18n="ethicalUseTitle">Ethical Use Guidelines</span></h4>
-            <p data-i18n="ethicalUseText1">KemonoDownloader interacts with content from Kemono.cr, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.</p>
+            <p data-i18n="ethicalUseText1">KemonoDownloader interacts with content from Kemono.cr and Coomer.st, which may include material originally posted on paywalled platforms like Patreon, Pixiv Fanbox, and Gumroad. Many creators on these platforms rely on paid subscriptions for their livelihood. Downloading and redistributing their content without permission can harm their ability to continue creating.</p>
             <p data-i18n="ethicalUseText2">We strongly encourage users to:</p>
             <ul>
                 <li data-i18n="ethicalUseList1">Use KemonoDownloader responsibly and only for content you have the legal right to access.</li>
@@ -185,7 +185,7 @@
             <h4><i class="fas fa-shield-alt"></i> <span data-i18n="risksTitle">Risks and Limitations</span></h4>
             <ul>
                 <li><strong data-i18n="risksLegalTitle">Legal Risks</strong>: <span data-i18n="risksLegalText">Downloading content from Kemono.cr may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.</span></li>
-                <li><strong data-i18n="risksDependencyTitle">Dependency on Kemono.cr</strong>: <span data-i18n="risksDependencyText">KemonoDownloader relies on Kemono.cr, which has a history of inconsistent updates and downtime. If Kemono.cr becomes unavailable, this tool will lose its functionality.</span></li>
+                <li><strong data-i18n="risksDependencyTitle">Dependency on Kemono.cr and Coomer.st</strong>: <span data-i18n="risksDependencyText">KemonoDownloader relies on Kemono.cr and Coomer.st, which have a history of inconsistent updates and downtime. If these sites become unavailable, this tool will lose its functionality.</span></li>
                 <li><strong data-i18n="risksRateLimitsTitle">Rate Limits and Errors</strong>: <span data-i18n="risksRateLimitsText">Kemono.cr may impose rate limits or other restrictions that affect download performance. The maintainers cannot guarantee uninterrupted access to Kemono.cr's content.</span></li>
             </ul>
         </div>
@@ -391,7 +391,7 @@ pip install -r requirements.txt</code></pre></li>
                                     <li><strong>Linux</strong>: <code>briefcase run linux</code></li>
                                 </ul>
                             </li>
-                            <p><em data-i18n="installNote">Note</em>: <span data-i18n="installNoteText">An internet connection is required to fetch content from Kemono.cr.</span></p>
+                            <p><em data-i18n="installNote">Note</em>: <span data-i18n="installNoteText">An internet connection is required to fetch content from Kemono.cr and Coomer.st.</span></p>
                         </ol>
                     </div>
                 </div>
@@ -431,7 +431,7 @@ pip install -r requirements.txt</code></pre></li>
                     <div class="usage-card-content">
                         <ul>
                             <li data-i18n="usageStep1">The application creates default directories (<code>Downloads</code>, <code>Cache</code>, <code>Other Files</code>) in the specified save location.</li>
-                            <li data-i18n="usageStep2">Ensure an active internet connection to access Kemono.cr content.</li>
+                            <li data-i18n="usageStep2">Ensure an active internet connection to access Kemono.cr and Coomer.st content.</li>
                             <li data-i18n="usageStep3">Explore the Help tab for detailed instructions and troubleshooting tips.</li>
                         </ul>
                     </div>
@@ -442,7 +442,7 @@ pip install -r requirements.txt</code></pre></li>
                     <h4><i class="fas fa-download"></i> <span data-i18n="postDownloaderTab">Post Downloader Tab</span></h4>
                     <div class="usage-card-content">
                         <ol>
-                            <li data-i18n="postDownloaderStep1">Enter a post URL (e.g., <code>https://kemono.cr/patreon/user/123456789/post/123456789</code>) in the "Enter post URL" field.</li>
+                            <li data-i18n="postDownloaderStep1">Enter a post URL (e.g., <code>https://kemono.cr/patreon/user/123456789/post/123456789</code> or <code>https://coomer.st/onlyfans/user/123456789/post/123456789</code>) in the "Enter post URL" field.</li>
                             <li data-i18n="postDownloaderStep2">Click "Add to Queue" to add it to the list.</li>
                             <li data-i18n="postDownloaderStep3">Click the eye icon to view files, filter by type (e.g., JPG, ZIP), and select files to download.</li>
                             <li data-i18n="postDownloaderStep4">Click "Download" to start, and monitor progress with the progress bars and console.</li>
@@ -455,7 +455,7 @@ pip install -r requirements.txt</code></pre></li>
                     <h4><i class="fas fa-users"></i> <span data-i18n="creatorDownloaderTab">Creator Downloader Tab</span></h4>
                     <div class="usage-card-content">
                         <ol>
-                            <li data-i18n="creatorDownloaderStep1">Enter a creator URL (e.g., <code>https://kemono.cr/patreon/user/123456789</code>) in the "Enter creator URL" field.</li>
+                            <li data-i18n="creatorDownloaderStep1">Enter a creator URL (e.g., <code>https://kemono.cr/patreon/user/123456789</code> or <code>https://coomer.st/onlyfans/user/123456789</code>) in the "Enter creator URL" field.</li>
                             <li data-i18n="creatorDownloaderStep2">Click "Add to Queue" to add it to the list.</li>
                             <li data-i18n="creatorDownloaderStep3">Click the eye icon to fetch posts, configure options (Main File, Attachments, Content Images), and select posts.</li>
                             <li data-i18n="creatorDownloaderStep4">Click "Download" to begin, and track progress via the interface.</li>
