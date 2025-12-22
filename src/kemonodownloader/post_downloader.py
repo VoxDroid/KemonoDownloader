@@ -537,6 +537,7 @@ class PostDetectionThread(QThread):
         self.log.emit(translate("log_info", "PostDetectionThread cancellation initiated"), "INFO")
 
     def run(self):
+        self.url = self.url.rstrip('/')
         parts = self.url.split('/')
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
         api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
@@ -739,6 +740,7 @@ class FilePreparationThread(QThread):
     def fetch_post_data(self, post_id, max_retries=None, retry_delay_seconds=5):
         if max_retries is None:
             max_retries = self.settings.post_data_max_retries
+        self.url = self.url.rstrip('/')
         parts = self.url.split('/')
         service, creator_id = parts[-5], parts[-3]
         api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}/post/{post_id}"
@@ -899,6 +901,7 @@ class DownloadThread(QThread):
 
     def fetch_post_info(self):
         """Fetch post title."""
+        self.url = self.url.rstrip('/')
         parts = self.url.split('/')
         if len(parts) < 7 or self.domain_config['domain'] not in self.url:
             self.log.emit(translate("log_error", "Invalid URL format for fetching post info"), "ERROR")
@@ -953,6 +956,7 @@ class DownloadThread(QThread):
             return None
 
     def extract_service_from_url(self, url):
+        url = url.rstrip('/')
         parts = url.split('/')
         if len(parts) >= 5 and self.domain_config['domain'] in url:
             return parts[-5]
@@ -1487,7 +1491,8 @@ class PostDownloaderTab(QWidget):
         if not url:
             self.append_log_to_console(translate("log_error", translate("no_url_entered")), "ERROR")
             return
-        if any(item[0] == url for item in self.post_queue):
+        normalized_url = url.rstrip('/')
+        if any(item[0].rstrip('/') == normalized_url for item in self.post_queue):
             self.append_log_to_console(translate("log_warning", translate("url_already_in_queue")), "WARNING")
             return
         if self.check_post_url_validity(url):
@@ -1501,6 +1506,7 @@ class PostDownloaderTab(QWidget):
             self.append_log_to_console(translate("log_error", translate("invalid_post_url", url)), "ERROR")
 
     def check_post_url_validity(self, url):
+        url = url.rstrip('/')
         parts = url.split('/')
         if len(parts) < 7 or get_domain_config(url)['domain'] not in url:
             return False
@@ -1664,6 +1670,7 @@ class PostDownloaderTab(QWidget):
         self.background_task_label.setText(translate("idle"))
 
     def display_files_for_post(self, url):
+        url = url.rstrip('/')
         parts = url.split('/')
         service, creator_id, post_id = parts[-5], parts[-3], parts[-1]
         api_url = f"{get_domain_config(url)['api_base']}/{service}/user/{creator_id}/post/{post_id}"
@@ -1931,6 +1938,7 @@ class PostDownloaderTab(QWidget):
             return
 
         url = urls[0]
+        url = url.rstrip('/')
         remaining_urls = urls[1:] if len(urls) > 1 else []
         self.append_log_to_console(translate("log_info", f"Processing post: {url}, Remaining URLs: {remaining_urls}"), "INFO")
         parts = url.split('/')
@@ -2321,16 +2329,17 @@ class PostDownloaderTab(QWidget):
             skipped_count = 0
             
             for line in lines:
-                url = line.strip()
+                original_url = line.strip()
                 
                 # Skip empty lines
-                if not url:
+                if not original_url:
                     continue
                 
                 # Skip if already in queue
-                if any(item[0] == url for item in self.post_queue):
+                normalized_url = original_url.rstrip('/')
+                if any(item[0].rstrip('/') == normalized_url for item in self.post_queue):
                     self.append_log_to_console(
-                        translate("log_warning", translate("url_already_in_queue") + f": {url}"), 
+                        translate("log_warning", translate("url_already_in_queue") + f": {original_url}"), 
                         "WARNING"
                     )
                     skipped_count += 1
@@ -2339,19 +2348,20 @@ class PostDownloaderTab(QWidget):
                 # Validate and add to queue
                 try:
                     # Basic URL validation for posts
+                    url = normalized_url
                     domain_config = get_domain_config(url)
                     parts = url.split('/')
                     
                     if len(parts) >= 7 and (domain_config['domain'] in url) and parts[-4] == 'user' and parts[-2] == 'post':
-                        self.post_queue.append((url, False))
+                        self.post_queue.append((original_url, False))
                         added_count += 1
                         self.append_log_to_console(
-                            translate("log_info", translate("added_to_queue") + f": {url}"), 
+                            translate("log_info", translate("added_to_queue") + f": {original_url}"), 
                             "INFO"
                         )
                     else:
                         self.append_log_to_console(
-                            translate("log_error", translate("invalid_url_format_from_txt")  + f": {url}"), 
+                            translate("log_error", translate("invalid_url_format_from_txt")  + f": {original_url}"), 
                             "ERROR"
                         )
                         skipped_count += 1

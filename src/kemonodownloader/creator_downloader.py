@@ -199,6 +199,7 @@ class PostDetectionThread(QThread):
     def run(self):
         if not self.is_running:
             return
+        self.url = self.url.rstrip('/')
         self.log.emit(translate("log_info", translate("checking_creator_with_url", self.url)), "INFO")
         parts = self.url.split('/')
         if len(parts) < 5 or (self.domain_config['domain'] not in self.url) or parts[-2] != 'user':
@@ -497,6 +498,7 @@ class FilePreparationThread(QThread):
         return list(dict.fromkeys(files_to_download))
 
     def fetch_and_detect_files(self, post_id, creator_url):
+        creator_url = creator_url.rstrip('/')
         parts = creator_url.split('/')
         service, creator_id = parts[-3], parts[-1]
         domain_config = get_domain_config(creator_url)
@@ -972,6 +974,7 @@ class ValidationThread(QThread):
         if not self.is_running:
             return
         
+        self.url = self.url.rstrip('/')
         parts = self.url.split('/')
         if len(parts) < 5 or (self.domain_config['domain'] not in self.url) or parts[-2] != 'user':
             self.log.emit(translate("log_error", translate("invalid_url_format_link", self.url)), "ERROR")
@@ -1458,7 +1461,8 @@ class CreatorDownloaderTab(QWidget):
         if not url:
             self.append_log_to_console(translate("log_error", translate("no_url_entered")), "ERROR")
             return
-        if any(item[0] == url for item in self.creator_queue):
+        normalized_url = url.rstrip('/')
+        if any(item[0].rstrip('/') == normalized_url for item in self.creator_queue):
             self.append_log_to_console(translate("log_warning", translate("url_already_in_queue")), "WARNING")
             return
         if hasattr(self, 'validation_thread') and self.validation_thread is not None and self.validation_thread.isRunning():
@@ -1741,6 +1745,7 @@ class CreatorDownloaderTab(QWidget):
             return
 
         url = urls[0]
+        url = url.rstrip('/')
         remaining_urls = urls[1:]
         parts = url.split('/')
         service, creator_id = parts[-3], parts[-1]
@@ -2232,16 +2237,17 @@ class CreatorDownloaderTab(QWidget):
             skipped_count = 0
             
             for line in lines:
-                url = line.strip()
+                original_url = line.strip()
                 
                 # Skip empty lines
-                if not url:
+                if not original_url:
                     continue
                 
                 # Skip if already in queue
-                if any(item[0] == url for item in self.creator_queue):
+                normalized_url = original_url.rstrip('/')
+                if any(item[0].rstrip('/') == normalized_url for item in self.creator_queue):
                     self.append_log_to_console(
-                        translate("log_warning", translate("url_already_in_queue") + f": {url}"), 
+                        translate("log_warning", translate("url_already_in_queue") + f": {original_url}"), 
                         "WARNING"
                     )
                     skipped_count += 1
@@ -2250,19 +2256,20 @@ class CreatorDownloaderTab(QWidget):
                 # Validate and add to queue
                 try:
                     # Basic URL validation
+                    url = normalized_url
                     domain_config = get_domain_config(url)
                     parts = url.split('/')
                     
                     if len(parts) >= 5 and (domain_config['domain'] in url) and parts[-2] == 'user':
-                        self.creator_queue.append((url, False))
+                        self.creator_queue.append((original_url, False))
                         added_count += 1
                         self.append_log_to_console(
-                            translate("log_info", translate("added_to_queue") + f": {url}"), 
+                            translate("log_info", translate("added_to_queue") + f": {original_url}"), 
                             "INFO"
                         )
                     else:
                         self.append_log_to_console(
-                            translate("log_error", translate("invalid_url_format_from_txt")  + f": {url}"), 
+                            translate("log_error", translate("invalid_url_format_from_txt")  + f": {original_url}"), 
                             "ERROR"
                         )
                         skipped_count += 1
