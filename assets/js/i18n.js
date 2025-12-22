@@ -198,6 +198,12 @@ const translations = {
       dependenciesNote:
         "Create a `requirements.txt` file with these dependencies and run `pip install -r requirements.txt`.",
   
+      // Contributors
+      contributorsTitle: "Contributors",
+      contributorsDesc: "We're incredibly grateful to our amazing contributors who have helped shape Kemono Downloader into what it is today.",
+      viewAllContributors: "View All Contributors",
+      starHistoryTitle: "Star History",
+
       english: "English",
       japanese: "Japanese",
       korean: "Korean",
@@ -403,7 +409,13 @@ const translations = {
       dependencyBriefcase: "briefcase（アプリのパッケージングのため）",
       dependenciesNote:
         "これらの依存関係を含む`requirements.txt`ファイルを作成し、`pip install -r requirements.txt`を実行します。",
-  
+
+      // Contributors
+      contributorsTitle: "貢献者",
+      contributorsDesc: "Kemono Downloader を今日の姿に形作ってくれた素晴らしい貢献者に心から感謝します。",
+      viewAllContributors: "すべての貢献者を表示",
+      starHistoryTitle: "スター履歴",
+
       english: "英語",
       japanese: "日本語",
       korean: "韓国語",
@@ -602,10 +614,183 @@ const translations = {
       dependencyBriefcase: "briefcase(앱 패키징용)",
       dependenciesNote:
         "이러한 종속성이 포함된 `requirements.txt` 파일을 만들고 `pip install -r requirements.txt`를 실행하세요.",
-  
+
+      // Contributors
+      contributorsTitle: "기여자",
+      contributorsDesc: "Kemono Downloader를 오늘날의 모습으로 만들어준 놀라운 기여자들에게 엄청난 감사를 드립니다.",
+      viewAllContributors: "모든 기여자 보기",
+      starHistoryTitle: "스타 기록",
+
       english: "英語",
       japanese: "日本語",
       korean: "한국어",
+    },
+    "zh-cn": {
+      // Header
+      appTitle: "Kemono 下载器",
+      appDescription: "一个用 PyQt6 构建的跨平台 Python 应用程序，用于从 Kemono.cr 和 Coomer.st 下载内容",
+      githubRepo: "GitHub 仓库",
+
+      // Overview
+      overviewTitle: "概述",
+      overviewDescription:
+        'Kemono 下载器是一个用 PyQt6 构建的跨平台 Python 桌面应用程序，旨在从 <a href="https://kemono.cr" target="_blank">Kemono.cr</a> 和 <a href="https://coomer.st" target="_blank">Coomer.st</a> 下载内容。这个工具允许用户从 Patreon、Fanbox 和其他服务中归档单个帖子或整个创作者资料，支持各种文件类型，具有可自定义的设置和高级功能。',
+
+      // Important Notices
+      importantNoticesTitle: "重要通知",
+      disclaimerTitle: "免责声明",
+      disclaimerText1:
+        "KemonoDownloader 是一个仅供个人和教育使用的工具，用于协助用户从 Kemono.cr 和 Coomer.st 下载内容。本项目的维护者<strong>不认可或支持未经授权分发受版权保护的材料</strong>。用户有责任确保他们有合法权利访问和下载 Kemono.cr 和 Coomer.st 的内容，并遵守所有适用的法律，以及原始平台（如 Patreon、Pixiv Fanbox、Gumroad）的服务条款。",
+      disclaimerText2:
+        "<strong>将此工具用于侵犯创作者权利、违反版权法或违反服务条款是严格禁止的。</strong>维护者不对 KemonoDownloader 的任何滥用或由此使用引起的任何后果负责，包括但不限于法律行动、财务损失或对第三方的损害。",
+  
+      ethicalUseTitle: "道德使用指南",
+      ethicalUseText1:
+        "KemonoDownloader 与来自 Kemono.cr 和 Coomer.st 的内容互动，这些内容可能最初发布在付费平台如 Patreon、Pixiv Fanbox 和 Gumroad 上。许多这些平台上的创作者依赖付费订阅来维持生计。未经许可下载和重新分发他们的内容可能会损害他们继续创作的能力。",
+      ethicalUseText2: "我们强烈鼓励用户：",
+      ethicalUseList1: "负责任地使用 KemonoDownloader，仅用于他们有合法权利访问的内容。",
+      ethicalUseList2:
+        "直接支持创作者，通过 Patreon、Pixiv Fanbox 或 Gumroad 等平台的官方渠道订阅。",
+      ethicalUseList3: "避免重新分发下载的内容，因为这可能违反版权法并损害创作者。",
+  
+      risksTitle: "风险和限制",
+      risksLegalTitle: "法律风险",
+      risksLegalText:
+        "从 Kemono.cr 下载内容可能违反版权法或原始平台的条款。用户承担使用此工具的所有法律风险。",
+      risksDependencyTitle: "对 Kemono.cr 和 Coomer.st 的依赖",
+      risksDependencyText:
+        "KemonoDownloader 依赖 Kemono.cr 和 Coomer.st，这些站点有不一致的更新和停机历史。如果这些站点不可用，此工具将失去功能。",
+      risksRateLimitsTitle: "速率限制和错误",
+      risksRateLimitsText:
+        "Kemono.cr 可能施加速率限制或其他限制，影响下载性能。维护者无法保证对 Kemono.cr 内容的无中断访问。",
+  
+      communityTitle: "社区标准",
+      communityText1:
+        '我们致力于为 KemonoDownloader 建立一个欢迎和尊重的社区。请阅读我们的 <a href="CODE_OF_CONDUCT.md">行为准则</a> 以了解我们对所有贡献者和用户的期望标准。关键点包括：',
+      communityList1: "尊重创作者的知识产权。",
+      communityList2:
+        "避免使用 KemonoDownloader 从事非法活动，如未经授权分发受版权保护的材料。",
+      communityList3:
+        '通过 GitHub、SourceForge 或通过标记为 "行为准则违规" 的私有问题向维护者报告任何违反行为准则的情况。',
+  
+      // Features
+      featuresTitle: "功能",
+      featurePostDownloading: "帖子下载",
+      featurePostDownloadingDesc: "使用其 URL 从特定 Kemono.cr 帖子下载文件。",
+      featureCreatorArchiving: "创作者归档",
+      featureCreatorArchivingDesc: "通过一次点击下载创作者资料的所有帖子和文件。",
+      featureFileTypeSupport: "文件类型支持",
+      featureFileTypeSupportDesc: "处理图像（JPG、PNG、GIF）、视频（MP4）、归档（ZIP、7Z）、PDF 等。",
+      featureConcurrentDownloads: "并发下载",
+      featureConcurrentDownloadsDesc: "调整同时下载的数量（1-10）以获得最佳性能。",
+      featureFileDeduplication: "文件去重",
+      featureFileDeduplicationDesc: "使用 URL 哈希防止冗余下载。",
+      featureImagePreviews: "图像预览",
+      featureImagePreviewsDesc: "在下载前预览图像以验证内容。",
+      featureDetailedLogging: "详细日志记录",
+      featureDetailedLoggingDesc: "使用应用程序控制台跟踪进度和排除故障。",
+      featureCrossPlatformUI: "跨平台 UI",
+      featureCrossPlatformUIDesc: "使用 PyQt6 构建现代、直观的界面，兼容多个操作系统。",
+      featureMediaPlayback: "媒体播放",
+      featureMediaPlaybackDesc: "使用内置播放控件预览视频和 GIF。",
+      featureMultilingualSupport: "多语言支持",
+      featureMultilingualSupportDesc: "动态切换英语、日语和韩语。",
+      featureAutomaticUpdates: "自动更新",
+      featureAutomaticUpdatesDesc: "在启动时检查新版本，并可选择通知。",
+      featureCustomizableSettings: "可自定义设置",
+      featureCustomizableSettingsDesc: "根据您的偏好定制保存目录、文件夹名称、通知和主题。",
+  
+      // Installation
+      installationTitle: "安装",
+      installationDescription: "Kemono 下载器现在使用 <a href=\"https://briefcase.readthedocs.io/\" target=\"_blank\">Briefcase</a> 打包，使其更容易作为本机应用程序运行或分发到平台。您可以从源代码构建或使用预编译二进制文件（如果可用）。",
+      buildingWithBriefcase: "使用 Briefcase 构建（所有平台）",
+      preCompiledBinaries: "预编译二进制文件",
+      installStep1: "确保您的系统上安装了 <strong>Python 3.9+</strong>（Windows、macOS、Linux）。",
+      installStep2: "克隆此仓库：<br><pre><code class=\"language-bash\">git clone https://github.com/VoxDroid/KemonoDownloader.git\ncd KemonoDownloader</code></pre>",
+      installStep3: "安装 Briefcase 和依赖项：<br><pre><code class=\"bash\">pip install briefcase\npip install -r requirements.txt</code></pre>",
+      installStep4: "初始化 Briefcase 项目（如果尚未设置）：<br><pre><code class=\"bash\">briefcase create</code></pre>",
+      installStep5: "构建应用程序：<br><ul><li><strong>Windows</strong>： <code>briefcase build windows</code></li><li><strong>macOS</strong>： <code>briefcase build macos</code></li><li><strong>Linux</strong>： <code>briefcase build linux</code></li></ul>",
+      installStep6: "运行应用程序：<br><ul><li><strong>Windows</strong>： <code>briefcase run windows</code></li><li><strong>macOS</strong>： <code>briefcase run macos</code></li><li><strong>Linux</strong>： <code>briefcase run linux</code></li></ul>",
+      installNote: "注意",
+      installNoteText: "需要互联网连接来从 Kemono.cr 和 Coomer.st 获取内容。",
+      installWindows: "<strong>Windows</strong>：从 <a href=\"https://github.com/VoxDroid/KemonoDownloader/releases\" target=\"_blank\">Releases 页面</a> 下载标记为 [W] 的最新 .exe（便携版）或 .msi（安装程序）。运行 msi 安装程序或使用便携版进行无设置运行。",
+      installMacOS: "<strong>macOS</strong>：从 <a href=\"https://github.com/VoxDroid/KemonoDownloader/releases\" target=\"_blank\">Releases 页面</a> 下载标记为 [M] 的最新通用 .dmg（x86_64 和 Apple Silicon）。打开 DMG，将应用程序拖到应用程序，然后启动。",
+      installLinux: "<strong>Linux</strong>：从 <a href=\"https://github.com/VoxDroid/KemonoDownloader/releases\" target=\"_blank\">Releases 页面</a> 下载标记为 [L] 的最新 .rpm（Fedora/Red Hat）、.deb（Debian/Ubuntu）或 .pkg.tar.zst（Arch/Pacman）。运行安装程序，然后启动应用程序。",
+  
+      // Usage
+      usageTitle: "使用",
+      usageDescription: "启动后，您将看到一个介绍屏幕，带有 \"Launch\" 按钮。点击它进入主界面，包含四个选项卡：<strong>Post Downloader</strong>、<strong>Creator Downloader</strong>、<strong>Settings</strong> 和 <strong>Help</strong>。应用程序内 Help 选项卡包含全面的用户手册。",
+      gettingStarted: "入门",
+      usageStep1: "应用程序会在指定的保存位置创建默认目录（<code>Downloads</code>、<code>Cache</code>、<code>Other Files</code>）。",
+      usageStep2: "确保有活跃的互联网连接来访问 Kemono.cr 和 Coomer.st 内容。",
+      usageStep3: "探索 Help 选项卡以获取详细说明和故障排除提示。",
+      postDownloaderTab: "Post Downloader 选项卡",
+      postDownloaderStep1: "在 \"Enter post URL\" 字段中输入帖子 URL（例如，<code>https://kemono.cr/patreon/user/123456789/post/123456789</code> 或 <code>https://coomer.st/onlyfans/user/123456789/post/123456789</code>）。",
+      postDownloaderStep2: "点击 \"Add to Queue\" 将其添加到列表中。",
+      postDownloaderStep3: "点击眼睛图标查看文件，按类型过滤（例如，JPG、ZIP），并选择要下载的文件。",
+      postDownloaderStep4: "点击 \"Download\" 开始，并使用进度条和控制台监控进度。",
+      creatorDownloaderTab: "Creator Downloader 选项卡",
+      creatorDownloaderStep1: "在 \"Enter creator URL\" 字段中输入创作者 URL（例如，<code>https://kemono.cr/patreon/user/123456789</code> 或 <code>https://coomer.st/onlyfans/user/123456789</code>）。",
+      creatorDownloaderStep2: "点击 \"Add to Queue\" 将其添加到列表中。",
+      creatorDownloaderStep3: "点击眼睛图标获取帖子，配置选项（Main File、Attachments、Content Images），并选择帖子。",
+      creatorDownloaderStep4: "点击 \"Download\" 开始，并通过界面跟踪进度。",
+      settingsTab: "Settings 选项卡",
+      settingsStep1: "设置下载的文件夹名称和保存目录。",
+      settingsStep2: "使用滑块或 spinbox 调整同时下载（1-10）。",
+      settingsStep3: "点击 \"Apply Changes\" 保存。",
+      helpTab: "Help 选项卡",
+      helpTabDesc: "导航到 Help 选项卡阅读详细指南、示例和支持信息。",
+  
+      // Screenshots
+      screenshotsTitle: "截图",
+      postDownloaderTabCaption: "Post Downloader 选项卡",
+      creatorDownloaderTabCaption: "Creator Downloader 选项卡",
+      settingsTabCaption: "Settings 选项卡",
+  
+      // Releases
+      releasesTitle: "发布",
+      releasesWindows: "<strong>Windows</strong>：预编译 .exe 在 <a href=\"https://github.com/VoxDroid/KemonoDownloader/releases\" target=\"_blank\">Releases 部分</a> 中可用。",
+      releasesMacOS: "<strong>macOS</strong>：预编译通用 .dmg（x86_64 和 Apple Silicon）在 <a href=\"https://github.com/VoxDroid/KemonoDownloader/releases\" target=\"_blank\">Releases 部分</a> 中可用。",
+      releasesLinux: "<strong>Linux</strong>：预编译 .rpm（Fedora/Red Hat）、.deb（Debian/Ubuntu）或 .pkg.tar.zst（Arch/Pacman）在 <a href=\"https://github.com/VoxDroid/KemonoDownloader/releases\" target=\"_blank\">Releases 页面</a> 中可用。",
+      releasesDesc: "检查发布说明以获取新功能、错误修复和版本更新的详细信息。Briefcase 构建的 Python 源代码仍然是所有平台的主要方法，具有适当的设置支持。",
+      downloadLatestRelease: "下载最新发布",
+  
+      // Support & Contributing
+      supportTitle: "支持",
+      supportDesc: "有关获取帮助、报告问题或支持项目开发的途径，请参阅 <a href=\"SUPPORT.md\">Support 页面</a>。",
+      supportInApp: "<strong>应用程序内帮助</strong>：Help 选项卡包含全面的用户手册。",
+      supportGitHub: "<strong>GitHub 讨论</strong>：在 <a href=\"https://github.com/VoxDroid/KemonoDownloader/discussions\" target=\"_blank\">Discussions 选项卡</a> 与社区互动。",
+      supportBugs: "<strong>报告错误</strong>：在 <a href=\"https://github.com/VoxDroid/KemonoDownloader/issues\" target=\"_blank\">Issues 页面</a> 打开问题。",
+      supportDevelopment: "<strong>支持开发</strong>：<a href=\"https://ko-fi.com/izeno\" target=\"_blank\">在 Ko-fi 上给我买杯咖啡</a>。",
+      contributingTitle: "贡献",
+      contributingDesc: "Kemono Downloader 是开源的，欢迎贡献！请阅读我们的 <a href=\"CONTRIBUTING.md\">Contributing Guidelines</a> 以获取详细信息，了解如何参与、提交拉取请求和建议功能。所有贡献者都必须遵守我们的 <a href=\"CODE_OF_CONDUCT.md\">Code of Conduct</a>。",
+      contributingStep1: "在 <a href=\"https://github.com/VoxDroid/KemonoDownloader\" target=\"_blank\">GitHub</a> 上分叉仓库。",
+      contributingStep2: "为您的功能或修复创建分支。",
+      contributingStep3: "提交包含您的更改清晰描述的拉取请求。",
+      contributingStep4: "遵守编码标准并彻底测试您的更改。",
+  
+      // License & Dependencies
+      licenseTitle: "许可证",
+      licenseDesc: "此项目根据 <a href=\"LICENSE\">MIT License</a> 获得许可。自由使用、修改和分发它根据许可证条款。",
+      dependenciesTitle: "依赖项",
+      dependenciesDesc: "要从源代码构建，请安装以下 Python 包：",
+      dependencyPyQt6: "<code>PyQt6</code>（用于 GUI）",
+      dependencyRequests: "<code>requests</code>（用于 HTTP 请求）",
+      dependencyBS4: "<code>beautifulsoup4</code>（用于 HTML 解析）",
+      dependencyQtAwesome: "<code>qtawesome</code>（用于图标）",
+      dependencyBriefcase: "<code>briefcase</code>（用于应用程序打包）",
+      dependenciesNote: "使用这些依赖项创建 <code>requirements.txt</code> 文件并运行 <code>pip install -r requirements.txt</code>。",
+  
+      // Footer
+      developedBy: "由",
+      supportOnKofi: "在 Ko-fi 上支持",
+      downloadFromSourceForge: "从 SourceForge 下载",
+  
+      // Language names
+      english: "英语",
+      japanese: "日语",
+      korean: "韩语",
+      chinese: "中文 (简体)",
     },
   }
   

@@ -22,7 +22,9 @@ body {
 }
 
 header {
-    background: linear-gradient(135deg, #1e1b4b 0%, #111827 100%);
+    background: linear-gradient(135deg, #1e1b4b 0%, #111827 50%, #1e1b4b 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
     padding: 70px 20px;
     text-align: center;
     border-bottom: 2px solid var(--border-color);
@@ -829,4 +831,40 @@ a:hover {
     section {
         padding: 40px 10px;
     }
+}
+
+/* Contributors Section */
+.contributors-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.contributor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid var(--accent-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.contributor-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--accent-color);
+}
+
+.star-history-chart {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+}
+
+/* Animations */
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
