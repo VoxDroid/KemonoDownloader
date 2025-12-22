@@ -182,6 +182,7 @@ class ImageModal(QDialog):
 
 class PostDetectionThread(QThread):
     finished = pyqtSignal(list)
+    posts_batch = pyqtSignal(list)
     log = pyqtSignal(str, str)
     error = pyqtSignal(str)
 
@@ -272,6 +273,9 @@ class PostDetectionThread(QThread):
                     self.log.emit(translate("log_error", translate("all_api_endpoints_failed", creator_id)), "ERROR")
                     break
                 
+            if not self.is_running:
+                return
+                
             try:
                 response_text = None
                 
@@ -295,6 +299,9 @@ class PostDetectionThread(QThread):
                     self.log.emit(translate("log_info", translate("empty_response_at_offset", offset)), "INFO")
                     break
                 
+                if not self.is_running:
+                    return
+                    
                 posts_data = json.loads(response_text)
                 
             except (json.JSONDecodeError, UnicodeDecodeError) as e:
@@ -336,7 +343,33 @@ class PostDetectionThread(QThread):
                 self.log.emit(translate("log_info", translate("no_more_posts_at_offset", offset)), "INFO")
                 break
 
+            # Process posts for this batch
+            batch_posts = []
+            for post in posts_data:
+                if not isinstance(post, dict):
+                    continue
+                post_id = post.get('id')
+                if not post_id:
+                    continue
+                title = post.get('title', f"Post {post_id}")
+                thumbnail_url = None
+                if 'file' in post and post['file'] and 'path' in post['file']:
+                    if post['file']['path'].lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+                        thumbnail_url = urljoin(self.domain_config['base_url'], post['file']['path'])
+                if not thumbnail_url and 'attachments' in post:
+                    for attachment in post['attachments']:
+                        if isinstance(attachment, dict) and 'path' in attachment and attachment['path'].lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+                            thumbnail_url = urljoin(self.domain_config['base_url'], attachment['path'])
+                            break
+                if not thumbnail_url and 'file' in post and post['file'] and 'path' in post['file']:
+                    thumbnail_url = urljoin(self.domain_config['base_url'], post['file']['path'])
+                batch_posts.append((title, (post_id, thumbnail_url)))
+
             all_posts.extend(posts_data)
+
+            # Emit batch of processed posts
+            if batch_posts:
+                self.posts_batch.emit(batch_posts)
 
             if len(posts_data) < page_size:
                 self.log.emit(translate("log_info", translate("last_page_reached_with_counts", len(posts_data), page_size, len(all_posts))), "INFO")
@@ -1184,6 +1217,11 @@ class CreatorDownloaderTab(QWidget):
         self.checkbox_toggle_thread = None
         self.post_titles_map = {}
         self.post_widget_cache = {}  # Maps post_title -> (item, widget) for O(1) lookups
+        # Pagination variables
+        self.posts_per_page = 200  # Number of posts to show per page
+        self.current_page = 1
+        self.total_pages = 1
+        self.filtered_posts = []  # Cache of filtered posts for pagination
         os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(self.other_files_dir, exist_ok=True)
         self.setup_ui()
@@ -1357,6 +1395,13 @@ class CreatorDownloaderTab(QWidget):
         self.creator_check_all.setStyleSheet("color: white;")
         self.creator_check_all.stateChanged.connect(self.toggle_check_all)
         checkbox_layout.addWidget(self.creator_check_all)
+        
+        self.creator_check_all_all = QCheckBox()
+        self.creator_check_all_all.setChecked(False)
+        self.creator_check_all_all.setStyleSheet("color: white;")
+        self.creator_check_all_all.stateChanged.connect(self.toggle_check_all_all)
+        checkbox_layout.addWidget(self.creator_check_all_all)
+        
         post_list_layout.addLayout(checkbox_layout)
 
         self.creator_post_list = QListWidget()
@@ -1371,11 +1416,29 @@ class CreatorDownloaderTab(QWidget):
         self.creator_post_count_label.setStyleSheet("color: white;")
         bottom_layout.addWidget(self.creator_post_count_label)
 
+        # Pagination controls
+        self.page_label = QLabel()
+        self.page_label.setStyleSheet("color: white;")
+        bottom_layout.addStretch()
+        bottom_layout.addWidget(self.page_label)
+
+        self.prev_page_btn = QPushButton(qta.icon('fa5s.chevron-left', color='white'), "")
+        self.prev_page_btn.setStyleSheet("background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;")
+        self.prev_page_btn.clicked.connect(self.prev_page)
+        self.prev_page_btn.setEnabled(False)
+        bottom_layout.addWidget(self.prev_page_btn)
+
+        self.next_page_btn = QPushButton(qta.icon('fa5s.chevron-right', color='white'), "")
+        self.next_page_btn.setStyleSheet("background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;")
+        self.next_page_btn.clicked.connect(self.next_page)
+        self.next_page_btn.setEnabled(False)
+        bottom_layout.addWidget(self.next_page_btn)
+
+        bottom_layout.addStretch()
         self.creator_view_button = QPushButton(qta.icon('fa5s.eye', color='white'), "")
         self.creator_view_button.setStyleSheet("background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;")
         self.creator_view_button.clicked.connect(self.view_current_item)
         self.creator_view_button.setEnabled(False)
-        bottom_layout.addStretch()
         bottom_layout.addWidget(self.creator_view_button)
 
         post_list_layout.addLayout(bottom_layout) 
@@ -1420,6 +1483,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_attachments_check.setText(translate("attachments"))
         self.creator_content_check.setText(translate("content_images"))
         self.creator_check_all.setText(translate("check_all"))
+        self.creator_check_all_all.setText(translate("check_all_all"))
         self.creator_auto_rename_check.setText(translate("auto_rename"))
         
         self.creator_file_progress_label.setText(translate("file_progress", 0))
@@ -1573,32 +1637,43 @@ class CreatorDownloaderTab(QWidget):
         self.current_creator_url = url
         self.checked_urls.clear()
         self.posts_to_download = []
+        self.filtered_posts = []  # Clear filtered posts cache
+        self.all_detected_posts = []  # Clear previous creator's posts
+        self.post_url_map = {}  # Clear previous creator's post URL mapping
+        self.current_page = 1   # Reset pagination
+        self.total_pages = 1
 
         self.creator_post_list.clear()
         self.post_widget_cache.clear()
         self.previous_selected_widget = None
+        self.update_pagination_controls()  # Reset pagination UI
         
-        if url in self.all_files_map:
-            self.all_detected_posts = self.all_files_map.get(url, [])
-            self.start_population_thread(self.all_detected_posts)
-            for i, (queue_url, _) in enumerate(self.creator_queue):
-                if queue_url == url:
-                    self.creator_queue[i] = (url, True)
-                    self.update_creator_queue_list()
-                    break
-        else:
-            if hasattr(self, 'post_detection_thread') and self.post_detection_thread is not None and self.post_detection_thread.isRunning():
-                self.append_log_to_console(translate("log_warning", translate("post_detection_in_progress")), "WARNING")
-                return
-            self.background_task_label.setText(translate("detecting_posts"))
-            self.background_task_progress.setRange(0, 0)
-            self.post_detection_thread = PostDetectionThread(url, self.post_titles_map, self._create_thread_settings())
-            self.post_detection_thread.finished.connect(self.on_post_detection_finished)
-            self.post_detection_thread.log.connect(self.append_log_to_console)
-            self.post_detection_thread.error.connect(self.on_post_detection_error)
-            self.post_detection_thread.finished.connect(self.cleanup_post_detection_thread) 
-            self.active_threads.append(self.post_detection_thread)
-            self.post_detection_thread.start()
+        # Reset queue status to allow refetching
+        for i, (queue_url, _) in enumerate(self.creator_queue):
+            if queue_url == url:
+                self.creator_queue[i] = (url, False)  # Mark as not processed
+                self.update_creator_queue_list()
+                break
+        
+        # Always attempt to fetch/refetch posts when viewing a creator
+        # This allows users to refresh the post list even if already cached
+        if hasattr(self, 'post_detection_thread') and self.post_detection_thread is not None and self.post_detection_thread.isRunning():
+            self.append_log_to_console(translate("log_warning", translate("post_detection_in_progress")), "WARNING")
+            return
+        self.background_task_label.setText(translate("detecting_posts"))
+        self.background_task_progress.setRange(0, 0)
+        
+        # Disable UI elements during fetching
+        self.set_fetching_ui_state(True)
+        
+        self.post_detection_thread = PostDetectionThread(url, self.post_titles_map, self._create_thread_settings())
+        self.post_detection_thread.finished.connect(self.on_post_detection_finished)
+        self.post_detection_thread.posts_batch.connect(self.on_posts_batch_received)
+        self.post_detection_thread.log.connect(self.append_log_to_console)
+        self.post_detection_thread.error.connect(self.on_post_detection_error)
+        self.post_detection_thread.finished.connect(self.cleanup_post_detection_thread) 
+        self.active_threads.append(self.post_detection_thread)
+        self.post_detection_thread.start()
             
     def cleanup_post_detection_thread(self):
         """Clean up the post detection thread after it finishes."""
@@ -1607,9 +1682,137 @@ class CreatorDownloaderTab(QWidget):
         self.post_detection_thread = None  
             
     def on_post_detection_finished(self, detected_posts):
-        self.all_files_map[self.current_creator_url] = detected_posts
-        self.all_detected_posts = detected_posts
+        # Only update if we haven't been receiving incremental batches
+        if self.current_creator_url not in self.all_files_map:
+            self.all_files_map[self.current_creator_url] = detected_posts
+        # Ensure all_detected_posts is set (should already be set from batches)
+        if not self.all_detected_posts:
+            self.all_detected_posts = detected_posts
         self.start_population_thread(self.all_detected_posts)
+
+    def on_posts_batch_received(self, batch_posts):
+        """Handle incremental batch of posts received during detection"""
+        # Append new posts to the existing list
+        self.all_detected_posts.extend(batch_posts)
+        
+        # Update all_files_map incrementally
+        if self.current_creator_url not in self.all_files_map:
+            self.all_files_map[self.current_creator_url] = []
+        self.all_files_map[self.current_creator_url].extend(batch_posts)
+        
+        # Update checked_urls for new posts
+        for post_title, (post_id, thumbnail_url) in batch_posts:
+            self.checked_urls[post_id] = False
+        
+        # Trigger incremental filtering to add new posts to UI
+        self.filter_items_incremental(batch_posts)
+
+    def filter_items_incremental(self, batch_posts):
+        """Filter and add a batch of posts to the filtered cache incrementally"""
+        search_text = self.creator_search_input.text().lower()
+        filtered_batch = []
+        
+        for post_title, (post_id, thumbnail_url) in batch_posts:
+            if not search_text or search_text in post_title.lower():
+                is_checked = self.checked_urls.get(post_id, False)
+                filtered_batch.append((post_title, post_id, thumbnail_url, is_checked))
+        
+        # Add to filtered posts cache
+        self.filtered_posts.extend(filtered_batch)
+        
+        # Update pagination info
+        self.total_pages = max(1, (len(self.filtered_posts) + self.posts_per_page - 1) // self.posts_per_page)
+        
+        # If we're on the last page and there are more posts to show, add them to current page
+        current_page_start = (self.current_page - 1) * self.posts_per_page
+        current_page_end = min(current_page_start + self.posts_per_page, len(self.filtered_posts))
+        
+        if self.current_page == self.total_pages or len(self.filtered_posts) <= self.posts_per_page:
+            # Add new items to current page display
+            start_idx = len(self.filtered_posts) - len(filtered_batch)
+            for i in range(max(start_idx, current_page_start), min(len(self.filtered_posts), current_page_end)):
+                post_title, post_id, thumbnail_url, is_checked = self.filtered_posts[i]
+                unique_title = f"{post_title} (ID: {post_id})"
+                self.post_url_map[unique_title] = (post_id, thumbnail_url)
+                self.add_list_item(unique_title, thumbnail_url, is_checked)
+        
+        self.update_pagination_controls()
+        self.update_check_all_state()
+        self.update_checked_posts()
+        self.append_log_to_console(translate("log_debug", translate("incremental_filtering_added_posts", len(filtered_batch))), "INFO")
+
+    def set_fetching_ui_state(self, is_fetching):
+        """Enable/disable UI elements during fetching"""
+        # Main action buttons
+        self.creator_download_btn.setEnabled(not is_fetching)
+        self.creator_cancel_btn.setEnabled(is_fetching)
+        
+        # Creator queue operations
+        self.creator_url_input.setEnabled(not is_fetching)
+        self.creator_add_to_queue_btn.setEnabled(not is_fetching)
+        self.creator_add_from_file_btn.setEnabled(not is_fetching)
+        self.creator_queue_list.setEnabled(not is_fetching)
+        
+        # Post operations
+        self.creator_search_input.setEnabled(not is_fetching)
+        self.creator_check_all.setEnabled(not is_fetching)
+        self.creator_check_all_all.setEnabled(not is_fetching)
+        self.creator_post_list.setEnabled(not is_fetching)
+        
+        # Pagination controls
+        self.prev_page_btn.setEnabled(not is_fetching and self.current_page > 1)
+        self.next_page_btn.setEnabled(not is_fetching and self.current_page < self.total_pages)
+        
+        # View button
+        self.creator_view_button.setEnabled(not is_fetching)
+        
+        # Tab switching (disable other tabs during fetching)
+        if hasattr(self.parent, 'tabs'):
+            for i in range(self.parent.tabs.count()):
+                if i != self.parent.tabs.currentIndex():  # Keep current tab enabled
+                    self.parent.tabs.setTabEnabled(i, not is_fetching)
+
+    def prev_page(self):
+        """Go to previous page"""
+        if self.current_page > 1:
+            self.current_page -= 1
+            self.display_current_page()
+
+    def next_page(self):
+        """Go to next page"""
+        if self.current_page < self.total_pages:
+            self.current_page += 1
+            self.display_current_page()
+
+    def display_current_page(self):
+        """Display the current page of posts"""
+        self.creator_post_list.clear()
+        self.post_widget_cache.clear()
+        self.previous_selected_widget = None
+
+        start_idx = (self.current_page - 1) * self.posts_per_page
+        end_idx = min(start_idx + self.posts_per_page, len(self.filtered_posts))
+
+        for i in range(start_idx, end_idx):
+            post_title, post_id, thumbnail_url, is_checked = self.filtered_posts[i]
+            unique_title = f"{post_title} (ID: {post_id})"
+            self.post_url_map[unique_title] = (post_id, thumbnail_url)
+            self.add_list_item(unique_title, thumbnail_url, is_checked)
+
+        self.update_pagination_controls()
+        self.update_check_all_state()
+        self.append_log_to_console(translate("log_debug", translate("displayed_page_posts", self.current_page, len(self.filtered_posts[start_idx:end_idx]))), "INFO")
+
+    def update_pagination_controls(self):
+        """Update pagination UI controls"""
+        if self.total_pages <= 1:
+            self.page_label.setText("")
+            self.prev_page_btn.setEnabled(False)
+            self.next_page_btn.setEnabled(False)
+        else:
+            self.page_label.setText(translate("page_info", self.current_page, self.total_pages))
+            self.prev_page_btn.setEnabled(self.current_page > 1)
+            self.next_page_btn.setEnabled(self.current_page < self.total_pages)
 
     def start_population_thread(self, detected_posts):
         self.background_task_label.setText(translate("populating_posts"))
@@ -1627,20 +1830,39 @@ class CreatorDownloaderTab(QWidget):
             self.checked_urls[post_id] = False
         for i, (queue_url, _) in enumerate(self.creator_queue):
             if queue_url == self.current_creator_url:
-                self.creator_queue[i] = (self.current_creator_url, True)
+                self.creator_queue[i] = (self.current_creator_url, True)  # Mark as processed
                 self.update_creator_queue_list()
                 break
         self.filter_items()
+        self.set_fetching_ui_state(False)  # Re-enable UI when fetching is complete
         self.append_log_to_console(translate("log_debug", translate("populated_posts_for_creator", len(self.all_detected_posts), self.current_creator_url)), "INFO")
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))
 
+    def on_post_detection_finished(self, detected_posts):
+        # Only update if we haven't been receiving incremental batches
+        if self.current_creator_url not in self.all_files_map:
+            self.all_files_map[self.current_creator_url] = detected_posts
+        # Ensure all_detected_posts is set (should already be set from batches)
+        if not self.all_detected_posts:
+            self.all_detected_posts = detected_posts
+        self.start_population_thread(self.all_detected_posts)
+
     def on_post_detection_error(self, error_message):
         self.append_log_to_console(translate("log_error", error_message), "ERROR")
-        self.background_task_progress.setRange(0, 100)
-        self.background_task_progress.setValue(0)
-        self.background_task_label.setText(translate("idle"))
+        
+        # If fetching failed, try to use cached posts as fallback
+        if self.current_creator_url in self.all_files_map:
+            self.append_log_to_console(translate("log_info", translate("using_cached_posts_fallback", self.current_creator_url)), "INFO")
+            self.all_detected_posts = self.all_files_map.get(self.current_creator_url, [])
+            self.start_population_thread(self.all_detected_posts)
+        else:
+            self.set_fetching_ui_state(False)  # Re-enable UI on error
+            self.background_task_progress.setRange(0, 100)
+            self.background_task_progress.setValue(0)
+            self.background_task_label.setText(translate("idle"))
+        
         if hasattr(self, 'post_detection_thread') and self.post_detection_thread is not None:
             self.cleanup_post_detection_thread()
 
@@ -1827,16 +2049,39 @@ class CreatorDownloaderTab(QWidget):
             self.append_log_to_console(translate("log_warning", translate("no_active_downloads_to_cancel")), "WARNING")
             return
 
-        self.append_log_to_console(translate("log_warning", translate("all_downloads_cancelled")), "WARNING")
-        self.background_task_label.setText(translate("cancelling_downloads"))
-        self.background_task_progress.setRange(0, 0)
+        # Check if we're cancelling fetching or downloading
+        is_fetching = hasattr(self, 'post_detection_thread') and self.post_detection_thread is not None and self.post_detection_thread.isRunning()
+        
+        if is_fetching:
+            # Cancelling fetching - stop the detection thread and keep selected posts
+            self.append_log_to_console(translate("log_warning", translate("cancelling_post_detection")), "WARNING")
+            self.post_detection_thread.stop()
+            self.cleanup_post_detection_thread()  # Clean up the thread
+            self.set_fetching_ui_state(False)  # Re-enable UI immediately
+            self.background_task_progress.setRange(0, 100)
+            self.background_task_progress.setValue(0)
+            self.background_task_label.setText(translate("idle"))
+            # Keep only posts that are already selected for download
+            selected_post_ids = set(self.posts_to_download)
+            self.all_detected_posts = [post for post in self.all_detected_posts if post[1][0] in selected_post_ids]
+            self.filtered_posts = [post for post in self.filtered_posts if post[1] in selected_post_ids]
+            self.all_files_map[self.current_creator_url] = self.all_detected_posts
+            # Refresh the display
+            self.display_current_page()
+            self.update_pagination_controls()
+            self.append_log_to_console(translate("log_info", f"Kept {len(self.all_detected_posts)} selected posts after cancelling detection"), "INFO")
+        else:
+            # Cancelling downloading
+            self.append_log_to_console(translate("log_warning", translate("all_downloads_cancelled")), "WARNING")
+            self.background_task_label.setText(translate("cancelling_downloads"))
+            self.background_task_progress.setRange(0, 0)
 
-        # Start cancellation thread to handle cleanup
-        cancellation_thread = CancellationThread(self.active_threads[:])
-        cancellation_thread.finished.connect(self.on_cancellation_finished)
-        cancellation_thread.log.connect(self.append_log_to_console)
-        self.active_threads.append(cancellation_thread)
-        cancellation_thread.start()
+            # Start cancellation thread to handle cleanup
+            cancellation_thread = CancellationThread(self.active_threads[:])
+            cancellation_thread.finished.connect(self.on_cancellation_finished)
+            cancellation_thread.log.connect(self.append_log_to_console)
+            self.active_threads.append(cancellation_thread)
+            cancellation_thread.start()
         
     def on_cancellation_finished(self):
         threads_to_delete = self.active_threads[:]
@@ -2012,6 +2257,25 @@ class CreatorDownloaderTab(QWidget):
         self.checkbox_toggle_thread.deleteLater()
         self.checkbox_toggle_thread = None
 
+    def toggle_check_all_all(self, state):
+        if hasattr(self, 'checkbox_toggle_thread') and self.checkbox_toggle_thread is not None and self.checkbox_toggle_thread.isRunning():
+            self.append_log_to_console(translate("log_warning", translate("checkbox_toggle_already_in_progress")), "WARNING")
+            return
+        
+        # Use all detected posts instead of just visible ones
+        if not self.all_detected_posts:
+            self.append_log_to_console(translate("log_warning", translate("no_posts_to_toggle")), "WARNING")
+            return
+
+        self.background_task_label.setText(translate("updating_checkboxes"))
+        self.background_task_progress.setRange(0, 0)
+        self.checkbox_toggle_thread = CheckboxToggleThread(self.all_detected_posts, self.checked_urls, state)
+        self.checkbox_toggle_thread.finished.connect(self.on_toggle_check_all_finished)
+        self.checkbox_toggle_thread.log.connect(self.append_log_to_console)
+        self.checkbox_toggle_thread.finished.connect(self.cleanup_checkbox_toggle_thread)
+        self.active_threads.append(self.checkbox_toggle_thread)
+        self.checkbox_toggle_thread.start()
+
     def on_toggle_check_all_finished(self, checked_urls, posts_to_download):
         self.checked_urls = checked_urls
         self.posts_to_download = posts_to_download
@@ -2052,21 +2316,23 @@ class CreatorDownloaderTab(QWidget):
         self.filter_thread.start()
 
     def on_filter_finished(self, filtered_items):
-        self.creator_post_list.clear()
-        self.post_widget_cache.clear()
-        self.previous_selected_widget = None
-        self.post_url_map = {}
-        for post_title, post_id, thumbnail_url, is_checked in filtered_items:
-            unique_title = f"{post_title} (ID: {post_id})"
-            self.post_url_map[unique_title] = (post_id, thumbnail_url)
-            self.add_list_item(unique_title, thumbnail_url, is_checked)
-
+        # Store filtered posts for pagination
+        self.filtered_posts = filtered_items
+        self.total_pages = max(1, (len(self.filtered_posts) + self.posts_per_page - 1) // self.posts_per_page)
+        
+        # Only reset to page 1 if we have more than one page, otherwise keep current page
+        if self.current_page > self.total_pages:
+            self.current_page = 1
+        
+        # Display current page
+        self.display_current_page()
+        
         self.update_check_all_state()
         self.update_checked_posts()
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))
-        self.append_log_to_console(translate("log_debug", translate("filtering_completed_displayed_posts", self.creator_post_list.count())), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("filtering_completed_displayed_posts", len(filtered_items))), "INFO")
 
     def cleanup_filter_thread(self):
         """Clean up the filter thread after it finishes."""
@@ -2157,7 +2423,7 @@ class CreatorDownloaderTab(QWidget):
         return None
 
     def update_check_all_state(self):
-        # Only iterate visible items from cache
+        # Update page checkbox - only iterate visible items from cache
         visible_checked = []
         for post_title, (item, widget) in self.post_widget_cache.items():
             if not item.isHidden():
@@ -2167,6 +2433,13 @@ class CreatorDownloaderTab(QWidget):
         self.creator_check_all.blockSignals(True)
         self.creator_check_all.setChecked(all_visible_checked)
         self.creator_check_all.blockSignals(False)
+        
+        # Update all checkbox - check all detected posts
+        all_posts_checked = all(self.checked_urls.get(post_id, False) for post_title, (post_id, thumbnail_url) in self.all_detected_posts) and len(self.all_detected_posts) > 0
+        self.creator_check_all_all.blockSignals(True)
+        self.creator_check_all_all.setChecked(all_posts_checked)
+        self.creator_check_all_all.blockSignals(False)
+        
         self.append_log_to_console(translate("log_debug", translate("check_all_state_updated", all_visible_checked)), "INFO")
 
     def update_current_preview_url(self, current, previous):

@@ -273,6 +273,12 @@ class KDLanguage:
                 "korean": "전환할 수 있는 표시된 게시물이 없습니다.",
                 "chinese-simplified": "没有可切换的可见帖子。"
             },
+            "no_posts_to_toggle": {
+                "english": "No posts to toggle.",
+                "japanese": "切り替える投稿がありません。",
+                "korean": "전환할 게시물이 없습니다.",
+                "chinese-simplified": "没有可切换的帖子。"
+            },
             
             "download_completed_with_failed_files": {
                 "english": "Download completed with {0} failed files:",
@@ -320,6 +326,12 @@ class KDLanguage:
                 "japanese": "フィルタリングが完了しました。表示された投稿数: {0}",
                 "korean": "필터링이 완료되었습니다. 표시된 게시물: {0}",
                 "chinese-simplified": "筛选完成，显示了 {0} 个帖子"
+            },
+            "displayed_page_posts": {
+                "english": "Displayed page {0} with {1} posts",
+                "japanese": "ページ {0} を表示（投稿数: {1}）",
+                "korean": "페이지 {0} 표시（게시물: {1}）",
+                "chinese-simplified": "显示第 {0} 页（{1} 个帖子）"
             },
             
             "no_post_id_found_for_title": {
@@ -387,6 +399,12 @@ class KDLanguage:
                 "japanese": "応答内容（最初の500文字）：{0}",
                 "korean": "응답 내용 (처음 500자): {0}",
                 "chinese-simplified": "响应内容（前500个字符）：{0}"
+            },
+            "using_cached_posts_fallback": {
+                "english": "Fetching failed, using cached posts for {0}",
+                "japanese": "取得に失敗しました、{0}のキャッシュされた投稿を使用します",
+                "korean": "가져오기에 실패하여 {0}의 캐시된 게시물을 사용합니다",
+                "chinese-simplified": "获取失败，使用 {0} 的缓存帖子"
             },
             
             "endpoint_successful": {
@@ -1125,10 +1143,16 @@ class KDLanguage:
                 "chinese-simplified": "搜索项目..."
             },
             "check_all": {
-                "english": "Check ALL",
-                "japanese": "すべてチェック",
-                "korean": "모두 선택",
-                "chinese-simplified": "全选"
+                "english": "Check ALL (Page)",
+                "japanese": "すべてチェック (ページ)",
+                "korean": "모두 선택 (페이지)",
+                "chinese-simplified": "全选 (页面)"
+            },
+            "check_all_all": {
+                "english": "Check ALL (All)",
+                "japanese": "すべてチェック (すべて)",
+                "korean": "모두 선택 (모두)",
+                "chinese-simplified": "全选 (全部)"
             },
             "download_all_links": {
                 "english": "Download All Links",
@@ -1215,6 +1239,12 @@ class KDLanguage:
                 "japanese": "投稿: {0}",
                 "korean": "게시물: {0}",
                 "chinese-simplified": "投稿: {0}"
+            },
+            "page_info": {
+                "english": "Page {0} of {1}",
+                "japanese": "ページ {0} / {1}",
+                "korean": "페이지 {0} / {1}",
+                "chinese-simplified": "第 {0} 页，共 {1} 页"
             },
             
             # Settings tab
@@ -1660,6 +1690,12 @@ class KDLanguage:
                 "korean": "크리에이터 보는 중: {0}",
                 "chinese-simplified": "查看创作者: {0}"
             },
+            "refetching_posts_for_creator": {
+                "english": "Refetching posts for creator: {0}",
+                "japanese": "クリエイターの投稿を再取得中: {0}",
+                "korean": "크리에이터의 게시물 다시 가져오는 중: {0}",
+                "chinese-simplified": "重新获取创作者的投稿: {0}"
+            },
             "link_removed": {
                 "english": "Link ({0}) is removed from the queue.",
                 "japanese": "リンク ({0}) がキューから削除されました。",
@@ -1755,6 +1791,12 @@ class KDLanguage:
                 "japanese": "すべてのダウンロードをキャンセル中...",
                 "korean": "모든 다운로드 취소 중...",
                 "chinese-simplified": "正在取消所有下载..."
+            },
+            "cancelling_post_detection": {
+                "english": "Cancelling post detection...",
+                "japanese": "投稿検出をキャンセル中...",
+                "korean": "게시물 감지 취소 중...",
+                "chinese-simplified": "正在取消投稿检测..."
             },
             "all_downloads_cancelled": {
                 "english": "All downloads cancelled by user",
