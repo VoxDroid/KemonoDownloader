@@ -1471,8 +1471,8 @@ class CreatorDownloaderTab(QWidget):
 
         self.creator_post_list = QListWidget()
         self.creator_post_list.setStyleSheet("background: #2A3B5A; border-radius: 5px;")
-        self.creator_post_list.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.creator_post_list.itemClicked.connect(self.handle_item_click)
+        self.creator_post_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.creator_post_list.itemSelectionChanged.connect(self.on_selection_changed)
         self.creator_post_list.currentItemChanged.connect(self.update_current_preview_url)
         post_list_layout.addWidget(self.creator_post_list)
 
@@ -2459,24 +2459,51 @@ class CreatorDownloaderTab(QWidget):
     def toggle_checkbox_state(self, post_title):
         self.background_task_label.setText(translate("toggling_checkbox"))
         self.background_task_progress.setRange(0, 0)
-        post_id, thumbnail_url = self.post_url_map.get(post_title, (None, None))
-        if not post_id:
+        
+        base_post_id, _ = self.post_url_map.get(post_title, (None, None))
+        if not base_post_id:
             self.append_log_to_console(translate("log_error", translate("no_post_id_found_for_title", post_title)), "ERROR")
             self.background_task_progress.setRange(0, 100)
             self.background_task_progress.setValue(0)
             self.background_task_label.setText(translate("idle"))
             return
-        current_state = self.checked_urls.get(post_id, False)
+
+        # Determine new state based on the clicked item
+        current_state = self.checked_urls.get(base_post_id, False)
         new_state = not current_state
-        self.checked_urls[post_id] = new_state
-        widget = self.get_widget_for_post_title(post_title)
-        if widget:
-            widget.check_box.blockSignals(True)
-            widget.check_box.setChecked(new_state)
-            widget.check_box.blockSignals(False)
+        
+        # Check if the clicked item is part of the selection
+        base_item, _ = self.post_widget_cache.get(post_title, (None, None))
+        selected_items = self.creator_post_list.selectedItems()
+        
+        widgets_to_update = []
+        if base_item and base_item in selected_items:
+            # Apply to all selected items
+            for item in selected_items:
+                w = self.creator_post_list.itemWidget(item)
+                if w:
+                    widgets_to_update.append(w)
+        else:
+            # Apply only to single item
+            w = self.get_widget_for_post_title(post_title)
+            if w:
+                widgets_to_update.append(w)
+        
+        count = 0
+        for widget in widgets_to_update:
+            if hasattr(widget, 'label'):
+                title = widget.label.text()
+                post_id, _ = self.post_url_map.get(title, (None, None))
+                if post_id:
+                    self.checked_urls[post_id] = new_state
+                    widget.check_box.blockSignals(True)
+                    widget.check_box.setChecked(new_state)
+                    widget.check_box.blockSignals(False)
+                    count += 1
+
         self.update_checked_posts()
         self.update_check_all_state()
-        self.append_log_to_console(translate("log_debug", translate("checkbox_toggled_for_post", post_title, post_id, new_state)), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("checkbox_toggled_for_post", post_title, base_post_id, new_state) + f" (Applied to {count} items)"), "INFO")
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))
@@ -2529,25 +2556,22 @@ class CreatorDownloaderTab(QWidget):
             else:
                 self.append_log_to_console(translate("log_warning", translate("viewing_not_supported_for_url", self.current_preview_url)), "WARNING")
 
-    def handle_item_click(self, item):
-        if item:
-            if self.previous_selected_widget:
-                self.previous_selected_widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+    def on_selection_changed(self):
+        # Reset previous styles
+        if hasattr(self, 'previous_selected_widgets'):
+            for w in self.previous_selected_widgets:
+                try:
+                    w.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+                except RuntimeError:
+                    pass
+        
+        self.previous_selected_widgets = []
+        selected_items = self.creator_post_list.selectedItems()
+        for item in selected_items:
             widget = self.creator_post_list.itemWidget(item)
             if widget:
                 widget.setStyleSheet("background-color: #4A5B7A; border-radius: 5px;")
-                self.previous_selected_widget = widget
-                self.current_preview_url = item.data(Qt.UserRole)
-                self.creator_view_button.setEnabled(True)
-            else:
-                self.current_preview_url = None
-                self.creator_view_button.setEnabled(False)
-        else:
-            if self.previous_selected_widget:
-                self.previous_selected_widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
-                self.previous_selected_widget = None
-            self.current_preview_url = None
-            self.creator_view_button.setEnabled(False)
+                self.previous_selected_widgets.append(widget)
 
     def append_log_to_console(self, message, level="INFO"):
         color = {"INFO": "green", "WARNING": "yellow", "ERROR": "red"}.get(level, "white")

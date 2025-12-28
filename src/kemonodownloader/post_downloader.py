@@ -1422,8 +1422,8 @@ class PostDownloaderTab(QWidget):
         # File list
         self.post_file_list = QListWidget()
         self.post_file_list.setStyleSheet("background: #2A3B5A; border-radius: 5px;")
-        self.post_file_list.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
-        self.post_file_list.itemClicked.connect(self.handle_item_click)
+        self.post_file_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.post_file_list.itemSelectionChanged.connect(self.on_selection_changed)
         self.post_file_list.currentItemChanged.connect(self.update_current_preview_url)
         file_list_layout.addWidget(self.post_file_list)
 
@@ -2242,15 +2242,41 @@ class PostDownloaderTab(QWidget):
         widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
 
     def toggle_checkbox_state(self, url):
+        # Determine new state based on the clicked item
         current_state = self.checked_urls.get(url, True)
         new_state = not current_state
-        self.checked_urls[url] = new_state
-        widget = self.get_widget_for_url(url)
-        if widget:
-            widget.check_box.blockSignals(True)
-            widget.check_box.setChecked(new_state)
-            widget.check_box.blockSignals(False)
-        self.append_log_to_console(translate("log_debug", translate("checkbox_toggled", url, new_state, len(self.checked_urls))), "INFO")
+        
+        # Check if the clicked item is part of the selection
+        selected_items = self.post_file_list.selectedItems()
+        is_part_of_selection = False
+        for item in selected_items:
+            if item.data(Qt.UserRole) == url:
+                is_part_of_selection = True
+                break
+        
+        count = 0
+        if is_part_of_selection:
+            # Apply to all selected items
+            for item in selected_items:
+                item_url = item.data(Qt.UserRole)
+                self.checked_urls[item_url] = new_state
+                widget = self.post_file_list.itemWidget(item)
+                if widget:
+                    widget.check_box.blockSignals(True)
+                    widget.check_box.setChecked(new_state)
+                    widget.check_box.blockSignals(False)
+                count += 1
+        else:
+            # Apply only to single item
+            self.checked_urls[url] = new_state
+            widget = self.get_widget_for_url(url)
+            if widget:
+                widget.check_box.blockSignals(True)
+                widget.check_box.setChecked(new_state)
+                widget.check_box.blockSignals(False)
+            count = 1
+
+        self.append_log_to_console(translate("log_debug", translate("checkbox_toggled", url, new_state, len(self.checked_urls)) + f" (Applied to {count} items)"), "INFO")
         self.update_checked_files()
         self.update_check_all_state()
 
@@ -2302,25 +2328,22 @@ class PostDownloaderTab(QWidget):
         else:
             self.append_log_to_console(translate("log_warning", translate("no_item_selected")), "WARNING")
 
-    def handle_item_click(self, item):
-        if item:
-            if self.previous_selected_widget:
-                self.previous_selected_widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+    def on_selection_changed(self):
+        # Reset previous styles
+        if hasattr(self, 'previous_selected_widgets'):
+            for w in self.previous_selected_widgets:
+                try:
+                    w.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+                except RuntimeError:
+                    pass
+        
+        self.previous_selected_widgets = []
+        selected_items = self.post_file_list.selectedItems()
+        for item in selected_items:
             widget = self.post_file_list.itemWidget(item)
             if widget:
                 widget.setStyleSheet("background-color: #4A5B7A; border-radius: 5px;")
-                self.previous_selected_widget = widget
-                self.current_preview_url = item.data(Qt.UserRole)
-                self.post_view_button.setEnabled(True)
-            else:
-                self.current_preview_url = None
-                self.post_view_button.setEnabled(False)
-        else:
-            if self.previous_selected_widget:
-                self.previous_selected_widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
-                self.previous_selected_widget = None
-            self.current_preview_url = None
-            self.post_view_button.setEnabled(False)
+                self.previous_selected_widgets.append(widget)
 
     def expand_logs(self):
         """Open logs window with full logs display"""
