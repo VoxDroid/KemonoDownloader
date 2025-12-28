@@ -258,14 +258,14 @@ class MediaPreviewModal(QDialog):
         ext = os.path.splitext(self.media_url.lower())[1]
 
         if ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
-            self.preview_thread = PreviewThread(self.media_url, self.cache_dir, self.parent.settings_tab)
+            self.preview_thread = PreviewThread(self.media_url, self.cache_dir, self.tab_parent.parent.settings_tab)
             self.preview_thread.preview_ready.connect(self.display_image)
             self.preview_thread.progress.connect(self.update_progress)
             self.preview_thread.error.connect(self.display_error)
             self.preview_thread.start()
         elif ext in ['.mp4', '.mov', '.mp3', '.wav']:
             self.setup_media_player()
-            self.preview_thread = PreviewThread(self.media_url, self.cache_dir, self.parent.settings_tab)
+            self.preview_thread = PreviewThread(self.media_url, self.cache_dir, self.tab_parent.parent.settings_tab)
             self.preview_thread.preview_ready.connect(self.play_media)
             self.preview_thread.progress.connect(self.update_progress)
             self.preview_thread.error.connect(self.display_error)
@@ -537,7 +537,7 @@ class PostDetectionThread(QThread):
 
     def stop(self):
         self.is_running = False
-        self.log.emit(translate("log_info", "PostDetectionThread cancellation initiated"), "INFO")
+        self.log.emit(translate("log_info", translate("post_detection_cancellation")), "INFO")
 
     def run(self):
         self.url = self.url.rstrip('/')
@@ -551,7 +551,7 @@ class PostDetectionThread(QThread):
                 self.log.emit(translate("log_info", "PostDetectionThread stopped during request"), "INFO")
                 return
             if response is None:
-                self.log.emit(translate("log_error", "Failed to fetch post - No valid response"), "ERROR")
+                self.log.emit(translate("log_error", translate("failed_fetch_post_no_response")), "ERROR")
                 self.error.emit(translate("failed_to_fetch_post", "No response"))
                 return
 
@@ -573,7 +573,7 @@ class PostDetectionThread(QThread):
                 self.log.emit(translate("log_info", "PostDetectionThread stopped before emitting results"), "INFO")
 
         except Exception as e:
-            self.log.emit(translate("log_error", f"Failed to fetch post: {str(e)}"), "ERROR")
+            self.log.emit(translate("log_error", translate("failed_fetch_post", str(e))), "ERROR")
             self.error.emit(translate("failed_to_fetch_post_error", str(e)))
             return
 
@@ -756,12 +756,12 @@ class FilePreparationThread(QThread):
                     return None
                 if response is None:
                     if attempt < max_retries:
-                        self.log.emit(translate("log_warning", f"Failed to fetch {api_url} (attempt {attempt}/{max_retries}). Retrying..."), "WARNING")
+                        self.log.emit(translate("log_warning", translate("failed_fetch_api_url_retry", api_url, attempt, max_retries)), "WARNING")
                         for i in range(retry_delay_seconds, 0, -1):
                             self.log.emit(translate("log_info", f"Trying again in {i}"), "INFO")
                             time.sleep(1)
                         continue
-                    self.log.emit(translate("log_error", f"Failed to fetch {api_url} after {max_retries} attempts"), "ERROR")
+                    self.log.emit(translate("log_error", translate("failed_fetch_api_url_final", api_url, max_retries)), "ERROR")
                     return None
                 
                 post_data = self.parse_response_content(response)
@@ -773,9 +773,9 @@ class FilePreparationThread(QThread):
                 return (post_id, files_to_download)
             except Exception as e:
                 if attempt == max_retries:
-                    self.log.emit(translate("log_error", f"Error fetching post {post_id} after {max_retries} attempts: {str(e)}"), "ERROR")
+                    self.log.emit(translate("log_error", translate("error_fetching_post_final", post_id, max_retries, str(e))), "ERROR")
                     return None
-                self.log.emit(translate("log_warning", f"Error fetching post {post_id} (attempt {attempt}/{max_retries}): {str(e)}. Retrying..."), "WARNING")
+                self.log.emit(translate("log_warning", translate("error_fetching_post_retry", post_id, attempt, max_retries, str(e))), "WARNING")
                 for i in range(retry_delay_seconds, 0, -1):
                     self.log.emit(translate("log_info", f"Trying again in {i}"), "INFO")
                     time.sleep(1)
@@ -918,10 +918,10 @@ class DownloadThread(QThread):
                 post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
                 self.post_title = sanitize_filename(post.get('title', f"Post_{post_id}"))
             else:
-                self.log.emit(translate("log_error", f"Failed to fetch post title - No valid response"), "ERROR")
+                self.log.emit(translate("log_error", translate("failed_fetch_post_title")), "ERROR")
                 self.post_title = f"Post_{post_id}"
         except Exception as e:
-            self.log.emit(translate("log_error", f"Error fetching post info: {str(e)}"), "ERROR")
+            self.log.emit(translate("log_error", translate("error_fetching_post_info", str(e))), "ERROR")
             self.post_title = f"Post_{post_id}"
 
     def make_robust_request(self, url, max_retries=None):
@@ -1340,7 +1340,7 @@ class PostDownloaderTab(QWidget):
         self.post_expand_logs_btn = QPushButton(qta.icon('fa5s.expand', color='white'), "")
         self.post_expand_logs_btn.clicked.connect(self.expand_logs)
         self.post_expand_logs_btn.setStyleSheet("background: #4A5B7A; padding: 8px; border-radius: 5px;")
-        self.post_expand_logs_btn.setToolTip("Expand Logs")
+        self.post_expand_logs_btn.setToolTip(translate("expand_logs"))
         post_btn_layout.addWidget(self.post_expand_logs_btn)
         
         left_layout.addLayout(post_btn_layout)
@@ -1610,7 +1610,7 @@ class PostDownloaderTab(QWidget):
 
     def check_post_from_queue(self, url):
         if not isinstance(url, str):
-            self.append_log_to_console(translate("log_error", f"Invalid URL type: {type(url)}. Expected string."), "ERROR")
+            self.append_log_to_console(translate("log_error", translate("invalid_url_type", type(url))), "ERROR")
             return
         self.append_log_to_console(translate("log_info", translate("viewing_post", url)), "INFO")
         
@@ -1624,7 +1624,7 @@ class PostDownloaderTab(QWidget):
         if url in self.all_files_map:
             self.all_detected_posts = [(title, post_id) for title, post_id in self.all_files_map.get(url, [])]
             self.post_url_map = {title: post_id for title, post_id in self.all_detected_posts}
-            self.append_log_to_console(translate("log_debug", f"Total detected posts: {len(self.all_detected_posts)}"), "INFO")
+            self.append_log_to_console(translate("log_debug", translate("total_detected_posts", len(self.all_detected_posts))), "INFO")
             self.display_files_for_post(url)
             for i, (queue_url, _) in enumerate(self.post_queue):
                 if queue_url == url:
@@ -1633,7 +1633,7 @@ class PostDownloaderTab(QWidget):
                     break
             self.update_checked_files()
             self.filter_items()
-            self.append_log_to_console(translate("log_debug", f"Displayed files for post {url}"), "INFO")
+            self.append_log_to_console(translate("log_debug", translate("displayed_files_for_post", url)), "INFO")
             self.background_task_progress.setRange(0, 100)
             self.background_task_progress.setValue(0)
             self.background_task_label.setText(translate("idle"))
@@ -1653,7 +1653,7 @@ class PostDownloaderTab(QWidget):
         self.all_files_map[self.current_post_url] = detected_posts
         self.all_detected_posts = detected_posts
         self.post_url_map = {title: post_id for title, post_id in self.all_detected_posts}
-        self.append_log_to_console(translate("log_debug", f"Total detected posts: {len(self.all_detected_posts)}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("total_detected_posts", len(self.all_detected_posts))), "INFO")
         self.display_files_for_post(self.current_post_url)
         for i, (queue_url, _) in enumerate(self.post_queue):
             if queue_url == self.current_post_url:
@@ -1662,7 +1662,7 @@ class PostDownloaderTab(QWidget):
                 break
         self.update_checked_files()
         self.filter_items()
-        self.append_log_to_console(translate("log_debug", f"Displayed files for post {self.current_post_url}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("displayed_files_for_post", self.current_post_url)), "INFO")
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))
@@ -1681,7 +1681,7 @@ class PostDownloaderTab(QWidget):
         try:
             response = self.make_robust_request(api_url)
             if not response or response.status_code != 200:
-                self.append_log_to_console(translate("log_error", f"Failed to fetch {api_url} - No valid response"), "ERROR")
+                self.append_log_to_console(translate("log_error", translate("failed_fetch_api_url_final", api_url, "No valid response")), "ERROR")
                 return
             post_data = self.parse_response_content(response)
             post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
@@ -1695,7 +1695,7 @@ class PostDownloaderTab(QWidget):
                 self.add_list_item(file_name, file_url)
             self.update_checked_files()
         except Exception as e:
-            self.append_log_to_console(translate("log_error", f"Error fetching files for post {url}: {str(e)}"), "ERROR")
+            self.append_log_to_console(translate("log_error", translate("error_fetching_post_info", f"Error fetching files for post {url}: {str(e)}")), "ERROR")
 
     def make_robust_request(self, url, max_retries=None):
         if max_retries is None:
@@ -1787,7 +1787,7 @@ class PostDownloaderTab(QWidget):
         self.files_to_download = []
         self.file_url_map.clear()
         self.post_file_count_label.setText(translate("files_count", "0 (Detecting...)"))
-        self.append_log_to_console(translate("log_info", "Starting detection of all posts in queue"), "INFO")
+        self.append_log_to_console(translate("log_info", translate("starting_detection_all_posts")), "INFO")
 
         for url, _ in self.post_queue:
             if url not in self.all_files_map:
@@ -1810,7 +1810,7 @@ class PostDownloaderTab(QWidget):
             self.file_url_map[file_name] = file_url
         self.files_to_download = list(dict.fromkeys(self.detected_files_during_check_all))
         self.post_file_count_label.setText(translate("files_count", f"{len(self.files_to_download)} (Detecting...)"))
-        self.append_log_to_console(translate("log_debug", f"Files detected so far: {len(self.files_to_download)}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("files_detected_so_far", len(self.files_to_download))), "INFO")
 
     def on_check_all_posts_detected(self, url, posts):
         self.all_files_map[url] = posts
@@ -1821,7 +1821,7 @@ class PostDownloaderTab(QWidget):
         if not any(thread.isRunning() for thread in self.active_threads if isinstance(thread, PostDetectionThread)):
             self.files_to_download = list(dict.fromkeys(self.detected_files_during_check_all))
             self.post_file_count_label.setText(translate("files_count", len(self.files_to_download)))
-            self.append_log_to_console(translate("log_info", f"Finished checking all posts. Total posts: {total_posts}, Total files: {len(self.files_to_download)}"), "INFO")
+            self.append_log_to_console(translate("log_info", translate("finished_checking_all_posts", total_posts, len(self.files_to_download))), "INFO")
             self.detected_files_during_check_all = []
             self.update_checked_files()
 
@@ -1832,7 +1832,7 @@ class PostDownloaderTab(QWidget):
 
         self.update_checked_files()
         checked_files = [file_url for file_url, is_checked in self.checked_urls.items() if is_checked]
-        self.append_log_to_console(translate("log_debug", f"Checked files for download: {checked_files}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("checked_files_for_download", checked_files)), "INFO")
         if not checked_files:
             self.append_log_to_console(translate("log_warning", translate("no_files_selected")), "WARNING")
             return
@@ -1864,7 +1864,7 @@ class PostDownloaderTab(QWidget):
             self.append_log_to_console(translate("log_info", translate("preparing_files_all_posts")), "INFO")
         else:
             if not self.current_post_url:
-                self.append_log_to_console(translate("log_warning", "No post currently viewed to download."), "WARNING")
+                self.append_log_to_console(translate("log_warning", translate("no_post_currently_viewed")), "WARNING")
                 self.post_download_finished()
                 return
             urls = [self.current_post_url]
@@ -1876,9 +1876,9 @@ class PostDownloaderTab(QWidget):
         self.prepare_files_for_download(urls)
 
     def prepare_files_for_download(self, urls):
-        self.append_log_to_console(translate("log_debug", f"Preparing files for URLs: {urls}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("preparing_files_for_urls", urls)), "INFO")
         if not urls:
-            self.append_log_to_console(translate("log_info", "No more URLs to process. Finishing download."), "INFO")
+            self.append_log_to_console(translate("log_info", translate("no_more_urls_process")), "INFO")
             self.post_download_finished()
             return
 
@@ -1890,7 +1890,7 @@ class PostDownloaderTab(QWidget):
             post_ids = [post_id for _, post_id in self.all_files_map.get(urls[0], [])]
 
         if not post_ids:
-            self.append_log_to_console(translate("log_warning", f"No posts available for download in URLs: {urls}. Skipping to next."), "WARNING")
+            self.append_log_to_console(translate("log_warning", translate("no_posts_available_download", urls)), "WARNING")
             self.process_next_post(urls[1:] if len(urls) > 1 else [])
             return
 
@@ -1917,11 +1917,11 @@ class PostDownloaderTab(QWidget):
         self.background_task_progress.setValue(value)
 
     def on_file_preparation_finished(self, urls, files_to_download, files_to_posts_map):
-        self.append_log_to_console(translate("log_debug", f"Files prepared for URLs: {urls}, Total files: {len(files_to_download)}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("files_prepared_for_urls", urls, len(files_to_download))), "INFO")
         for file_url in files_to_download:
             if file_url not in self.checked_urls:
                 self.checked_urls[file_url] = True
-        self.append_log_to_console(translate("log_debug", f"Updated checked_urls after preparation: {self.checked_urls}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("updated_checked_urls", self.checked_urls)), "INFO")
 
         active_filters = [ext.lower() for ext, check in self.post_filter_checks.items() if check.isChecked()]
         checked_files = []
@@ -1933,18 +1933,18 @@ class PostDownloaderTab(QWidget):
             if not active_filters or file_ext in active_filters or (file_ext == '.jpeg' and '.jpg' in active_filters):
                 checked_files.append(file_url)
 
-        self.append_log_to_console(translate("log_debug", f"Checked files after filtering: {len(checked_files)}"), "INFO")
-        self.append_log_to_console(translate("log_debug", f"Checked files list: {checked_files}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("checked_files_after_filtering", len(checked_files))), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("checked_files_list", checked_files)), "INFO")
 
         if not checked_files:
-            self.append_log_to_console(translate("log_warning", f"No files to download for URLs: {urls}. Proceeding to next post."), "WARNING")
+            self.append_log_to_console(translate("log_warning", translate("no_files_download_urls", urls)), "WARNING")
             self.process_next_post(urls[1:] if len(urls) > 1 else [])
             return
 
         url = urls[0]
         url = url.rstrip('/')
         remaining_urls = urls[1:] if len(urls) > 1 else []
-        self.append_log_to_console(translate("log_info", f"Processing post: {url}, Remaining URLs: {remaining_urls}"), "INFO")
+        self.append_log_to_console(translate("log_info", translate("processing_post", url, remaining_urls)), "INFO")
         parts = url.split('/')
         post_id = parts[-1]
 
@@ -1969,29 +1969,29 @@ class PostDownloaderTab(QWidget):
         self.post_download_finished()
 
     def process_next_post(self, remaining_urls):
-        self.append_log_to_console(translate("log_info", f"Processing next post. Remaining URLs: {remaining_urls}"), "INFO")
+        self.append_log_to_console(translate("log_info", translate("processing_next_post", remaining_urls)), "INFO")
         if not remaining_urls:
-            self.append_log_to_console(translate("log_info", "No more posts to download. Finishing."), "INFO")
+            self.append_log_to_console(translate("log_info", translate("no_more_posts_download")), "INFO")
             self.post_download_finished()
             return
         self.prepare_files_for_download(remaining_urls)
 
     def cleanup_thread(self, thread, remaining_urls):
-        self.append_log_to_console(translate("log_info", f"Cleaning up thread for post. Remaining URLs: {remaining_urls}"), "INFO")
+        self.append_log_to_console(translate("log_info", translate("cleaning_up_thread", remaining_urls)), "INFO")
         if thread in self.active_threads:
             self.active_threads.remove(thread)
-            self.append_log_to_console(translate("log_debug", f"Removed thread from active_threads. Active threads remaining: {len(self.active_threads)}"), "INFO")
+            self.append_log_to_console(translate("log_debug", translate("removed_thread_active", len(self.active_threads))), "INFO")
         else:
-            self.append_log_to_console(translate("log_warning", "Thread not found in active_threads."), "WARNING")
+            self.append_log_to_console(translate("log_warning", translate("thread_not_found_active")), "WARNING")
 
         active_download_threads = [t for t in self.active_threads if isinstance(t, DownloadThread)]
-        self.append_log_to_console(translate("log_debug", f"Active DownloadThreads remaining: {len(active_download_threads)}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("active_download_threads_remaining", len(active_download_threads))), "INFO")
 
         if not active_download_threads:
-            self.append_log_to_console(translate("log_info", "No active DownloadThreads remaining. Proceeding to next post."), "INFO")
+            self.append_log_to_console(translate("log_info", translate("no_active_download_threads")), "INFO")
             self.process_next_post(remaining_urls)
         else:
-            self.append_log_to_console(translate("log_debug", f"Active DownloadThreads still running: {len(active_download_threads)}. Waiting before proceeding."), "INFO")
+            self.append_log_to_console(translate("log_debug", translate("active_download_threads_running", len(active_download_threads))), "INFO")
 
     def cancel_post_download(self):
         if self.active_threads:
@@ -2005,7 +2005,7 @@ class PostDownloaderTab(QWidget):
                     thread.terminate()
                     thread.wait()  
                     self.active_threads.remove(thread)
-                    self.append_log_to_console(translate("log_info", f"Terminated thread: {thread.__class__.__name__}"), "INFO")
+                    self.append_log_to_console(translate("log_info", translate("terminated_thread", thread.__class__.__name__)), "INFO")
             self.post_file_progress.setStyleSheet("QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }")
             self.post_overall_progress.setStyleSheet("QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }")
             self.post_file_progress_label.setText(translate("downloads_terminated"))
@@ -2031,7 +2031,7 @@ class PostDownloaderTab(QWidget):
     def update_file_completion(self, file_index, file_url):
         if file_url not in self.completed_files:
             self.completed_files.add(file_url)
-            self.append_log_to_console(translate("log_debug", f"File completed: {file_url}, Total completed: {len(self.completed_files)}/{self.total_files_to_download}"), "INFO")
+            self.append_log_to_console(translate("log_debug", translate("file_completed", file_url, len(self.completed_files), self.total_files_to_download)), "INFO")
             self.update_overall_progress()
         if self.current_file_index == file_index:
             self.current_file_index = -1
@@ -2112,7 +2112,7 @@ class PostDownloaderTab(QWidget):
                     widget.check_box.blockSignals(False)
         
         self.update_checked_files()
-        self.append_log_to_console(translate("log_debug", f"Check ALL toggled to {is_checked} for {len(visible_urls)} visible files"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("check_all_toggled", is_checked, len(visible_urls))), "INFO")
 
     def toggle_download_all_links(self, state):
         is_checked = state == 2
@@ -2224,7 +2224,7 @@ class PostDownloaderTab(QWidget):
             widget.check_box.blockSignals(True)
             widget.check_box.setChecked(new_state)
             widget.check_box.blockSignals(False)
-        self.append_log_to_console(translate("log_debug", f"Checkbox toggled for {url} to {new_state}, checked_urls count: {len(self.checked_urls)}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("checkbox_toggled", url, new_state, len(self.checked_urls))), "INFO")
         self.update_checked_files()
         self.update_check_all_state()
 
@@ -2243,7 +2243,7 @@ class PostDownloaderTab(QWidget):
         self.post_check_all.blockSignals(True)
         self.post_check_all.setChecked(all_visible_checked)
         self.post_check_all.blockSignals(False)
-        self.append_log_to_console(translate("log_debug", f"Check ALL state updated to {all_visible_checked}"), "INFO")
+        self.append_log_to_console(translate("log_debug", translate("check_all_state_updated", all_visible_checked)), "INFO")
 
     def update_current_preview_url(self, current, previous):
         if current:

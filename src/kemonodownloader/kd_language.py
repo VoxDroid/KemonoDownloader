@@ -3134,6 +3134,246 @@ class KDLanguage:
                 "japanese": "Torステータス: 実行中",
                 "korean": "Tor 상태: 실행 중",
                 "chinese-simplified": "Tor状态: 运行中"
+            },
+            "invalid_url_type": {
+                "english": "Invalid URL type: {0}. Expected string.",
+                "japanese": "無効なURLタイプ: {0}。文字列を期待します。",
+                "korean": "잘못된 URL 유형: {0}. 문자열이 필요합니다.",
+                "chinese-simplified": "无效的URL类型: {0}。应为字符串。"
+            },
+            "starting_detection_all_posts": {
+                "english": "Starting detection of all posts in queue",
+                "japanese": "キュー内のすべての投稿の検出を開始",
+                "korean": "대기열의 모든 게시물 감지 시작",
+                "chinese-simplified": "开始检测队列中的所有投稿"
+            },
+            "failed_fetch_post_no_response": {
+                "english": "Failed to fetch post - No valid response",
+                "japanese": "投稿の取得に失敗しました - 有効な応答がありません",
+                "korean": "게시물 가져오기 실패 - 유효한 응답 없음",
+                "chinese-simplified": "获取投稿失败 - 无有效响应"
+            },
+            "failed_fetch_post": {
+                "english": "Failed to fetch post: {0}",
+                "japanese": "投稿の取得に失敗しました: {0}",
+                "korean": "게시물 가져오기 실패: {0}",
+                "chinese-simplified": "获取投稿失败: {0}"
+            },
+            "failed_fetch_api_url_retry": {
+                "english": "Failed to fetch {0} (attempt {1}/{2}). Retrying...",
+                "japanese": "{0} の取得に失敗しました (試行 {1}/{2})。再試行中...",
+                "korean": "{0} 가져오기 실패 (시도 {1}/{2}). 재시도 중...",
+                "chinese-simplified": "获取 {0} 失败 (尝试 {1}/{2})。正在重试..."
+            },
+            "failed_fetch_api_url_final": {
+                "english": "Failed to fetch {0} after {1} attempts",
+                "japanese": "{1} 回の試行後に {0} の取得に失敗しました",
+                "korean": "{1}번 시도 후 {0} 가져오기 실패",
+                "chinese-simplified": "{1} 次尝试后获取 {0} 失败"
+            },
+            "failed_fetch_post_title": {
+                "english": "Failed to fetch post title - No valid response",
+                "japanese": "投稿タイトルの取得に失敗しました - 有効な応答がありません",
+                "korean": "게시물 제목 가져오기 실패 - 유효한 응답 없음",
+                "chinese-simplified": "获取投稿标题失败 - 无有效响应"
+            },
+            "error_fetching_post_info": {
+                "english": "Error fetching post info: {0}",
+                "japanese": "投稿情報の取得エラー: {0}",
+                "korean": "게시물 정보 가져오기 오류: {0}",
+                "chinese-simplified": "获取投稿信息时出错: {0}"
+            },
+            "error_fetching_post_retry": {
+                "english": "Error fetching post {0} (attempt {1}/{2}): {3}. Retrying...",
+                "japanese": "投稿 {0} の取得エラー (試行 {1}/{2}): {3}。再試行中...",
+                "korean": "게시물 {0} 가져오기 오류 (시도 {1}/{2}): {3}. 재시도 중...",
+                "chinese-simplified": "获取投稿 {0} 时出错 (尝试 {1}/{2}): {3}。正在重试..."
+            },
+            "error_fetching_post_final": {
+                "english": "Error fetching post {0} after {1} attempts: {2}",
+                "japanese": "{1} 回の試行後に投稿 {0} の取得エラーが発生しました: {2}",
+                "korean": "{1}번 시도 후 게시물 {0} 가져오기 오류: {2}",
+                "chinese-simplified": "{1} 次尝试后获取投稿 {0} 时出错: {2}"
+            },
+            "no_post_currently_viewed": {
+                "english": "No post currently viewed to download.",
+                "japanese": "現在表示中の投稿がダウンロード用にありません。",
+                "korean": "현재 보고 있는 게시물이 다운로드할 수 없습니다.",
+                "chinese-simplified": "当前没有查看的投稿可供下载。"
+            },
+            "no_more_urls_process": {
+                "english": "No more URLs to process. Finishing download.",
+                "japanese": "処理するURLがありません。ダウンロードを終了します。",
+                "korean": "처리할 URL이 더 이상 없습니다. 다운로드를 완료합니다.",
+                "chinese-simplified": "没有更多URL需要处理。完成下载。"
+            },
+            "no_more_posts_download": {
+                "english": "No more posts to download. Finishing.",
+                "japanese": "ダウンロードする投稿がありません。終了します。",
+                "korean": "다운로드할 게시물이 더 이상 없습니다. 완료합니다.",
+                "chinese-simplified": "没有更多投稿需要下载。完成。"
+            },
+            "thread_not_found_active": {
+                "english": "Thread not found in active_threads.",
+                "japanese": "active_threadsにスレッドが見つかりません。",
+                "korean": "active_threads에서 스레드를 찾을 수 없습니다.",
+                "chinese-simplified": "在active_threads中找不到线程。"
+            },
+            "no_active_download_threads": {
+                "english": "No active DownloadThreads remaining. Proceeding to next post.",
+                "japanese": "アクティブなDownloadThreadsが残っていません。次の投稿に進みます。",
+                "korean": "활성 DownloadThreads가 남아 있지 않습니다. 다음 게시물로 진행합니다.",
+                "chinese-simplified": "没有剩余的活跃DownloadThreads。继续下一个投稿。"
+            },
+            "processing_next_post": {
+                "english": "Processing next post. Remaining URLs: {0}",
+                "japanese": "次の投稿を処理中。残りのURL: {0}",
+                "korean": "다음 게시물 처리 중. 남은 URL: {0}",
+                "chinese-simplified": "正在处理下一个投稿。剩余URL: {0}"
+            },
+            "cleaning_up_thread": {
+                "english": "Cleaning up thread for post. Remaining URLs: {0}",
+                "japanese": "投稿のスレッドをクリーンアップ中。残りのURL: {0}",
+                "korean": "게시물의 스레드 정리 중. 남은 URL: {0}",
+                "chinese-simplified": "正在清理投稿线程。剩余URL: {0}"
+            },
+            "removed_thread_active": {
+                "english": "Removed thread from active_threads. Active threads remaining: {0}",
+                "japanese": "active_threadsからスレッドを削除しました。残りのアクティブスレッド: {0}",
+                "korean": "active_threads에서 스레드를 제거했습니다. 남은 활성 스레드: {0}",
+                "chinese-simplified": "从active_threads中移除线程。剩余活跃线程: {0}"
+            },
+            "active_download_threads_remaining": {
+                "english": "Active DownloadThreads remaining: {0}",
+                "japanese": "残りのアクティブDownloadThreads: {0}",
+                "korean": "남은 활성 DownloadThreads: {0}",
+                "chinese-simplified": "剩余活跃DownloadThreads: {0}"
+            },
+            "active_download_threads_running": {
+                "english": "Active DownloadThreads still running: {0}. Waiting before proceeding.",
+                "japanese": "アクティブDownloadThreadsがまだ実行中: {0}。続行前に待機します。",
+                "korean": "활성 DownloadThreads가 아직 실행 중: {0}. 진행하기 전에 대기합니다.",
+                "chinese-simplified": "活跃DownloadThreads仍在运行: {0}。继续前等待。"
+            },
+            "check_all_toggled": {
+                "english": "Check ALL toggled to {0} for {1} visible files",
+                "japanese": "{1} 個の表示ファイルに対してチェックALLが {0} に切り替えられました",
+                "korean": "{1}개의 표시 파일에 대해 체크 ALL이 {0}으로 전환되었습니다",
+                "chinese-simplified": "为 {1} 个可见文件切换了全选到 {0}"
+            },
+            "post_detection_cancellation": {
+                "english": "PostDetectionThread cancellation initiated",
+                "japanese": "PostDetectionThreadのキャンセルが開始されました",
+                "korean": "PostDetectionThread 취소가 시작되었습니다",
+                "chinese-simplified": "PostDetectionThread取消已启动"
+            },
+            "expand_logs": {
+                "english": "Expand Logs",
+                "japanese": "ログを展開",
+                "korean": "로그 확장",
+                "chinese-simplified": "展开日志"
+            },
+            "total_detected_posts": {
+                "english": "Total detected posts: {0}",
+                "japanese": "検出された投稿の総数: {0}",
+                "korean": "감지된 총 게시물 수: {0}",
+                "chinese-simplified": "检测到的总投稿数: {0}"
+            },
+            "displayed_files_for_post": {
+                "english": "Displayed files for post {0}",
+                "japanese": "投稿 {0} のファイルを表示しました",
+                "korean": "게시물 {0}의 파일 표시됨",
+                "chinese-simplified": "显示了投稿 {0} 的文件"
+            },
+            "files_detected_so_far": {
+                "english": "Files detected so far: {0}",
+                "japanese": "これまでに検出されたファイル: {0}",
+                "korean": "지금까지 감지된 파일: {0}",
+                "chinese-simplified": "迄今检测到的文件: {0}"
+            },
+            "finished_checking_all_posts": {
+                "english": "Finished checking all posts. Total posts: {0}, Total files: {1}",
+                "japanese": "すべての投稿のチェックが完了しました。総投稿数: {0}、総ファイル数: {1}",
+                "korean": "모든 게시물 확인 완료. 총 게시물: {0}, 총 파일: {1}",
+                "chinese-simplified": "完成检查所有投稿。总投稿数: {0}，总文件数: {1}"
+            },
+            "checked_files_for_download": {
+                "english": "Checked files for download: {0}",
+                "japanese": "ダウンロード用にチェックされたファイル: {0}",
+                "korean": "다운로드용으로 체크된 파일: {0}",
+                "chinese-simplified": "为下载选中的文件: {0}"
+            },
+            "preparing_files_for_urls": {
+                "english": "Preparing files for URLs: {0}",
+                "japanese": "URLのファイルを準備中: {0}",
+                "korean": "URL에 대한 파일 준비 중: {0}",
+                "chinese-simplified": "正在准备URL的文件: {0}"
+            },
+            "no_posts_available_download": {
+                "english": "No posts available for download in URLs: {0}. Skipping to next.",
+                "japanese": "URL {0} でダウンロード可能な投稿がありません。次にスキップします。",
+                "korean": "URL {0}에서 다운로드 가능한 게시물이 없습니다. 다음으로 건너뜁니다.",
+                "chinese-simplified": "URL {0} 中没有可下载的投稿。跳到下一个。"
+            },
+            "files_prepared_for_urls": {
+                "english": "Files prepared for URLs: {0}, Total files: {1}",
+                "japanese": "URL {0} のファイルが準備されました、総ファイル数: {1}",
+                "korean": "URL {0}에 대한 파일 준비됨, 총 파일: {1}",
+                "chinese-simplified": "为URL {0} 准备了文件，总文件数: {1}"
+            },
+            "updated_checked_urls": {
+                "english": "Updated checked_urls after preparation: {0}",
+                "japanese": "準備後にchecked_urlsを更新しました: {0}",
+                "korean": "준비 후 checked_urls 업데이트됨: {0}",
+                "chinese-simplified": "准备后更新了checked_urls: {0}"
+            },
+            "checked_files_after_filtering": {
+                "english": "Checked files after filtering: {0}",
+                "japanese": "フィルタリング後のチェック済みファイル: {0}",
+                "korean": "필터링 후 체크된 파일: {0}",
+                "chinese-simplified": "过滤后的选中文件: {0}"
+            },
+            "checked_files_list": {
+                "english": "Checked files list: {0}",
+                "japanese": "チェック済みファイルリスト: {0}",
+                "korean": "체크된 파일 목록: {0}",
+                "chinese-simplified": "选中文件列表: {0}"
+            },
+            "no_files_download_urls": {
+                "english": "No files to download for URLs: {0}. Proceeding to next post.",
+                "japanese": "URL {0} でダウンロードするファイルがありません。次の投稿に進みます。",
+                "korean": "URL {0}에 대해 다운로드할 파일이 없습니다. 다음 게시물로 진행합니다.",
+                "chinese-simplified": "URL {0} 没有要下载的文件。继续下一个投稿。"
+            },
+            "processing_post": {
+                "english": "Processing post: {0}, Remaining URLs: {1}",
+                "japanese": "投稿を処理中: {0}、残りのURL: {1}",
+                "korean": "게시물 처리 중: {0}, 남은 URL: {1}",
+                "chinese-simplified": "正在处理投稿: {0}，剩余URL: {1}"
+            },
+            "terminated_thread": {
+                "english": "Terminated thread: {0}",
+                "japanese": "スレッドを終了しました: {0}",
+                "korean": "스레드 종료됨: {0}",
+                "chinese-simplified": "终止线程: {0}"
+            },
+            "file_completed": {
+                "english": "File completed: {0}, Total completed: {1}/{2}",
+                "japanese": "ファイル完了: {0}、完了総数: {1}/{2}",
+                "korean": "파일 완료: {0}, 총 완료: {1}/{2}",
+                "chinese-simplified": "文件完成: {0}，总完成: {1}/{2}"
+            },
+            "checkbox_toggled": {
+                "english": "Checkbox toggled for {0} to {1}, checked_urls count: {2}",
+                "japanese": "{0} のチェックボックスが {1} に切り替えられました、checked_urls数: {2}",
+                "korean": "{0}의 체크박스가 {1}으로 전환됨, checked_urls 수: {2}",
+                "chinese-simplified": "{0} 的复选框切换到 {1}，checked_urls 数量: {2}"
+            },
+            "check_all_state_updated": {
+                "english": "Check ALL state updated to {0}",
+                "japanese": "チェックALL状態が {0} に更新されました",
+                "korean": "모두 체크 상태가 {0}으로 업데이트됨",
+                "chinese-simplified": "全选状态更新为 {0}"
             }
         }
     
