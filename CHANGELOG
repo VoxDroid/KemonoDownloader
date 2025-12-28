@@ -1,5 +1,10 @@
 # Kemono Downloader Release Notes
 
+## v5.7.0 (28 December 2025)
+**feat: Add proxy and Tor support to settings and downloads, and localize log messages in post_downloader.py**
+- Introduces proxy configuration (custom and Tor) in the settings UI, including Tor process management, auto-detection, and testing. Updates language strings for proxy/Tor options and confirmation dialogs. Refactors download logic to use requests with proxy support, and ensures proxy settings are respected throughout the downloader. Adds PySocks to requirements for SOCKS proxy support.
+- Replaced hardcoded log and tooltip strings in post_downloader.py with calls to the translation system, using new keys added to kd_language.py for improved localization.
+
 ## v5.6.0 (23 December 2025)
 **feat: Enhanced UI features, URL normalization, and import functionality**
 - Added a new button to import creator/posts URLs from a .txt file

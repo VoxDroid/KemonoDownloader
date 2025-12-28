@@ -1,7 +1,7 @@
 [tool.briefcase]
 project_name = "Kemono Downloader"
 bundle = "com.voxdroid"
-version = "5.6.0"
+version = "5.7.0"
 url = "https://github.com/VoxDroid/KemonoDownloader"
 license.file = "LICENSE"
 author = "VoxDroid"
