@@ -3116,6 +3116,24 @@ class KDLanguage:
                            "<b>7.3 注意事项</b><br>"
                            "- 支持由开发者和社区以志愿者形式提供。<br>"
                            "- 对于非紧急问题，等待回复时请保持耐心。"
+            },
+            "tor_status_stopped": {
+                "english": "Tor Status: Stopped",
+                "japanese": "Torステータス: 停止中",
+                "korean": "Tor 상태: 중지됨",
+                "chinese-simplified": "Tor状态: 已停止"
+            },
+            "tor_status_starting": {
+                "english": "Tor Status: Starting...",
+                "japanese": "Torステータス: 開始中...",
+                "korean": "Tor 상태: 시작 중...",
+                "chinese-simplified": "Tor状态: 启动中..."
+            },
+            "tor_status_running": {
+                "english": "Tor Status: Running",
+                "japanese": "Torステータス: 実行中",
+                "korean": "Tor 상태: 실행 중",
+                "chinese-simplified": "Tor状态: 运行中"
             }
         }
     

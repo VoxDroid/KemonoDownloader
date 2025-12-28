@@ -314,7 +314,7 @@ class SettingsTab(QWidget):
         tor_path_layout.addWidget(self.stop_tor_button)
         
         # Tor status label
-        self.tor_status_label = QLabel("Tor Status: Stopped")
+        self.tor_status_label = QLabel(translate("tor_status_stopped"))
         self.tor_status_label.setStyleSheet("color: #FF6B6B; font-weight: bold; margin-left: 10px;")
         self.tor_status_label.setVisible(False)
         tor_path_layout.addWidget(self.tor_status_label)
@@ -706,7 +706,7 @@ class SettingsTab(QWidget):
         self.download_tor_button.setText(translate("download_tor"))
         self.test_tor_button.setText(translate("test_tor"))
         self.tor_output_label.setText(translate("tor_output"))
-        self.tor_status_label.setText("Tor Status: Stopped")
+        self.tor_status_label.setText(translate("tor_status_stopped"))
 
         self.apply_button.setText(translate("apply_changes"))
         self.reset_button.setText(translate("reset_to_defaults"))
@@ -946,6 +946,8 @@ class SettingsTab(QWidget):
         self.tor_process.start()
         
         # Update UI
+        self.tor_status_label.setText(translate("tor_status_starting"))
+        self.tor_status_label.setStyleSheet("color: #FFA500; font-weight: bold; margin-left: 10px;")
         self.start_tor_button.setEnabled(False)
         self.stop_tor_button.setEnabled(True)
         self.test_tor_button.setEnabled(True)
@@ -981,7 +983,7 @@ class SettingsTab(QWidget):
         # Update UI
         self.start_tor_button.setEnabled(True)
         self.stop_tor_button.setEnabled(False)
-        self.tor_status_label.setText("Tor Status: Stopped")
+        self.tor_status_label.setText(translate("tor_status_stopped"))
         self.tor_status_label.setStyleSheet("color: #FF6B6B; font-weight: bold; margin-left: 10px;")
         
         # Re-enable proxy type selection
@@ -1107,7 +1109,7 @@ class SettingsTab(QWidget):
                 
                 # Check for bootstrap completion
                 if "Bootstrapped 100%" in output:
-                    self.tor_status_label.setText("Tor Status: Running")
+                    self.tor_status_label.setText(translate("tor_status_running"))
                     self.tor_status_label.setStyleSheet("color: #6BCF7F; font-weight: bold; margin-left: 10px;")
                     QMessageBox.information(self, translate("success"), translate("tor_running"))
 
@@ -1136,7 +1138,7 @@ class SettingsTab(QWidget):
         
         self.start_tor_button.setEnabled(True)
         self.stop_tor_button.setEnabled(False)
-        self.tor_status_label.setText("Tor Status: Stopped")
+        self.tor_status_label.setText(translate("tor_status_stopped"))
         self.tor_status_label.setStyleSheet("color: #FF6B6B; font-weight: bold; margin-left: 10px;")
 
     def get_proxy_settings(self):
