@@ -29,6 +29,9 @@ class KDLanguage:
                 "korean": ".txt 파일에서 크리에이터 URL을 포함하는 파일을 선택하세요",
                 "chinese-simplified": "选择包含创作者URL的.txt文件"
             },
+                "english": "Select Tor executable",
+                "chinese-simplified": "选择Tor可执行文件"
+            },
             
             "url_already_in_queue": {
                 "english": "URL is already in the download queue",
@@ -1390,10 +1393,10 @@ class KDLanguage:
                 "chinese-simplified": "确认设置更改"
             },
             "confirm_settings_message": {
-                "english": "Are you sure you want to apply these settings?\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}",
-                "japanese": "これらの設定を適用してもよろしいですか？\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}",
-                "korean": "이 설정을 적용하시겠습니까?\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}",
-                "chinese-simplified": "您确定要应用这些设置吗？\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}"
+                "english": "Are you sure you want to apply these settings?\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}",
+                "japanese": "これらの設定を適用してもよろしいですか？\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}",
+                "korean": "이 설정을 적용하시겠습니까?\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}",
+                "chinese-simplified": "您确定要应用这些设置吗？\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}"
             },
             "enabled": {
                 "english": "Enabled",
@@ -1432,10 +1435,202 @@ class KDLanguage:
                 "chinese-simplified": "设置已应用"
             },
             "settings_applied_message": {
-                "english": "Settings have been successfully applied!\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}",
-                "japanese": "設定が正常に適用されました！\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}",
-                "korean": "설정이 성공적으로 적용되었습니다!\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}",
-                "chinese-simplified": "设置已成功应用！\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}"
+                "english": "Settings have been successfully applied!\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}",
+                "japanese": "設定が正常に適用されました！\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}",
+                "korean": "설정이 성공적으로 적용되었습니다!\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}",
+                "chinese-simplified": "设置已成功应用！\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}"
+            },
+            "proxy_settings": {
+                "english": "Proxy Settings",
+                "japanese": "プロキシ設定",
+                "korean": "프록시 설정",
+                "chinese-simplified": "代理设置"
+            },
+            "use_proxy": {
+                "english": "Use Proxy",
+                "japanese": "プロキシを使用",
+                "korean": "프록시 사용",
+                "chinese-simplified": "使用代理"
+            },
+            "proxy_type": {
+                "english": "Proxy Type:",
+                "japanese": "プロキシタイプ:",
+                "korean": "프록시 유형:",
+                "chinese-simplified": "代理类型:"
+            },
+            "custom_proxy_url": {
+                "english": "Custom Proxy URL:",
+                "japanese": "カスタムプロキシURL:",
+                "korean": "사용자 정의 프록시 URL:",
+                "chinese-simplified": "自定义代理URL:"
+            },
+            "test_proxy": {
+                "english": "Test Proxy",
+                "japanese": "プロキシをテスト",
+                "korean": "프록시 테스트",
+                "chinese-simplified": "测试代理"
+            },
+            "tor_path": {
+                "english": "Tor Path:",
+                "japanese": "Torパス:",
+                "korean": "Tor 경로:",
+                "chinese-simplified": "Tor路径:"
+            },
+            "download_tor": {
+                "english": "Download Tor",
+                "japanese": "Torをダウンロード",
+                "korean": "Tor 다운로드",
+                "chinese-simplified": "下载Tor"
+            },
+            "test_tor": {
+                "english": "Test Tor",
+                "japanese": "Torをテスト",
+                "korean": "Tor 테스트",
+                "chinese-simplified": "测试Tor"
+            },
+            "custom_proxy_url_empty": {
+                "english": "Custom proxy URL cannot be empty.",
+                "japanese": "カスタムプロキシURLは空にできません。",
+                "korean": "사용자 정의 프록시 URL은 비워둘 수 없습니다.",
+                "chinese-simplified": "自定义代理URL不能为空。"
+            },
+            "proxy_test_successful": {
+                "english": "Proxy test successful!",
+                "japanese": "プロキシテスト成功！",
+                "korean": "프록시 테스트 성공!",
+                "chinese-simplified": "代理测试成功！"
+            },
+            "proxy_test_failed": {
+                "english": "Proxy test failed: {0}",
+                "japanese": "プロキシテスト失敗: {0}",
+                "korean": "프록시 테스트 실패: {0}",
+                "chinese-simplified": "代理测试失败: {0}"
+            },
+            "downloading_tor": {
+                "english": "Downloading Tor...",
+                "japanese": "Torをダウンロード中...",
+                "korean": "Tor 다운로드 중...",
+                "chinese-simplified": "正在下载Tor..."
+            },
+            "downloading": {
+                "english": "Downloading...",
+                "japanese": "ダウンロード中...",
+                "korean": "다운로드 중...",
+                "chinese-simplified": "下载中..."
+            },
+            "extracting": {
+                "english": "Extracting...",
+                "japanese": "展開中...",
+                "korean": "압축 해제 중...",
+                "chinese-simplified": "解压中..."
+            },
+            "tor_download_successful": {
+                "english": "Tor downloaded successfully!",
+                "japanese": "Torのダウンロードに成功しました！",
+                "korean": "Tor 다운로드 성공!",
+                "chinese-simplified": "Tor下载成功！"
+            },
+            "tor_download_failed": {
+                "english": "Tor download failed: {0}",
+                "japanese": "Torダウンロード失敗: {0}",
+                "korean": "Tor 다운로드 실패: {0}",
+                "chinese-simplified": "Tor下载失败: {0}"
+            },
+            "tor_exe_not_found": {
+                "english": "tor.exe not found in downloaded files.",
+                "japanese": "ダウンロードしたファイルにtor.exeが見つかりません。",
+                "korean": "다운로드한 파일에서 tor.exe를 찾을 수 없습니다.",
+                "chinese-simplified": "在下载的文件中找不到tor.exe。"
+            },
+            "tor_not_configured": {
+                "english": "Tor is not configured or tor.exe not found.",
+                "japanese": "Torが設定されていないか、tor.exeが見つかりません。",
+                "korean": "Tor가 구성되지 않았거나 tor.exe를 찾을 수 없습니다.",
+                "chinese-simplified": "Tor未配置或找不到tor.exe。"
+            },
+            "tor_test_successful": {
+                "english": "Tor test successful!",
+                "japanese": "Torテスト成功！",
+                "korean": "Tor 테스트 성공!",
+                "chinese-simplified": "Tor测试成功！"
+            },
+            "tor_test_failed": {
+                "english": "Tor test failed.",
+                "japanese": "Torテスト失敗。",
+                "korean": "Tor 테스트 실패.",
+                "chinese-simplified": "Tor测试失败。"
+            },
+            "tor_unsupported_platform": {
+                "english": "Tor download is not supported on this platform.",
+                "japanese": "このプラットフォームではTorのダウンロードはサポートされていません。",
+                "korean": "이 플랫폼에서는 Tor 다운로드를 지원하지 않습니다.",
+                "chinese-simplified": "此平台不支持Tor下载。"
+            },
+            "tor_auto_detected": {
+                "english": "Tor automatically detected at: {0}",
+                "japanese": "Torが自動検出されました: {0}",
+                "korean": "Tor가 자동으로 감지되었습니다: {0}",
+                "chinese-simplified": "Tor已自动检测到: {0}"
+            },
+            "start_tor": {
+                "english": "Start Tor",
+                "japanese": "Torを開始",
+                "korean": "Tor 시작",
+                "chinese-simplified": "启动Tor"
+            },
+            "stop_tor": {
+                "english": "Stop Tor",
+                "japanese": "Torを停止",
+                "korean": "Tor 중지",
+                "chinese-simplified": "停止Tor"
+            },
+            "tor_starting": {
+                "english": "Starting Tor...",
+                "japanese": "Torを開始中...",
+                "korean": "Tor 시작 중...",
+                "chinese-simplified": "正在启动Tor..."
+            },
+            "tor_running": {
+                "english": "Tor is now running and ready to use.",
+                "japanese": "Torが実行中です。使用可能です。",
+                "korean": "Tor가 실행 중입니다. 사용할 수 있습니다.",
+                "chinese-simplified": "Tor正在运行，可以使用。"
+            },
+            "tor_stopped": {
+                "english": "Tor has been stopped.",
+                "japanese": "Torが停止されました。",
+                "korean": "Tor가 중지되었습니다.",
+                "chinese-simplified": "Tor已停止。"
+            },
+            "tor_already_running": {
+                "english": "Tor is already running.",
+                "japanese": "Torはすでに実行中です。",
+                "korean": "Tor가 이미 실행 중입니다.",
+                "chinese-simplified": "Tor已经在运行。"
+            },
+            "tor_not_running": {
+                "english": "Tor is not currently running.",
+                "japanese": "Torは現在実行されていません。",
+                "korean": "Tor가 현재 실행되고 있지 않습니다.",
+                "chinese-simplified": "Tor当前未运行。"
+            },
+            "tor_proxy_working": {
+                "english": "Tor proxy is working correctly!",
+                "japanese": "Torプロキシが正常に動作しています！",
+                "korean": "Tor 프록시가 올바르게 작동하고 있습니다!",
+                "chinese-simplified": "Tor代理正常工作！"
+            },
+            "tor_executable_ok_but_proxy_not_running": {
+                "english": "Tor executable is valid, but proxy service is not running. Please start Tor first.",
+                "japanese": "Tor実行ファイルは有効ですが、プロキシサービスが実行されていません。まずTorを開始してください。",
+                "korean": "Tor 실행 파일은 유효하지만 프록시 서비스가 실행되고 있지 않습니다. 먼저 Tor를 시작하십시오.",
+                "chinese-simplified": "Tor可执行文件有效，但代理服务未运行。请先启动Tor。"
+            },
+            "tor_output": {
+                "english": "Tor Output:",
+                "japanese": "Tor出力:",
+                "korean": "Tor 출력:",
+                "chinese-simplified": "Tor输出:"
             },
             "confirm_removal": {
                 "english": "Confirm Removal",

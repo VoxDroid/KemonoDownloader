@@ -27,12 +27,13 @@ import threading
 class ThreadSettings:
     """Settings container for thread operations"""
     def __init__(self, creator_posts_max_attempts, post_data_max_retries,
-                 file_download_max_retries, api_request_max_retries, simultaneous_downloads):
+                 file_download_max_retries, api_request_max_retries, simultaneous_downloads, settings_tab=None):
         self.creator_posts_max_attempts = creator_posts_max_attempts
         self.post_data_max_retries = post_data_max_retries
         self.file_download_max_retries = file_download_max_retries
         self.api_request_max_retries = api_request_max_retries
         self.simultaneous_downloads = simultaneous_downloads
+        self.settings_tab = settings_tab
 
 
 try:
@@ -83,7 +84,7 @@ HEADERS = {
 API_BASE = "https://kemono.cr/api/v1"
 
 # Create a shared session for connection pooling
-def get_session():
+def get_session(settings_tab=None):
     """Get or create a requests session with connection pooling"""
     if not hasattr(get_session, 'session'):
         get_session.session = requests.Session()
@@ -96,6 +97,33 @@ def get_session():
         )
         get_session.session.mount('http://', adapter)
         get_session.session.mount('https://', adapter)
+    
+    # Set proxies if settings_tab is provided
+    if settings_tab:
+        proxies = settings_tab.get_proxy_settings()
+        if proxies:
+            # Check if this is a SOCKS proxy
+            is_socks = any(proxy_url.startswith(('socks4://', 'socks5://', 'socks5h://')) for proxy_url in proxies.values())
+            if is_socks:
+                # For SOCKS proxies, we need to create a new session to avoid conflicts with HTTP adapters
+                session = requests.Session()
+                session.proxies.update(proxies)
+                # Configure SOCKS-specific timeout and retry settings
+                adapter = requests.adapters.HTTPAdapter(
+                    pool_connections=5,
+                    pool_maxsize=5,
+                    max_retries=3,
+                    pool_block=False
+                )
+                session.mount('http://', adapter)
+                session.mount('https://', adapter)
+                return session
+            else:
+                # For HTTP proxies, use the shared session
+                get_session.session.proxies.update(proxies)
+        else:
+            get_session.session.proxies.clear()
+    
     return get_session.session
 
 class PreviewThread(QThread):
@@ -103,10 +131,11 @@ class PreviewThread(QThread):
     progress = pyqtSignal(int)
     error = pyqtSignal(str)
 
-    def __init__(self, url, cache_dir):
+    def __init__(self, url, cache_dir, settings_tab=None):
         super().__init__()
         self.url = url
         self.cache_dir = cache_dir
+        self.settings_tab = settings_tab
         self.total_size = 0
         self.downloaded_size = 0
         os.makedirs(self.cache_dir, exist_ok=True)
@@ -122,7 +151,7 @@ class PreviewThread(QThread):
                     return
 
             try:
-                response = get_session().get(self.url, headers=HEADERS, stream=True)
+                response = get_session(self.settings_tab).get(self.url, headers=HEADERS, stream=True)
                 response.raise_for_status()
                 self.total_size = int(response.headers.get('content-length', 0)) or 1
                 downloaded_data = bytearray()
@@ -147,6 +176,7 @@ class PreviewThread(QThread):
 class ImageModal(QDialog):
     def __init__(self, url, cache_dir, parent=None):
         super().__init__(parent)
+        self.parent = parent
         self.setWindowTitle(translate("media_preview"))
         self.setModal(True)
         self.resize(800, 800)
@@ -159,7 +189,7 @@ class ImageModal(QDialog):
         self.layout.addWidget(self.progress_bar)
         self.setLayout(self.layout)
         
-        self.preview_thread = PreviewThread(url, cache_dir)
+        self.preview_thread = PreviewThread(url, cache_dir, self.parent.parent.settings_tab)
         self.preview_thread.preview_ready.connect(self.display_image)
         self.preview_thread.progress.connect(self.update_progress)
         self.preview_thread.error.connect(self.display_error)
@@ -247,7 +277,7 @@ class PostDetectionThread(QThread):
                 }
                 
                 try:
-                    alt_response = get_session().get(alt_url, headers=fallback_headers, timeout=15)
+                    alt_response = get_session(self.settings.settings_tab).get(alt_url, headers=fallback_headers, timeout=15)
                     if alt_response.status_code == 200:
                         response = alt_response
                         self.log.emit(translate("log_info", translate("endpoint_successful", alt_url)), "INFO")
@@ -542,7 +572,7 @@ class FilePreparationThread(QThread):
             try:
                 headers = HEADERS.copy()
                 headers['Referer'] = domain_config['referer']
-                response = get_session().get(api_url, headers=headers)
+                response = get_session(self.settings.settings_tab).get(api_url, headers=headers)
                 if response.status_code != 200:
                     if response.status_code == 429 and attempt < max_retries:
                         self.log.emit(translate("log_warning", translate("rate_limit_hit", api_url, attempt, max_retries)), "WARNING")
@@ -715,7 +745,7 @@ class CreatorDownloadThread(QThread):
         try:
             headers = HEADERS.copy()
             headers['Referer'] = self.domain_config['referer']
-            profile_response = get_session().get(profile_url, headers=headers, timeout=10)
+            profile_response = get_session(self.settings.settings_tab).get(profile_url, headers=headers, timeout=10)
             if profile_response.status_code == 200:
                 profile_data = profile_response.json()
                 self.creator_name = sanitize_filename(profile_data.get('name', 'Unknown_Creator'))
@@ -733,7 +763,7 @@ class CreatorDownloadThread(QThread):
                 try:
                     headers = HEADERS.copy()
                     headers['Referer'] = self.domain_config['referer']
-                    response = get_session().get(post_url, headers=headers, timeout=10)
+                    response = get_session(self.settings.settings_tab).get(post_url, headers=headers, timeout=10)
                     if response.status_code == 200:
                         post_data = response.json()
                         title = post_data.get('title', f"Post_{post_id}")
@@ -749,7 +779,7 @@ class CreatorDownloadThread(QThread):
     def stop(self):
         self.is_running = False
 
-    async def download_file(self, file_url, folder, file_index, total_files, session):
+    async def download_file(self, file_url, folder, file_index, total_files):
         if not self.is_running or file_url not in self.files_to_download:
             self.log.emit(translate("log_info", f"Skipping {file_url}"), "INFO")
             return
@@ -822,71 +852,64 @@ class CreatorDownloadThread(QThread):
             try:
                 headers = HEADERS.copy()
                 headers['Referer'] = self.domain_config['referer']
-                async with session.get(file_url, headers=headers, timeout=ClientTimeout(total=3600)) as response:
+                
+                # Use requests instead of aiohttp for better proxy support
+                def download_with_requests():
+                    session = get_session(self.settings.settings_tab)
+                    response = session.get(file_url, headers=headers, stream=True, timeout=3600)
                     response.raise_for_status()
                     file_size = int(response.headers.get('content-length', 0)) or 1
                     downloaded_size = 0
-
+                    
                     file_handle = open(full_path, 'wb')
-                    async for chunk in response.content.iter_chunked(8192):
-                        if not self.is_running:
-                            file_handle.close()
-                            file_handle = None
-                            if os.path.exists(full_path):
-                                try:
-                                    os.remove(full_path)
-                                except OSError as e:
-                                    self.log.emit(translate("log_error", translate("failed_to_remove_interrupted_file", full_path, str(e))), "ERROR")
-                            with self.failed_files_lock:
-                                self.failed_files[file_url] = "Download interrupted by user"
-                            self.file_completed.emit(file_index, file_url, False)
-                            self.check_post_completion(file_url)
-                            return
-                        if chunk:
-                            file_handle.write(chunk)
-                            downloaded_size += len(chunk)
-                            progress = int((downloaded_size / file_size) * 100)
-                            self.file_progress.emit(file_index, progress)
-                            if progress == 100:
-                                self.file_completed.emit(file_index, file_url, True)
+                    try:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            if not self.is_running:
+                                raise Exception("Download interrupted by user")
+                            if chunk:
+                                file_handle.write(chunk)
+                                downloaded_size += len(chunk)
+                                progress = int((downloaded_size / file_size) * 100)
+                                self.file_progress.emit(file_index, progress)
+                    finally:
+                        file_handle.close()
+                    
+                    return file_size, downloaded_size
+                
+                # Run the download in a thread to avoid blocking
+                file_size, downloaded_size = await asyncio.to_thread(download_with_requests)
+                
+                # Validate downloaded size matches content-length
+                if file_size > 0 and downloaded_size != file_size:
+                    error_msg = translate("size_mismatch_error", downloaded_size, file_size, file_url)
+                    self.log.emit(translate("log_warning", error_msg), "WARNING")
+                    # Delete incomplete file
+                    if os.path.exists(full_path):
+                        try:
+                            os.remove(full_path)
+                            self.log.emit(translate("log_info", translate("deleted_incomplete_file", full_path)), "INFO")
+                        except OSError as e:
+                            self.log.emit(translate("log_error", translate("failed_to_delete_incomplete_file", full_path, str(e))), "ERROR")
+                    # Raise exception to trigger retry
+                    raise Exception(f"Size mismatch: downloaded {downloaded_size} bytes, expected {file_size} bytes")
 
-                    file_handle.close()
-                    file_handle = None
+                with open(full_path, 'rb') as f:
+                    file_hash = hashlib.md5(f.read()).hexdigest()
+                with self.file_hashes_lock:
+                    self.file_hashes[url_hash] = {
+                        "file_path": full_path,
+                        "file_hash": file_hash,
+                        "url": file_url
+                    }
+                    self.save_hashes()
+                self.log.emit(translate("log_info", translate("successfully_downloaded", full_path)), "INFO")
+                with self.completed_files_lock:
+                    self.completed_files.add(file_url)
+                self.file_completed.emit(file_index, file_url, True)
+                self.check_post_completion(file_url)
+                return
 
-                    # Validate downloaded size matches content-length
-                    if file_size > 0 and downloaded_size != file_size:
-                        error_msg = translate("size_mismatch_error", downloaded_size, file_size, file_url)
-                        self.log.emit(translate("log_warning", error_msg), "WARNING")
-                        # Delete incomplete file
-                        if os.path.exists(full_path):
-                            try:
-                                os.remove(full_path)
-                                self.log.emit(translate("log_info", translate("deleted_incomplete_file", full_path)), "INFO")
-                            except OSError as e:
-                                self.log.emit(translate("log_error", translate("failed_to_delete_incomplete_file", full_path, str(e))), "ERROR")
-                        # Raise exception to trigger retry
-                        raise Exception(f"Size mismatch: downloaded {downloaded_size} bytes, expected {file_size} bytes")
-
-                    with open(full_path, 'rb') as f:
-                        file_hash = hashlib.md5(f.read()).hexdigest()
-                    with self.file_hashes_lock:
-                        self.file_hashes[url_hash] = {
-                            "file_path": full_path,
-                            "file_hash": file_hash,
-                            "url": file_url
-                        }
-                        self.save_hashes()
-                    self.log.emit(translate("log_info", translate("successfully_downloaded", full_path)), "INFO")
-                    with self.completed_files_lock:
-                        self.completed_files.add(file_url)
-                    self.file_completed.emit(file_index, file_url, True)
-                    self.check_post_completion(file_url)
-                    return
-
-            except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                if file_handle:
-                    file_handle.close()
-                    file_handle = None
+            except requests.RequestException as e:
                 if attempt == max_retries:
                     error_msg = translate("error_downloading_after_retries", file_url, max_retries, str(e))
                     self.log.emit(translate("log_error", error_msg), "ERROR")
@@ -900,9 +923,6 @@ class CreatorDownloadThread(QThread):
                     self.log.emit(translate("log_warning", translate("download_failed_retrying", file_url, attempt, max_retries, str(e))), "WARNING")
                     await asyncio.sleep(1)
             except Exception as e:
-                if file_handle:
-                    file_handle.close()
-                    file_handle = None
                 self.log.emit(translate("log_error", translate("unexpected_error_downloading", file_url, str(e))), "ERROR")
                 with self.failed_files_lock:
                     self.failed_files[file_url] = str(e)
@@ -910,10 +930,6 @@ class CreatorDownloadThread(QThread):
                 self.file_completed.emit(file_index, file_url, False)
                 self.check_post_completion(file_url)
                 return
-            finally:
-                if file_handle:
-                    file_handle.close()
-                    file_handle = None
 
     def check_post_completion(self, file_url):
         post_id = self.files_to_posts_map.get(file_url)
@@ -922,11 +938,11 @@ class CreatorDownloadThread(QThread):
             if all(f in self.completed_files for f in post_files):
                 self.post_completed.emit(post_id)
 
-    async def download_worker(self, queue, folder, total_files, session):
+    async def download_worker(self, queue, folder, total_files):
         while self.is_running:
             try:
                 file_index, file_url = await queue.get()
-                await self.download_file(file_url, folder, file_index, total_files, session)
+                await self.download_file(file_url, folder, file_index, total_files)
                 queue.task_done()
             except asyncio.QueueEmpty:
                 break
@@ -962,13 +978,12 @@ class CreatorDownloadThread(QThread):
                     queue.put_nowait((i, file_url))
 
                 async def main():
-                    async with ClientSession() as session:
-                        tasks = [
-                            loop.create_task(self.download_worker(queue, creator_folder, total_files, session))
-                            for _ in range(self.max_concurrent)
-                        ]
-                        await queue.join()
-                        await asyncio.gather(*tasks, return_exceptions=True)
+                    tasks = [
+                        loop.create_task(self.download_worker(queue, creator_folder, total_files))
+                        for _ in range(self.max_concurrent)
+                    ]
+                    await queue.join()
+                    await asyncio.gather(*tasks, return_exceptions=True)
 
                 loop.run_until_complete(main())
             except Exception as e:
@@ -1030,7 +1045,7 @@ class ValidationThread(QThread):
                     'Referer': self.domain_config['referer']
                 }
 
-                direct_response = get_session().get(self.url, headers=fallback_headers, timeout=10)
+                direct_response = get_session(self.settings.settings_tab).get(self.url, headers=fallback_headers, timeout=10)
                 domain_check = self.domain_config['domain'].split('.')[0]  # 'kemono' or 'coomer'
                 if direct_response.status_code == 200 and domain_check in direct_response.text.lower():
                     self.log.emit(translate("log_info", translate("successfully_validated_url", self.url)), "INFO")
@@ -1235,7 +1250,8 @@ class CreatorDownloaderTab(QWidget):
             post_data_max_retries=self.parent.settings_tab.get_post_data_max_retries(),
             file_download_max_retries=self.parent.settings_tab.get_file_download_max_retries(),
             api_request_max_retries=self.parent.settings_tab.get_api_request_max_retries(),
-            simultaneous_downloads=self.parent.settings_tab.get_simultaneous_downloads()
+            simultaneous_downloads=self.parent.settings_tab.get_simultaneous_downloads(),
+            settings_tab=self.parent.settings_tab
         )
 
     def setup_ui(self):

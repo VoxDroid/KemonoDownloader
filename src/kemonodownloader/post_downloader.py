@@ -17,23 +17,25 @@ import time
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 import subprocess
-from kemonodownloader.kd_language import translate
+from kemonodownloader.creator_downloader import get_session
 import locale
 import ctypes
 from fake_useragent import UserAgent
 import gzip
 import threading
+from kemonodownloader.kd_language import translate
 
 
 class ThreadSettings:
     """Settings container for thread operations"""
     def __init__(self, creator_posts_max_attempts, post_data_max_retries,
-                 file_download_max_retries, api_request_max_retries, simultaneous_downloads):
+                 file_download_max_retries, api_request_max_retries, simultaneous_downloads, settings_tab=None):
         self.creator_posts_max_attempts = creator_posts_max_attempts
         self.post_data_max_retries = post_data_max_retries
         self.file_download_max_retries = file_download_max_retries
         self.api_request_max_retries = api_request_max_retries
         self.simultaneous_downloads = simultaneous_downloads
+        self.settings_tab = settings_tab
 
 
 try:
@@ -87,10 +89,11 @@ class PreviewThread(QThread):
     progress = pyqtSignal(int)
     error = pyqtSignal(str)
 
-    def __init__(self, url, cache_dir):
+    def __init__(self, url, cache_dir, settings_tab=None):
         super().__init__()
         self.url = url
         self.cache_dir = cache_dir
+        self.settings_tab = settings_tab
         self.total_size = 0
         self.downloaded_size = 0
         os.makedirs(self.cache_dir, exist_ok=True)
@@ -115,7 +118,7 @@ class PreviewThread(QThread):
                 return
 
         try:
-            response = requests.get(self.url, headers=HEADERS, stream=True)
+            response = get_session(self.settings_tab).get(self.url, headers=HEADERS, stream=True)
             response.raise_for_status()
             self.total_size = int(response.headers.get('content-length', 0)) or 1
             downloaded_data = bytearray()
@@ -255,14 +258,14 @@ class MediaPreviewModal(QDialog):
         ext = os.path.splitext(self.media_url.lower())[1]
 
         if ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
-            self.preview_thread = PreviewThread(self.media_url, self.cache_dir)
+            self.preview_thread = PreviewThread(self.media_url, self.cache_dir, self.parent.settings_tab)
             self.preview_thread.preview_ready.connect(self.display_image)
             self.preview_thread.progress.connect(self.update_progress)
             self.preview_thread.error.connect(self.display_error)
             self.preview_thread.start()
         elif ext in ['.mp4', '.mov', '.mp3', '.wav']:
             self.setup_media_player()
-            self.preview_thread = PreviewThread(self.media_url, self.cache_dir)
+            self.preview_thread = PreviewThread(self.media_url, self.cache_dir, self.parent.settings_tab)
             self.preview_thread.preview_ready.connect(self.play_media)
             self.preview_thread.progress.connect(self.update_progress)
             self.preview_thread.error.connect(self.display_error)
@@ -579,14 +582,14 @@ class PostDetectionThread(QThread):
             max_retries = self.settings.api_request_max_retries
         for attempt in range(max_retries):
             try:
-                response = requests.get(url, headers=HEADERS, timeout=10)
+                response = get_session(self.settings.settings_tab).get(url, headers=HEADERS, timeout=10)
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
                     # Try with alternative headers
                     alt_headers = HEADERS.copy()
                     alt_headers["Accept"] = "text/css"
-                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    response = get_session(self.settings.settings_tab).get(url, headers=alt_headers, timeout=10)
                     if response.status_code == 200:
                         return response
             except Exception as e:
@@ -782,13 +785,13 @@ class FilePreparationThread(QThread):
             max_retries = self.settings.api_request_max_retries
         for attempt in range(max_retries):
             try:
-                response = requests.get(url, headers=HEADERS, timeout=10)
+                response = get_session(self.settings.settings_tab).get(url, headers=HEADERS, timeout=10)
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
                     alt_headers = HEADERS.copy()
                     alt_headers["Accept"] = "text/css"
-                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    response = get_session(self.settings.settings_tab).get(url, headers=alt_headers, timeout=10)
                     if response.status_code == 200:
                         return response
             except Exception:
@@ -926,13 +929,13 @@ class DownloadThread(QThread):
             max_retries = self.settings.api_request_max_retries
         for attempt in range(max_retries):
             try:
-                response = requests.get(url, headers=HEADERS, timeout=10)
+                response = get_session(self.settings.settings_tab).get(url, headers=HEADERS, timeout=10)
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
                     alt_headers = HEADERS.copy()
                     alt_headers["Accept"] = "text/css"
-                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    response = get_session(self.settings.settings_tab).get(url, headers=alt_headers, timeout=10)
                     if response.status_code == 200:
                         return response
             except Exception:
@@ -1041,7 +1044,7 @@ class DownloadThread(QThread):
         max_retries = self.settings.file_download_max_retries
         for attempt in range(1, max_retries + 1):
             try:
-                response = requests.get(file_url, headers=HEADERS, stream=True)
+                response = get_session(self.settings.settings_tab).get(file_url, headers=HEADERS, stream=True)
                 response.raise_for_status()
                 file_size = int(response.headers.get('content-length', 0)) or 1
                 downloaded_size = 0
@@ -1258,7 +1261,8 @@ class PostDownloaderTab(QWidget):
             post_data_max_retries=self.parent.settings_tab.get_post_data_max_retries(),
             file_download_max_retries=self.parent.settings_tab.get_file_download_max_retries(),
             api_request_max_retries=self.parent.settings_tab.get_api_request_max_retries(),
-            simultaneous_downloads=self.parent.settings_tab.get_simultaneous_downloads()
+            simultaneous_downloads=self.parent.settings_tab.get_simultaneous_downloads(),
+            settings_tab=self.parent.settings_tab
         )
 
     def setup_ui(self):
@@ -1524,7 +1528,7 @@ class PostDownloaderTab(QWidget):
                 'Referer': get_domain_config(url)['referer']
             }
             
-            direct_response = requests.get(url, headers=fallback_headers, timeout=10)
+            direct_response = get_session(self.parent.settings_tab).get(url, headers=fallback_headers, timeout=10)
             
             if direct_response.status_code == 200:
                 content = direct_response.text.lower()
@@ -1699,13 +1703,13 @@ class PostDownloaderTab(QWidget):
             max_retries = settings.api_request_max_retries
         for attempt in range(max_retries):
             try:
-                response = requests.get(url, headers=HEADERS, timeout=10)
+                response = get_session(self.parent.settings_tab).get(url, headers=HEADERS, timeout=10)
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
                     alt_headers = HEADERS.copy()
                     alt_headers["Accept"] = "text/css"
-                    response = requests.get(url, headers=alt_headers, timeout=10)
+                    response = get_session(self.parent.settings_tab).get(url, headers=alt_headers, timeout=10)
                     if response.status_code == 200:
                         return response
             except Exception:

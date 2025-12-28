@@ -164,6 +164,8 @@ class KemonoDownloader(QMainWindow):
         self.setGeometry(100, 100, 1000, 700)
 
         self.settings_tab = SettingsTab(self)
+        self.settings_tab.download_started.connect(self.disable_other_tabs)
+        self.settings_tab.download_finished.connect(self.enable_other_tabs)
         self.base_folder = os.path.join(
             self.settings_tab.settings["base_directory"], 
             self.settings_tab.settings["base_folder_name"]
@@ -199,6 +201,17 @@ class KemonoDownloader(QMainWindow):
     def ensure_folders_exist(self):
         for folder in [self.base_folder, self.download_folder, self.cache_folder, self.other_files_folder]:
             os.makedirs(folder, exist_ok=True)
+
+    def disable_other_tabs(self):
+        if hasattr(self, 'tabs'):
+            for i in range(self.tabs.count()):
+                if self.tabs.widget(i) != self.settings_tab:
+                    self.tabs.setTabEnabled(i, False)
+
+    def enable_other_tabs(self):
+        if hasattr(self, 'tabs'):
+            for i in range(self.tabs.count()):
+                self.tabs.setTabEnabled(i, True)
 
     def setup_main_ui(self):
         main_widget = QWidget()

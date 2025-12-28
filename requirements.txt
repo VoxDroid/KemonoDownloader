@@ -8,3 +8,4 @@ briefcase
 fake-useragent
 aiohttp
 asyncio
+PySocks
