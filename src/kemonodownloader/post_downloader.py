@@ -878,7 +878,7 @@ class DownloadThread(QThread):
     log = pyqtSignal(str, str)
     finished = pyqtSignal()
 
-    def __init__(self, url, download_folder, selected_files, files_to_posts_map, console, other_files_dir, post_id, settings, max_concurrent=5, auto_rename=False):
+    def __init__(self, url, download_folder, selected_files, files_to_posts_map, console, other_files_dir, post_id, settings, max_concurrent=5, auto_rename=False, download_text=False):
         super().__init__()
         self.url = url
         self.domain_config = get_domain_config(url)
@@ -898,6 +898,8 @@ class DownloadThread(QThread):
         self.completed_files = set()
         self.post_title = None  # Store post title
         self.auto_rename = auto_rename
+        self.download_text = download_text
+        self.post_content = ""
         # Locks for thread-safe access to shared dictionaries
         self.file_hashes_lock = threading.Lock()
         self.completed_files_lock = threading.Lock()
@@ -917,6 +919,7 @@ class DownloadThread(QThread):
                 post_data = self.parse_response_content(response)
                 post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
                 self.post_title = sanitize_filename(post.get('title', f"Post_{post_id}"))
+                self.post_content = post.get('content', '')
             else:
                 self.log.emit(translate("log_error", translate("failed_fetch_post_title")), "ERROR")
                 self.post_title = f"Post_{post_id}"
@@ -1122,6 +1125,22 @@ class DownloadThread(QThread):
         os.makedirs(service_folder, exist_ok=True)
         self.log.emit(translate("log_info", f"Created directory: {service_folder}"), "INFO")
 
+        # Save post text if enabled
+        if self.download_text and self.post_content:
+            try:
+                soup = BeautifulSoup(self.post_content, 'html.parser')
+                text = soup.get_text(separator='\n\n')
+                post_folder_name = f"{self.post_id}_{self.post_title}"
+                post_folder = os.path.join(service_folder, post_folder_name)
+                os.makedirs(post_folder, exist_ok=True)
+                desc_path = os.path.join(post_folder, 'desc.txt')
+                if not os.path.exists(desc_path):
+                     with open(desc_path, 'w', encoding='utf-8') as f:
+                         f.write(text)
+                     self.log.emit(translate("log_info", translate("saved_post_description", self.post_id)), "INFO")
+            except Exception as e:
+                self.log.emit(translate("log_warning", translate("failed_save_post_description", self.post_id, str(e))), "WARNING")
+
         total_files = len(self.selected_files)
         self.log.emit(translate("log_info", f"Total selected files to download for this post: {total_files}"), "INFO")
 
@@ -1324,6 +1343,12 @@ class PostDownloaderTab(QWidget):
         self.auto_rename_checkbox.setChecked(True)  # Set to checked by default
         self.auto_rename_checkbox.setStyleSheet("color: white;")
         left_layout.addWidget(self.auto_rename_checkbox)
+
+        # Download text checkbox
+        self.post_download_text_check = QCheckBox(translate("download_text"))
+        self.post_download_text_check.setChecked(True)
+        self.post_download_text_check.setStyleSheet("color: white;")
+        left_layout.addWidget(self.post_download_text_check)
 
         # Post buttons layout
         post_btn_layout = QHBoxLayout()
@@ -1952,7 +1977,8 @@ class PostDownloaderTab(QWidget):
         max_concurrent = settings.simultaneous_downloads
         auto_rename = self.auto_rename_checkbox.isChecked()
         self.thread = DownloadThread(url, self.parent.download_folder, checked_files, files_to_posts_map,
-                                    self.post_console, self.other_files_dir, post_id, settings, max_concurrent, auto_rename)
+                                    self.post_console, self.other_files_dir, post_id, settings, max_concurrent, auto_rename,
+                                    download_text=self.post_download_text_check.isChecked())
         self.active_threads.append(self.thread)
         self.thread.file_progress.connect(self.update_file_progress)
         self.thread.file_completed.connect(self.update_file_completion)

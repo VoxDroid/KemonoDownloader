@@ -1228,6 +1228,24 @@ class KDLanguage:
                 "korean": "파일 확장자",
                 "chinese-simplified": "文件扩展名"
             },
+            "download_text": {
+                "english": "Download Post Text",
+                "japanese": "投稿テキストをダウンロード",
+                "korean": "게시물 텍스트 다운로드",
+                "chinese-simplified": "下载帖子文本"
+            },
+            "saved_post_description": {
+                "english": "Saved description for post {0}",
+                "japanese": "投稿 {0} の説明を保存しました",
+                "korean": "게시물 {0}의 설명을 저장했습니다",
+                "chinese-simplified": "已保存帖子 {0} 的描述"
+            },
+            "failed_save_post_description": {
+                "english": "Failed to save description for post {0}: {1}",
+                "japanese": "投稿 {0} の説明の保存に失敗しました：{1}",
+                "korean": "게시물 {0}의 설명 저장에 실패했습니다: {1}",
+                "chinese-simplified": "保存帖子 {0} 的描述失败：{1}"
+            },
             "posts_to_download": {
                 "english": "Posts to Download",
                 "japanese": "ダウンロードする投稿",

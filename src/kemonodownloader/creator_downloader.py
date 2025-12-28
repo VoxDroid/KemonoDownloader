@@ -675,7 +675,7 @@ class CreatorDownloadThread(QThread):
     log = pyqtSignal(str, str)
     finished = pyqtSignal()
 
-    def __init__(self, service, creator_id, download_folder, selected_posts, files_to_download, files_to_posts_map, console, other_files_dir, post_titles_map, auto_rename_enabled, settings, max_concurrent=20):
+    def __init__(self, service, creator_id, download_folder, selected_posts, files_to_download, files_to_posts_map, console, other_files_dir, post_titles_map, auto_rename_enabled, settings, max_concurrent=20, download_text=False):
         super().__init__()
         self.service = service
         self.creator_id = creator_id
@@ -686,6 +686,7 @@ class CreatorDownloadThread(QThread):
         self.console = console
         self.settings = settings
         self.is_running = True
+        self.download_text = download_text
         self.other_files_dir = other_files_dir
         self.hash_file_path = os.path.join(self.other_files_dir, "file_hashes.json")
         self.file_hashes = self.load_hashes()
@@ -701,7 +702,10 @@ class CreatorDownloadThread(QThread):
         # Locks for thread-safe access to shared dictionaries
         self.failed_files_lock = threading.Lock()
         self.post_file_counters_lock = threading.Lock()
+
         self.completed_files_lock = threading.Lock()
+        self.fetched_texts_lock = threading.Lock()
+        self.fetched_texts = set()
         self.file_hashes_lock = threading.Lock()
 
     def _get_domain_config_from_files(self):
@@ -779,6 +783,39 @@ class CreatorDownloadThread(QThread):
     def stop(self):
         self.is_running = False
 
+    async def download_post_text_if_needed(self, post_id, post_folder):
+        should_download = False
+        with self.fetched_texts_lock:
+             if post_id not in self.fetched_texts:
+                 self.fetched_texts.add(post_id)
+                 should_download = True
+        
+        if should_download:
+             await asyncio.to_thread(self._download_text_sync, post_id, post_folder)
+
+    def _download_text_sync(self, post_id, post_folder):
+        try:
+            desc_path = os.path.join(post_folder, 'desc.txt')
+            if os.path.exists(desc_path):
+                 return
+
+            api_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/post/{post_id}"
+            headers = HEADERS.copy()
+            headers['Referer'] = self.domain_config['referer']
+            response = get_session(self.settings.settings_tab).get(api_url, headers=headers, timeout=10)
+            if response.status_code == 200:
+                post_data = response.json()
+                post = post_data if isinstance(post_data, dict) and 'post' not in post_data else post_data.get('post', {})
+                content = post.get('content', '')
+                if content:
+                    soup = BeautifulSoup(content, 'html.parser')
+                    text = soup.get_text(separator='\n\n')
+                    with open(desc_path, 'w', encoding='utf-8') as f:
+                        f.write(text)
+                    self.log.emit(translate("log_info", translate("saved_post_description", post_id)), "INFO")
+        except Exception as e:
+             self.log.emit(translate("log_warning", translate("failed_save_post_description", post_id, str(e))), "WARNING")
+
     async def download_file(self, file_url, folder, file_index, total_files):
         if not self.is_running or file_url not in self.files_to_download:
             self.log.emit(translate("log_info", f"Skipping {file_url}"), "INFO")
@@ -799,6 +836,11 @@ class CreatorDownloadThread(QThread):
             self.file_completed.emit(file_index, file_url, False)
             self.check_post_completion(file_url)
             return
+
+        # Download text if enabled (only once per post)
+        if self.download_text:
+
+            await self.download_post_text_if_needed(post_id, post_folder)
 
         filename = file_url.split('f=')[-1] if 'f=' in file_url else file_url.split('/')[-1].split('?')[0]
 
@@ -1313,6 +1355,12 @@ class CreatorDownloaderTab(QWidget):
         self.creator_auto_rename_check.setChecked(True)  # Default to enabled
         self.creator_auto_rename_check.setStyleSheet("color: white;")
         creator_options_layout.addWidget(self.creator_auto_rename_check)
+
+        # Download text checkbox
+        self.creator_download_text_check = QCheckBox(translate("download_text"))
+        self.creator_download_text_check.setChecked(True)
+        self.creator_download_text_check.setStyleSheet("color: white;")
+        creator_options_layout.addWidget(self.creator_download_text_check)
 
         self.creator_ext_group = QGroupBox()
         self.creator_ext_group.setStyleSheet("QGroupBox { color: white; }")
@@ -1996,7 +2044,8 @@ class CreatorDownloaderTab(QWidget):
         thread = CreatorDownloadThread(service, creator_id, self.parent.download_folder,
                                     self.posts_to_download, files_to_download, files_to_posts_map,
                                     self.creator_console, self.other_files_dir, self.post_titles_map,
-                                    self.creator_auto_rename_check.isChecked(), settings, settings.simultaneous_downloads)
+                                    self.creator_auto_rename_check.isChecked(), settings, settings.simultaneous_downloads,
+                                    download_text=self.creator_download_text_check.isChecked())
         thread.file_progress.connect(self.update_creator_file_progress)
         thread.file_completed.connect(self.update_file_completion)
         thread.post_completed.connect(self.update_post_completion)
