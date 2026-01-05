@@ -8,12 +8,6 @@ import sys
 import tempfile
 
 from PyQt6.QtCore import QSettings
-from PyQt6.QtWidgets import QApplication
-
-# Ensure QApplication exists for PyQt6 components
-app = QApplication.instance()
-if app is None:
-    app = QApplication([])
 
 
 class TestDefaultSettings:

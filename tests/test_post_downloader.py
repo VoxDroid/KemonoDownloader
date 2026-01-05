@@ -7,12 +7,6 @@ import os
 import sys
 from urllib.parse import urljoin
 
-from PyQt6.QtWidgets import QApplication
-
-# Ensure QApplication exists for PyQt6 components
-app = QApplication.instance()
-if app is None:
-    app = QApplication([])
 
 try:
     from kemonodownloader.post_downloader import (

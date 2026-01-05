@@ -37,6 +37,7 @@ requires = [
 test_requires = [
     "pytest",
     "types-requests",
+    "pytest-qt",
 ]
 
 [tool.mypy]
