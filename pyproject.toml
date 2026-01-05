@@ -25,18 +25,18 @@ test_sources = [
 requires = [
     "pyqt6",
     "requests",
-    "beautifulsoup4", 
+    "beautifulsoup4",
     "qtawesome",
     "packaging",
     "pillow",
     "fake-useragent",
     "aiohttp",
-    "asyncio",
     "PySocks",
 ]
 
 test_requires = [
     "pytest",
+    "types-requests",
 ]
 
 [tool.mypy]
@@ -71,6 +71,16 @@ requires = [
 
 [tool.briefcase.app.kemonodownloader.linux.system.debian]
 system_requires = [
+    "libegl1",
+    "libgl1-mesa-dri",
+    "libglx-mesa0",
+    "libx11-6",
+    "libxkbcommon0",
+    "libxcb-xinerama0",
+    "libpulse0",
+    "libpulse-mainloop-glib0",
+    "libasound2t64",
+    "mesa-utils",
 ]
 
 system_runtime_requires = [
