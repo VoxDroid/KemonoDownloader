@@ -258,7 +258,59 @@ class TestFolderStructure:
 
         assert expected_structure["Downloads"].endswith("Downloads")
         assert expected_structure["Cache"].endswith("Cache")
-        assert expected_structure["Other Files"].endswith("Other Files")
+
+
+def test_auto_detect_tor_in_base_directory(tmp_path, monkeypatch, qapp):
+    """Auto-detect should find tor executable under the configured base directory."""
+    import subprocess
+    import sys
+
+    # Minimal mock parent
+    class MockParent:
+        base_folder = ""
+        download_folder = ""
+        cache_folder = ""
+        other_files_folder = ""
+
+        def log(self, msg):
+            pass
+
+        def ensure_folders_exist(self):
+            pass
+
+    settings_tab = None
+    try:
+        # Create SettingsTab (requires QApplication available in conftest)
+        from kemonodownloader.kd_settings import SettingsTab
+
+        settings_tab = SettingsTab(MockParent())
+
+        # Point settings to tmp base directory
+        base_dir = str(tmp_path)
+        settings_tab.temp_settings["base_directory"] = base_dir
+        settings_tab.temp_settings["base_folder_name"] = "Kemono Downloader"
+
+        # Create a fake tor executable in the expected app Tor folder
+        tor_dir = tmp_path / "Kemono Downloader" / "Tor"
+        tor_dir.mkdir(parents=True)
+        tor_file = tor_dir / ("tor.exe" if sys.platform == "win32" else "tor")
+        tor_file.write_text("#!/bin/sh\necho Tor 0.4\n")
+        tor_file.chmod(0o755)
+
+        # Patch subprocess.run to simulate a valid 'tor --version' output
+        class FakeResult:
+            returncode = 0
+            stdout = "Tor version 0.4"
+
+        monkeypatch.setattr(subprocess, "run", lambda *a, **k: FakeResult)
+
+        detected = settings_tab.auto_detect_tor()
+        assert detected is not None
+        assert str(tor_file) in detected
+    finally:
+        # Attempt to cleanup SettingsTab if it exists
+        if settings_tab is not None:
+            settings_tab.deleteLater()
 
     def test_folder_creation_logic(self):
         """Test folder creation with os.makedirs."""

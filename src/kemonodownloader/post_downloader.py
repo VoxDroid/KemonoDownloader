@@ -14,7 +14,7 @@ import qtawesome as qta
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-from PyQt6.QtCore import QSize, Qt, QThread, QTimer, QUrl, pyqtSignal
+from PyQt6.QtCore import QByteArray, QSize, Qt, QThread, QTimer, QUrl, pyqtSignal
 from PyQt6.QtGui import QMovie, QPixmap
 from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
@@ -165,7 +165,7 @@ class PreviewThread(QThread):
 
             if ext in [".jpg", ".jpeg", ".png"]:
                 pixmap = QPixmap()
-                if not pixmap.loadFromData(downloaded_data):
+                if not pixmap.loadFromData(QByteArray(bytes(downloaded_data))):
                     self.error.emit(
                         f"{translate('error_loading_image')}: {self.url}: {translate('invalid_image_data')}"
                     )

@@ -645,7 +645,13 @@ class SettingsTab(QWidget):
             self.tor_path_input.setText(tor_exe_path)
 
     def auto_detect_tor(self):
-        """Try to auto-detect Tor executable in common locations."""
+        """Try to auto-detect Tor executable in common locations.
+
+        Enhanced detection: in addition to well-known system locations, search
+        the current app base directory and download folders so that Tor can be
+        detected when installed within the app's own directory (e.g. in
+        AppData/Roaming on Windows).
+        """
         common_paths = []
 
         if sys.platform == "win32":
@@ -759,18 +765,78 @@ class SettingsTab(QWidget):
                 ]
             )
 
-        for path in common_paths:
+        # Also look for Tor inside the app's base directory / download folders
+        try:
+            base_dir = self.temp_settings.get("base_directory")
+            base_name = self.temp_settings.get("base_folder_name")
+        except Exception:
+            base_dir = None
+            base_name = None
+
+        candidate_roots = []
+        if base_dir:
+            candidate_roots.extend(
+                [
+                    base_dir,
+                    os.path.join(base_dir, base_name) if base_name else base_dir,
+                    os.path.join(base_dir, "Tor"),
+                    (
+                        os.path.join(base_dir, base_name, "Tor")
+                        if base_name
+                        else os.path.join(base_dir, "Tor")
+                    ),
+                    os.path.join(base_dir, "Downloads"),
+                    os.path.join(base_dir, "Downloads", "Tor"),
+                ]
+            )
+
+        # If parent (app) provides download_folder use that too
+        if hasattr(self, "parent") and getattr(self.parent, "download_folder", None):
+            df = getattr(self.parent, "download_folder")
+            candidate_roots.extend([df, os.path.join(df, "Tor")])
+
+        # Prefer searching the app's candidate roots first (so app-local Tor is detected before system-wide installs),
+        # then fall back to common system locations
+        search_roots = [
+            p for p in candidate_roots if p not in common_paths
+        ] + common_paths
+
+        for path in search_roots:
+            # If path is a file directly, test it
             if os.path.exists(path) and os.path.isfile(path):
                 try:
-                    # Quick test to see if it's actually Tor
-                    import subprocess
-
                     result = subprocess.run(
                         [path, "--version"], capture_output=True, text=True, timeout=5
                     )
                     if result.returncode == 0 and "Tor" in result.stdout:
                         return path
                 except Exception:
+                    continue
+
+            # If path is a directory, walk it and look for tor executable
+            if os.path.exists(path) and os.path.isdir(path):
+                try:
+                    for root, dirs, files in os.walk(path):
+                        for f in files:
+                            if f.lower() in ("tor.exe", "tor"):
+                                candidate = os.path.join(root, f)
+                                try:
+                                    result = subprocess.run(
+                                        [candidate, "--version"],
+                                        capture_output=True,
+                                        text=True,
+                                        timeout=5,
+                                    )
+                                    if (
+                                        result.returncode == 0
+                                        and "Tor" in result.stdout
+                                    ):
+                                        return candidate
+                                except Exception:
+                                    # Continue searching other files
+                                    continue
+                except Exception:
+                    # ignore and move to next root
                     continue
 
         return None

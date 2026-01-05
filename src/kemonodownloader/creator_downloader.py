@@ -16,7 +16,7 @@ import qtawesome as qta
 import requests
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QByteArray, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QAbstractItemView,
@@ -198,7 +198,7 @@ class PreviewThread(QThread):
                         progress = int((self.downloaded_size / self.total_size) * 100)
                         self.progress.emit(min(progress, 100))
                 pixmap = QPixmap()
-                if not pixmap.loadFromData(downloaded_data):
+                if not pixmap.loadFromData(QByteArray(bytes(downloaded_data))):
                     self.error.emit(
                         translate(
                             "failed_to_download",
