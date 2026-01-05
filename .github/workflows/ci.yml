@@ -19,7 +19,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxkbcommon0 libxcb-xinerama0 libpulse0 libpulse-mainloop-glib0 libasound2 mesa-utils
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxkbcommon0 libxcb-xinerama0 libpulse0 libpulse-mainloop-glib0 libasound2t64 mesa-utils
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
