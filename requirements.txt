@@ -13,3 +13,4 @@ PySocks
 pre-commit
 mypy 
 pyright
+pytest
