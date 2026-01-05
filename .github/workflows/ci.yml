@@ -15,6 +15,11 @@ jobs:
         python-version: ['3.9', '3.10', '3.11']
     steps:
       - uses: actions/checkout@v4
+      - name: Install system libraries (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1-mesa-glx libxcb-xinerama0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -30,6 +35,8 @@ jobs:
         run: |
           pre-commit run --all-files
       - name: Run tests
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           python -m pytest -q
       - name: Upload test logs (optional)
