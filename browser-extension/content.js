@@ -658,8 +658,12 @@
 
           await downloadAsZip(selectedFiles, downloadText, autoRename);
         } else {
+          // Start individual downloads and show progress modal with cancel option
           downloadIndividual(selectedFiles, downloadText, autoRename);
+          createProgressModal();
+          updateProgress({ status: 'processing', message: 'Individual downloads started... Use Cancel to stop and refresh.', progress: 5 });
         }
+        // Close the selection modal (progress modal will remain)
         modal.remove();
       } catch (error) {
         console.error('Download error:', error);
@@ -727,6 +731,11 @@
       const progressRange = 80 - baseProgress; // Leave room for final ZIP processing
 
       for (const file of selectedFiles) {
+        if (downloadCancelled) {
+          console.log('Download cancelled by user, aborting ZIP creation');
+          updateProgress({ status: 'error', message: 'Download cancelled by user' });
+          return false;
+        }
         try {
           console.log('Processing file:', file.url);
 
@@ -764,6 +773,10 @@
                   reject(new Error(`Failed to download ${file.filename}: ${chrome.runtime.lastError.message}`));
                 } else {
                   console.log(`Individual download started for video file: ${file.filename}`);
+                  // Save download id for potential cancellation
+                  if (downloadResponse && downloadResponse.downloadId) {
+                    activeDownloadIds.push(downloadResponse.downloadId);
+                  }
                   if (window.videoStatusElement) {
                     window.videoStatusElement.textContent = `Completed: ${file.filename}`;
                     window.videoStatusElement.style.color = '#059669';
@@ -953,6 +966,9 @@
                 });
               } else {
                 console.log(`Individual download started for large file: ${file.filename}`);
+                if (downloadResponse && downloadResponse.downloadId) {
+                  activeDownloadIds.push(downloadResponse.downloadId);
+                }
               }
             });
 
@@ -1061,6 +1077,12 @@
           progress: 90
         });
 
+        if (downloadCancelled) {
+          console.log('Download cancelled before awaiting video downloads');
+          updateProgress({ status: 'error', message: 'Download cancelled by user' });
+          return false;
+        }
+
         try {
           await Promise.all(videoDownloadPromises);
           console.log('All video downloads completed');
@@ -1074,7 +1096,7 @@
             status: 'error',
             message: 'Some video downloads failed: ' + videoError.message
           });
-          return;
+          return false;
         }
       }
 
@@ -1101,12 +1123,19 @@
 
   // Download individual files
   function downloadIndividual(selectedFiles, downloadText, autoRename) {
+    // Reset cancellation state and active download ids
+    downloadCancelled = false;
+
     selectedFiles.forEach(file => {
       const fileName = autoRename ? `${sanitizeFilename(postData.title || 'post')}_${file.filename}` : file.filename;
       chrome.runtime.sendMessage({
         action: 'download',
         url: file.url,
         filename: fileName
+      }, (response) => {
+        if (!chrome.runtime.lastError && response && response.downloadId) {
+          activeDownloadIds.push(response.downloadId);
+        }
       });
     });
 
@@ -1130,10 +1159,19 @@
           action: 'download',
           url: textUrl,
           filename: textFileName
+        }, (response) => {
+          if (!chrome.runtime.lastError && response && response.downloadId) {
+            activeDownloadIds.push(response.downloadId);
+          }
         });
       }
 
       setTimeout(() => URL.revokeObjectURL(textUrl), 10000);
+    }
+
+    // Mark progress as running so the Cancel button will act accordingly
+    if (progressState !== 'running') {
+      progressState = 'running';
     }
   }
 
@@ -1440,6 +1478,10 @@
   let progressBar = null;
   let progressText = null;
   let videoStatus = null;
+  // Track cancellation and active downloads
+  let downloadCancelled = false;
+  let activeDownloadIds = [];
+  let progressState = 'idle'; // 'idle' | 'running' | 'completed' | 'error'
 
   // Listen for progress updates from background script
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -1478,6 +1520,7 @@
 
     // Handle completion
     if (progressData.status === 'completed') {
+      progressState = 'completed';
       if (progressText) {
         progressText.textContent = 'All downloads completed successfully!';
         progressText.style.color = '#10b981';
@@ -1492,6 +1535,7 @@
 
     // Handle errors
     if (progressData.status === 'error') {
+      progressState = 'error';
       if (progressText) {
         progressText.style.color = '#ef4444';
       }
@@ -1500,6 +1544,12 @@
       }
       // Add error buttons instead of auto-close
       addErrorButtons();
+    }
+
+    // If progress indicates running-like states, mark as running
+    const runningStates = ['initializing', 'preparing', 'downloading', 'processing', 'compressing', 'downloading_zip'];
+    if (runningStates.includes(progressData.status)) {
+      progressState = 'running';
     }
   }
 
@@ -1706,7 +1756,7 @@
 
     // Exit button (always visible)
     const exitButton = document.createElement('button');
-    exitButton.textContent = 'Exit';
+    exitButton.textContent = 'Cancel';
     exitButton.style.padding = '8px 16px';
     exitButton.style.backgroundColor = '#374151';
     exitButton.style.color = '#e2e8f0';
@@ -1718,11 +1768,25 @@
     exitButton.style.fontFamily = '"JetBrains Mono", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace';
     exitButton.style.transition = 'all 0.3s ease';
     exitButton.onclick = () => {
+      // If downloads are running, treat this as a cancel + reload
+      if (progressState === 'running') {
+        console.log('User requested cancel during active download');
+        downloadCancelled = true;
+        updateProgress({ status: 'error', message: 'Cancellation requested. Stopping downloads and reloading...' });
+        // Try to cancel active downloads in the background
+        if (activeDownloadIds.length > 0) {
+          chrome.runtime.sendMessage({ action: 'cancel_downloads', downloadIds: activeDownloadIds });
+        }
+        // Give UI a moment to update, then reload
+        setTimeout(() => window.location.reload(), 700);
+        return;
+      }
+
+      // Otherwise behave as Exit: close progress modal and return to download modal
       if (progressModal) {
         progressModal.remove();
         progressModal = null;
       }
-      // Return to the download modal
       const modal = createModal();
       document.body.appendChild(modal);
     };

@@ -78,6 +78,9 @@ Files are downloaded directly to your browser's default download folder.
   - **Site requires authentication**: ensure you're logged in if the post is gated.
 - If the problem persists, run the extension in the Browser Console and paste the latest logs (look for `Fetching:`, `Retry response status:`, `Background fetch result:`, `Fetch error:`) so we can diagnose further.
 
+User actions:
+- When a download is in progress, the progress modal shows a **Cancel** button. Clicking it will stop further processing, attempt to cancel active downloads, and then reload the page to refresh the post state.
+
 ## Technical Details
 
 - Uses JSZip for client-side ZIP creation
