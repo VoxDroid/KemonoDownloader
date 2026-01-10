@@ -121,6 +121,8 @@ linuxdeploy_plugins = [
 finish_arg."filesystem=home" = true
 flatpak_runtime = "org.kde.Platform"
 flatpak_runtime_version = "6.7"
+flatpak_base = "com.riverbankcomputing.PyQt.BaseApp"
+flatpak_base_version = "6.7"
 flatpak_sdk = "org.kde.Sdk"
 
 [tool.briefcase.app.kemonodownloader.windows]
