@@ -53,6 +53,21 @@ class TestDefaultSettings:
         assert default_settings["auto_check_updates"] is True
         assert default_settings["language"] == "english"
 
+    def test_creator_filename_and_folder_defaults(self):
+        """Ensure the creator filename template and folder strategy defaults exist."""
+        from kemonodownloader.kd_settings import SettingsTab
+
+        st = SettingsTab(None)
+        try:
+            assert st.get_creator_filename_template() != ""
+            assert st.get_creator_folder_strategy() in [
+                "per_post",
+                "single_folder",
+                "by_file_type",
+            ]
+        finally:
+            st.deleteLater()
+
     def test_default_retry_settings(self):
         """Test default retry configuration values."""
         defaults = {

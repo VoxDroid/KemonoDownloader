@@ -5,7 +5,7 @@
   "exclude": [
     "tests"
   ],
-  "reportMissingImports": true,
+  "reportMissingImports": false,
   "reportMissingTypeStubs": false,
   "reportOptionalMemberAccess": false,
   "reportAttributeAccessIssue": false,

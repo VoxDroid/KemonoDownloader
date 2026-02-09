@@ -283,14 +283,21 @@ class PostDetectionThread(QThread):
         self.is_running = False
 
     def run(self):
-        if not self.is_running:
+        try:
+            if not self.is_running:
+                return
+
+            # Parse URL to handle query parameters correctly and extract clean ID and service
+            parsed_url = urlparse(self.url)
+            path = parsed_url.path.strip("/")
+            path_parts = path.split("/")
+        except Exception as e:  # Top-level protection to at least log Python exceptions
+            try:
+                self.log.emit(translate("log_error", str(e)), "ERROR")
+                self.error.emit(str(e))
+            except Exception:
+                pass
             return
-
-        # Parse URL to handle query parameters correctly and extract clean ID and service
-        parsed_url = urlparse(self.url)
-        path = parsed_url.path.strip("/")
-        path_parts = path.split("/")
-
         # Check validity.
         # path_parts should end with user/{id}
         # Example: fanbox/user/12345 -> parts: ['fanbox', 'user', '12345']
@@ -1397,6 +1404,130 @@ class CreatorDownloadThread(QThread):
     def stop(self):
         self.is_running = False
 
+    def generate_filename_and_folder(
+        self, file_url, folder, file_index, total_files, post_id, post_title
+    ):
+        """Generate the target folder path and filename for a given file according to
+        the creator downloader settings (filename template, folder strategy) and
+        current auto-rename state.
+
+        Returns (target_folder, filename)
+        """
+        # Determine raw filename from URL
+        raw_filename = (
+            file_url.split("f=")[-1]
+            if "f=" in file_url
+            else file_url.split("/")[-1].split("?")[0]
+        )
+        file_ext = os.path.splitext(raw_filename)[1]
+        original_name = os.path.splitext(raw_filename)[0]
+
+        # Prepare context for template formatting
+        key = (self.service, self.creator_id, post_id)
+        post_title_safe = sanitize_filename(
+            self.post_titles_map.get(key, f"Post_{post_id}")
+        )
+        context = {
+            "post_id": post_id,
+            "post_title": post_title_safe,
+            "orig_name": sanitize_filename(original_name),
+            "ext": file_ext.lstrip("."),
+            "creator_name": sanitize_filename(self.creator_name or "Unknown_Creator"),
+            "creator_id": self.creator_id,
+            "file_index": file_index + 1,
+            "total_files": total_files,
+        }
+
+        # Get settings
+        template = None
+        strategy = "per_post"
+        try:
+            if self.settings and getattr(self.settings, "settings_tab", None):
+                st = self.settings.settings_tab
+                template = st.get_creator_filename_template()
+                strategy = st.get_creator_folder_strategy()
+        except Exception:
+            # Fallback to defaults
+            template = None
+            strategy = "per_post"
+
+        if not template:
+            template = "{post_id}_{orig_name}"
+
+        # Attempt to format template with context, safely
+        try:
+            formatted = template.format(**context)
+        except Exception:
+            # Log a warning and fallback to a safe default template
+            try:
+                self.log.emit(
+                    translate(
+                        "log_warning", translate("filename_template_error", template)
+                    ),
+                    "WARNING",
+                )
+            except Exception:
+                pass
+            formatted = f"{context['post_id']}_{context['orig_name']}"
+
+        # Apply auto-rename prefix if enabled (per-post counter)
+        prefix = ""
+        if self.auto_rename_enabled:
+            with self.post_file_counters_lock:
+                if post_id not in self.post_file_counters:
+                    self.post_file_counters[post_id] = 0
+                self.post_file_counters[post_id] += 1
+                file_counter = self.post_file_counters[post_id]
+            prefix = f"{file_counter}_"
+
+        # Build final filename and sanitize
+        filename_no_ext = sanitize_filename(prefix + formatted)
+        final_filename = f"{filename_no_ext}{file_ext}"
+
+        # Determine target folder
+        # Creator folder name
+        creator_folder_name = (
+            f"{self.creator_id}_{self.creator_name or self.creator_id}"
+        )
+        # Determine creator_folder: if `folder` already ends with the creator folder
+        # (e.g., passed as the creator_folder in the thread), don't append it again.
+        norm_folder = os.path.normpath(folder)
+        if os.path.basename(norm_folder) == creator_folder_name:
+            creator_folder = norm_folder
+        else:
+            creator_folder = os.path.join(folder, creator_folder_name)
+
+        if strategy == "single_folder":
+            target_folder = creator_folder
+        elif strategy == "by_file_type":
+            ext_folder = (file_ext.lstrip(".") or "other").lower()
+            target_folder = os.path.join(creator_folder, ext_folder)
+        else:  # per_post (default)
+            post_folder_name = f"{post_id}_{post_title_safe}"
+            target_folder = os.path.join(creator_folder, post_folder_name)
+
+        return target_folder, final_filename
+
+    def get_desc_folder_for_post(self, creator_folder, post_id, post_title):
+        """Return the folder where description files should be saved based on folder strategy."""
+        strategy = "per_post"
+        try:
+            if self.settings and getattr(self.settings, "settings_tab", None):
+                strategy = self.settings.settings_tab.get_creator_folder_strategy()
+        except Exception:
+            strategy = "per_post"
+
+        # Normalize creator_folder path
+        creator_folder = os.path.normpath(creator_folder)
+
+        if strategy == "by_file_type":
+            return os.path.join(creator_folder, "txt")
+        elif strategy == "single_folder":
+            return creator_folder
+        else:  # per_post
+            safe_title = sanitize_filename(post_title)
+            return os.path.join(creator_folder, f"{post_id}_{safe_title}")
+
     async def download_post_text_if_needed(self, post_id, post_folder):
         should_download = False
         with self.fetched_texts_lock:
@@ -1409,7 +1540,10 @@ class CreatorDownloadThread(QThread):
 
     def _download_text_sync(self, post_id, post_folder):
         try:
-            desc_path = os.path.join(post_folder, "desc.txt")
+            # Always write a per-post description file to avoid collisions when using
+            # shared folders (like single_creator or file-type subfolders).
+            desc_filename = f"desc_{post_id}.txt"
+            desc_path = os.path.join(post_folder, desc_filename)
             if os.path.exists(desc_path):
                 return
 
@@ -1455,12 +1589,16 @@ class CreatorDownloadThread(QThread):
         post_id = self.files_to_posts_map.get(file_url, self.creator_id)
         key = (self.service, self.creator_id, post_id)
         post_title = self.post_titles_map.get(key, f"Post_{post_id}")
-        post_folder_name = f"{post_id}_{post_title}"
-        post_folder = os.path.join(folder, post_folder_name)
+
+        # Generate final target folder and filename using settings and auto-rename
+        target_folder, filename = self.generate_filename_and_folder(
+            file_url, folder, file_index, total_files, post_id, post_title
+        )
+
         try:
-            os.makedirs(post_folder, exist_ok=True)
+            os.makedirs(target_folder, exist_ok=True)
         except OSError as e:
-            error_msg = translate("failed_to_create_post_folder", post_folder, str(e))
+            error_msg = translate("failed_to_create_post_folder", target_folder, str(e))
             self.log.emit(translate("log_error", error_msg), "ERROR")
             with self.failed_files_lock:
                 self.failed_files[file_url] = error_msg
@@ -1470,34 +1608,16 @@ class CreatorDownloadThread(QThread):
 
         # Download text if enabled (only once per post)
         if self.download_text:
+            # Determine destination for description files depending on folder strategy
+            # (e.g., 'txt' subfolder when using file-type subfolders)
+            desc_folder = self.get_desc_folder_for_post(folder, post_id, post_title)
+            try:
+                os.makedirs(desc_folder, exist_ok=True)
+            except Exception:
+                pass
+            await self.download_post_text_if_needed(post_id, desc_folder)
 
-            await self.download_post_text_if_needed(post_id, post_folder)
-
-        filename = (
-            file_url.split("f=")[-1]
-            if "f=" in file_url
-            else file_url.split("/")[-1].split("?")[0]
-        )
-
-        # Apply auto rename if enabled
-        if self.auto_rename_enabled:
-            # Initialize counter for this post if not exists
-            with self.post_file_counters_lock:
-                if post_id not in self.post_file_counters:
-                    self.post_file_counters[post_id] = 0
-
-                # Increment counter for this post
-                self.post_file_counters[post_id] += 1
-                file_counter = self.post_file_counters[post_id]
-
-            # Get file extension
-            file_ext = os.path.splitext(filename)[1]
-            # Get original filename without extension
-            original_name = os.path.splitext(filename)[0]
-            # Create new filename with counter and original name
-            filename = f"{file_counter}_{original_name}{file_ext}"
-
-        full_path = os.path.join(post_folder, filename.replace("/", "_"))
+        full_path = os.path.join(target_folder, filename.replace("/", "_"))
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
         with self.file_hashes_lock:
@@ -1537,7 +1657,7 @@ class CreatorDownloadThread(QThread):
                     file_index + 1,
                     total_files,
                     file_url,
-                    post_folder,
+                    target_folder,
                 ),
             ),
             "INFO",
@@ -1701,18 +1821,27 @@ class CreatorDownloadThread(QThread):
                 queue.task_done()
 
     def run(self):
-        if not self.is_running:
-            return
-        self.log.emit(
-            translate(
-                "log_info",
+        try:
+            if not self.is_running:
+                return
+            self.log.emit(
                 translate(
-                    "creator_download_thread_started", self.service, self.creator_id
+                    "log_info",
+                    translate(
+                        "creator_download_thread_started", self.service, self.creator_id
+                    ),
                 ),
-            ),
-            "INFO",
-        )
-        self.fetch_creator_and_post_info()
+                "INFO",
+            )
+            self.fetch_creator_and_post_info()
+        except Exception as e:
+            try:
+                self.log.emit(translate("log_error", str(e)), "ERROR")
+            except Exception:
+                pass
+            # Ensure we exit cleanly
+            self.is_running = False
+            return
         total_posts = len(self.selected_posts)
         self.log.emit(
             translate("log_info", translate("total_posts", total_posts)), "INFO"

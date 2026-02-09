@@ -16,7 +16,15 @@ def pytest_configure(config):
     This runs before collection, preventing ImportError during test collection on headless CI.
     """
     try:
+        import faulthandler
+
         from PyQt6.QtWidgets import QApplication
+
+        # Enable faulthandler to get native tracebacks on crashes (useful for C-level faults)
+        try:
+            faulthandler.enable()
+        except Exception:
+            pass
 
         if QApplication.instance() is None:
             QApplication([])

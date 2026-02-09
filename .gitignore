@@ -64,3 +64,6 @@ logs/
 # venv
 /.app
 /.venv
+
+# briefcase
+/.briefcase

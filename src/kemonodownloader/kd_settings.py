@@ -50,6 +50,9 @@ class SettingsTab(QWidget):
             "proxy_type": "tor",  # "custom", "tor"
             "custom_proxy_url": "",
             "tor_path": "",
+            # Creator downloader filename/folder customization
+            "creator_filename_template": "{post_id}_{orig_name}",
+            "creator_folder_strategy": "per_post",  # per_post|single_folder|by_file_type
         }
         self.settings = self.load_settings()
         self.temp_settings = self.settings.copy()
@@ -129,6 +132,19 @@ class SettingsTab(QWidget):
         settings_dict["tor_path"] = self.qsettings.value(
             "tor_path", self.default_settings["tor_path"], type=str
         )
+        # Creator downloader settings
+        settings_dict["creator_filename_template"] = self.qsettings.value(
+            "creator_filename_template",
+            self.default_settings.get(
+                "creator_filename_template", "{post_id}_{orig_name}"
+            ),
+            type=str,
+        )
+        settings_dict["creator_folder_strategy"] = self.qsettings.value(
+            "creator_folder_strategy",
+            self.default_settings.get("creator_folder_strategy", "per_post"),
+            type=str,
+        )
         return settings_dict
 
     def save_settings(self):
@@ -156,6 +172,15 @@ class SettingsTab(QWidget):
         self.qsettings.setValue("proxy_type", self.settings["proxy_type"])
         self.qsettings.setValue("custom_proxy_url", self.settings["custom_proxy_url"])
         self.qsettings.setValue("tor_path", self.settings["tor_path"])
+        # Creator downloader settings
+        self.qsettings.setValue(
+            "creator_filename_template",
+            self.settings.get("creator_filename_template", "{post_id}_{orig_name}"),
+        )
+        self.qsettings.setValue(
+            "creator_folder_strategy",
+            self.settings.get("creator_folder_strategy", "per_post"),
+        )
         self.qsettings.sync()
 
     def setup_ui(self):
@@ -304,6 +329,109 @@ class SettingsTab(QWidget):
 
         self.retry_group.setLayout(retry_layout)
         layout.addWidget(self.retry_group)
+
+        # Creator downloader customization group
+        self.creator_custom_group = QGroupBox()
+        self.creator_custom_group.setStyleSheet(
+            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
+        )
+        creator_custom_layout = QGridLayout()
+
+        self.creator_custom_label = QLabel()
+        creator_custom_layout.addWidget(self.creator_custom_label, 0, 0)
+
+        # Filename template combo (preset selections + editable custom)
+        self.creator_filename_combo = QComboBox()
+        self.creator_filename_combo.setEditable(True)
+        # Preset templates (label_key, template_string)
+        self._template_presets = [
+            ("tmpl_postid_orig", "{post_id}_{orig_name}"),
+            ("tmpl_posttitle_postid_orig", "{post_title}-{post_id}-{orig_name}"),
+            ("tmpl_postid_posttitle", "{post_id}_{post_title}"),
+            ("tmpl_index_posttitle", "{file_index}_{post_title}_{orig_name}"),
+        ]
+        for label_key, tpl in self._template_presets:
+            self.creator_filename_combo.addItem(translate(label_key), tpl)
+        # Add a custom option at the end
+        self.creator_filename_combo.addItem(
+            translate("tmpl_custom"), "{post_id}_{orig_name}"
+        )
+        # Set current or custom text
+        current_tpl = self.temp_settings.get(
+            "creator_filename_template", "{post_id}_{orig_name}"
+        )
+        found_index = None
+        for i in range(self.creator_filename_combo.count()):
+            if self.creator_filename_combo.itemData(i) == current_tpl:
+                found_index = i
+                break
+        if found_index is not None:
+            self.creator_filename_combo.setCurrentIndex(found_index)
+        else:
+            # Use custom editable text
+            self.creator_filename_combo.setCurrentIndex(
+                self.creator_filename_combo.count() - 1
+            )
+            self.creator_filename_combo.setEditText(current_tpl)
+
+        self.creator_filename_combo.setStyleSheet("padding: 5px; border-radius: 5px;")
+        # Connect both change events
+        self.creator_filename_combo.currentIndexChanged.connect(
+            lambda idx: self.update_temp_setting(
+                "creator_filename_template",
+                (
+                    self.creator_filename_combo.itemData(idx)
+                    if idx < self.creator_filename_combo.count() - 1
+                    else self.creator_filename_combo.currentText()
+                ),
+            )
+        )
+        # Update temp setting when editing text
+        self.creator_filename_combo.lineEdit().textChanged.connect(
+            lambda text: self.update_temp_setting("creator_filename_template", text)
+        )
+        creator_custom_layout.addWidget(self.creator_filename_combo, 0, 1)
+
+        # Help button for template variables
+        self.creator_template_help_btn = QPushButton("?")
+        self.creator_template_help_btn.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px; min-width: 26px; max-width: 26px;"
+        )
+        self.creator_template_help_btn.clicked.connect(self.show_template_help)
+        creator_custom_layout.addWidget(self.creator_template_help_btn, 0, 2)
+
+        self.creator_folder_strategy_label = QLabel()
+        creator_custom_layout.addWidget(self.creator_folder_strategy_label, 1, 0)
+
+        self.creator_folder_strategy_combo = QComboBox()
+        self.creator_folder_strategy_combo.addItem(
+            translate("per_post_folders"), "per_post"
+        )
+        self.creator_folder_strategy_combo.addItem(
+            translate("single_creator_folder"), "single_folder"
+        )
+        self.creator_folder_strategy_combo.addItem(
+            translate("subfolders_by_file_type"), "by_file_type"
+        )
+        self.creator_folder_strategy_combo.setStyleSheet(
+            "padding: 5px; border-radius: 5px;"
+        )
+        # Set current index based on temp setting
+        strategy = self.temp_settings.get("creator_folder_strategy", "per_post")
+        for i in range(self.creator_folder_strategy_combo.count()):
+            if self.creator_folder_strategy_combo.itemData(i) == strategy:
+                self.creator_folder_strategy_combo.setCurrentIndex(i)
+                break
+        self.creator_folder_strategy_combo.currentIndexChanged.connect(
+            lambda idx: self.update_temp_setting(
+                "creator_folder_strategy",
+                self.creator_folder_strategy_combo.itemData(idx),
+            )
+        )
+        creator_custom_layout.addWidget(self.creator_folder_strategy_combo, 1, 1)
+
+        self.creator_custom_group.setLayout(creator_custom_layout)
+        layout.addWidget(self.creator_custom_group)
 
         # Update Settings Group
         self.update_group = QGroupBox()
@@ -591,6 +719,22 @@ class SettingsTab(QWidget):
         language = self.language_combo.itemData(index)
         self.update_temp_setting("language", language)
 
+    def show_template_help(self):
+        """Show help text explaining the available filename template placeholders."""
+        try:
+            QMessageBox.information(
+                self,
+                translate("filename_template_help_title"),
+                translate("filename_template_help_text"),
+            )
+        except Exception:
+            # In case translation lookup or UI fails, fall back to a simple message
+            QMessageBox.information(
+                self,
+                "Template Help",
+                "Use placeholders like {post_title}, {post_id}, {orig_name}, {ext}, {creator_name}, {creator_id}, {file_index}, {total_files}",
+            )
+
     def browse_directory(self):
         directory = QFileDialog.getExistingDirectory(
             self, translate("browse"), self.temp_settings["base_directory"]
@@ -867,6 +1011,23 @@ class SettingsTab(QWidget):
         )
         proxy_type_name = self.temp_settings["proxy_type"].capitalize()
 
+        # Prepare display values for template and folder strategy
+        filename_template_display = self.temp_settings.get(
+            "creator_filename_template", "{post_id}_{orig_name}"
+        )
+        folder_strategy_key = self.temp_settings.get(
+            "creator_folder_strategy", "per_post"
+        )
+        folder_strategy_display = translate(
+            "per_post_folders"
+            if folder_strategy_key == "per_post"
+            else (
+                "single_creator_folder"
+                if folder_strategy_key == "single_folder"
+                else "subfolders_by_file_type"
+            )
+        )
+
         reply = QMessageBox.question(
             self,
             translate("confirm_settings_change"),
@@ -879,6 +1040,8 @@ class SettingsTab(QWidget):
                 language_name,
                 proxy_status,
                 proxy_type_name,
+                filename_template_display,
+                folder_strategy_display,
             ),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
@@ -955,6 +1118,21 @@ class SettingsTab(QWidget):
         )
         proxy_type_name = self.settings["proxy_type"].capitalize()
 
+        # Show applied message including creator filename template and folder strategy
+        filename_template_display = self.settings.get(
+            "creator_filename_template", "{post_id}_{orig_name}"
+        )
+        folder_strategy_key = self.settings.get("creator_folder_strategy", "per_post")
+        folder_strategy_display = translate(
+            "per_post_folders"
+            if folder_strategy_key == "per_post"
+            else (
+                "single_creator_folder"
+                if folder_strategy_key == "single_folder"
+                else "subfolders_by_file_type"
+            )
+        )
+
         QMessageBox.information(
             self,
             translate("settings_applied"),
@@ -967,6 +1145,8 @@ class SettingsTab(QWidget):
                 language_name,
                 proxy_status,
                 proxy_type_name,
+                filename_template_display,
+                folder_strategy_display,
             ),
         )
 
@@ -1049,6 +1229,85 @@ class SettingsTab(QWidget):
         self.api_request_max_retries_label.setText(translate("api_request_max_retries"))
 
         self.update_group.setTitle(translate("update_settings"))
+
+        # Creator downloader customization texts
+        self.creator_custom_group.setTitle(translate("creator_downloader_settings"))
+        self.creator_custom_label.setText(translate("filename_template"))
+        self.creator_folder_strategy_label.setText(translate("folder_strategy"))
+
+        # Update template presets display (support language change)
+        try:
+            current_text = (
+                self.creator_filename_combo.currentText()
+                if hasattr(self, "creator_filename_combo")
+                else ""
+            )
+            # Clear and re-add with translated labels but preserve data values
+            if hasattr(self, "creator_filename_combo"):
+                self.creator_filename_combo.blockSignals(True)
+                self.creator_filename_combo.clear()
+                for label_key, tpl in self._template_presets:
+                    self.creator_filename_combo.addItem(translate(label_key), tpl)
+                self.creator_filename_combo.addItem(
+                    translate("tmpl_custom"), "{post_id}_{orig_name}"
+                )
+                # Restore selection
+                found_index = None
+                for i in range(self.creator_filename_combo.count()):
+                    if self.creator_filename_combo.itemData(
+                        i
+                    ) == self.temp_settings.get(
+                        "creator_filename_template", "{post_id}_{orig_name}"
+                    ):
+                        found_index = i
+                        break
+                if found_index is not None:
+                    self.creator_filename_combo.setCurrentIndex(found_index)
+                else:
+                    self.creator_filename_combo.setCurrentIndex(
+                        self.creator_filename_combo.count() - 1
+                    )
+                    self.creator_filename_combo.setEditText(current_text)
+                self.creator_filename_combo.blockSignals(False)
+        except Exception:
+            pass
+
+        # Ensure folder strategy combo labels are localized
+        try:
+            if hasattr(self, "creator_folder_strategy_combo"):
+                current_data = self.creator_folder_strategy_combo.itemData(
+                    self.creator_folder_strategy_combo.currentIndex()
+                )
+                self.creator_folder_strategy_combo.blockSignals(True)
+                self.creator_folder_strategy_combo.clear()
+                self.creator_folder_strategy_combo.addItem(
+                    translate("per_post_folders"), "per_post"
+                )
+                self.creator_folder_strategy_combo.addItem(
+                    translate("single_creator_folder"), "single_folder"
+                )
+                self.creator_folder_strategy_combo.addItem(
+                    translate("subfolders_by_file_type"), "by_file_type"
+                )
+                # restore selection based on data
+                for i in range(self.creator_folder_strategy_combo.count()):
+                    if (
+                        self.creator_folder_strategy_combo.itemData(i) == current_data
+                    ):  # pragma: no cover - trivial UI restore
+                        self.creator_folder_strategy_combo.setCurrentIndex(i)
+                        break
+                self.creator_folder_strategy_combo.blockSignals(False)
+        except Exception:
+            pass
+
+        # Tooltip/help for template
+        if hasattr(self, "creator_template_help_btn"):
+            self.creator_template_help_btn.setToolTip(
+                translate("filename_template_help_title")
+            )
+
+        # Update proxy and other text
+
         self.auto_update_label.setText(translate("auto_check_updates"))
 
         self.language_group.setTitle(translate("language_settings"))
@@ -1089,6 +1348,12 @@ class SettingsTab(QWidget):
 
     def get_api_request_max_retries(self):
         return self.settings["api_request_max_retries"]
+
+    def get_creator_filename_template(self):
+        return self.settings.get("creator_filename_template", "{post_id}_{orig_name}")
+
+    def get_creator_folder_strategy(self):
+        return self.settings.get("creator_folder_strategy", "per_post")
 
     def get_proxy_type_index(self, proxy_type):
         type_map = {"custom": 0, "tor": 1}
