@@ -32,7 +32,7 @@ from kemonodownloader.post_downloader import PostDownloaderTab
 
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
-CURRENT_VERSION = "5.8.0"
+CURRENT_VERSION = "5.9.0"
 GITHUB_REPO = "VoxDroid/KemonoDownloader"
 
 

@@ -1,5 +1,34 @@
 # Kemono Downloader Release Notes
 
+## v5.9.0 (09 February 2026)
+**feat: Creator filename/folder customization, browser extension, and misc fixes**
+- Add creator filename/folder customization
+  Introduce customizable filename templates and folder strategies for the Creator downloader. Added SettingsTab options and persistence for `creator_filename_template` and `creator_folder_strategy`, UI widgets (preset templates, editable custom template, help button, folder strategy combo) and translated labels in `kd_language`. Implemented `generate_filename_and_folder` and `get_desc_folder_for_post` in `CreatorDownloadThread` to build sanitized filenames and target folders (`per_post` / `single_folder` / `by_file_type`), support auto-rename counters, avoid duplicating creator folder segments, and write per-post description files (`desc_{post_id}.txt`) into appropriate folders. Added top-level exception protection and logging in download threads for more robust error handling. Added faulthandler enable in `tests/conftest.py` and multiple unit tests covering templates, folder strategies, UI behavior, and thread safety. Also updated `.gitignore` (add `.briefcase`) and extended settings confirmation/applied dialogs to include the new options.
+
+- Add initial Kemono Downloader browser extension
+  Introduce a standalone browser extension for downloading content from Kemono and Coomer sites. Includes background script for downloads and CORS handling, content script for UI and post parsing, manifest, assets, and documentation.
+
+- Add browser extension tab and documentation
+  Introduces a new 'Browser Extension' tab in the application, providing users with information and instructions for the standalone browser extension. Updates the README with a detailed section on the browser extension, and adds relevant translations and UI logic to support the new tab.
+
+- Improve file progress display and direct downloads of the browser extension
+  Enhanced progress messages in the background script to include file index and total, improving clarity during multi-file downloads. Added filename truncation for better UI in content script, and switched to direct anchor-based downloads for ZIP and text files to improve compatibility, especially in incognito mode. Updated manifest with new version, author, and homepage.
+
+- Ensure boolean type for Tor button state checks
+  Wrapped `tor_exists` in `bool()` when setting enabled state for test and start Tor buttons to ensure correct type is used. This improves code clarity and prevents potential issues with non-boolean values.
+
+- Update CI to use libasound2t64 on Ubuntu
+  Replaces `libasound2` with `libasound2t64` in the list of packages installed on Ubuntu in the CI workflow. This ensures compatibility with updated package naming conventions.
+
+- Update dependencies and Debian system requirements
+  Added `types-requests` to test requirements and several new Debian system packages under `system_requires` for better compatibility. Removed `asyncio` from the main requirements list.
+
+- Improve Tor auto-detection and fix image preview loading
+  Enhanced Tor executable auto-detection to search app-local directories before system locations, including walking subfolders for tor binaries. Fixed image preview loading by wrapping downloaded data in `QByteArray` for `QPixmap`. Added type stubs for `fake_useragent` and `qtawesome`. Updated tests to cover new Tor detection logic.
+
+- Improve API fetch robustness and manifest compatibility
+  Enhances the extension's ability to fetch post data by adding fallback parsing, background fetches with custom headers, and improved error handling for sites with non-standard API responses or authentication requirements. Updates the manifest to use Manifest V2 for cross-browser compatibility and documents MV2/MV3 differences and troubleshooting steps in the README.
+
 ## v5.8.0 (07 January 2025)
 **feat: Enhanced download capabilities, Tor compatibility, and UI improvements**
 - Fix Tor startup issues on Linux and cross-platform compatibility. Create temporary torrc file to avoid system config conflicts on Linux. Use --torc-file argument for clean Tor initialization.
