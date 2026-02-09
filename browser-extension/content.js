@@ -755,7 +755,8 @@
               window.videoStatusElement.style.color = '#0369a1';
             }
 
-            const fileName = autoRename ? `${sanitizeFilename(postData.title || 'post')}_${file.filename}` : file.filename;
+            // Include numeric order prefix when auto-rename is enabled so files sort by order
+            const fileName = autoRename ? `${processedFiles + 1}_${sanitizeFilename(postData.title || 'post')}_${file.filename}` : file.filename;
 
             // Track video download
             const videoDownloadPromise = new Promise((resolve, reject) => {
@@ -943,7 +944,8 @@
             continue;
           }
 
-          const fileName = autoRename ? `${sanitizeFilename(postData.title || 'post')}_${file.filename}` : file.filename;
+          // Prefix with numeric order when auto-rename is enabled (processedFiles starts at 0)
+          const fileName = autoRename ? `${processedFiles + 1}_${sanitizeFilename(postData.title || 'post')}_${file.filename}` : file.filename;
           const path = fileName;
 
           // For very large files, download individually instead of adding to ZIP
@@ -1004,7 +1006,8 @@
 
       // Add text content
       if (downloadText) {
-        const textFileName = autoRename ? `${sanitizeFilename(postData.title || 'post')}_content.txt` : 'content.txt';
+        // For consistency, put the text content after other files and prefix with next numeric order when auto-rename is enabled
+        const textFileName = autoRename ? `${processedFiles + 1}_${sanitizeFilename(postData.title || 'post')}_content.txt` : 'content.txt';
         zip.file(textFileName, postData.content);
         console.log('Added text content to ZIP');
 
@@ -1126,8 +1129,9 @@
     // Reset cancellation state and active download ids
     downloadCancelled = false;
 
-    selectedFiles.forEach(file => {
-      const fileName = autoRename ? `${sanitizeFilename(postData.title || 'post')}_${file.filename}` : file.filename;
+    selectedFiles.forEach((file, idx) => {
+      // Use the selection order idx to prefix filenames for auto-rename so files sort by order
+      const fileName = autoRename ? `${idx + 1}_${sanitizeFilename(postData.title || 'post')}_${file.filename}` : file.filename;
       chrome.runtime.sendMessage({
         action: 'download',
         url: file.url,
@@ -1140,7 +1144,8 @@
     });
 
     if (downloadText) {
-      const textFileName = autoRename ? `${sanitizeFilename(postData.title || 'post')}_content.txt` : 'content.txt';
+      // Place the text file after selected files and prefix with numeric order when auto-rename is enabled
+      const textFileName = autoRename ? `${selectedFiles.length + 1}_${sanitizeFilename(postData.title || 'post')}_content.txt` : 'content.txt';
       const textBlob = new Blob([postData.content], { type: 'text/plain' });
       const textUrl = URL.createObjectURL(textBlob);
 
