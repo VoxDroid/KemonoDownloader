@@ -42,19 +42,27 @@ The extension automatically detects when you're on a Kemono or Coomer post page 
 
 ## Manifest & Browser compatibility 
 
-- This repository uses a single **Manifest V2** file at `manifest.json` which is compatible with **Firefox** and works for local testing in **Chrome/Edge**.
-- If you need a **Manifest V3** copy to test MV3 service workers, create a MV3 manifest by copying `manifest.json` to `manifest.chrome.json` and applying these edits:
-  - Set `"manifest_version": 3`
-  - Move host patterns from `permissions` into `host_permissions`
-  - Replace the background section with: `"background": { "service_worker": "background.js" }`
-  - Remove the `applications`/`gecko` block
+- This repository now contains two manifest files for convenience:
+  - `chrome_manifest.json` — Manifest V3 for Chrome/Edge (service worker background)
+  - `firefox_manifest.json` — Manifest V2 for Firefox and local testing
 
-PowerShell quick-copy (manual edits still required):
+- To load the extension in a browser, rename the appropriate file to `manifest.json` (or copy it as `manifest.json`) in the extracted folder before using the browser's developer add-on/extension UI.
+
+PowerShell quick-copy examples:
 
 ```powershell
-Copy-Item browser-extension\manifest.json browser-extension\manifest.chrome.json
-# Then edit browser-extension\manifest.chrome.json to change manifest_version and background as described above
+# For Chrome/Edge (Manifest V3)
+Copy-Item browser-extension\chrome_manifest.json browser-extension\manifest.json
+
+# For Firefox (Manifest V2)
+Copy-Item browser-extension\firefox_manifest.json browser-extension\manifest.json
 ```
+
+Notes:
+- MV3 (`chrome_manifest.json`) moves host patterns into `host_permissions` and uses a `background.service_worker` entry.
+- MV2 (`firefox_manifest.json`) retains `background.scripts` and the `applications.gecko` block required by some Firefox installs.
+
+> Tip: After renaming, use your browser's developer extension page to load the unpacked folder. Remember to rename back or keep both manifests to switch browsers easily.
 
 > 💡 Tip: Keep `manifest.json` as the canonical, developer-friendly (MV2) manifest while generating `manifest.chrome.json` only when you need MV3-specific testing or publishing.
 

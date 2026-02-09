@@ -253,11 +253,25 @@ Files are downloaded directly to your browser's default download folder.
 ### $\color{#90a4ae}{\sf{\text{Installation}}}$
 1. Download the extension package from the [GitHub Releases](https://github.com/VoxDroid/KemonoDownloader/releases)
 2. Extract the ZIP file to a folder on your computer
-3. Follow the browser-specific installation instructions:
-   - **Chrome/Edge:** Enable Developer mode and load the unpacked extension
-   - **Firefox:** Use the debugging console to load the temporary add-on
+3. Choose the correct manifest for your browser and copy it to `manifest.json` inside the unpacked extension folder. This repository includes two per-browser manifests in the `browser-extension/` directory:
+   - **Chrome/Edge (Manifest V3):** `browser-extension/chrome_manifest.json`
+   - **Firefox (Manifest V2):** `browser-extension/firefox_manifest.json`
 
-The extension works with Chrome, Edge, and other Chromium-based browsers, as well as Firefox.
+   Quick copy commands:
+   - **PowerShell (Windows):**
+     - `Copy-Item .\browser-extension\chrome_manifest.json .\browser-extension\manifest.json`
+     - `Copy-Item .\browser-extension\firefox_manifest.json .\browser-extension\manifest.json`
+   - **Bash (macOS / Linux):**
+     - `cp browser-extension/chrome_manifest.json browser-extension/manifest.json`
+     - `cp browser-extension/firefox_manifest.json browser-extension/manifest.json`
+
+   > **Note:** `browser-extension/manifest.json` in this repository is a small placeholder file that explains how to choose and copy the proper per-browser manifest; please replace it with the appropriate manifest file before loading the extension.
+
+4. Follow the browser-specific installation instructions:
+   - **Chrome/Edge:** Enable Developer mode and load the unpacked extension (select the `browser-extension` directory)
+   - **Firefox:** Use the debugging console to load the temporary add-on (select the `manifest.json` in the `browser-extension` directory)
+
+For more details and troubleshooting, see `browser-extension/README.md`. The extension works with Chrome, Edge, and other Chromium-based browsers, as well as Firefox.
 
 ## $\color{#546e7a}{\sf{\text{Installation}}}$ <a name="installation"></a>
 Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedocs.io/), making it easier to run or distribute as a native application across platforms. You can either build from source or use pre-compiled binaries where available.

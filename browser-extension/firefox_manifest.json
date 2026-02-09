@@ -1,0 +1,46 @@
+{
+  "manifest_version": 2,
+  "name": "Kemono Downloader Extension",
+  "short_name": "KemonoDLE",
+  "version": "1.2.0",
+  "description": "Download posts from Kemono and Coomer sites",
+  "author": "VoxDroid",
+  "homepage_url": "https://github.com/VoxDroid/KemonoDownloader",
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "storage",
+    "tabs",
+    "https://kemono.cr/*",
+    "https://coomer.st/*",
+    "https://*.kemono.cr/*",
+    "https://*.coomer.st/*",
+    "https://n4.coomer.st/*",
+    "https://n4.kemono.cr/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://kemono.cr/*",
+        "https://coomer.st/*",
+        "https://*.kemono.cr/*",
+        "https://*.coomer.st/*"
+      ],
+      "js": ["jszip.min.js", "content.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "applications": {
+    "gecko": {
+      "id": "izeno.contact@gmail.com",
+      "strict_min_version": "90.0"
+    }
+  }
+}

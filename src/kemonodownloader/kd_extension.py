@@ -182,6 +182,41 @@ class ExtensionTab(QWidget):
         setup_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
         self.content_layout.addWidget(setup_text)
 
+        # Manifest compatibility / notes
+        manifest_title = QLabel(f"<h2>{translate('extension_manifest_title')}</h2>")
+        manifest_title.setFont(QFont("Poppins", 16, QFont.Weight.Bold))
+        manifest_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
+        self.content_layout.addWidget(manifest_title)
+
+        manifest_text = QLabel(translate("extension_manifest_text"))
+        manifest_text.setFont(QFont("Poppins", 12))
+        manifest_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
+        manifest_text.setWordWrap(True)
+        manifest_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        manifest_text.setOpenExternalLinks(True)
+        self.content_layout.addWidget(manifest_text)
+
+        chrome_manifest = QLabel(translate("extension_manifest_chrome"))
+        chrome_manifest.setFont(QFont("Poppins", 12))
+        chrome_manifest.setStyleSheet("color: #D0D0D0; padding: 5px;")
+        chrome_manifest.setWordWrap(True)
+        chrome_manifest.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        self.content_layout.addWidget(chrome_manifest)
+
+        firefox_manifest = QLabel(translate("extension_manifest_firefox"))
+        firefox_manifest.setFont(QFont("Poppins", 12))
+        firefox_manifest.setStyleSheet("color: #D0D0D0; padding: 5px;")
+        firefox_manifest.setWordWrap(True)
+        firefox_manifest.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        self.content_layout.addWidget(firefox_manifest)
+
+        manifest_quick = QLabel(translate("extension_manifest_quickcopy"))
+        manifest_quick.setFont(QFont("Poppins", 12))
+        manifest_quick.setStyleSheet("color: #D0D0D0; padding: 5px;")
+        manifest_quick.setWordWrap(True)
+        manifest_quick.setAlignment(Qt.AlignmentFlag.AlignJustify)
+        self.content_layout.addWidget(manifest_quick)
+
         # Troubleshooting Section
         troubleshooting_title = QLabel(
             f"<h2>{translate('extension_troubleshooting_title')}</h2>"

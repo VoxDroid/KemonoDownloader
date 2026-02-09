@@ -3215,7 +3215,8 @@ class KDLanguage:
                 "<b>Download Location:</b> Files are downloaded to your browser's default download folder. The extension integrates with your system's download manager for the best experience.<br><br>"
                 "<b>File Organization:</b> The extension automatically organizes downloads with post titles and maintains file structure. No additional configuration needed.<br><br>"
                 "<b>Performance:</b> Large video files are downloaded individually for optimal performance, while smaller files are compressed into ZIP archives.<br><br>"
-                "<b>Compatibility:</b> The extension automatically detects whether you're on kemono.cr or coomer.st and adjusts accordingly.",
+                "<b>Compatibility:</b> The extension automatically detects whether you're on kemono.cr or coomer.st and adjusts accordingly.<br><br>"
+                "Note: This repository now includes two manifest files for convenience: `chrome_manifest.json` (MV3) and `firefox_manifest.json` (MV2). Rename or copy the appropriate file to `manifest.json` before loading the extension in your browser's developer UI.",
                 "japanese": "拡張機能はすぐに使用できる適切なデフォルト設定で動作しますが、動作をカスタマイズできます：<br><br>"
                 "<b>ダウンロード場所:</b> ファイルはブラウザのデフォルトダウンロードフォルダにダウンロードされます。拡張機能は最適なエクスペリエンスのためにシステムのダウンロードマネージャーと統合します。<br><br>"
                 "<b>ファイル整理:</b> 拡張機能は投稿タイトルでダウンロードを自動的に整理し、ファイル構造を維持します。追加の設定は必要ありません。<br><br>"
@@ -3263,6 +3264,36 @@ class KDLanguage:
                 "<b>扩展程序消失：</b>对于 Firefox，您需要在浏览器重启后重新安装<br>"
                 "<b>权限问题：</b>确保扩展程序已启用必要的权限<br><br>"
                 "如需额外帮助，请查看 GitHub 仓库或创建问题。",
+            },
+            "extension_manifest_title": {
+                "english": "Manifest & Browser compatibility",
+                "japanese": "マニフェストとブラウザ互換性",
+                "korean": "매니페스트 및 브라우저 호환성",
+                "chinese-simplified": "清单与浏览器兼容性",
+            },
+            "extension_manifest_text": {
+                "english": "This repository now includes two manifest files for convenience: `chrome_manifest.json` (Manifest V3 for Chrome/Edge) and `firefox_manifest.json` (Manifest V2 for Firefox).\n\nBefore loading the extension in your browser's developer UI, rename or copy the appropriate file to `manifest.json`.",
+                "japanese": "このリポジトリには、便利なように2つのマニフェストファイルが含まれています: `chrome_manifest.json` (Chrome/Edge 用の Manifest V3) と `firefox_manifest.json` (Firefox 用の Manifest V2)。\n\nブラウザのデベロッパーUIに拡張機能を読み込む前に、適切なファイルを `manifest.json` にリネームまたはコピーしてください。",
+                "korean": "이 저장소에는 Chrome/Edge용 Manifest V3의 `chrome_manifest.json`과 Firefox용 Manifest V2의 `firefox_manifest.json` 두 가지 매니페스트 파일이 포함되어 있습니다.\n\n브라우저 개발자 UI에서 확장을 로드하기 전에 적절한 파일을 `manifest.json`으로 이름을 바꾸거나 복사하세요.",
+                "chinese-simplified": "此仓库现在为了方便包含两个清单文件：`chrome_manifest.json`（适用于 Chrome/Edge 的 Manifest V3）和 `firefox_manifest.json`（适用于 Firefox 的 Manifest V2）。\n\n在浏览器的开发者 UI 中加载扩展之前，请将合适的文件重命名或复制为 `manifest.json`。",
+            },
+            "extension_manifest_chrome": {
+                "english": "For Chrome/Edge, use `chrome_manifest.json` (Manifest V3). Move host patterns into `host_permissions` and use a `background.service_worker` entry.",
+                "japanese": "Chrome/Edge の場合は `chrome_manifest.json` (Manifest V3) を使用します。ホストパターンを `host_permissions` に移動し、`background.service_worker` を使用します。",
+                "korean": "Chrome/Edge의 경우 `chrome_manifest.json`(Manifest V3)을 사용하세요. 호스트 패턴을 `host_permissions`로 이동하고 `background.service_worker`를 사용합니다.",
+                "chinese-simplified": "对于 Chrome/Edge，请使用 `chrome_manifest.json`（Manifest V3）。将主机模式移到 `host_permissions` 并使用 `background.service_worker`。",
+            },
+            "extension_manifest_firefox": {
+                "english": "For Firefox, use `firefox_manifest.json` (Manifest V2). Keep `background.scripts` and the `applications.gecko` block if needed.",
+                "japanese": "Firefox の場合は `firefox_manifest.json` (Manifest V2) を使用します。必要に応じて `background.scripts` と `applications.gecko` ブロックを維持してください。",
+                "korean": "Firefox의 경우 `firefox_manifest.json`(Manifest V2)을 사용하세요. 필요시 `background.scripts` 및 `applications.gecko` 블록을 유지하세요.",
+                "chinese-simplified": "对于 Firefox，请使用 `firefox_manifest.json`（Manifest V2）。如有需要，请保留 `background.scripts` 和 `applications.gecko` 块。",
+            },
+            "extension_manifest_quickcopy": {
+                "english": "Quick copy commands (PowerShell):<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
+                "japanese": "クイックコピーコマンド（PowerShell）：<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
+                "korean": "빠른 복사 명령(파워셸):<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
+                "chinese-simplified": "快速复制命令 (PowerShell)：<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
             },
             "tor_status_stopped": {
                 "english": "Tor Status: Stopped",
