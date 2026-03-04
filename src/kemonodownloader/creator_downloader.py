@@ -39,6 +39,7 @@ from PyQt6.QtWidgets import (
 )
 from requests.adapters import HTTPAdapter  # type: ignore[import]
 
+from kemonodownloader.hash_db import HashDB
 from kemonodownloader.kd_language import translate
 
 
@@ -77,8 +78,23 @@ else:
 system_language = system_language.replace("_", "-")
 accept_language = f"{system_language},en;q=0.9"
 
-ua = UserAgent()
-user_agent = ua.chrome
+_user_agent: Optional[str] = None
+
+
+def get_user_agent() -> str:
+    global _user_agent
+    if _user_agent is None:
+        try:
+            ua = UserAgent()
+            _user_agent = ua.chrome
+        except Exception:
+            _user_agent = (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/131.0.0.0 Safari/537.36"
+            )
+    assert _user_agent is not None
+    return _user_agent
 
 
 def get_domain_config(url):
@@ -100,15 +116,28 @@ def get_domain_config(url):
 
 
 # Default headers (will be updated per request based on domain)
-HEADERS = {
-    "User-Agent": user_agent,
-    "Referer": "https://kemono.cr/",
-    "Accept": "text/css",
-    "Accept-Language": accept_language,
-    "Accept-Encoding": "gzip, deflate",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-}
+def _build_headers() -> dict:
+    return {
+        "User-Agent": get_user_agent(),
+        "Referer": "https://kemono.cr/",
+        "Accept": "text/css",
+        "Accept-Language": accept_language,
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+    }
+
+
+HEADERS = None  # Built lazily via get_headers()
+
+
+def get_headers() -> dict:
+    global HEADERS
+    if HEADERS is None:
+        HEADERS = _build_headers()
+    return HEADERS
+
+
 API_BASE = "https://kemono.cr/api/v1"
 
 
@@ -186,7 +215,7 @@ class PreviewThread(QThread):
 
             try:
                 response = get_session(self.settings_tab).get(
-                    self.url, headers=HEADERS, stream=True
+                    self.url, headers=get_headers(), stream=True
                 )
                 response.raise_for_status()
                 self.total_size = int(response.headers.get("content-length", 0)) or 1
@@ -415,7 +444,7 @@ class PostDetectionThread(QThread):
                 )
 
                 fallback_headers = {
-                    "User-Agent": user_agent,
+                    "User-Agent": get_user_agent(),
                     "Accept": "text/css",
                     "Accept-Language": accept_language,
                     "Connection": "keep-alive",
@@ -1038,7 +1067,7 @@ class FilePreparationThread(QThread):
         retry_delay_seconds = 5
         for attempt in range(1, max_retries + 1):
             try:
-                headers = HEADERS.copy()
+                headers = get_headers().copy()
                 headers["Referer"] = domain_config["referer"]
                 response = get_session(self.settings.settings_tab).get(
                     api_url, headers=headers
@@ -1266,8 +1295,7 @@ class CreatorDownloadThread(QThread):
         self.is_running = True
         self.download_text = download_text
         self.other_files_dir = other_files_dir
-        self.hash_file_path = os.path.join(self.other_files_dir, "file_hashes.json")
-        self.file_hashes = self.load_hashes()
+        self.hash_db = HashDB(self.other_files_dir)
         self.max_concurrent = max_concurrent
         self.post_files_map = self.build_post_files_map()
         self.completed_files = set()
@@ -1284,7 +1312,6 @@ class CreatorDownloadThread(QThread):
         self.completed_files_lock = threading.Lock()
         self.fetched_texts_lock = threading.Lock()
         self.fetched_texts = set()
-        self.file_hashes_lock = threading.Lock()
 
     def _get_domain_config_from_files(self):
         """Determine domain configuration from the files to download"""
@@ -1302,38 +1329,11 @@ class CreatorDownloadThread(QThread):
                 post_files_map[post_id].append(file_url)
         return post_files_map
 
-    def load_hashes(self):
-        os.makedirs(self.other_files_dir, exist_ok=True)
-        if os.path.exists(self.hash_file_path):
-            try:
-                with open(self.hash_file_path, "r") as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, IOError) as e:
-                self.log.emit(
-                    translate(
-                        "log_error", translate("failed_to_load_file_hashes", str(e))
-                    ),
-                    "ERROR",
-                )
-                return {}
-        return {}
-
-    def save_hashes(self):
-        os.makedirs(self.other_files_dir, exist_ok=True)
-        try:
-            with open(self.hash_file_path, "w") as f:
-                json.dump(self.file_hashes, f, indent=4)
-        except IOError as e:
-            self.log.emit(
-                translate("log_error", translate("failed_to_save_file_hashes", str(e))),
-                "ERROR",
-            )
-
     def fetch_creator_and_post_info(self):
         """Fetch creator name and retrieve post titles from post_titles_map."""
         profile_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/profile"
         try:
-            headers = HEADERS.copy()
+            headers = get_headers().copy()
             headers["Referer"] = self.domain_config["referer"]
             profile_response = get_session(self.settings.settings_tab).get(
                 profile_url, headers=headers, timeout=10
@@ -1366,7 +1366,7 @@ class CreatorDownloadThread(QThread):
             if key not in self.post_titles_map:
                 post_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/post/{post_id}"
                 try:
-                    headers = HEADERS.copy()
+                    headers = get_headers().copy()
                     headers["Referer"] = self.domain_config["referer"]
                     response = get_session(self.settings.settings_tab).get(
                         post_url, headers=headers, timeout=10
@@ -1548,7 +1548,7 @@ class CreatorDownloadThread(QThread):
                 return
 
             api_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/post/{post_id}"
-            headers = HEADERS.copy()
+            headers = get_headers().copy()
             headers["Referer"] = self.domain_config["referer"]
             response = get_session(self.settings.settings_tab).get(
                 api_url, headers=headers, timeout=10
@@ -1620,34 +1620,28 @@ class CreatorDownloadThread(QThread):
         full_path = os.path.join(target_folder, filename.replace("/", "_"))
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
-        with self.file_hashes_lock:
-            file_hashes_keys = list(self.file_hashes.keys())
-
-        for hash_key in file_hashes_keys:
-            if hash_key == url_hash:
-                with self.file_hashes_lock:
-                    existing_path = self.file_hashes[hash_key]["file_path"]
-                if os.path.exists(existing_path):
-                    with open(existing_path, "rb") as f:
-                        file_hash = hashlib.md5(f.read()).hexdigest()
-                    with self.file_hashes_lock:
-                        stored_hash = self.file_hashes[hash_key]["file_hash"]
-                    if file_hash == stored_hash:
-                        self.log.emit(
+        entry = self.hash_db.lookup(url_hash)
+        if entry:
+            existing_path = entry["file_path"]
+            if os.path.exists(existing_path):
+                with open(existing_path, "rb") as f:
+                    file_hash = hashlib.md5(f.read()).hexdigest()
+                if file_hash == entry["file_hash"]:
+                    self.log.emit(
+                        translate(
+                            "log_info",
                             translate(
-                                "log_info",
-                                translate(
-                                    "file_already_downloaded", filename, existing_path
-                                ),
+                                "file_already_downloaded", filename, existing_path
                             ),
-                            "INFO",
-                        )
-                        self.file_progress.emit(file_index, 100)
-                        self.file_completed.emit(file_index, file_url, True)
-                        with self.completed_files_lock:
-                            self.completed_files.add(file_url)
-                        self.check_post_completion(file_url)
-                        return
+                        ),
+                        "INFO",
+                    )
+                    self.file_progress.emit(file_index, 100)
+                    self.file_completed.emit(file_index, file_url, True)
+                    with self.completed_files_lock:
+                        self.completed_files.add(file_url)
+                    self.check_post_completion(file_url)
+                    return
 
         self.log.emit(
             translate(
@@ -1666,7 +1660,7 @@ class CreatorDownloadThread(QThread):
         max_retries = self.settings.file_download_max_retries
         for attempt in range(1, max_retries + 1):
             try:
-                headers = HEADERS.copy()
+                headers = get_headers().copy()
                 headers["Referer"] = self.domain_config["referer"]
 
                 # Use requests instead of aiohttp for better proxy support
@@ -1735,13 +1729,7 @@ class CreatorDownloadThread(QThread):
 
                 with open(full_path, "rb") as f:
                     file_hash = hashlib.md5(f.read()).hexdigest()
-                with self.file_hashes_lock:
-                    self.file_hashes[url_hash] = {
-                        "file_path": full_path,
-                        "file_hash": file_hash,
-                        "url": file_url,
-                    }
-                    self.save_hashes()
+                self.hash_db.store(url_hash, full_path, file_hash, file_url)
                 self.log.emit(
                     translate(
                         "log_info", translate("successfully_downloaded", full_path)
@@ -1973,7 +1961,7 @@ class ValidationThread(QThread):
             try:
                 # Use fallback validation with robust headers
                 fallback_headers = {
-                    "User-Agent": user_agent,
+                    "User-Agent": get_user_agent(),
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
                     "Accept-Language": accept_language,
                     "Connection": "keep-alive",
@@ -2248,6 +2236,7 @@ class CreatorDownloaderTab(QWidget):
         self.current_page = 1
         self.total_pages = 1
         self.filtered_posts = []  # Cache of filtered posts for pagination
+        self.fast_mode = False
         os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(self.other_files_dir, exist_ok=True)
         self.setup_ui()
@@ -2303,6 +2292,30 @@ class CreatorDownloaderTab(QWidget):
         creator_url_layout.addWidget(self.creator_add_from_file_btn)
         left_layout.addLayout(creator_url_layout)
 
+        # Multi-URL input area
+        self.creator_multi_url_input = QTextEdit()
+        self.creator_multi_url_input.setPlaceholderText(
+            translate("multi_url_placeholder_creator")
+        )
+        self.creator_multi_url_input.setStyleSheet(
+            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
+        )
+        self.creator_multi_url_input.setFixedHeight(80)
+        self.creator_multi_url_input.setVisible(False)
+        left_layout.addWidget(self.creator_multi_url_input)
+
+        self.creator_multi_url_add_btn = QPushButton(
+            qta.icon("fa5s.layer-group", color="white"), ""
+        )
+        self.creator_multi_url_add_btn.clicked.connect(
+            self.add_multiple_creators_to_queue
+        )
+        self.creator_multi_url_add_btn.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
+        self.creator_multi_url_add_btn.setVisible(False)
+        left_layout.addWidget(self.creator_multi_url_add_btn)
+
         # Creator Queue Group
         self.creator_queue_group = QGroupBox()
         self.creator_queue_group.setStyleSheet(
@@ -2337,6 +2350,29 @@ class CreatorDownloaderTab(QWidget):
         creator_categories_layout.addWidget(self.creator_content_check)
         creator_categories_layout.addStretch()
         creator_options_layout.addLayout(creator_categories_layout)
+
+        # Fast Mode row: icon checkbox + info button
+        creator_fast_mode_layout = QHBoxLayout()
+        creator_fast_mode_layout.setContentsMargins(0, 0, 0, 0)
+        self.creator_fast_mode_check = QCheckBox()
+        self.creator_fast_mode_check.setChecked(False)
+        self.creator_fast_mode_check.setIcon(qta.icon("fa5s.bolt", color="#FFD700"))
+        self.creator_fast_mode_check.setStyleSheet("color: white; font-weight: bold;")
+        self.creator_fast_mode_check.stateChanged.connect(self.toggle_fast_mode)
+        creator_fast_mode_layout.addWidget(self.creator_fast_mode_check)
+
+        self.creator_fast_mode_info_btn = QPushButton(
+            qta.icon("fa5s.info-circle", color="#A0C0FF"), ""
+        )
+        self.creator_fast_mode_info_btn.setFixedSize(26, 26)
+        self.creator_fast_mode_info_btn.setStyleSheet(
+            "background: #4A5B7A; border-radius: 5px;"
+        )
+        self.creator_fast_mode_info_btn.setToolTip(translate("fast_mode_info_title"))
+        self.creator_fast_mode_info_btn.clicked.connect(self.show_fast_mode_info)
+        creator_fast_mode_layout.addWidget(self.creator_fast_mode_info_btn)
+        creator_fast_mode_layout.addStretch()
+        creator_options_layout.addLayout(creator_fast_mode_layout)
 
         # Auto rename checkbox
         self.creator_auto_rename_check = QCheckBox()
@@ -2589,6 +2625,12 @@ class CreatorDownloaderTab(QWidget):
         self.creator_check_all.setText(translate("check_all"))
         self.creator_check_all_all.setText(translate("check_all_all"))
         self.creator_auto_rename_check.setText(translate("auto_rename"))
+        self.creator_fast_mode_check.setText(translate("fast_mode"))
+        self.creator_fast_mode_info_btn.setToolTip(translate("fast_mode_info_title"))
+        self.creator_multi_url_input.setPlaceholderText(
+            translate("multi_url_placeholder_creator")
+        )
+        self.creator_multi_url_add_btn.setText(translate("add_all_to_queue"))
 
         self.creator_file_progress_label.setText(translate("file_progress", 0))
         self.creator_overall_progress_label.setText(
@@ -2627,6 +2669,76 @@ class CreatorDownloaderTab(QWidget):
             self.background_task_progress.setRange(0, 100)
             self.background_task_progress.setValue(0)
             self.background_task_label.setText(translate("idle"))
+
+    def show_fast_mode_info(self):
+        """Show a dialog explaining what Fast Mode does."""
+        QMessageBox.information(
+            self,
+            translate("fast_mode_info_title"),
+            translate("fast_mode_info_text"),
+        )
+
+    def toggle_fast_mode(self, state):
+        """Toggle fast mode on/off. When on, disables manual options and enables auto-queue processing."""
+        self.fast_mode = state == 2  # Qt.CheckState.Checked
+        # Disable manual option controls when fast mode is on
+        self.creator_main_check.setEnabled(not self.fast_mode)
+        self.creator_attachments_check.setEnabled(not self.fast_mode)
+        self.creator_content_check.setEnabled(not self.fast_mode)
+        self.creator_auto_rename_check.setEnabled(not self.fast_mode)
+        self.creator_download_text_check.setEnabled(not self.fast_mode)
+        self.creator_check_all.setEnabled(not self.fast_mode)
+        self.creator_check_all_all.setEnabled(not self.fast_mode)
+
+        # Show/hide multi-URL batch input
+        self.creator_multi_url_input.setVisible(self.fast_mode)
+        self.creator_multi_url_add_btn.setVisible(self.fast_mode)
+
+        if self.fast_mode:
+            # Force check-all on
+            self.creator_check_all.setChecked(True)
+            self.creator_check_all_all.setChecked(True)
+            self.append_log_to_console(
+                translate("log_info", translate("fast_mode_enabled")), "INFO"
+            )
+        else:
+            self.append_log_to_console(
+                translate("log_info", translate("fast_mode_disabled")), "INFO"
+            )
+
+    def add_multiple_creators_to_queue(self):
+        """Add multiple creator URLs from the multi-URL text area to the queue at once."""
+        text = self.creator_multi_url_input.toPlainText().strip()
+        if not text:
+            self.append_log_to_console(
+                translate("log_error", translate("no_url_entered")), "ERROR"
+            )
+            return
+
+        lines = text.split("\n")
+        added_count = 0
+        skipped_count = 0
+
+        for line in lines:
+            url = line.strip()
+            if not url:
+                continue
+            normalized_url = url.rstrip("/")
+            if any(
+                item[0].rstrip("/") == normalized_url for item in self.creator_queue
+            ):
+                skipped_count += 1
+                continue
+            # Add to queue — validation will happen in the existing flow
+            self.creator_queue.append((url, False))
+            added_count += 1
+
+        if added_count > 0:
+            self.update_creator_queue_list()
+            self.creator_multi_url_input.clear()
+
+        summary = translate("bulk_add_summary", added_count, skipped_count)
+        self.append_log_to_console(translate("log_info", summary), "INFO")
 
     def add_creator_to_queue(self):
         url = self.creator_url_input.text().strip()
@@ -3670,6 +3782,22 @@ class CreatorDownloaderTab(QWidget):
         )
         self.creator_file_progress_label.setText(translate("downloads_complete"))
         self.creator_overall_progress_label.setText(translate("downloads_complete"))
+
+        # Fast mode: auto-remove completed creators from queue
+        if self.fast_mode and self.current_creator_url:
+            self.creator_queue = [
+                (u, c)
+                for u, c in self.creator_queue
+                if u.rstrip("/") != self.current_creator_url.rstrip("/")
+            ]
+            self.update_creator_queue_list()
+            self.append_log_to_console(
+                translate(
+                    "log_info",
+                    translate("fast_mode_removed_creator", self.current_creator_url),
+                ),
+                "INFO",
+            )
 
         self.total_files_to_download = 0
         self.completed_files.clear()

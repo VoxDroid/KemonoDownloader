@@ -10,17 +10,17 @@ import sys
 
 try:
     from kemonodownloader.creator_downloader import (
-        HEADERS,
         ThreadSettings,
         get_domain_config,
+        get_headers,
         sanitize_filename,
     )
 except ImportError:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "src"))
     from kemonodownloader.creator_downloader import (
-        HEADERS,
         ThreadSettings,
         get_domain_config,
+        get_headers,
         sanitize_filename,
     )
 
@@ -245,22 +245,26 @@ class TestHeadersConfiguration:
 
     def test_headers_have_user_agent(self):
         """Test that headers include a User-Agent."""
-        assert "User-Agent" in HEADERS
-        assert len(HEADERS["User-Agent"]) > 0
+        headers = get_headers()
+        assert "User-Agent" in headers
+        assert len(headers["User-Agent"]) > 0
 
     def test_headers_have_referer(self):
         """Test that headers include a Referer."""
-        assert "Referer" in HEADERS
-        assert "kemono" in HEADERS["Referer"] or len(HEADERS["Referer"]) > 0
+        headers = get_headers()
+        assert "Referer" in headers
+        assert "kemono" in headers["Referer"] or len(headers["Referer"]) > 0
 
     def test_headers_have_accept_language(self):
         """Test that headers include Accept-Language."""
-        assert "Accept-Language" in HEADERS
+        headers = get_headers()
+        assert "Accept-Language" in headers
 
     def test_headers_have_connection(self):
         """Test that headers include Connection setting."""
-        assert "Connection" in HEADERS
-        assert HEADERS["Connection"] == "keep-alive"
+        headers = get_headers()
+        assert "Connection" in headers
+        assert headers["Connection"] == "keep-alive"
 
 
 class TestAPIResponseParsing:

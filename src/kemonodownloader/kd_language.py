@@ -3554,6 +3554,110 @@ class KDLanguage:
                 "korean": "{0}의 체크박스가 {1}으로 전환됨, checked_urls 수: {2}",
                 "chinese-simplified": "{0} 的复选框切换到 {1}，checked_urls 数量: {2}",
             },
+            # ── Fast Mode & Multi-URL translations ──
+            "fast_mode": {
+                "english": "Fast Mode",
+                "japanese": "高速モード",
+                "korean": "빠른 모드",
+                "chinese-simplified": "快速模式",
+            },
+            "fast_mode_info_title": {
+                "english": "Fast Mode",
+                "japanese": "高速モード",
+                "korean": "빠른 모드",
+                "chinese-simplified": "快速模式",
+            },
+            "fast_mode_info_text": {
+                "english": (
+                    "Normal Mode gives you full control — you add one URL at a time "
+                    "and manually choose which file types to download (images, videos, "
+                    "attachments, text, etc.).\n\n"
+                    "Fast Mode is for when you just want everything downloaded quickly "
+                    "with minimal clicks:\n\n"
+                    "• All download categories are turned ON and locked, so nothing "
+                    "gets missed\n"
+                    "• A batch input area appears where you can paste many URLs at "
+                    "once (one per line)\n"
+                    "• Completed downloads are automatically removed from the queue\n\n"
+                    "Turn it off at any time to go back to manual control."
+                ),
+                "japanese": (
+                    "通常モードでは完全な制御が可能です — URLを1つずつ追加し、"
+                    "ダウンロードするファイルの種類（画像、動画、添付ファイル、テキスト"
+                    "など）を手動で選択します。\n\n"
+                    "高速モードは、最小限の操作ですべてを素早くダウンロードしたい時に"
+                    "使います：\n\n"
+                    "• すべてのダウンロードカテゴリがONになりロックされるため、"
+                    "何も見逃しません\n"
+                    "• 一括入力エリアが表示され、多数のURLを一度に貼り付けられます"
+                    "（1行に1つ）\n"
+                    "• 完了したダウンロードはキューから自動的に削除されます\n\n"
+                    "いつでもオフにして手動制御に戻せます。"
+                ),
+                "korean": (
+                    "일반 모드에서는 완전한 제어가 가능합니다 — URL을 하나씩 추가하고 "
+                    "다운로드할 파일 유형(이미지, 동영상, 첨부파일, 텍스트 등)을 "
+                    "직접 선택합니다.\n\n"
+                    "빠른 모드는 최소한의 클릭으로 모든 것을 빠르게 다운로드하고 싶을 때 "
+                    "사용합니다:\n\n"
+                    "• 모든 다운로드 카테고리가 켜지고 잠겨서 아무것도 놓치지 않습니다\n"
+                    "• 일괄 입력 영역이 나타나 여러 URL을 한 번에 붙여넣을 수 있습니다"
+                    "(한 줄에 하나)\n"
+                    "• 완료된 다운로드는 큐에서 자동으로 제거됩니다\n\n"
+                    "언제든지 끄면 수동 제어로 돌아갈 수 있습니다."
+                ),
+                "chinese-simplified": (
+                    "普通模式让您完全控制 — 每次添加一个URL，手动选择要下载的文件"
+                    "类型（图片、视频、附件、文本等）。\n\n"
+                    "快速模式适用于您想以最少的点击快速下载所有内容的情况：\n\n"
+                    "• 所有下载类别将被开启并锁定，确保不会遗漏任何内容\n"
+                    "• 会出现批量输入区域，您可以一次粘贴多个URL（每行一个）\n"
+                    "• 已完成的下载会自动从队列中移除\n\n"
+                    "随时关闭即可恢复手动控制。"
+                ),
+            },
+            "fast_mode_enabled": {
+                "english": "Fast Mode enabled – all files will be downloaded, options locked.",
+                "japanese": "高速モードが有効になりました – すべてのファイルがダウンロードされ、オプションがロックされます。",
+                "korean": "빠른 모드가 활성화되었습니다 – 모든 파일이 다운로드되며 옵션이 잠겼습니다.",
+                "chinese-simplified": "快速模式已启用 – 将下载所有文件，选项已锁定。",
+            },
+            "fast_mode_disabled": {
+                "english": "Fast Mode disabled – manual control restored.",
+                "japanese": "高速モードが無効になりました – 手動制御が復元されました。",
+                "korean": "빠른 모드가 비활성화되었습니다 – 수동 제어가 복원되었습니다.",
+                "chinese-simplified": "快速模式已禁用 – 手动控制已恢复。",
+            },
+            "fast_mode_removed_posts": {
+                "english": "Fast Mode: removed {0} completed post(s) from queue.",
+                "japanese": "高速モード: 完了した{0}件の投稿をキューから削除しました。",
+                "korean": "빠른 모드: 완료된 {0}개의 게시물을 큐에서 제거했습니다.",
+                "chinese-simplified": "快速模式：已从队列中移除 {0} 个已完成的帖子。",
+            },
+            "fast_mode_removed_creator": {
+                "english": "Fast Mode: removed completed creator {0} from queue.",
+                "japanese": "高速モード: 完了したクリエイター {0} をキューから削除しました。",
+                "korean": "빠른 모드: 완료된 크리에이터 {0}을(를) 큐에서 제거했습니다.",
+                "chinese-simplified": "快速模式：已从队列中移除已完成的创作者 {0}。",
+            },
+            "multi_url_placeholder": {
+                "english": "Paste multiple post URLs here, one per line…",
+                "japanese": "複数の投稿URLをここに貼り付けてください（1行に1つ）…",
+                "korean": "여기에 여러 게시물 URL을 붙여넣으세요 (한 줄에 하나)…",
+                "chinese-simplified": "在此粘贴多个帖子URL，每行一个…",
+            },
+            "multi_url_placeholder_creator": {
+                "english": "Paste multiple creator URLs here, one per line…",
+                "japanese": "複数のクリエイターURLをここに貼り付けてください（1行に1つ）…",
+                "korean": "여기에 여러 크리에이터 URL을 붙여넣으세요 (한 줄에 하나)…",
+                "chinese-simplified": "在此粘贴多个创作者URL，每行一个…",
+            },
+            "add_all_to_queue": {
+                "english": "Add All to Queue",
+                "japanese": "すべてキューに追加",
+                "korean": "모두 큐에 추가",
+                "chinese-simplified": "全部添加到队列",
+            },
         }
 
     def get_text(self, key, language=None, *args):

@@ -42,6 +42,7 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.creator_downloader import get_session
+from kemonodownloader.hash_db import HashDB
 from kemonodownloader.kd_language import translate
 
 
@@ -80,8 +81,25 @@ else:
 system_language = system_language.replace("_", "-")
 accept_language = f"{system_language},en;q=0.9"
 
-ua = UserAgent()
-user_agent = ua.chrome
+_user_agent: str | None = None
+
+
+def get_user_agent() -> str:
+    global _user_agent
+    if _user_agent is None:
+        try:
+            ua = UserAgent()
+            _user_agent = ua.chrome
+        except Exception:
+            _user_agent = (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/131.0.0.0 Safari/537.36"
+            )
+    assert _user_agent is not None
+    return _user_agent
+
+
 API_BASE = "https://kemono.cr/api/v1"
 
 
@@ -103,15 +121,26 @@ def get_domain_config(url):
         }
 
 
-HEADERS = {
-    "User-Agent": user_agent,
-    "Referer": "https://kemono.cr/",
-    "Accept": "text/css",
-    "Accept-Language": accept_language,
-    "Accept-Encoding": "gzip, deflate",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-}
+def _build_headers() -> dict:
+    return {
+        "User-Agent": get_user_agent(),
+        "Referer": "https://kemono.cr/",
+        "Accept": "text/css",
+        "Accept-Language": accept_language,
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+    }
+
+
+HEADERS = None  # Built lazily via get_headers()
+
+
+def get_headers() -> dict:
+    global HEADERS
+    if HEADERS is None:
+        HEADERS = _build_headers()
+    return HEADERS
 
 
 class PreviewThread(QThread):
@@ -149,7 +178,7 @@ class PreviewThread(QThread):
 
         try:
             response = get_session(self.settings_tab).get(
-                self.url, headers=HEADERS, stream=True
+                self.url, headers=get_headers(), stream=True
             )
             response.raise_for_status()
             self.total_size = int(response.headers.get("content-length", 0)) or 1
@@ -734,13 +763,13 @@ class PostDetectionThread(QThread):
         for attempt in range(max_retries):
             try:
                 response = get_session(self.settings.settings_tab).get(
-                    url, headers=HEADERS, timeout=10
+                    url, headers=get_headers(), timeout=10
                 )
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
                     # Try with alternative headers
-                    alt_headers = HEADERS.copy()
+                    alt_headers = get_headers().copy()
                     alt_headers["Accept"] = "text/css"
                     response = get_session(self.settings.settings_tab).get(
                         url, headers=alt_headers, timeout=10
@@ -1097,12 +1126,12 @@ class FilePreparationThread(QThread):
         for attempt in range(max_retries):
             try:
                 response = get_session(self.settings.settings_tab).get(
-                    url, headers=HEADERS, timeout=10
+                    url, headers=get_headers(), timeout=10
                 )
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
-                    alt_headers = HEADERS.copy()
+                    alt_headers = get_headers().copy()
                     alt_headers["Accept"] = "text/css"
                     response = get_session(self.settings.settings_tab).get(
                         url, headers=alt_headers, timeout=10
@@ -1249,8 +1278,7 @@ class DownloadThread(QThread):
         self.console = console
         self.is_running = True
         self.other_files_dir = other_files_dir
-        self.hash_file_path = os.path.join(self.other_files_dir, "file_hashes.json")
-        self.file_hashes = self.load_hashes()
+        self.hash_db = HashDB(self.other_files_dir)
         self.max_concurrent = max_concurrent
         self.post_id = post_id
         self.service = self.extract_service_from_url(url)
@@ -1260,8 +1288,7 @@ class DownloadThread(QThread):
         self.auto_rename = auto_rename
         self.download_text = download_text
         self.post_content = ""
-        # Locks for thread-safe access to shared dictionaries
-        self.file_hashes_lock = threading.Lock()
+        # Lock for thread-safe access to shared data
         self.completed_files_lock = threading.Lock()
 
     def fetch_post_info(self):
@@ -1308,12 +1335,12 @@ class DownloadThread(QThread):
         for attempt in range(max_retries):
             try:
                 response = get_session(self.settings.settings_tab).get(
-                    url, headers=HEADERS, timeout=10
+                    url, headers=get_headers(), timeout=10
                 )
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
-                    alt_headers = HEADERS.copy()
+                    alt_headers = get_headers().copy()
                     alt_headers["Accept"] = "text/css"
                     response = get_session(self.settings.settings_tab).get(
                         url, headers=alt_headers, timeout=10
@@ -1355,30 +1382,6 @@ class DownloadThread(QThread):
                 post_files_map[post_id].append(file_url)
         return post_files_map
 
-    def load_hashes(self):
-        os.makedirs(self.other_files_dir, exist_ok=True)
-        if os.path.exists(self.hash_file_path):
-            try:
-                with open(self.hash_file_path, "r") as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, IOError) as e:
-                self.log.emit(
-                    translate("log_error", f"Failed to load file hashes: {str(e)}"),
-                    "ERROR",
-                )
-                return {}
-        return {}
-
-    def save_hashes(self):
-        os.makedirs(self.other_files_dir, exist_ok=True)
-        try:
-            with open(self.hash_file_path, "w") as f:
-                json.dump(self.file_hashes, f, indent=4)
-        except IOError as e:
-            self.log.emit(
-                translate("log_error", f"Failed to save file hashes: {str(e)}"), "ERROR"
-            )
-
     def stop(self):
         self.is_running = False
         self.log.emit(
@@ -1414,34 +1417,28 @@ class DownloadThread(QThread):
         full_path = os.path.join(post_folder, filename.replace("/", "_"))
         url_hash = hashlib.md5(file_url.encode()).hexdigest()
 
-        with self.file_hashes_lock:
-            file_hashes_keys = list(self.file_hashes.keys())
-
-        for hash_key in file_hashes_keys:
-            if hash_key == url_hash:
-                with self.file_hashes_lock:
-                    existing_path = self.file_hashes[hash_key]["file_path"]
-                if os.path.exists(existing_path):
-                    with open(existing_path, "rb") as f:
-                        file_hash = hashlib.md5(f.read()).hexdigest()
-                    with self.file_hashes_lock:
-                        stored_hash = self.file_hashes[hash_key]["file_hash"]
-                    if file_hash == stored_hash:
-                        self.log.emit(
+        entry = self.hash_db.lookup(url_hash)
+        if entry:
+            existing_path = entry["file_path"]
+            if os.path.exists(existing_path):
+                with open(existing_path, "rb") as f:
+                    file_hash = hashlib.md5(f.read()).hexdigest()
+                if file_hash == entry["file_hash"]:
+                    self.log.emit(
+                        translate(
+                            "log_info",
                             translate(
-                                "log_info",
-                                translate(
-                                    "file_already_downloaded", filename, existing_path
-                                ),
+                                "file_already_downloaded", filename, existing_path
                             ),
-                            "INFO",
-                        )
-                        self.file_progress.emit(file_index, 100)
-                        self.file_completed.emit(file_index, file_url)
-                        with self.completed_files_lock:
-                            self.completed_files.add(file_url)
-                        self.check_post_completion(file_url)
-                        return
+                        ),
+                        "INFO",
+                    )
+                    self.file_progress.emit(file_index, 100)
+                    self.file_completed.emit(file_index, file_url)
+                    with self.completed_files_lock:
+                        self.completed_files.add(file_url)
+                    self.check_post_completion(file_url)
+                    return
 
         self.log.emit(
             translate(
@@ -1461,7 +1458,7 @@ class DownloadThread(QThread):
         for attempt in range(1, max_retries + 1):
             try:
                 response = get_session(self.settings.settings_tab).get(
-                    file_url, headers=HEADERS, stream=True
+                    file_url, headers=get_headers(), stream=True
                 )
                 response.raise_for_status()
                 file_size = int(response.headers.get("content-length", 0)) or 1
@@ -1523,13 +1520,7 @@ class DownloadThread(QThread):
 
                 with open(full_path, "rb") as f:
                     file_hash = hashlib.md5(f.read()).hexdigest()
-                with self.file_hashes_lock:
-                    self.file_hashes[url_hash] = {
-                        "file_path": full_path,
-                        "file_hash": file_hash,
-                        "url": file_url,
-                    }
-                    self.save_hashes()
+                self.hash_db.store(url_hash, full_path, file_hash, file_url)
                 self.log.emit(
                     translate(
                         "log_info", translate("successfully_downloaded", full_path)
@@ -1794,6 +1785,7 @@ class PostDownloaderTab(QWidget):
         self.completed_posts = set()
         self.total_posts_to_download = 0
         self.detected_files_during_check_all = []
+        self.fast_mode = False
         os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(self.other_files_dir, exist_ok=True)
         self.setup_ui()
@@ -1840,6 +1832,26 @@ class PostDownloaderTab(QWidget):
         post_url_layout.addWidget(self.post_add_from_file_btn)
         left_layout.addLayout(post_url_layout)
 
+        # Multi-URL input area
+        self.multi_url_input = QTextEdit()
+        self.multi_url_input.setPlaceholderText(translate("multi_url_placeholder"))
+        self.multi_url_input.setStyleSheet(
+            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
+        )
+        self.multi_url_input.setFixedHeight(80)
+        self.multi_url_input.setVisible(False)
+        left_layout.addWidget(self.multi_url_input)
+
+        self.multi_url_add_btn = QPushButton(
+            qta.icon("fa5s.layer-group", color="white"), ""
+        )
+        self.multi_url_add_btn.clicked.connect(self.add_multiple_posts_to_queue)
+        self.multi_url_add_btn.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
+        self.multi_url_add_btn.setVisible(False)
+        left_layout.addWidget(self.multi_url_add_btn)
+
         # Post Queue Group
         self.post_queue_group = QGroupBox()
         self.post_queue_group.setStyleSheet(
@@ -1880,6 +1892,29 @@ class PostDownloaderTab(QWidget):
             "background: #2A3B5A; border-radius: 5px; padding: 5px;"
         )
         left_layout.addWidget(self.post_console)
+
+        # Fast Mode row: icon checkbox + info button
+        fast_mode_layout = QHBoxLayout()
+        fast_mode_layout.setContentsMargins(0, 0, 0, 0)
+        self.fast_mode_check = QCheckBox()
+        self.fast_mode_check.setChecked(False)
+        self.fast_mode_check.setIcon(qta.icon("fa5s.bolt", color="#FFD700"))
+        self.fast_mode_check.setStyleSheet("color: white; font-weight: bold;")
+        self.fast_mode_check.stateChanged.connect(self.toggle_fast_mode)
+        fast_mode_layout.addWidget(self.fast_mode_check)
+
+        self.fast_mode_info_btn = QPushButton(
+            qta.icon("fa5s.info-circle", color="#A0C0FF"), ""
+        )
+        self.fast_mode_info_btn.setFixedSize(26, 26)
+        self.fast_mode_info_btn.setStyleSheet(
+            "background: #4A5B7A; border-radius: 5px;"
+        )
+        self.fast_mode_info_btn.setToolTip(translate("fast_mode_info_title"))
+        self.fast_mode_info_btn.clicked.connect(self.show_fast_mode_info)
+        fast_mode_layout.addWidget(self.fast_mode_info_btn)
+        fast_mode_layout.addStretch()
+        left_layout.addLayout(fast_mode_layout)
 
         # Auto rename checkbox
         self.auto_rename_checkbox = QCheckBox()
@@ -2080,6 +2115,10 @@ class PostDownloaderTab(QWidget):
 
         self.update_post_queue_list()
         self.auto_rename_checkbox.setText(translate("auto_rename"))
+        self.fast_mode_check.setText(translate("fast_mode"))
+        self.fast_mode_info_btn.setToolTip(translate("fast_mode_info_title"))
+        self.multi_url_input.setPlaceholderText(translate("multi_url_placeholder"))
+        self.multi_url_add_btn.setText(translate("add_all_to_queue"))
 
     def update_progress_bar_style(self):
         separator_style = "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
@@ -2103,6 +2142,78 @@ class PostDownloaderTab(QWidget):
             self.background_task_progress.setRange(0, 100)
             self.background_task_progress.setValue(0)
             self.background_task_label.setText(translate("idle"))
+
+    def show_fast_mode_info(self):
+        """Show a dialog explaining what Fast Mode does."""
+        QMessageBox.information(
+            self,
+            translate("fast_mode_info_title"),
+            translate("fast_mode_info_text"),
+        )
+
+    def toggle_fast_mode(self, state):
+        """Toggle fast mode on/off. When on, disables manual options and enables auto-queue processing."""
+        self.fast_mode = state == 2  # Qt.CheckState.Checked
+        # When fast mode is ON: disable manual option controls, show multi-URL input
+        self.auto_rename_checkbox.setEnabled(not self.fast_mode)
+        self.post_download_text_check.setEnabled(not self.fast_mode)
+        self.post_check_all.setEnabled(not self.fast_mode)
+        self.download_all_links.setEnabled(not self.fast_mode)
+
+        # Show/hide multi-URL batch input
+        self.multi_url_input.setVisible(self.fast_mode)
+        self.multi_url_add_btn.setVisible(self.fast_mode)
+
+        if self.fast_mode:
+            # Force check-all and download-all-links on
+            self.post_check_all.setChecked(True)
+            self.download_all_links.setChecked(True)
+            self.append_log_to_console(
+                translate("log_info", translate("fast_mode_enabled")), "INFO"
+            )
+        else:
+            self.append_log_to_console(
+                translate("log_info", translate("fast_mode_disabled")), "INFO"
+            )
+
+    def add_multiple_posts_to_queue(self):
+        """Add multiple URLs from the multi-URL text area to the queue at once."""
+        text = self.multi_url_input.toPlainText().strip()
+        if not text:
+            self.append_log_to_console(
+                translate("log_error", translate("no_url_entered")), "ERROR"
+            )
+            return
+
+        lines = text.split("\n")
+        added_count = 0
+        skipped_count = 0
+
+        for line in lines:
+            url = line.strip()
+            if not url:
+                continue
+            normalized_url = url.rstrip("/")
+            if any(item[0].rstrip("/") == normalized_url for item in self.post_queue):
+                skipped_count += 1
+                continue
+            if self.check_post_url_validity(url):
+                self.post_queue.append((url, False))
+                added_count += 1
+            else:
+                self.append_log_to_console(
+                    translate("log_error", translate("invalid_post_url", url)), "ERROR"
+                )
+                skipped_count += 1
+
+        if added_count > 0:
+            self.update_post_queue_list()
+            self.multi_url_input.clear()
+            if self.download_all_links.isChecked():
+                self.check_all_posts()
+
+        summary = translate("bulk_add_summary", added_count, skipped_count)
+        self.append_log_to_console(translate("log_info", summary), "INFO")
 
     def add_post_to_queue(self):
         url = self.post_url_input.text().strip()
@@ -2144,7 +2255,7 @@ class PostDownloaderTab(QWidget):
             )
 
             fallback_headers = {
-                "User-Agent": user_agent,
+                "User-Agent": get_user_agent(),
                 "Accept": "text/css",
                 "Accept-Language": accept_language,
                 "Connection": "keep-alive",
@@ -2418,12 +2529,12 @@ class PostDownloaderTab(QWidget):
         for attempt in range(max_retries):
             try:
                 response = get_session(self.parent.settings_tab).get(
-                    url, headers=HEADERS, timeout=10
+                    url, headers=get_headers(), timeout=10
                 )
                 if response.status_code == 200:
                     return response
                 elif response.status_code == 403:
-                    alt_headers = HEADERS.copy()
+                    alt_headers = get_headers().copy()
                     alt_headers["Accept"] = "text/css"
                     response = get_session(self.parent.settings_tab).get(
                         url, headers=alt_headers, timeout=10
@@ -3028,6 +3139,25 @@ class PostDownloaderTab(QWidget):
                 "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
             )
             self.post_overall_progress_label.setText(translate("downloads_complete"))
+
+            # Fast mode: auto-remove completed posts from queue
+            if self.fast_mode:
+                completed_urls = set()
+                for url, _ in self.post_queue:
+                    if url in self.all_files_map:
+                        completed_urls.add(url)
+                self.post_queue = [
+                    (u, c) for u, c in self.post_queue if u not in completed_urls
+                ]
+                self.update_post_queue_list()
+                if completed_urls:
+                    self.append_log_to_console(
+                        translate(
+                            "log_info",
+                            translate("fast_mode_removed_posts", len(completed_urls)),
+                        ),
+                        "INFO",
+                    )
 
         self.total_files_to_download = 0
         self.completed_files.clear()
