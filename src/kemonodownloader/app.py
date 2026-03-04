@@ -130,7 +130,8 @@ class IntroScreen(QWidget):
         self.launch_button.setFont(
             QFont(self._get_font_family(), 16, QFont.Weight.Medium)
         )
-        self.launch_button.setFixedSize(220, 60)
+        # larger width for launch button
+        self.launch_button.setFixedSize(300, 60)
         self.launch_button.setStyleSheet(
             """
             QPushButton {
