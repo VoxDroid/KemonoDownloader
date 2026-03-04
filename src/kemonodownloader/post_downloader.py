@@ -74,7 +74,7 @@ if hasattr(ctypes, "windll"):
     lcid = ctypes.windll.kernel32.GetUserDefaultLCID()
     system_language = locale.windows_locale.get(lcid, "en_US")
 else:
-    locale_info = locale.getlocale(locale.LC_ALL)
+    locale_info = locale.getlocale(locale.LC_CTYPE)
     system_language = locale_info[0] if locale_info and locale_info[0] else "en_US"
 
 system_language = system_language.replace("_", "-")
