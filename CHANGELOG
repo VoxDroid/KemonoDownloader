@@ -1,7 +1,13 @@
 # Kemono Downloader Release Notes
 
 ## v5.10.0 (10 February 2026)
-**feat: Customizable font settings with bundled Google Fonts**
+**feat: Fast Mode, SQLite hash storage, and customizable font settings**
+- Add Fast Mode to Post Downloader and Creator Downloader
+  Introduces a Fast Mode toggle (with qtawesome bolt icon) to both downloader tabs. When enabled, Fast Mode automatically selects all download categories, locks manual options to prevent accidental changes, and reveals a batch URL input area for pasting multiple URLs at once (one per line). Completed items are automatically removed from the queue. An info button (ℹ) explains the feature in a dialog. Includes full translations for all four languages and new unit tests.
+
+- Migrate file deduplication from JSON to SQLite
+  Replaces the `file_hashes.json` flat-file backend with a new `hash_db.py` module backed by SQLite (WAL mode, thread-safe). The `HashDB` class provides `has()`, `add()`, `remove()`, and `all_hashes()` methods. Existing JSON hash files are automatically migrated on first access. Improves performance and reliability for large hash sets. Includes 16 unit tests covering CRUD, migration, and thread safety.
+
 - Add font settings to the Settings tab
   Introduces a new Font Settings group in the settings UI, allowing users to switch the application-wide font between JetBrains Mono (default) and Poppins. Fonts are bundled as TTF files (Regular, Bold, Medium weights) and loaded at startup via QFontDatabase. The selected font is persisted via QSettings and applied across the entire application, including the intro screen, help tab, and browser extension tab. Adds `font_changed` signal to SettingsTab, dynamic `_get_font_family()` helpers in HelpTab and ExtensionTab, recursive font propagation in `KemonoDownloader.apply_font()`, and translations for the font UI in all four languages (English, Japanese, Korean, Chinese-Simplified). Includes 39 new unit tests covering defaults, combo box, signal emission, dialog messages, reset, bundled files, translations, QSettings persistence, and UI elements.
 
