@@ -9,7 +9,7 @@ import requests
 from bs4 import MarkupResemblesLocatorWarning
 from packaging import version
 from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QColor, QCursor, QFont, QIcon, QPalette, QPixmap
+from PyQt6.QtGui import QColor, QCursor, QFont, QFontDatabase, QIcon, QPalette, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
     QGraphicsDropShadowEffect,
@@ -32,8 +32,32 @@ from kemonodownloader.post_downloader import PostDownloaderTab
 
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
-CURRENT_VERSION = "5.9.0"
+CURRENT_VERSION = "5.10.0"
 GITHUB_REPO = "VoxDroid/KemonoDownloader"
+
+# Available Google Fonts bundled with the app
+BUNDLED_FONTS = {
+    "JetBrains Mono": [
+        "JetBrainsMono-Regular.ttf",
+        "JetBrainsMono-Bold.ttf",
+        "JetBrainsMono-Medium.ttf",
+    ],
+    "Poppins": [
+        "Poppins-Regular.ttf",
+        "Poppins-Bold.ttf",
+        "Poppins-Medium.ttf",
+    ],
+}
+
+
+def load_bundled_fonts():
+    """Load all bundled Google Fonts into the application font database."""
+    fonts_dir = os.path.join(os.path.dirname(__file__), "resources", "fonts")
+    for font_family, font_files in BUNDLED_FONTS.items():
+        for font_file in font_files:
+            font_path = os.path.join(fonts_dir, font_file)
+            if os.path.exists(font_path):
+                QFontDatabase.addApplicationFont(font_path)
 
 
 class VersionChecker(QThread):
@@ -94,7 +118,7 @@ class IntroScreen(QWidget):
 
         # Version Label
         self.version_label = QLabel(f"Version {CURRENT_VERSION}")
-        self.version_label.setFont(QFont("Poppins", 12))
+        self.version_label.setFont(QFont(self._get_font_family(), 12))
         self.version_label.setStyleSheet("color: #CCCCCC; background: transparent;")
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(
@@ -103,7 +127,9 @@ class IntroScreen(QWidget):
 
         # Launch Button
         self.launch_button = QPushButton(translate("launch_button"))
-        self.launch_button.setFont(QFont("Poppins", 16, QFont.Weight.Medium))
+        self.launch_button.setFont(
+            QFont(self._get_font_family(), 16, QFont.Weight.Medium)
+        )
         self.launch_button.setFixedSize(220, 60)
         self.launch_button.setStyleSheet(
             """
@@ -141,13 +167,13 @@ class IntroScreen(QWidget):
         footer_layout.setContentsMargins(0, 0, 0, 0)
 
         self.title = QLabel(translate("app_title"))
-        self.title.setFont(QFont("Poppins", 14, QFont.Weight.Bold))
+        self.title.setFont(QFont(self._get_font_family(), 14, QFont.Weight.Bold))
         self.title.setStyleSheet("color: #FFFFFF; background: transparent;")
         self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(self.title)
 
         self.dev_label = QLabel(translate("developed_by"))
-        self.dev_label.setFont(QFont("Poppins", 10))
+        self.dev_label.setFont(QFont(self._get_font_family(), 10))
         self.dev_label.setStyleSheet("color: #CCCCCC; background: transparent;")
         self.dev_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(self.dev_label)
@@ -155,7 +181,7 @@ class IntroScreen(QWidget):
         self.github_label = QLabel(
             '<a href="https://github.com/VoxDroid" style="color: #A0C0FF; text-decoration: none; font-size: 10px;">github.com/VoxDroid</a>'
         )
-        self.github_label.setFont(QFont("Poppins", 10))
+        self.github_label.setFont(QFont(self._get_font_family(), 10))
         self.github_label.setOpenExternalLinks(True)
         self.github_label.setStyleSheet(
             "QLabel { background: transparent; } QLabel:hover { color: #C0E0FF; }"
@@ -165,6 +191,18 @@ class IntroScreen(QWidget):
         footer_layout.addWidget(self.github_label)
 
         main_layout.addWidget(footer_widget, alignment=Qt.AlignmentFlag.AlignCenter)
+
+    def _get_font_family(self):
+        """Get the current font family from settings."""
+        return self._parent.settings_tab.get_font()
+
+    def apply_font(self, font_family: str):
+        """Update all fonts in the intro screen to use the new font family."""
+        self.version_label.setFont(QFont(font_family, 12))
+        self.launch_button.setFont(QFont(font_family, 16, QFont.Weight.Medium))
+        self.title.setFont(QFont(font_family, 14, QFont.Weight.Bold))
+        self.dev_label.setFont(QFont(font_family, 10))
+        self.github_label.setFont(QFont(font_family, 10))
 
     def update_ui_text(self):
         self.title.setText(translate("app_title"))
@@ -214,9 +252,45 @@ class KemonoDownloader(QMainWindow):
         self.apply_palette()
 
         self.settings_tab.language_changed.connect(self.update_all_ui)
+        self.settings_tab.font_changed.connect(self.apply_font)
+
+        # Apply the saved font setting
+        self.apply_font(self.settings_tab.get_font())
 
         if self.settings_tab.is_auto_check_updates_enabled():
             self.check_for_updates()
+
+    def apply_font(self, font_family: str):
+        """Apply the selected font family to the entire application and all widgets."""
+        app = QApplication.instance()
+        if app:
+            font = QFont(font_family)
+            font.setPointSize(app.font().pointSize())
+            app.setFont(font)
+        # Update all existing widgets that have explicit fonts set
+        self._apply_font_recursive(self, font_family)
+        # Update the intro screen if it still exists
+        if hasattr(self, "intro_screen") and self.intro_screen is not None:
+            try:
+                self.intro_screen.apply_font(font_family)
+            except RuntimeError:
+                # C++ object already deleted after intro-to-main transition
+                self.intro_screen = None
+        # Refresh help and extension tabs if they exist
+        if hasattr(self, "help_tab"):
+            self.help_tab.update_ui_text()
+        if hasattr(self, "extension_tab"):
+            self.extension_tab.update_ui_text()
+
+    def _apply_font_recursive(self, widget, font_family: str):
+        """Recursively update the font family on all child widgets."""
+        current_font = widget.font()
+        current_font.setFamily(font_family)
+        widget.setFont(current_font)
+        for child in widget.findChildren(QWidget):
+            child_font = child.font()
+            child_font.setFamily(font_family)
+            child.setFont(child_font)
 
     def apply_palette(self):
         palette = QPalette()
@@ -391,11 +465,14 @@ class KemonoDownloader(QMainWindow):
         self.main_fade.setEndValue(1)
         self.main_fade.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
-        self.intro_fade.finished.connect(
-            lambda: self.setCentralWidget(self.main_widget)
-        )
+        self.intro_fade.finished.connect(self._finish_intro_transition)
         self.intro_fade.start()
         self.main_fade.start()
+
+    def _finish_intro_transition(self):
+        """Complete the intro-to-main transition and release the intro screen."""
+        self.setCentralWidget(self.main_widget)
+        self.intro_screen = None
 
     def check_for_updates(self):
         self.version_checker = VersionChecker()
@@ -507,6 +584,7 @@ class KemonoDownloader(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    load_bundled_fonts()
     window = KemonoDownloader()
     window.show()
     sys.exit(app.exec())

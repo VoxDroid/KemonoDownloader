@@ -1,5 +1,10 @@
 # Kemono Downloader Release Notes
 
+## v5.10.0 (10 February 2026)
+**feat: Customizable font settings with bundled Google Fonts**
+- Add font settings to the Settings tab
+  Introduces a new Font Settings group in the settings UI, allowing users to switch the application-wide font between JetBrains Mono (default) and Poppins. Fonts are bundled as TTF files (Regular, Bold, Medium weights) and loaded at startup via QFontDatabase. The selected font is persisted via QSettings and applied across the entire application, including the intro screen, help tab, and browser extension tab. Adds `font_changed` signal to SettingsTab, dynamic `_get_font_family()` helpers in HelpTab and ExtensionTab, recursive font propagation in `KemonoDownloader.apply_font()`, and translations for the font UI in all four languages (English, Japanese, Korean, Chinese-Simplified). Includes 39 new unit tests covering defaults, combo box, signal emission, dialog messages, reset, bundled files, translations, QSettings persistence, and UI elements.
+
 ## v5.9.0 (09 February 2026)
 **feat: Creator filename/folder customization, browser extension, and misc fixes**
 - Add creator filename/folder customization

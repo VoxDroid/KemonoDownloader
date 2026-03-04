@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.9.0-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.10.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -201,6 +201,11 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 - **Base Directory**: Custom root path for downloads
 - **Folder Name**: Configurable app data folder name
 - **Platform Defaults**: Auto-detection of appropriate directories per OS
+
+#### $\color{#90a4ae}{\sf{\text{Font Settings}}}$
+| Setting | Description | Default | Options |
+|---------|-------------|---------|---------|
+| Font | Application-wide font family (bundled Google Fonts) | JetBrains Mono | JetBrains Mono, Poppins |
 
 ### $\color{#90a4ae}{\sf{\text{Help and Documentation}}}$
 

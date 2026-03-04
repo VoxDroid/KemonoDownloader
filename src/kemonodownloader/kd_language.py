@@ -1321,6 +1321,19 @@ class KDLanguage:
                 "korean": "중국어 (간체)",
                 "chinese-simplified": "中文 (简体)",
             },
+            # Font settings
+            "font_settings": {
+                "english": "Font Settings",
+                "japanese": "フォント設定",
+                "korean": "글꼴 설정",
+                "chinese-simplified": "字体设置",
+            },
+            "font": {
+                "english": "Font:",
+                "japanese": "フォント:",
+                "korean": "글꼴:",
+                "chinese-simplified": "字体:",
+            },
             "full_logs": {
                 "english": "Full Logs",
                 "japanese": "完全なログ",
@@ -1347,10 +1360,10 @@ class KDLanguage:
                 "chinese-simplified": "确认设置更改",
             },
             "confirm_settings_message": {
-                "english": "Are you sure you want to apply these settings?\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}",
-                "japanese": "これらの設定を適用してもよろしいですか？\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}",
-                "korean": "이 설정을 적용하시겠습니까?\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}",
-                "chinese-simplified": "您确定要应用这些设置吗？\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}",
+                "english": "Are you sure you want to apply these settings?\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}\nFont: {9}",
+                "japanese": "これらの設定を適用してもよろしいですか？\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}\nフォント: {9}",
+                "korean": "이 설정을 적용하시겠습니까?\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}\n글꼴: {9}",
+                "chinese-simplified": "您确定要应用这些设置吗？\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}\n字体: {9}",
             },
             "enabled": {
                 "english": "Enabled",
@@ -1389,10 +1402,10 @@ class KDLanguage:
                 "chinese-simplified": "设置已应用",
             },
             "settings_applied_message": {
-                "english": "Settings have been successfully applied!\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}",
-                "japanese": "設定が正常に適用されました！\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}",
-                "korean": "설정이 성공적으로 적용되었습니다!\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}",
-                "chinese-simplified": "设置已成功应用！\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}",
+                "english": "Settings have been successfully applied!\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}\nFont: {9}",
+                "japanese": "設定が正常に適用されました！\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}\nフォント: {9}",
+                "korean": "설정이 성공적으로 적용되었습니다!\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}\n글꼴: {9}",
+                "chinese-simplified": "设置已成功应用！\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}\n字体: {9}",
             },
             "proxy_settings": {
                 "english": "Proxy Settings",
