@@ -7,7 +7,6 @@ import os
 import re
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urljoin
 
 import qtawesome as qta
@@ -1175,39 +1174,82 @@ class FilePreparationThread(QThread):
         total_posts = len(self.post_ids)
         completed_posts = 0
 
-        with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
-            future_to_post = {
-                executor.submit(self.fetch_post_data, post_id): post_id
-                for post_url, posts in self.all_files_map.items()
-                for _, post_id in posts
-                if post_id in self.post_ids
-            }
+        # Build list of post_ids to process
+        post_id_list = [
+            post_id
+            for post_url, posts in self.all_files_map.items()
+            for _, post_id in posts
+            if post_id in self.post_ids
+        ]
 
-            for future in as_completed(future_to_post):
+        # Use pure Lock + polling instead of Semaphore/Event to avoid
+        # Condition.notify() access violations on Python 3.14 + Windows.
+        slot_lock = threading.Lock()
+        active_slots = [0]
+        results_lock = threading.Lock()
+        workers = []
+
+        def _worker(pid):
+            """Fetch post data in a daemon thread."""
+            try:
                 if not self.is_running:
-                    self.log.emit(
-                        translate(
-                            "log_info", "FilePreparationThread stopped during execution"
-                        ),
-                        "INFO",
-                    )
-                    break
-                result = future.result()
-                if result:
-                    post_id, detected_files = result
-                    for file_name, file_url in detected_files:
-                        self.log.emit(
-                            translate(
-                                "log_debug",
-                                f"Detected file: {file_name} from {file_url}",
-                            ),
-                            "INFO",
-                        )
-                        files_to_download.append(file_url)
-                        files_to_posts_map[file_url] = post_id
-                completed_posts += 1
+                    return
+                result = self.fetch_post_data(pid)
+                if result and self.is_running:
+                    pid_result, detected_files = result
+                    with results_lock:
+                        for file_name, file_url in detected_files:
+                            try:
+                                self.log.emit(
+                                    translate(
+                                        "log_debug",
+                                        f"Detected file: {file_name} from {file_url}",
+                                    ),
+                                    "INFO",
+                                )
+                            except RuntimeError:
+                                pass
+                            files_to_download.append(file_url)
+                            files_to_posts_map[file_url] = pid_result
+            except Exception:
+                pass  # fetch_post_data handles its own logging
+            finally:
+                with slot_lock:
+                    active_slots[0] -= 1
+                    nonlocal completed_posts
+                    completed_posts += 1
                 progress = min(int((completed_posts / total_posts) * 100), 100)
-                self.progress.emit(progress)
+                try:
+                    self.progress.emit(progress)
+                except RuntimeError:
+                    pass
+
+        for pid in post_id_list:
+            if not self.is_running:
+                break
+            # Wait for a concurrency slot using pure Lock polling
+            while True:
+                with slot_lock:
+                    if active_slots[0] < self.max_concurrent:
+                        active_slots[0] += 1
+                        break
+                if not self.is_running:
+                    break
+                time.sleep(0.05)
+            if not self.is_running:
+                break
+            t = threading.Thread(target=_worker, args=(pid,), daemon=True)
+            t.start()
+            workers.append(t)
+
+        # Wait for all workers so none outlive the QThread C++ object.
+        # Thread.join() internally uses Event.wait() which triggers
+        # Condition.notify() access violations on Python 3.14 + Windows,
+        # so poll is_alive() instead.
+        _deadline = time.monotonic() + 30
+        for w in workers:
+            while w.is_alive() and time.monotonic() < _deadline:
+                time.sleep(0.05)
 
         if self.is_running:
             files_to_download = list(dict.fromkeys(files_to_download))
@@ -1291,6 +1333,16 @@ class DownloadThread(QThread):
         self.post_content = ""
         # Lock for thread-safe access to shared data
         self.completed_files_lock = threading.Lock()
+        # Lock to serialize SSL connection establishment across workers.
+        # On Windows + Python 3.14, concurrent SSL handshakes / reads in
+        # OpenSSL trigger native access-violation crashes.  Serialising
+        # only the session.get() call (which does SSL + redirects) while
+        # allowing concurrent body streaming avoids the problem.
+        self._ssl_lock = threading.Lock()
+        # Flag set when the C++ QThread wrapper is about to be destroyed.
+        # Workers check this before emitting signals to avoid accessing
+        # a deleted C++ object.
+        self._destroyed = False
 
     def fetch_post_info(self):
         """Fetch post title."""
@@ -1385,16 +1437,23 @@ class DownloadThread(QThread):
 
     def stop(self):
         self.is_running = False
+        self._destroyed = True
         self.log.emit(
             translate("log_info", "DownloadThread cancellation initiated"), "INFO"
         )
 
     def download_file(self, file_url, folder, file_index, total_files):
         if not self.is_running or file_url not in self.selected_files:
-            self.log.emit(
-                translate("log_info", f"Skipping {file_url} due to cancellation"),
-                "INFO",
-            )
+            if not self._destroyed:
+                try:
+                    self.log.emit(
+                        translate(
+                            "log_info", f"Skipping {file_url} due to cancellation"
+                        ),
+                        "INFO",
+                    )
+                except RuntimeError:
+                    pass
             return
 
         post_id = self.files_to_posts_map.get(file_url, self.post_id)
@@ -1457,10 +1516,23 @@ class DownloadThread(QThread):
 
         max_retries = self.settings.file_download_max_retries
         for attempt in range(1, max_retries + 1):
+            if not self.is_running:
+                return
+            response = None
             try:
-                response = get_session(self.settings.settings_tab).get(
-                    file_url, headers=get_headers(), stream=True
-                )
+                # Serialize SSL connection establishment to prevent
+                # concurrent SSL access violations on Windows.
+                with self._ssl_lock:
+                    if not self.is_running:
+                        return
+                    response = get_session(self.settings.settings_tab).get(
+                        file_url,
+                        headers=get_headers(),
+                        stream=True,
+                        timeout=(30, 30),
+                    )
+                # After headers are received each thread has its own
+                # SSL connection and can stream data concurrently.
                 response.raise_for_status()
                 file_size = int(response.headers.get("content-length", 0)) or 1
                 downloaded_size = 0
@@ -1579,6 +1651,12 @@ class DownloadThread(QThread):
                         )
                         time.sleep(1)
                     continue
+            finally:
+                if response is not None:
+                    try:
+                        response.close()
+                    except Exception:
+                        pass
 
     def check_post_completion(self, file_url):
         post_id = self.files_to_posts_map.get(file_url)
@@ -1641,26 +1719,62 @@ class DownloadThread(QThread):
         )
 
         if total_files > 0:
-            with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
-                futures = {
-                    executor.submit(
-                        self.download_file,
-                        file_url,
-                        self.download_folder,
-                        i,
-                        total_files,
-                    ): i
-                    for i, file_url in enumerate(self.selected_files)
-                }
-                for future in as_completed(futures):
+            # Use pure Lock + polling instead of Semaphore/Event to avoid
+            # Condition.notify() access violations on Python 3.14 + Windows.
+            slot_lock = threading.Lock()
+            active_slots = [0]
+            workers = []  # keep refs so we can join
+
+            def _worker(file_url, folder, idx, total):
+                """Download worker."""
+                try:
+                    if not self.is_running:
+                        return
+                    self.download_file(file_url, folder, idx, total)
+                except Exception as e:
+                    if not self._destroyed:
+                        try:
+                            self.log.emit(
+                                translate("log_error", f"Error in download: {e}"),
+                                "ERROR",
+                            )
+                        except RuntimeError:
+                            pass
+                finally:
+                    with slot_lock:
+                        active_slots[0] -= 1
+
+            for i, file_url in enumerate(self.selected_files):
+                if not self.is_running:
+                    break
+                # Wait for a concurrency slot using pure Lock polling
+                while True:
+                    with slot_lock:
+                        if active_slots[0] < self.max_concurrent:
+                            active_slots[0] += 1
+                            break
                     if not self.is_running:
                         break
-                    try:
-                        future.result()
-                    except Exception as e:
-                        self.log.emit(
-                            translate("log_error", f"Error in download: {e}"), "ERROR"
-                        )
+                    time.sleep(0.05)
+                if not self.is_running:
+                    break
+                t = threading.Thread(
+                    target=_worker,
+                    args=(file_url, self.download_folder, i, total_files),
+                    daemon=True,
+                )
+                t.start()
+                workers.append(t)
+
+            # Wait for all workers before run() returns so that no thread
+            # outlives the QThread C++ object (which gets deleteLater'd).
+            # Thread.join() internally uses Event.wait() which triggers
+            # Condition.notify() access violations on Python 3.14 + Windows,
+            # so poll is_alive() instead.
+            _deadline = time.monotonic() + 30
+            for w in workers:
+                while w.is_alive() and time.monotonic() < _deadline:
+                    time.sleep(0.05)
         else:
             self.log.emit(
                 translate(
@@ -1684,6 +1798,12 @@ class LogsWindow(QDialog):
         self.setModal(False)
         self.resize(800, 600)
         self.init_ui()
+
+        # Batch update with timer to reduce UI updates and prevent freezing
+        self.update_timer = QTimer()
+        self.update_timer.timeout.connect(self._do_update)
+        self.update_timer.setInterval(500)  # Update every 500ms
+        self.needs_update = False
 
     def init_ui(self):
         layout = QVBoxLayout(self)
@@ -1722,8 +1842,23 @@ class LogsWindow(QDialog):
         layout.addLayout(buttons_layout)
 
     def update_logs(self):
-        """Update logs display with current parent console content"""
-        self.logs_display.setHtml(self.parent_console.toHtml())
+        """Schedule a batched update instead of updating immediately"""
+        self.needs_update = True
+        if not self.update_timer.isActive():
+            self.update_timer.start()
+
+    def _do_update(self):
+        """Actually perform the update (called by timer)"""
+        if self.needs_update and self.parent_console:
+            self.logs_display.setHtml(self.parent_console.toHtml())
+            self.needs_update = False
+
+    def closeEvent(self, a0):
+        """Stop timer when window closes"""
+        if hasattr(self, "update_timer"):
+            self.update_timer.stop()
+        if a0 is not None:
+            a0.accept()
 
     def clear_logs(self):
         """Clear both the logs window and parent console"""
@@ -2649,8 +2784,10 @@ class PostDownloaderTab(QWidget):
                 thread.file_detected.connect(self.on_files_detected_during_check_all)
                 thread.log.connect(self.append_log_to_console)
                 thread.error.connect(self.on_post_detection_error)
-                thread.finished.connect(lambda posts: self.cleanup_thread(thread, []))
-                thread.error.connect(lambda err: self.cleanup_thread(thread, []))
+                thread.finished.connect(
+                    lambda posts, t=thread: self.cleanup_thread(t, [])
+                )
+                thread.error.connect(lambda err, t=thread: self.cleanup_thread(t, []))
                 self.active_threads.append(thread)
                 thread.start()
 
@@ -2704,6 +2841,51 @@ class PostDownloaderTab(QWidget):
             self.detected_files_during_check_all = []
             self.update_checked_files()
 
+    def set_downloading_ui_state(self, is_downloading):
+        """Lock/unlock ALL UI controls during an active download.
+
+        Only the Cancel button and Expand Logs remain enabled while downloading.
+        """
+        enabled = not is_downloading
+
+        # Action buttons
+        self.post_download_btn.setEnabled(enabled)
+        self.post_cancel_btn.setEnabled(is_downloading)
+
+        # Queue input area
+        self.post_url_input.setEnabled(enabled)
+        self.post_add_to_queue_btn.setEnabled(enabled)
+        self.post_add_from_file_btn.setEnabled(enabled)
+        self.post_queue_list.setEnabled(enabled)
+
+        # Multi-URL fast mode inputs
+        self.multi_url_input.setEnabled(enabled)
+        self.multi_url_add_btn.setEnabled(enabled)
+
+        # Options
+        self.fast_mode_check.setEnabled(enabled)
+        if hasattr(self, "fast_mode_info_btn"):
+            self.fast_mode_info_btn.setEnabled(enabled)
+        self.auto_rename_checkbox.setEnabled(enabled)
+        self.post_download_text_check.setEnabled(enabled)
+
+        # File selection controls
+        self.post_search_input.setEnabled(enabled)
+        self.post_check_all.setEnabled(enabled)
+        self.download_all_links.setEnabled(enabled)
+        self.post_file_list.setEnabled(enabled)
+        self.post_filter_group.setEnabled(enabled)
+
+        # Tabs: disable all other tabs (keep current) + settings tab
+        if self.parent and hasattr(self.parent, "tabs"):
+            for i in range(self.parent.tabs.count()):
+                if i != self.parent.tabs.currentIndex():
+                    self.parent.tabs.setTabEnabled(i, enabled)
+        if self.parent and hasattr(self.parent, "status_label"):
+            self.parent.status_label.setText(
+                translate("preparing_files") if is_downloading else translate("idle")
+            )
+
     def start_post_download(self):
         if not self.post_queue:
             self.append_log_to_console(
@@ -2728,10 +2910,7 @@ class PostDownloaderTab(QWidget):
             return
 
         self.downloading = True
-        self.parent.tabs.setTabEnabled(1, False)
-        self.parent.status_label.setText(translate("preparing_files"))
-        self.post_download_btn.setEnabled(False)
-        self.post_cancel_btn.setEnabled(True)
+        self.set_downloading_ui_state(True)
         self.post_overall_progress.setValue(0)
         self.completed_posts.clear()
         self.completed_files.clear()
@@ -3014,6 +3193,15 @@ class PostDownloaderTab(QWidget):
                 "WARNING",
             )
 
+        # Ensure the native thread has fully exited before the object can be
+        # garbage-collected — prevents "QThread: Destroyed while running".
+        try:
+            if thread.isRunning():
+                thread.wait(5000)
+            thread.deleteLater()
+        except RuntimeError:
+            pass  # C++ object already deleted
+
         active_download_threads = [
             t for t in self.active_threads if isinstance(t, DownloadThread)
         ]
@@ -3058,15 +3246,15 @@ class PostDownloaderTab(QWidget):
             for thread in self.active_threads[:]:
                 if thread.isRunning():
                     thread.terminate()
-                    thread.wait()
-                    self.active_threads.remove(thread)
-                    self.append_log_to_console(
-                        translate(
-                            "log_info",
-                            translate("terminated_thread", thread.__class__.__name__),
-                        ),
-                        "INFO",
-                    )
+                thread.wait(5000)
+                self.append_log_to_console(
+                    translate(
+                        "log_info",
+                        translate("terminated_thread", thread.__class__.__name__),
+                    ),
+                    "INFO",
+                )
+                thread.deleteLater()
             self.post_file_progress.setStyleSheet(
                 "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
             )
@@ -3077,10 +3265,7 @@ class PostDownloaderTab(QWidget):
             self.post_overall_progress_label.setText(translate("downloads_terminated"))
             self.active_threads.clear()
             self.downloading = False
-            self.parent.tabs.setTabEnabled(1, True)
-            self.parent.status_label.setText(translate("idle"))
-            self.post_download_btn.setEnabled(True)
-            self.post_cancel_btn.setEnabled(False)
+            self.set_downloading_ui_state(False)
             self.total_files_to_download = 0
             self.completed_files.clear()
             self.background_task_progress.setRange(0, 100)
@@ -3164,10 +3349,7 @@ class PostDownloaderTab(QWidget):
 
     def post_download_finished(self):
         self.downloading = False
-        self.parent.tabs.setTabEnabled(1, True)
-        self.parent.status_label.setText(translate("idle"))
-        self.post_download_btn.setEnabled(True)
-        self.post_cancel_btn.setEnabled(False)
+        self.set_downloading_ui_state(False)
         self.append_log_to_console(
             translate("log_info", translate("download_process_ended")), "INFO"
         )

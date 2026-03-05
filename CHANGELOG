@@ -6,6 +6,15 @@
 - Add Fast Mode to Post Downloader and Creator Downloader
   Introduces a Fast Mode toggle (with qtawesome bolt icon) to both downloader tabs. When enabled, Fast Mode automatically selects all download categories, locks manual options to prevent accidental changes, and reveals a batch URL input area for pasting multiple URLs at once (one per line). Completed items are automatically removed from the queue. An info button (ℹ) explains the feature in a dialog. Includes full translations for all four languages and new unit tests.
 
+- Fix Creator Downloader fast mode batch download
+  In fast mode, pressing Download now auto-detects and downloads all posts for each queued creator sequentially instead of requiring manual post selection. Uses a pipeline of `_fast_mode_process_next()` → PostDetectionThread → `_fast_mode_auto_download()` → `prepare_files_for_download()` to process each creator URL and advance to the next on completion.
+
+- Lock UI controls during active downloads
+  All UI elements (inputs, checkboxes, buttons, queue lists, pagination, other tabs, and settings tab) are disabled during a download in both Post and Creator downloader tabs. Only the Cancel button and Expand Logs remain enabled. New `set_downloading_ui_state()` method in both tabs provides comprehensive lock/unlock behavior.
+
+- Fix Expand Logs window freezing
+  Both Post and Creator downloader LogsWindow dialogs now use QTimer-based batched updates (500ms interval) instead of synchronous HTML copying on every log entry, preventing UI freezes during heavy download logging.
+
 - Migrate file deduplication from JSON to SQLite
   Replaces the `file_hashes.json` flat-file backend with a new `hash_db.py` module backed by SQLite (WAL mode, thread-safe). The `HashDB` class provides `has()`, `add()`, `remove()`, and `all_hashes()` methods. Existing JSON hash files are automatically migrated on first access. Improves performance and reliability for large hash sets. Includes 16 unit tests covering CRUD, migration, and thread safety.
 

@@ -158,7 +158,8 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Creator Downloader** | Bulk download entire creator profiles or selected posts. Configurable options for main files, attachments, and content images. |
 | **File Type Support** | Handles images (JPG, PNG, GIF, WebP), videos (MP4, AVI, MOV), archives (ZIP, 7Z, RAR), documents (PDF, TXT), audio (MP3, WAV), and more. |
 | **URL Import** | Import multiple creator URLs from .txt files for batch processing. |
-| **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. |
+| **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. In Creator Downloader, auto-detects and downloads all posts for each queued creator sequentially. |
+| **Download UI Lock** | All controls are disabled during active downloads (except Cancel and Expand Logs) to prevent accidental changes. |
 
 ### $\color{#90a4ae}{\sf{\text{Performance and Reliability}}}$
 

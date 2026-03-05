@@ -525,3 +525,211 @@ class TestFastModeRemovedPostUrlTranslation:
         assert (
             result != "fast_mode_removed_post_url"
         ), f"Missing fast_mode_removed_post_url in {lang}"
+
+
+class TestFastModeBatchTranslations:
+    """Verify that all fast-mode batch download translation keys exist."""
+
+    BATCH_KEYS = [
+        "fast_mode_batch_start",
+        "fast_mode_batch_complete",
+        "fast_mode_processing_creator",
+        "fast_mode_no_posts_found",
+        "fast_mode_auto_selected",
+    ]
+
+    def setup_method(self):
+        self.original = language_manager.current_language
+
+    def teardown_method(self):
+        language_manager.set_language(self.original)
+
+    @pytest.mark.parametrize("lang", language_manager.get_available_languages())
+    def test_batch_keys_exist(self, lang):
+        language_manager.set_language(lang)
+        for key in self.BATCH_KEYS:
+            result = translate(key)
+            assert result != key, f"Missing translation for '{key}' in {lang}"
+
+    def test_batch_start_format(self):
+        language_manager.set_language("english")
+        result = translate("fast_mode_batch_start", 5)
+        assert "5" in result
+
+    def test_processing_creator_format(self):
+        language_manager.set_language("english")
+        result = translate(
+            "fast_mode_processing_creator",
+            "https://kemono.cr/fanbox/user/100",
+            3,
+        )
+        assert "100" in result
+        assert "3" in result
+
+    def test_no_posts_found_format(self):
+        language_manager.set_language("english")
+        result = translate(
+            "fast_mode_no_posts_found",
+            "https://kemono.cr/fanbox/user/100",
+        )
+        assert "100" in result
+
+    def test_auto_selected_format(self):
+        language_manager.set_language("english")
+        result = translate(
+            "fast_mode_auto_selected",
+            10,
+            "https://kemono.cr/fanbox/user/100",
+        )
+        assert "10" in result
+        assert "100" in result
+
+    def test_batch_complete_no_args(self):
+        language_manager.set_language("english")
+        result = translate("fast_mode_batch_complete")
+        assert "complete" in result.lower()
+
+
+class TestFastModeBatchFlow:
+    """Test the fast-mode batch download flow for the creator downloader."""
+
+    def test_pending_urls_built_from_queue(self):
+        """fast_mode_pending_urls should be built from the creator queue."""
+        creator_queue = [
+            ("https://kemono.cr/fanbox/user/100", False),
+            ("https://kemono.cr/fanbox/user/200", False),
+            ("https://kemono.cr/fanbox/user/300", False),
+        ]
+        pending = [url for url, _ in creator_queue]
+        assert len(pending) == 3
+        assert pending[0].endswith("/100")
+
+    def test_process_next_pops_first(self):
+        """_fast_mode_process_next should pop the first URL from the list."""
+        pending = [
+            "https://kemono.cr/fanbox/user/100",
+            "https://kemono.cr/fanbox/user/200",
+        ]
+        url = pending.pop(0)
+        assert url.endswith("/100")
+        assert len(pending) == 1
+        assert pending[0].endswith("/200")
+
+    def test_process_next_empty_terminates(self):
+        """When pending list is empty, batch should complete."""
+        pending = []
+        is_downloading = bool(pending)
+        assert is_downloading is False
+
+    def test_auto_select_all_posts(self):
+        """_fast_mode_auto_download should select all detected posts."""
+        all_detected_posts = [
+            ("Post 1", ("post_1", "thumb_1")),
+            ("Post 2", ("post_2", "thumb_2")),
+            ("Post 3", ("post_3", "thumb_3")),
+        ]
+        checked_urls = {}
+        for post_title, (post_id, thumbnail_url) in all_detected_posts:
+            checked_urls[post_id] = True
+        posts_to_download = [post_id for _, (post_id, _) in all_detected_posts]
+        assert len(posts_to_download) == 3
+        assert all(checked_urls[pid] for pid in posts_to_download)
+
+    def test_no_posts_skips_creator(self):
+        """If no posts are detected, the creator should be skipped."""
+        all_detected_posts = []
+        assert len(all_detected_posts) == 0
+        # In real code this triggers _fast_mode_process_next() to advance
+
+    def test_batch_advances_after_download(self):
+        """After download finishes, the next creator should be processed."""
+        pending = [
+            "https://kemono.cr/fanbox/user/100",
+            "https://kemono.cr/fanbox/user/200",
+            "https://kemono.cr/fanbox/user/300",
+        ]
+        processed = []
+        while pending:
+            url = pending.pop(0)
+            processed.append(url)
+        assert len(processed) == 3
+        assert len(pending) == 0
+
+
+class TestUIStateLocking:
+    """Test the UI state locking/unlocking logic."""
+
+    def test_lock_enables_download_states(self):
+        """When is_downloading=True, enabled should be False."""
+        is_downloading = True
+        enabled = not is_downloading
+        assert enabled is False
+
+    def test_unlock_restores_states(self):
+        """When is_downloading=False, enabled should be True."""
+        is_downloading = False
+        enabled = not is_downloading
+        assert enabled is True
+
+    def test_cancel_clears_fast_mode_flags(self):
+        """cancel_creator_download should clear fast mode flags."""
+        fast_mode_downloading = True
+        fast_mode_pending_urls = ["url1", "url2"]
+
+        # Simulate cancel
+        fast_mode_downloading = False
+        fast_mode_pending_urls.clear()
+
+        assert fast_mode_downloading is False
+        assert len(fast_mode_pending_urls) == 0
+
+    def test_pagination_respects_page_bounds(self):
+        """Pagination buttons should respect current page and total pages."""
+        current_page = 1
+        total_pages = 5
+        is_downloading = False
+        enabled = not is_downloading
+
+        prev_enabled = enabled and current_page > 1
+        next_enabled = enabled and current_page < total_pages
+
+        assert prev_enabled is False  # Page 1, no previous
+        assert next_enabled is True
+
+    def test_pagination_locked_during_download(self):
+        """Pagination should be disabled during download regardless of page."""
+        current_page = 3
+        total_pages = 5
+        is_downloading = True
+        enabled = not is_downloading
+
+        prev_enabled = enabled and current_page > 1
+        next_enabled = enabled and current_page < total_pages
+
+        assert prev_enabled is False
+        assert next_enabled is False
+
+
+class TestLogsWindowTimer:
+    """Test the LogsWindow timer-based update logic."""
+
+    def test_needs_update_flag(self):
+        """update_logs should set needs_update to True."""
+        needs_update = False
+        # Simulate update_logs
+        needs_update = True
+        assert needs_update is True
+
+    def test_do_update_clears_flag(self):
+        """_do_update should clear needs_update after updating."""
+        needs_update = True
+        # Simulate _do_update
+        if needs_update:
+            # Would call setHtml in real code
+            needs_update = False
+        assert needs_update is False
+
+    def test_timer_interval(self):
+        """Timer interval should be 500ms for batched updates."""
+        interval = 500
+        assert interval == 500

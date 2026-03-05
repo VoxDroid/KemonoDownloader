@@ -3646,6 +3646,36 @@ class KDLanguage:
                 "korean": "빠른 모드: 완료된 크리에이터 {0}을(를) 큐에서 제거했습니다.",
                 "chinese-simplified": "快速模式：已从队列中移除已完成的创作者 {0}。",
             },
+            "fast_mode_batch_start": {
+                "english": "Fast Mode: starting batch download for {0} creator(s).",
+                "japanese": "高速モード: {0}人のクリエイターの一括ダウンロードを開始します。",
+                "korean": "빠른 모드: {0}명의 크리에이터 일괄 다운로드를 시작합니다.",
+                "chinese-simplified": "快速模式：开始批量下载 {0} 个创作者。",
+            },
+            "fast_mode_batch_complete": {
+                "english": "Fast Mode: batch download complete.",
+                "japanese": "高速モード: 一括ダウンロードが完了しました。",
+                "korean": "빠른 모드: 일괄 다운로드가 완료되었습니다.",
+                "chinese-simplified": "快速模式：批量下载完成。",
+            },
+            "fast_mode_processing_creator": {
+                "english": "Fast Mode: processing creator {0} ({1} remaining).",
+                "japanese": "高速モード: クリエイター {0} を処理中（残り {1} 件）。",
+                "korean": "빠른 모드: 크리에이터 {0} 처리 중 (나머지 {1}개).",
+                "chinese-simplified": "快速模式：正在处理创作者 {0}（剩余 {1} 个）。",
+            },
+            "fast_mode_no_posts_found": {
+                "english": "Fast Mode: no posts found for creator {0}, skipping.",
+                "japanese": "高速モード: クリエイター {0} の投稿が見つかりません。スキップします。",
+                "korean": "빠른 모드: 크리에이터 {0}의 게시물을 찾을 수 없습니다. 건너뜁니다.",
+                "chinese-simplified": "快速模式：未找到创作者 {0} 的帖子，跳过。",
+            },
+            "fast_mode_auto_selected": {
+                "english": "Fast Mode: auto-selected {0} post(s) for {1}.",
+                "japanese": "高速モード: {1} の {0} 件の投稿を自動選択しました。",
+                "korean": "빠른 모드: {1}에 대해 {0}개의 게시물을 자동 선택했습니다.",
+                "chinese-simplified": "快速模式：为 {1} 自动选择了 {0} 个帖子。",
+            },
             "multi_url_placeholder": {
                 "english": "Paste multiple post URLs here, one per line…",
                 "japanese": "複数の投稿URLをここに貼り付けてください（1行に1つ）…",

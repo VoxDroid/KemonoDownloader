@@ -8,7 +8,6 @@ import os
 import re
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Optional
 from urllib.parse import parse_qs, urljoin, urlparse
 
@@ -142,21 +141,36 @@ def get_headers() -> dict:
 API_BASE = "https://kemono.cr/api/v1"
 
 
-# Create a shared session for connection pooling
-_SHARED_SESSION: Optional[requests.Session] = None
+# Thread-local storage for per-thread sessions.
+# Using a shared session across ThreadPoolExecutor workers causes
+# concurrent SSL handshakes through the same connection pool, which
+# triggers access-violation crashes on Windows (Python 3.14 / OpenSSL).
+# Giving each thread its own session avoids the problem entirely.
+_thread_local = threading.local()
 
 
 def get_session(settings_tab=None):
-    """Get or create a requests session with connection pooling"""
-    global _SHARED_SESSION
-    if _SHARED_SESSION is None:
-        _SHARED_SESSION = requests.Session()
-        # Configure connection pool
+    """Get or create a per-thread requests session with connection pooling.
+
+    Each thread receives its own ``requests.Session`` (and connection pool)
+    so that concurrent SSL handshakes never share underlying OpenSSL state,
+    preventing access-violation crashes on Windows.
+    """
+    session: Optional[requests.Session] = getattr(_thread_local, "session", None)
+    if session is None:
+        session = requests.Session()
+        # Disable automatic environment/registry proxy lookup.
+        # On Windows, concurrent threads calling proxy_bypass_registry
+        # via winreg cause "access violation" crashes.  The app manages
+        # its own proxy settings through the Settings tab instead.
+        session.trust_env = False
+        # Configure connection pool (per-thread, so modest sizes suffice)
         adapter = HTTPAdapter(
-            pool_connections=20, pool_maxsize=20, max_retries=3, pool_block=False
+            pool_connections=10, pool_maxsize=10, max_retries=3, pool_block=False
         )
-        _SHARED_SESSION.mount("http://", adapter)
-        _SHARED_SESSION.mount("https://", adapter)
+        session.mount("http://", adapter)
+        session.mount("https://", adapter)
+        _thread_local.session = session
 
     # Set proxies if settings_tab is provided
     if settings_tab:
@@ -168,23 +182,32 @@ def get_session(settings_tab=None):
                 for proxy_url in proxies.values()
             )
             if is_socks:
-                # For SOCKS proxies, we need to create a new session to avoid conflicts with HTTP adapters
-                session = requests.Session()
-                session.proxies.update(proxies)
-                # Configure SOCKS-specific timeout and retry settings
-                adapter = HTTPAdapter(
-                    pool_connections=5, pool_maxsize=5, max_retries=3, pool_block=False
+                # Reuse a per-thread SOCKS session to avoid creating one
+                # on every call while still keeping threads isolated.
+                socks_session: Optional[requests.Session] = getattr(
+                    _thread_local, "socks_session", None
                 )
-                session.mount("http://", adapter)
-                session.mount("https://", adapter)
-                return session
+                if socks_session is None:
+                    socks_session = requests.Session()
+                    socks_session.trust_env = False
+                    socks_adapter = HTTPAdapter(
+                        pool_connections=5,
+                        pool_maxsize=5,
+                        max_retries=3,
+                        pool_block=False,
+                    )
+                    socks_session.mount("http://", socks_adapter)
+                    socks_session.mount("https://", socks_adapter)
+                    _thread_local.socks_session = socks_session
+                socks_session.proxies.update(proxies)
+                return socks_session
             else:
-                # For HTTP proxies, use the shared session
-                _SHARED_SESSION.proxies.update(proxies)
+                # For HTTP proxies, use the per-thread session
+                session.proxies.update(proxies)
         else:
-            _SHARED_SESSION.proxies.clear()
+            session.proxies.clear()
 
-    return _SHARED_SESSION
+    return session
 
 
 class PreviewThread(QThread):
@@ -1194,39 +1217,83 @@ class FilePreparationThread(QThread):
             self.finished.emit([], {})
             return
 
-        with ThreadPoolExecutor(max_workers=self.max_concurrent) as executor:
-            future_to_post = {}
-            for creator_url in creator_urls:
-                for post_id in self.post_ids:
-                    if any(
-                        p[1][0] == post_id
-                        for p in self.all_files_map.get(creator_url, [])
-                    ):
-                        future_to_post[
-                            executor.submit(
-                                self.fetch_and_detect_files, post_id, creator_url
-                            )
-                        ] = post_id
+        # Build work list: (post_id, creator_url) pairs
+        work_items = []
+        for creator_url in creator_urls:
+            for post_id in self.post_ids:
+                if any(
+                    p[1][0] == post_id for p in self.all_files_map.get(creator_url, [])
+                ):
+                    work_items.append((post_id, creator_url))
 
-            for future in as_completed(future_to_post):
+        # Use pure Lock + polling instead of Semaphore/Event to avoid
+        # Condition.notify() access violations on Python 3.14 + Windows.
+        slot_lock = threading.Lock()
+        active_slots = [0]
+        results_lock = threading.Lock()
+        workers = []
+
+        def _worker(pid, curl):
+            """Fetch & detect files in a daemon thread."""
+            try:
+                if not self.is_running:
+                    return
+                result = self.fetch_and_detect_files(pid, curl)
+                if result and self.is_running:
+                    pid_result, detected_files = result
+                    with results_lock:
+                        for file_name, file_url in detected_files:
+                            try:
+                                self.log.emit(
+                                    translate(
+                                        "log_debug",
+                                        translate("detected_file", file_name, file_url),
+                                    ),
+                                    "INFO",
+                                )
+                            except RuntimeError:
+                                pass
+                            files_to_download.append(file_url)
+                            files_to_posts_map[file_url] = pid_result
+            except Exception:
+                pass  # fetch_and_detect_files handles its own logging
+            finally:
+                with slot_lock:
+                    active_slots[0] -= 1
+                    nonlocal completed_posts
+                    completed_posts += 1
+                progress = min(int((completed_posts / total_posts) * 100), 100)
+                try:
+                    self.progress.emit(progress)
+                except RuntimeError:
+                    pass
+
+        for idx, (pid, curl) in enumerate(work_items):
+            if not self.is_running:
+                break
+            # Wait for a concurrency slot using pure Lock polling
+            while True:
+                with slot_lock:
+                    if active_slots[0] < self.max_concurrent:
+                        active_slots[0] += 1
+                        break
                 if not self.is_running:
                     break
-                result = future.result()
-                if result:
-                    post_id, detected_files = result
-                    for file_name, file_url in detected_files:
-                        self.log.emit(
-                            translate(
-                                "log_debug",
-                                translate("detected_file", file_name, file_url),
-                            ),
-                            "INFO",
-                        )
-                        files_to_download.append(file_url)
-                        files_to_posts_map[file_url] = post_id
-                    completed_posts += 1
-                    progress = min(int((completed_posts / total_posts) * 100), 100)
-                    self.progress.emit(progress)
+                time.sleep(0.05)
+            if not self.is_running:
+                break
+            t = threading.Thread(target=_worker, args=(pid, curl), daemon=True)
+            t.start()
+            workers.append(t)
+
+        # Wait for all workers so none outlive the QThread C++ object.
+        # Thread.join() internally uses Event.wait() which triggers
+        # Condition.notify() access violations on Python 3.14 + Windows,
+        # so poll is_alive() instead.
+        _deadline = time.monotonic() + 30
+        for w in workers:
+            while w.is_alive() and time.monotonic() < _deadline:
+                time.sleep(0.05)
 
         if self.is_running:
             files_to_download = list(dict.fromkeys(files_to_download))
@@ -1313,6 +1380,16 @@ class CreatorDownloadThread(QThread):
         self.completed_files_lock = threading.Lock()
         self.fetched_texts_lock = threading.Lock()
         self.fetched_texts = set()
+        # Lock to serialize SSL connection establishment across workers.
+        # On Windows + Python 3.14, concurrent SSL handshakes / reads in
+        # OpenSSL trigger native access-violation crashes.  Serialising
+        # only the session.get() call (which does SSL + redirects) while
+        # allowing concurrent body streaming avoids the problem.
+        self._ssl_lock = threading.Lock()
+        # Defence flag: set in stop() *before* any cleanup.  Workers
+        # check this before emitting signals so they never touch the
+        # C++ object after it has been scheduled for deletion.
+        self._destroyed = False
 
     def _get_domain_config_from_files(self):
         """Determine domain configuration from the files to download"""
@@ -1346,7 +1423,8 @@ class CreatorDownloadThread(QThread):
                 )
             else:
                 self.creator_name = "Unknown_Creator"
-                self.log.emit(
+                self._safe_emit(
+                    self.log,
                     translate(
                         "log_warning",
                         translate("failed_to_fetch_creator_name", self.creator_name),
@@ -1354,7 +1432,8 @@ class CreatorDownloadThread(QThread):
                     "WARNING",
                 )
         except requests.RequestException as e:
-            self.log.emit(
+            self._safe_emit(
+                self.log,
                 translate(
                     "log_error", translate("error_fetching_creator_name", str(e))
                 ),
@@ -1376,7 +1455,8 @@ class CreatorDownloadThread(QThread):
                         post_data = response.json()
                         title = post_data.get("title", f"Post_{post_id}")
                         self.post_titles_map[key] = sanitize_filename(title)
-                        self.log.emit(
+                        self._safe_emit(
+                            self.log,
                             translate(
                                 "log_info",
                                 translate("fetched_title_for_post", post_id, title),
@@ -1385,7 +1465,8 @@ class CreatorDownloadThread(QThread):
                         )
                     else:
                         self.post_titles_map[key] = sanitize_filename(f"Post_{post_id}")
-                        self.log.emit(
+                        self._safe_emit(
+                            self.log,
                             translate(
                                 "log_warning",
                                 translate("failed_to_fetch_title_for_post", post_id),
@@ -1394,7 +1475,8 @@ class CreatorDownloadThread(QThread):
                         )
                 except requests.RequestException as e:
                     self.post_titles_map[key] = sanitize_filename(f"Post_{post_id}")
-                    self.log.emit(
+                    self._safe_emit(
+                        self.log,
                         translate(
                             "log_error",
                             translate("error_fetching_title_for_post", post_id, str(e)),
@@ -1404,6 +1486,16 @@ class CreatorDownloadThread(QThread):
 
     def stop(self):
         self.is_running = False
+        self._destroyed = True
+
+    def _safe_emit(self, signal, *args):
+        """Emit *signal* only when the C++ object is still alive."""
+        if self._destroyed:
+            return
+        try:
+            signal.emit(*args)
+        except RuntimeError:
+            pass
 
     def generate_filename_and_folder(
         self, file_url, folder, file_index, total_files, post_id, post_title
@@ -1461,7 +1553,8 @@ class CreatorDownloadThread(QThread):
         except Exception:
             # Log a warning and fallback to a safe default template
             try:
-                self.log.emit(
+                self._safe_emit(
+                    self.log,
                     translate(
                         "log_warning", translate("filename_template_error", template)
                     ),
@@ -1567,14 +1660,16 @@ class CreatorDownloadThread(QThread):
                     text = soup.get_text(separator="\n\n")
                     with open(desc_path, "w", encoding="utf-8") as f:
                         f.write(text)
-                    self.log.emit(
+                    self._safe_emit(
+                        self.log,
                         translate(
                             "log_info", translate("saved_post_description", post_id)
                         ),
                         "INFO",
                     )
         except Exception as e:
-            self.log.emit(
+            self._safe_emit(
+                self.log,
                 translate(
                     "log_warning",
                     translate("failed_save_post_description", post_id, str(e)),
@@ -1584,7 +1679,9 @@ class CreatorDownloadThread(QThread):
 
     async def download_file(self, file_url, folder, file_index, total_files):
         if not self.is_running or file_url not in self.files_to_download:
-            self.log.emit(translate("log_info", f"Skipping {file_url}"), "INFO")
+            self._safe_emit(
+                self.log, translate("log_info", f"Skipping {file_url}"), "INFO"
+            )
             return
 
         post_id = self.files_to_posts_map.get(file_url, self.creator_id)
@@ -1600,10 +1697,10 @@ class CreatorDownloadThread(QThread):
             os.makedirs(target_folder, exist_ok=True)
         except OSError as e:
             error_msg = translate("failed_to_create_post_folder", target_folder, str(e))
-            self.log.emit(translate("log_error", error_msg), "ERROR")
+            self._safe_emit(self.log, translate("log_error", error_msg), "ERROR")
             with self.failed_files_lock:
                 self.failed_files[file_url] = error_msg
-            self.file_completed.emit(file_index, file_url, False)
+            self._safe_emit(self.file_completed, file_index, file_url, False)
             self.check_post_completion(file_url)
             return
 
@@ -1628,7 +1725,8 @@ class CreatorDownloadThread(QThread):
                 with open(existing_path, "rb") as f:
                     file_hash = hashlib.md5(f.read()).hexdigest()
                 if file_hash == entry["file_hash"]:
-                    self.log.emit(
+                    self._safe_emit(
+                        self.log,
                         translate(
                             "log_info",
                             translate(
@@ -1637,14 +1735,15 @@ class CreatorDownloadThread(QThread):
                         ),
                         "INFO",
                     )
-                    self.file_progress.emit(file_index, 100)
-                    self.file_completed.emit(file_index, file_url, True)
+                    self._safe_emit(self.file_progress, file_index, 100)
+                    self._safe_emit(self.file_completed, file_index, file_url, True)
                     with self.completed_files_lock:
                         self.completed_files.add(file_url)
                     self.check_post_completion(file_url)
                     return
 
-        self.log.emit(
+        self._safe_emit(
+            self.log,
             translate(
                 "log_info",
                 translate(
@@ -1667,27 +1766,42 @@ class CreatorDownloadThread(QThread):
                 # Use requests instead of aiohttp for better proxy support
                 def download_with_requests():
                     session = get_session(self.settings.settings_tab)
-                    response = session.get(
-                        file_url, headers=headers, stream=True, timeout=3600
-                    )
-                    response.raise_for_status()
-                    file_size = int(response.headers.get("content-length", 0)) or 1
-                    downloaded_size = 0
-
-                    file_handle = open(full_path, "wb")
+                    # Serialize SSL connection establishment to prevent
+                    # concurrent SSL access violations on Windows.
+                    with self._ssl_lock:
+                        if not self.is_running:
+                            raise Exception("Download cancelled before connection")
+                        response = session.get(
+                            file_url,
+                            headers=headers,
+                            stream=True,
+                            timeout=(30, 30),
+                        )
+                    # After headers are received each thread has its own
+                    # SSL connection and can stream data concurrently.
                     try:
-                        for chunk in response.iter_content(chunk_size=8192):
-                            if not self.is_running:
-                                raise Exception("Download interrupted by user")
-                            if chunk:
-                                file_handle.write(chunk)
-                                downloaded_size += len(chunk)
-                                progress = int((downloaded_size / file_size) * 100)
-                                self.file_progress.emit(file_index, progress)
-                    finally:
-                        file_handle.close()
+                        response.raise_for_status()
+                        file_size = int(response.headers.get("content-length", 0)) or 1
+                        downloaded_size = 0
 
-                    return file_size, downloaded_size
+                        file_handle = open(full_path, "wb")
+                        try:
+                            for chunk in response.iter_content(chunk_size=8192):
+                                if not self.is_running:
+                                    raise Exception("Download interrupted by user")
+                                if chunk:
+                                    file_handle.write(chunk)
+                                    downloaded_size += len(chunk)
+                                    progress = int((downloaded_size / file_size) * 100)
+                                    self._safe_emit(
+                                        self.file_progress, file_index, progress
+                                    )
+                        finally:
+                            file_handle.close()
+
+                        return file_size, downloaded_size
+                    finally:
+                        response.close()
 
                 # Run the download in a thread to avoid blocking
                 file_size, downloaded_size = await asyncio.to_thread(
@@ -1699,12 +1813,15 @@ class CreatorDownloadThread(QThread):
                     error_msg = translate(
                         "size_mismatch_error", downloaded_size, file_size, file_url
                     )
-                    self.log.emit(translate("log_warning", error_msg), "WARNING")
+                    self._safe_emit(
+                        self.log, translate("log_warning", error_msg), "WARNING"
+                    )
                     # Delete incomplete file
                     if os.path.exists(full_path):
                         try:
                             os.remove(full_path)
-                            self.log.emit(
+                            self._safe_emit(
+                                self.log,
                                 translate(
                                     "log_info",
                                     translate("deleted_incomplete_file", full_path),
@@ -1712,7 +1829,8 @@ class CreatorDownloadThread(QThread):
                                 "INFO",
                             )
                         except OSError as e:
-                            self.log.emit(
+                            self._safe_emit(
+                                self.log,
                                 translate(
                                     "log_error",
                                     translate(
@@ -1731,7 +1849,8 @@ class CreatorDownloadThread(QThread):
                 with open(full_path, "rb") as f:
                     file_hash = hashlib.md5(f.read()).hexdigest()
                 self.hash_db.store(url_hash, full_path, file_hash, file_url)
-                self.log.emit(
+                self._safe_emit(
+                    self.log,
                     translate(
                         "log_info", translate("successfully_downloaded", full_path)
                     ),
@@ -1739,7 +1858,7 @@ class CreatorDownloadThread(QThread):
                 )
                 with self.completed_files_lock:
                     self.completed_files.add(file_url)
-                self.file_completed.emit(file_index, file_url, True)
+                self._safe_emit(self.file_completed, file_index, file_url, True)
                 self.check_post_completion(file_url)
                 return
 
@@ -1748,15 +1867,18 @@ class CreatorDownloadThread(QThread):
                     error_msg = translate(
                         "error_downloading_after_retries", file_url, max_retries, str(e)
                     )
-                    self.log.emit(translate("log_error", error_msg), "ERROR")
+                    self._safe_emit(
+                        self.log, translate("log_error", error_msg), "ERROR"
+                    )
                     with self.failed_files_lock:
                         self.failed_files[file_url] = str(e)
-                    self.file_progress.emit(file_index, 0)
-                    self.file_completed.emit(file_index, file_url, False)
+                    self._safe_emit(self.file_progress, file_index, 0)
+                    self._safe_emit(self.file_completed, file_index, file_url, False)
                     self.check_post_completion(file_url)
                     return
                 else:
-                    self.log.emit(
+                    self._safe_emit(
+                        self.log,
                         translate(
                             "log_warning",
                             translate(
@@ -1771,7 +1893,8 @@ class CreatorDownloadThread(QThread):
                     )
                     await asyncio.sleep(1)
             except Exception as e:
-                self.log.emit(
+                self._safe_emit(
+                    self.log,
                     translate(
                         "log_error",
                         translate("unexpected_error_downloading", file_url, str(e)),
@@ -1780,8 +1903,8 @@ class CreatorDownloadThread(QThread):
                 )
                 with self.failed_files_lock:
                     self.failed_files[file_url] = str(e)
-                self.file_progress.emit(file_index, 0)
-                self.file_completed.emit(file_index, file_url, False)
+                self._safe_emit(self.file_progress, file_index, 0)
+                self._safe_emit(self.file_completed, file_index, file_url, False)
                 self.check_post_completion(file_url)
                 return
 
@@ -1790,30 +1913,38 @@ class CreatorDownloadThread(QThread):
         if post_id in self.post_files_map:
             post_files = self.post_files_map[post_id]
             if all(f in self.completed_files for f in post_files):
-                self.post_completed.emit(post_id)
+                self._safe_emit(self.post_completed, post_id)
 
     async def download_worker(self, queue, folder, total_files):
         while self.is_running:
             try:
-                file_index, file_url = await queue.get()
+                file_index, file_url = await asyncio.wait_for(queue.get(), timeout=1.0)
+            except asyncio.TimeoutError:
+                # Re-check self.is_running on next iteration
+                continue
+            except asyncio.CancelledError:
+                return
+            try:
                 await self.download_file(file_url, folder, file_index, total_files)
-                queue.task_done()
-            except asyncio.QueueEmpty:
-                break
+            except asyncio.CancelledError:
+                return  # finally still runs → task_done()
             except Exception as e:
-                self.log.emit(
+                self._safe_emit(
+                    self.log,
                     translate(
                         "log_error", translate("error_in_download_worker", str(e))
                     ),
                     "ERROR",
                 )
+            finally:
                 queue.task_done()
 
     def run(self):
         try:
             if not self.is_running:
                 return
-            self.log.emit(
+            self._safe_emit(
+                self.log,
                 translate(
                     "log_info",
                     translate(
@@ -1825,15 +1956,17 @@ class CreatorDownloadThread(QThread):
             self.fetch_creator_and_post_info()
         except Exception as e:
             try:
-                self.log.emit(translate("log_error", str(e)), "ERROR")
+                self._safe_emit(self.log, translate("log_error", str(e)), "ERROR")
             except Exception:
                 pass
             # Ensure we exit cleanly
             self.is_running = False
             return
         total_posts = len(self.selected_posts)
-        self.log.emit(
-            translate("log_info", translate("total_posts", total_posts)), "INFO"
+        self._safe_emit(
+            self.log,
+            translate("log_info", translate("total_posts", total_posts)),
+            "INFO",
         )
 
         creator_folder_name = f"{self.creator_id}_{self.creator_name}"
@@ -1841,7 +1974,8 @@ class CreatorDownloadThread(QThread):
         try:
             os.makedirs(creator_folder, exist_ok=True)
         except OSError as e:
-            self.log.emit(
+            self._safe_emit(
+                self.log,
                 translate(
                     "log_error",
                     translate(
@@ -1850,13 +1984,15 @@ class CreatorDownloadThread(QThread):
                 ),
                 "ERROR",
             )
-        self.log.emit(
+        self._safe_emit(
+            self.log,
             translate("log_info", translate("created_directory", creator_folder)),
             "INFO",
         )
 
         total_files = len(self.files_to_download)
-        self.log.emit(
+        self._safe_emit(
+            self.log,
             translate(
                 "log_info", translate("total_selected_files_to_download", total_files)
             ),
@@ -1878,12 +2014,24 @@ class CreatorDownloadThread(QThread):
                         )
                         for _ in range(self.max_concurrent)
                     ]
-                    await queue.join()
+                    # Wait for all queued items to be processed, but
+                    # periodically check for cancellation so we don't
+                    # block forever when workers stop consuming.
+                    while self.is_running:
+                        try:
+                            await asyncio.wait_for(queue.join(), timeout=0.5)
+                            break  # All items processed
+                        except asyncio.TimeoutError:
+                            continue
+                    # Cancel idle workers still waiting on queue.get()
+                    for t in tasks:
+                        t.cancel()
                     await asyncio.gather(*tasks, return_exceptions=True)
 
                 loop.run_until_complete(main())
             except Exception as e:
-                self.log.emit(
+                self._safe_emit(
+                    self.log,
                     translate(
                         "log_error", translate("error_in_async_download_loop", str(e))
                     ),
@@ -1892,16 +2040,21 @@ class CreatorDownloadThread(QThread):
             finally:
                 if not loop.is_closed():
                     loop.run_until_complete(loop.shutdown_asyncgens())
+                    # Wait for asyncio.to_thread() executor threads to finish
+                    # so no thread outlives the QThread C++ object.
+                    loop.run_until_complete(loop.shutdown_default_executor())
                     loop.close()
         else:
-            self.log.emit(
+            self._safe_emit(
+                self.log,
                 translate("log_warning", translate("no_files_selected_for_download")),
                 "WARNING",
             )
 
         # Log summary of failed files
         if self.failed_files:
-            self.log.emit(
+            self._safe_emit(
+                self.log,
                 translate(
                     "log_warning",
                     translate(
@@ -1911,7 +2064,8 @@ class CreatorDownloadThread(QThread):
                 "WARNING",
             )
             for file_url, error in self.failed_files.items():
-                self.log.emit(
+                self._safe_emit(
+                    self.log,
                     translate(
                         "log_error",
                         translate("failed_to_download_file", file_url, error),
@@ -1920,7 +2074,7 @@ class CreatorDownloadThread(QThread):
                 )
 
         if self.is_running:
-            self.finished.emit()
+            self._safe_emit(self.finished)
 
 
 class ValidationThread(QThread):
@@ -2228,6 +2382,7 @@ class CreatorDownloaderTab(QWidget):
         self.filter_thread = None
         self.file_preparation_thread = None
         self.checkbox_toggle_thread = None
+        self._cancellation_thread = None
         self.post_titles_map = {}
         self.post_widget_cache = (
             {}
@@ -2238,6 +2393,8 @@ class CreatorDownloaderTab(QWidget):
         self.total_pages = 1
         self.filtered_posts = []  # Cache of filtered posts for pagination
         self.fast_mode = False
+        self._fast_mode_downloading = False
+        self._fast_mode_pending_urls: list[str] = []
         os.makedirs(self.cache_dir, exist_ok=True)
         os.makedirs(self.other_files_dir, exist_ok=True)
         self.setup_ui()
@@ -3071,6 +3228,58 @@ class CreatorDownloaderTab(QWidget):
                 if i != self._parent.tabs.currentIndex():  # Keep current tab enabled
                     self._parent.tabs.setTabEnabled(i, not is_fetching)
 
+    def set_downloading_ui_state(self, is_downloading):
+        """Lock/unlock ALL UI controls during an active download.
+
+        Only the Cancel button and Expand Logs remain enabled while downloading.
+        """
+        enabled = not is_downloading
+
+        # Action buttons
+        self.creator_download_btn.setEnabled(enabled)
+        self.creator_cancel_btn.setEnabled(is_downloading)
+
+        # Queue input area
+        self.creator_url_input.setEnabled(enabled)
+        self.creator_add_to_queue_btn.setEnabled(enabled)
+        self.creator_add_from_file_btn.setEnabled(enabled)
+        self.creator_queue_list.setEnabled(enabled)
+
+        # Multi-URL fast mode inputs
+        self.creator_multi_url_input.setEnabled(enabled)
+        self.creator_multi_url_add_btn.setEnabled(enabled)
+
+        # Category checkboxes
+        self.creator_main_check.setEnabled(enabled)
+        self.creator_attachments_check.setEnabled(enabled)
+        self.creator_content_check.setEnabled(enabled)
+
+        # Options
+        self.creator_fast_mode_check.setEnabled(enabled)
+        self.creator_auto_rename_check.setEnabled(enabled)
+        self.creator_download_text_check.setEnabled(enabled)
+
+        # Post selection
+        self.creator_search_input.setEnabled(enabled)
+        self.creator_check_all.setEnabled(enabled)
+        self.creator_check_all_all.setEnabled(enabled)
+        self.creator_post_list.setEnabled(enabled)
+        self.creator_view_button.setEnabled(enabled)
+
+        # Pagination
+        self.prev_page_btn.setEnabled(enabled and self.current_page > 1)
+        self.next_page_btn.setEnabled(enabled and self.current_page < self.total_pages)
+
+        # Tabs: disable all other tabs (keep current) + settings tab
+        if self._parent and hasattr(self._parent, "tabs"):
+            for i in range(self._parent.tabs.count()):
+                if i != self._parent.tabs.currentIndex():
+                    self._parent.tabs.setTabEnabled(i, enabled)
+        if self._parent and hasattr(self._parent, "status_label"):
+            self._parent.status_label.setText(
+                translate("preparing_files") if is_downloading else translate("idle")
+            )
+
     def prev_page(self):
         """Go to previous page"""
         if self.current_page > 1:
@@ -3164,6 +3373,10 @@ class CreatorDownloaderTab(QWidget):
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))
 
+        # Fast mode auto-download: select all posts and start download
+        if self._fast_mode_downloading:
+            self._fast_mode_auto_download()
+
     def on_post_detection_error(self, error_message):
         self.append_log_to_console(translate("log_error", error_message), "ERROR")
 
@@ -3199,6 +3412,25 @@ class CreatorDownloaderTab(QWidget):
             )
             return
 
+        # Fast mode: auto-detect and download all creators in queue
+        if self.fast_mode:
+            self._fast_mode_pending_urls = [url for url, _ in self.creator_queue]
+            self._fast_mode_downloading = True
+            self.downloading = True
+            self.set_downloading_ui_state(True)
+            self.append_log_to_console(
+                translate(
+                    "log_info",
+                    translate(
+                        "fast_mode_batch_start",
+                        len(self._fast_mode_pending_urls),
+                    ),
+                ),
+                "INFO",
+            )
+            self._fast_mode_process_next()
+            return
+
         if not self.posts_to_download:
             self.append_log_to_console(
                 translate("log_warning", translate("no_posts_selected")), "WARNING"
@@ -3206,8 +3438,7 @@ class CreatorDownloaderTab(QWidget):
             return
 
         self.downloading = True
-        if self._parent and hasattr(self._parent, "tabs"):
-            self._parent.tabs.setTabEnabled(0, False)
+        self.set_downloading_ui_state(True)
         if self._parent and hasattr(self._parent, "status_label"):
             self._parent.status_label.setText(translate("preparing_files"))
         self.creator_download_btn.setEnabled(False)
@@ -3247,6 +3478,102 @@ class CreatorDownloaderTab(QWidget):
         self.append_log_to_console(
             translate(
                 "log_info", translate("posts_to_download_num", self.posts_to_download)
+            ),
+            "INFO",
+        )
+        self.prepare_files_for_download(urls)
+
+    def _fast_mode_process_next(self):
+        """Process the next creator URL in the fast mode queue."""
+        if not self._fast_mode_pending_urls:
+            self._fast_mode_downloading = False
+            self.append_log_to_console(
+                translate("log_info", translate("fast_mode_batch_complete")),
+                "INFO",
+            )
+            self.downloading = False
+            self.set_downloading_ui_state(False)
+            return
+
+        url = self._fast_mode_pending_urls.pop(0)
+        remaining = len(self._fast_mode_pending_urls)
+        self.append_log_to_console(
+            translate(
+                "log_info",
+                translate("fast_mode_processing_creator", url, remaining),
+            ),
+            "INFO",
+        )
+        # This triggers post detection → on_post_population_finished
+        # which will call _fast_mode_auto_download when _fast_mode_downloading is True
+        self.check_creator_from_queue(url)
+
+    def _fast_mode_auto_download(self):
+        """Called after post population in fast-mode to auto-select all and download."""
+        if not self.current_creator_url:
+            self.append_log_to_console(
+                translate("log_warning", translate("no_creator_viewed")), "WARNING"
+            )
+            self._fast_mode_process_next()
+            return
+
+        if not self.all_detected_posts:
+            self.append_log_to_console(
+                translate(
+                    "log_warning",
+                    translate("fast_mode_no_posts_found", self.current_creator_url),
+                ),
+                "WARNING",
+            )
+            self._fast_mode_remove_creator_url(self.current_creator_url)
+            self._fast_mode_process_next()
+            return
+
+        # Auto-select ALL posts
+        for post_title, (post_id, thumbnail_url) in self.all_detected_posts:
+            self.checked_urls[post_id] = True
+        self.posts_to_download = [
+            post_id for _, (post_id, _) in self.all_detected_posts
+        ]
+        self.append_log_to_console(
+            translate(
+                "log_info",
+                translate(
+                    "fast_mode_auto_selected",
+                    len(self.posts_to_download),
+                    self.current_creator_url,
+                ),
+            ),
+            "INFO",
+        )
+
+        # Set up download state
+        if self._parent and hasattr(self._parent, "status_label"):
+            self._parent.status_label.setText(translate("preparing_files"))
+        self.creator_download_btn.setEnabled(False)
+        self.creator_cancel_btn.setEnabled(True)
+        self.creator_overall_progress.setValue(0)
+        self.total_posts_to_download = len(self.posts_to_download)
+        self.completed_posts.clear()
+        self.completed_files.clear()
+        self.failed_files.clear()
+        self.total_files_to_download = 0
+        self.creator_overall_progress_label.setText(
+            translate("overall_progress", 0, 0, 0, self.total_posts_to_download)
+        )
+        self.current_file_index = -1
+        self.creator_file_progress.setValue(0)
+        self.creator_file_progress_label.setText(translate("file_progress", 0))
+        self.update_progress_bar_style()
+        self.background_task_label.setText(translate("preparing_files"))
+        self.background_task_progress.setRange(0, 100)
+        self.background_task_progress.setValue(0)
+
+        urls = [self.current_creator_url]
+        self.append_log_to_console(
+            translate(
+                "log_info",
+                translate("preparing_files_creator", self.current_creator_url),
             ),
             "INFO",
         )
@@ -3453,6 +3780,16 @@ class CreatorDownloaderTab(QWidget):
                     "INFO",
                 )
 
+        # Ensure the native thread has fully exited before we let the object
+        # be garbage-collected — otherwise Qt prints
+        # "QThread: Destroyed while thread is still running" and crashes.
+        try:
+            if thread.isRunning():
+                thread.wait(5000)
+            thread.deleteLater()
+        except RuntimeError:
+            pass  # C++ object already deleted
+
         # Check if all files for the current creator have been attempted
         if (
             self.total_files_to_download > 0
@@ -3515,6 +3852,10 @@ class CreatorDownloaderTab(QWidget):
             )
 
     def cancel_creator_download(self):
+        # Stop fast-mode processing loop
+        self._fast_mode_downloading = False
+        self._fast_mode_pending_urls.clear()
+
         if not self.active_threads:
             self.append_log_to_console(
                 translate("log_warning", translate("no_active_downloads_to_cancel")),
@@ -3574,18 +3915,26 @@ class CreatorDownloaderTab(QWidget):
             self.background_task_label.setText(translate("cancelling_downloads"))
             self.background_task_progress.setRange(0, 0)
 
-            # Start cancellation thread to handle cleanup
-            cancellation_thread = CancellationThread(self.active_threads[:])
-            cancellation_thread.finished.connect(self.on_cancellation_finished)
-            cancellation_thread.log.connect(self.append_log_to_console)
-            self.active_threads.append(cancellation_thread)
-            cancellation_thread.start()
+            # Start cancellation thread to handle cleanup.
+            # Store separately — do NOT add to active_threads because
+            # on_cancellation_finished deletes everything in that list
+            # and deleting the CancellationThread while its system thread
+            # is still tearing down causes "Destroyed while running".
+            self._cancellation_thread = CancellationThread(self.active_threads[:])
+            self._cancellation_thread.finished.connect(self.on_cancellation_finished)
+            self._cancellation_thread.log.connect(self.append_log_to_console)
+            self._cancellation_thread.start()
 
     def on_cancellation_finished(self):
         threads_to_delete = self.active_threads[:]
         self.active_threads = []
         for thread in threads_to_delete:
             try:
+                # Ensure the thread has fully exited before scheduling deletion.
+                # Without this, deleteLater can destroy the QThread while the
+                # underlying system thread is still tearing down.
+                if thread.isRunning():
+                    thread.wait(5000)
                 self.append_log_to_console(
                     translate(
                         "log_debug",
@@ -3603,6 +3952,12 @@ class CreatorDownloaderTab(QWidget):
                     "WARNING",
                 )
 
+        # Clean up the cancellation thread itself (stored separately)
+        if self._cancellation_thread is not None:
+            self._cancellation_thread.wait(2000)
+            self._cancellation_thread.deleteLater()
+            self._cancellation_thread = None
+
         self.creator_file_progress.setStyleSheet(
             "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
         )
@@ -3612,12 +3967,9 @@ class CreatorDownloaderTab(QWidget):
         self.creator_file_progress_label.setText(translate("downloads_terminated"))
         self.creator_overall_progress_label.setText(translate("downloads_terminated"))
         self.downloading = False
-        if self._parent and hasattr(self._parent, "tabs"):
-            self._parent.tabs.setTabEnabled(0, True)
-        if self._parent and hasattr(self._parent, "status_label"):
-            self._parent.status_label.setText(translate("idle"))
-        self.creator_download_btn.setEnabled(True)
-        self.creator_cancel_btn.setEnabled(False)
+        self._fast_mode_downloading = False
+        self._fast_mode_pending_urls.clear()
+        self.set_downloading_ui_state(False)
         self.total_files_to_download = 0
         self.completed_files.clear()
         self.failed_files.clear()
@@ -3781,12 +4133,6 @@ class CreatorDownloaderTab(QWidget):
     def creator_download_finished(self):
         """Reset UI state after download completes or is cancelled."""
         self.downloading = False
-        if self._parent and hasattr(self._parent, "tabs"):
-            self._parent.tabs.setTabEnabled(0, True)
-        if self._parent and hasattr(self._parent, "status_label"):
-            self._parent.status_label.setText(translate("idle"))
-        self.creator_download_btn.setEnabled(True)
-        self.creator_cancel_btn.setEnabled(False)
 
         # Log summary of failed files
         if self.failed_files:
@@ -3840,6 +4186,14 @@ class CreatorDownloaderTab(QWidget):
         self.filter_thread = None
         self.checkbox_toggle_thread = None
         self.validation_thread = None
+
+        # Fast mode: advance to the next creator in the queue
+        if self._fast_mode_downloading:
+            self._fast_mode_process_next()
+            return
+
+        # Normal mode: fully restore UI
+        self.set_downloading_ui_state(False)
 
     def expand_logs(self):
         """Open the full logs window"""
