@@ -35,6 +35,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
+    QScrollArea,
     QSlider,
     QTextEdit,
     QVBoxLayout,
@@ -1959,7 +1960,19 @@ class PostDownloaderTab(QWidget):
         left_layout.addLayout(post_btn_layout)
 
         left_layout.addStretch()
-        layout.addWidget(left_widget, stretch=2)
+
+        # Wrap the left panel in a scroll area so it remains usable
+        # on lower screen resolutions without overlapping.
+        left_scroll = QScrollArea()
+        left_scroll.setWidget(left_widget)
+        left_scroll.setWidgetResizable(True)
+        left_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        left_scroll.setStyleSheet(
+            "QScrollArea { background: transparent; }"
+            "QScrollArea > QWidget > QWidget { background: transparent; }"
+        )
+        layout.addWidget(left_scroll, stretch=2)
 
         # Right widget (Files to Download section)
         right_widget = QWidget()
