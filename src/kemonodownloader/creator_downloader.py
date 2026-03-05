@@ -3734,6 +3734,23 @@ class CreatorDownloaderTab(QWidget):
                 )
             )
 
+    def _fast_mode_remove_creator_url(self, url: str) -> None:
+        """In fast mode, remove a single completed creator URL from the queue."""
+        normalized = url.rstrip("/")
+        before_len = len(self.creator_queue)
+        self.creator_queue = [
+            (u, c) for u, c in self.creator_queue if u.rstrip("/") != normalized
+        ]
+        if len(self.creator_queue) < before_len:
+            self.update_creator_queue_list()
+            self.append_log_to_console(
+                translate(
+                    "log_info",
+                    translate("fast_mode_removed_creator", url),
+                ),
+                "INFO",
+            )
+
     def update_post_completion(self, post_id):
         """Update post completion status and check overall progress."""
         self.completed_posts.add(post_id)
@@ -3741,6 +3758,15 @@ class CreatorDownloaderTab(QWidget):
             translate("log_info", translate("post_fully_downloaded", post_id)), "INFO"
         )
         self.update_overall_progress()
+
+        # Fast mode: remove creator from queue once all its posts complete
+        if self.fast_mode and self.current_creator_url:
+            if (
+                len(self.completed_posts) >= self.total_posts_to_download
+                and self.total_posts_to_download > 0
+            ):
+                self._fast_mode_remove_creator_url(self.current_creator_url)
+
         if len(
             self.completed_posts
         ) == self.total_posts_to_download and self.total_files_to_download == len(
@@ -3796,21 +3822,9 @@ class CreatorDownloaderTab(QWidget):
         self.creator_file_progress_label.setText(translate("downloads_complete"))
         self.creator_overall_progress_label.setText(translate("downloads_complete"))
 
-        # Fast mode: auto-remove completed creators from queue
+        # Fast mode: safety-net removal (item should already be gone)
         if self.fast_mode and self.current_creator_url:
-            self.creator_queue = [
-                (u, c)
-                for u, c in self.creator_queue
-                if u.rstrip("/") != self.current_creator_url.rstrip("/")
-            ]
-            self.update_creator_queue_list()
-            self.append_log_to_console(
-                translate(
-                    "log_info",
-                    translate("fast_mode_removed_creator", self.current_creator_url),
-                ),
-                "INFO",
-            )
+            self._fast_mode_remove_creator_url(self.current_creator_url)
 
         self.total_files_to_download = 0
         self.completed_files.clear()

@@ -2791,7 +2791,30 @@ class PostDownloaderTab(QWidget):
                 "INFO",
             )
 
+        # Build reverse map: post_id -> queue URL for incremental fast-mode removal
+        self._post_to_url_map: dict[str, str] = {}
+        for url in urls:
+            for _, post_id in self.all_files_map.get(url, []):
+                self._post_to_url_map[post_id] = url
+
         self.prepare_files_for_download(urls)
+
+    def _fast_mode_remove_post_url(self, url: str) -> None:
+        """In fast mode, remove a single completed post URL from the queue."""
+        normalized = url.rstrip("/")
+        before_len = len(self.post_queue)
+        self.post_queue = [
+            (u, c) for u, c in self.post_queue if u.rstrip("/") != normalized
+        ]
+        if len(self.post_queue) < before_len:
+            self.update_post_queue_list()
+            self.append_log_to_console(
+                translate(
+                    "log_info",
+                    translate("fast_mode_removed_post_url", url),
+                ),
+                "INFO",
+            )
 
     def prepare_files_for_download(self, urls):
         self.append_log_to_console(
@@ -3131,6 +3154,14 @@ class PostDownloaderTab(QWidget):
         )
         self.update_overall_progress()
 
+        # Fast mode: remove the URL from queue once all its posts complete
+        if self.fast_mode and hasattr(self, "_post_to_url_map"):
+            url = self._post_to_url_map.get(post_id)
+            if url:
+                all_post_ids = {pid for _, pid in self.all_files_map.get(url, [])}
+                if all_post_ids and all_post_ids.issubset(self.completed_posts):
+                    self._fast_mode_remove_post_url(url)
+
     def post_download_finished(self):
         self.downloading = False
         self.parent.tabs.setTabEnabled(1, True)
@@ -3153,17 +3184,17 @@ class PostDownloaderTab(QWidget):
             )
             self.post_overall_progress_label.setText(translate("downloads_complete"))
 
-            # Fast mode: auto-remove completed posts from queue
+            # Fast mode: safety-net bulk removal (items should already be gone)
             if self.fast_mode:
                 completed_urls = set()
                 for url, _ in self.post_queue:
                     if url in self.all_files_map:
                         completed_urls.add(url)
-                self.post_queue = [
-                    (u, c) for u, c in self.post_queue if u not in completed_urls
-                ]
-                self.update_post_queue_list()
                 if completed_urls:
+                    self.post_queue = [
+                        (u, c) for u, c in self.post_queue if u not in completed_urls
+                    ]
+                    self.update_post_queue_list()
                     self.append_log_to_console(
                         translate(
                             "log_info",

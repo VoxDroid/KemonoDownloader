@@ -3628,6 +3628,12 @@ class KDLanguage:
                 "korean": "빠른 모드가 비활성화되었습니다 – 수동 제어가 복원되었습니다.",
                 "chinese-simplified": "快速模式已禁用 – 手动控制已恢复。",
             },
+            "fast_mode_removed_post_url": {
+                "english": "Fast Mode: removed completed post {0} from queue.",
+                "japanese": "高速モード: 完了した投稿 {0} をキューから削除しました。",
+                "korean": "빠른 모드: 완료된 게시물 {0}을(를) 큐에서 제거했습니다.",
+                "chinese-simplified": "快速模式：已从队列中移除已完成的帖子 {0}。",
+            },
             "fast_mode_removed_posts": {
                 "english": "Fast Mode: removed {0} completed post(s) from queue.",
                 "japanese": "高速モード: 完了した{0}件の投稿をキューから削除しました。",
