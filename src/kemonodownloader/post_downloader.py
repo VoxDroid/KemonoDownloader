@@ -7,6 +7,7 @@ import os
 import re
 import threading
 import time
+from typing import Optional
 from urllib.parse import urljoin
 
 import qtawesome as qta
@@ -81,7 +82,7 @@ else:
 system_language = system_language.replace("_", "-")
 accept_language = f"{system_language},en;q=0.9"
 
-_user_agent: str | None = None
+_user_agent: Optional[str] = None
 
 
 def get_user_agent() -> str:
