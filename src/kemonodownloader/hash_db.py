@@ -47,7 +47,7 @@ class HashDB:
         return conn
 
     def _init_db(self) -> None:
-        """Create table if not yet present."""
+        """Create table if not yet present and run schema migrations."""
         with self._lock:
             conn = self._get_connection()
             try:
@@ -57,11 +57,25 @@ class HashDB:
                         url_hash   TEXT PRIMARY KEY,
                         file_path  TEXT NOT NULL,
                         file_hash  TEXT NOT NULL,
-                        url        TEXT NOT NULL
+                        url        TEXT NOT NULL,
+                        file_size  INTEGER NOT NULL DEFAULT 0
                     )
                     """
                 )
                 conn.commit()
+                # Migrate: add file_size column for databases created before
+                # this column existed.  PRAGMA table_info returns one row per
+                # column; if file_size is absent we add it.
+                columns = {
+                    row[1]
+                    for row in conn.execute("PRAGMA table_info(file_hashes)").fetchall()
+                }
+                if "file_size" not in columns:
+                    conn.execute(
+                        "ALTER TABLE file_hashes "
+                        "ADD COLUMN file_size INTEGER NOT NULL DEFAULT 0"
+                    )
+                    conn.commit()
             finally:
                 conn.close()
 
@@ -82,14 +96,15 @@ class HashDB:
                         conn.execute(
                             """
                             INSERT OR IGNORE INTO file_hashes
-                            (url_hash, file_path, file_hash, url)
-                            VALUES (?, ?, ?, ?)
+                            (url_hash, file_path, file_hash, url, file_size)
+                            VALUES (?, ?, ?, ?, ?)
                             """,
                             (
                                 url_hash,
                                 entry.get("file_path", ""),
                                 entry.get("file_hash", ""),
                                 entry.get("url", ""),
+                                entry.get("file_size", 0),
                             ),
                         )
                     conn.commit()
@@ -111,13 +126,15 @@ class HashDB:
     def lookup(self, url_hash: str) -> Optional[dict]:
         """Return the stored entry for *url_hash*, or ``None``.
 
-        Returns a dict with keys ``file_path``, ``file_hash``, ``url``.
+        Returns a dict with keys ``file_path``, ``file_hash``, ``url``,
+        ``file_size``.
         """
         with self._lock:
             conn = self._get_connection()
             try:
                 row = conn.execute(
-                    "SELECT file_path, file_hash, url FROM file_hashes WHERE url_hash = ?",
+                    "SELECT file_path, file_hash, url, file_size "
+                    "FROM file_hashes WHERE url_hash = ?",
                     (url_hash,),
                 ).fetchone()
                 if row:
@@ -125,12 +142,20 @@ class HashDB:
                         "file_path": row["file_path"],
                         "file_hash": row["file_hash"],
                         "url": row["url"],
+                        "file_size": row["file_size"],
                     }
                 return None
             finally:
                 conn.close()
 
-    def store(self, url_hash: str, file_path: str, file_hash: str, url: str) -> None:
+    def store(
+        self,
+        url_hash: str,
+        file_path: str,
+        file_hash: str,
+        url: str,
+        file_size: int = 0,
+    ) -> None:
         """Insert or replace an entry."""
         with self._lock:
             conn = self._get_connection()
@@ -138,10 +163,10 @@ class HashDB:
                 conn.execute(
                     """
                     INSERT OR REPLACE INTO file_hashes
-                    (url_hash, file_path, file_hash, url)
-                    VALUES (?, ?, ?, ?)
+                    (url_hash, file_path, file_hash, url, file_size)
+                    VALUES (?, ?, ?, ?, ?)
                     """,
-                    (url_hash, file_path, file_hash, url),
+                    (url_hash, file_path, file_hash, url, file_size),
                 )
                 conn.commit()
             finally:
@@ -162,18 +187,20 @@ class HashDB:
                 conn.close()
 
     def all_entries(self) -> dict:
-        """Return all entries as ``{url_hash: {file_path, file_hash, url}}``."""
+        """Return all entries as ``{url_hash: {file_path, file_hash, url, file_size}}``."""
         with self._lock:
             conn = self._get_connection()
             try:
                 rows = conn.execute(
-                    "SELECT url_hash, file_path, file_hash, url FROM file_hashes"
+                    "SELECT url_hash, file_path, file_hash, url, file_size "
+                    "FROM file_hashes"
                 ).fetchall()
                 return {
                     row["url_hash"]: {
                         "file_path": row["file_path"],
                         "file_hash": row["file_hash"],
                         "url": row["url"],
+                        "file_size": row["file_size"],
                     }
                     for row in rows
                 }

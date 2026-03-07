@@ -1722,25 +1722,53 @@ class CreatorDownloadThread(QThread):
         if entry:
             existing_path = entry["file_path"]
             if os.path.exists(existing_path):
-                with open(existing_path, "rb") as f:
-                    file_hash = hashlib.md5(f.read()).hexdigest()
-                if file_hash == entry["file_hash"]:
+                # Check file size first for fast corruption detection
+                actual_size = os.path.getsize(existing_path)
+                expected_size = entry.get("file_size", 0)
+                if expected_size > 0 and actual_size != expected_size:
+                    self._safe_emit(
+                        self.log,
+                        translate(
+                            "log_warning",
+                            translate(
+                                "size_mismatch_error",
+                                actual_size,
+                                expected_size,
+                                file_url,
+                            ),
+                        ),
+                        "WARNING",
+                    )
                     self._safe_emit(
                         self.log,
                         translate(
                             "log_info",
-                            translate(
-                                "file_already_downloaded", filename, existing_path
-                            ),
+                            f"File size mismatch for {existing_path}, re-downloading",
                         ),
                         "INFO",
                     )
-                    self._safe_emit(self.file_progress, file_index, 100)
-                    self._safe_emit(self.file_completed, file_index, file_url, True)
-                    with self.completed_files_lock:
-                        self.completed_files.add(file_url)
-                    self.check_post_completion(file_url)
-                    return
+                else:
+                    with open(existing_path, "rb") as f:
+                        file_hash = hashlib.md5(f.read()).hexdigest()
+                    if file_hash == entry["file_hash"]:
+                        self._safe_emit(
+                            self.log,
+                            translate(
+                                "log_info",
+                                translate(
+                                    "file_already_downloaded",
+                                    filename,
+                                    existing_path,
+                                ),
+                            ),
+                            "INFO",
+                        )
+                        self._safe_emit(self.file_progress, file_index, 100)
+                        self._safe_emit(self.file_completed, file_index, file_url, True)
+                        with self.completed_files_lock:
+                            self.completed_files.add(file_url)
+                        self.check_post_completion(file_url)
+                        return
 
         self._safe_emit(
             self.log,
@@ -1848,7 +1876,10 @@ class CreatorDownloadThread(QThread):
 
                 with open(full_path, "rb") as f:
                     file_hash = hashlib.md5(f.read()).hexdigest()
-                self.hash_db.store(url_hash, full_path, file_hash, file_url)
+                actual_file_size = os.path.getsize(full_path)
+                self.hash_db.store(
+                    url_hash, full_path, file_hash, file_url, actual_file_size
+                )
                 self._safe_emit(
                     self.log,
                     translate(
@@ -4050,7 +4081,8 @@ class CreatorDownloaderTab(QWidget):
         """Update the overall progress bar and label."""
         if self.total_files_to_download > 0:
             completed_count = len(self.completed_files)
-            percentage = int((completed_count / self.total_files_to_download) * 100)
+            attempted_count = completed_count + len(self.failed_files)
+            percentage = int((attempted_count / self.total_files_to_download) * 100)
             self.creator_overall_progress.setValue(percentage)
             self.append_log_to_console(
                 translate(

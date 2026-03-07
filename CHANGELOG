@@ -3,6 +3,17 @@
 ## v5.10.0 (10 February 2026)
 **feat: Fast Mode, SQLite hash storage, and customizable font settings**
 
+- Add file size validation to HashDB for corruption detection
+  Adds a `file_size` column to the SQLite hash database schema. When a file is successfully downloaded, its actual size on disk is now stored alongside the hash. On subsequent download attempts, the stored file size is compared against the existing file's size before performing the more expensive MD5 hash check. If a size mismatch is detected (indicating corruption or incomplete download), the file is automatically re-downloaded. Includes automatic schema migration for existing databases (ALTER TABLE) and backward compatibility for legacy JSON-migrated entries (default file_size of 0). Adds 7 new unit tests covering file_size storage, retrieval, corruption detection, legacy migration, and old-DB schema migration.
+
+- Fix progress bars to accurately reflect download progress
+  Resolves multiple issues causing progress bars to not reflect actual download state:
+  - **Post Downloader**: Added `bool` success flag to `file_completed` signal (now `pyqtSignal(int, str, bool)`), matching Creator Downloader's existing pattern. Failed files now emit `file_completed(index, url, False)` instead of silently returning, ensuring they are counted in progress.
+  - **Post Downloader**: Removed premature `file_completed` emission from inside the chunk download loop (was firing at progress == 100 before size validation completed).
+  - **Both Downloaders**: Overall progress bar now calculates percentage as `(completed + failed) / total` instead of `completed / total`, so failed files no longer stall the progress bar.
+  - **Post Downloader**: Added `failed_files` tracking set to the UI class with proper clearing alongside `completed_files` at all reset points.
+  - **Post Downloader**: Download completion check now uses `completed + failed >= total` instead of `completed == total`.
+
 - Add Fast Mode to Post Downloader and Creator Downloader
   Introduces a Fast Mode toggle (with qtawesome bolt icon) to both downloader tabs. When enabled, Fast Mode automatically selects all download categories, locks manual options to prevent accidental changes, and reveals a batch URL input area for pasting multiple URLs at once (one per line). Completed items are automatically removed from the queue. An info button (ℹ) explains the feature in a dialog. Includes full translations for all four languages and new unit tests.
 

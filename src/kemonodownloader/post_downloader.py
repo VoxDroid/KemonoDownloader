@@ -1292,7 +1292,7 @@ def sanitize_filename(name, max_length=100):
 
 class DownloadThread(QThread):
     file_progress = pyqtSignal(int, int)
-    file_completed = pyqtSignal(int, str)
+    file_completed = pyqtSignal(int, str, bool)
     post_completed = pyqtSignal(str)
     log = pyqtSignal(str, str)
     finished = pyqtSignal()
@@ -1481,24 +1481,50 @@ class DownloadThread(QThread):
         if entry:
             existing_path = entry["file_path"]
             if os.path.exists(existing_path):
-                with open(existing_path, "rb") as f:
-                    file_hash = hashlib.md5(f.read()).hexdigest()
-                if file_hash == entry["file_hash"]:
+                # Check file size first for fast corruption detection
+                actual_size = os.path.getsize(existing_path)
+                expected_size = entry.get("file_size", 0)
+                if expected_size > 0 and actual_size != expected_size:
+                    self.log.emit(
+                        translate(
+                            "log_warning",
+                            translate(
+                                "size_mismatch_error",
+                                actual_size,
+                                expected_size,
+                                file_url,
+                            ),
+                        ),
+                        "WARNING",
+                    )
                     self.log.emit(
                         translate(
                             "log_info",
-                            translate(
-                                "file_already_downloaded", filename, existing_path
-                            ),
+                            f"File size mismatch for {existing_path}, re-downloading",
                         ),
                         "INFO",
                     )
-                    self.file_progress.emit(file_index, 100)
-                    self.file_completed.emit(file_index, file_url)
-                    with self.completed_files_lock:
-                        self.completed_files.add(file_url)
-                    self.check_post_completion(file_url)
-                    return
+                else:
+                    with open(existing_path, "rb") as f:
+                        file_hash = hashlib.md5(f.read()).hexdigest()
+                    if file_hash == entry["file_hash"]:
+                        self.log.emit(
+                            translate(
+                                "log_info",
+                                translate(
+                                    "file_already_downloaded",
+                                    filename,
+                                    existing_path,
+                                ),
+                            ),
+                            "INFO",
+                        )
+                        self.file_progress.emit(file_index, 100)
+                        self.file_completed.emit(file_index, file_url, True)
+                        with self.completed_files_lock:
+                            self.completed_files.add(file_url)
+                        self.check_post_completion(file_url)
+                        return
 
         self.log.emit(
             translate(
@@ -1554,8 +1580,6 @@ class DownloadThread(QThread):
                             downloaded_size += len(chunk)
                             progress = int((downloaded_size / file_size) * 100)
                             self.file_progress.emit(file_index, progress)
-                            if progress == 100:
-                                self.file_completed.emit(file_index, file_url)
 
                 # Validate downloaded size matches content-length
                 if file_size > 0 and downloaded_size != file_size:
@@ -1593,13 +1617,17 @@ class DownloadThread(QThread):
 
                 with open(full_path, "rb") as f:
                     file_hash = hashlib.md5(f.read()).hexdigest()
-                self.hash_db.store(url_hash, full_path, file_hash, file_url)
+                actual_file_size = os.path.getsize(full_path)
+                self.hash_db.store(
+                    url_hash, full_path, file_hash, file_url, actual_file_size
+                )
                 self.log.emit(
                     translate(
                         "log_info", translate("successfully_downloaded", full_path)
                     ),
                     "INFO",
                 )
+                self.file_completed.emit(file_index, file_url, True)
                 with self.completed_files_lock:
                     self.completed_files.add(file_url)
                 self.check_post_completion(file_url)
@@ -1620,6 +1648,7 @@ class DownloadThread(QThread):
                         "ERROR",
                     )
                     self.file_progress.emit(file_index, 0)
+                    self.file_completed.emit(file_index, file_url, False)
                     return
                 else:
                     self.log.emit(
@@ -1918,6 +1947,7 @@ class PostDownloaderTab(QWidget):
         self.post_url_map = {}
         self.total_files_to_download = 0
         self.completed_files = set()
+        self.failed_files = set()
         self.completed_posts = set()
         self.total_posts_to_download = 0
         self.detected_files_during_check_all = []
@@ -2286,6 +2316,7 @@ class PostDownloaderTab(QWidget):
             self.current_file_index = -1
             self.completed_posts.clear()
             self.completed_files.clear()
+            self.failed_files.clear()
             self.total_files_to_download = 0
             self.background_task_progress.setRange(0, 100)
             self.background_task_progress.setValue(0)
@@ -2914,6 +2945,7 @@ class PostDownloaderTab(QWidget):
         self.post_overall_progress.setValue(0)
         self.completed_posts.clear()
         self.completed_files.clear()
+        self.failed_files.clear()
         self.total_files_to_download = 0
         self.post_overall_progress_label.setText(
             translate("overall_progress", 0, 0, 0, 0)
@@ -3268,6 +3300,7 @@ class PostDownloaderTab(QWidget):
             self.set_downloading_ui_state(False)
             self.total_files_to_download = 0
             self.completed_files.clear()
+            self.failed_files.clear()
             self.background_task_progress.setRange(0, 100)
             self.background_task_progress.setValue(0)
             self.background_task_label.setText(translate("idle"))
@@ -3278,22 +3311,34 @@ class PostDownloaderTab(QWidget):
             self.post_file_progress.setValue(progress)
             self.post_file_progress_label.setText(translate("file_progress", progress))
 
-    def update_file_completion(self, file_index, file_url):
-        if file_url not in self.completed_files:
-            self.completed_files.add(file_url)
-            self.append_log_to_console(
-                translate(
-                    "log_debug",
+    def update_file_completion(self, file_index, file_url, success):
+        if success:
+            if file_url not in self.completed_files:
+                self.completed_files.add(file_url)
+                self.append_log_to_console(
                     translate(
-                        "file_completed",
-                        file_url,
-                        len(self.completed_files),
-                        self.total_files_to_download,
+                        "log_debug",
+                        translate(
+                            "file_completed",
+                            file_url,
+                            len(self.completed_files),
+                            self.total_files_to_download,
+                        ),
                     ),
-                ),
-                "INFO",
-            )
-            self.update_overall_progress()
+                    "INFO",
+                )
+        else:
+            if file_url not in self.failed_files:
+                self.failed_files.add(file_url)
+                self.append_log_to_console(
+                    translate(
+                        "log_debug",
+                        f"File failed: {file_url} "
+                        f"({len(self.failed_files)} failed)",
+                    ),
+                    "INFO",
+                )
+        self.update_overall_progress()
         if self.current_file_index == file_index:
             self.current_file_index = -1
             self.post_file_progress.setValue(0)
@@ -3302,7 +3347,8 @@ class PostDownloaderTab(QWidget):
     def update_overall_progress(self):
         if self.total_files_to_download > 0:
             completed_count = len(self.completed_files)
-            percentage = int((completed_count / self.total_files_to_download) * 100)
+            attempted_count = completed_count + len(self.failed_files)
+            percentage = int((attempted_count / self.total_files_to_download) * 100)
             self.post_overall_progress.setValue(percentage)
             self.append_log_to_console(
                 translate(
@@ -3356,7 +3402,8 @@ class PostDownloaderTab(QWidget):
 
         if (
             self.total_files_to_download > 0
-            and len(self.completed_files) == self.total_files_to_download
+            and len(self.completed_files) + len(self.failed_files)
+            >= self.total_files_to_download
         ):
             self.post_file_progress.setStyleSheet(
                 "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
@@ -3387,6 +3434,7 @@ class PostDownloaderTab(QWidget):
 
         self.total_files_to_download = 0
         self.completed_files.clear()
+        self.failed_files.clear()
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))

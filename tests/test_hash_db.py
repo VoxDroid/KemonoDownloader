@@ -29,12 +29,19 @@ class TestHashDBStoreAndLookup:
 
     def test_store_and_lookup(self, isolated_hash_dir):
         db = HashDB(isolated_hash_dir)
-        db.store("abc123", "/path/to/file.jpg", "deadbeef", "https://example.com/f.jpg")
+        db.store(
+            "abc123",
+            "/path/to/file.jpg",
+            "deadbeef",
+            "https://example.com/f.jpg",
+            1024,
+        )
         entry = db.lookup("abc123")
         assert entry is not None
         assert entry["file_path"] == "/path/to/file.jpg"
         assert entry["file_hash"] == "deadbeef"
         assert entry["url"] == "https://example.com/f.jpg"
+        assert entry["file_size"] == 1024
 
     def test_lookup_missing_key(self, isolated_hash_dir):
         db = HashDB(isolated_hash_dir)
@@ -42,11 +49,12 @@ class TestHashDBStoreAndLookup:
 
     def test_store_replaces_existing(self, isolated_hash_dir):
         db = HashDB(isolated_hash_dir)
-        db.store("abc", "/old.jpg", "hash1", "url1")
-        db.store("abc", "/new.jpg", "hash2", "url2")
+        db.store("abc", "/old.jpg", "hash1", "url1", 100)
+        db.store("abc", "/new.jpg", "hash2", "url2", 200)
         entry = db.lookup("abc")
         assert entry["file_path"] == "/new.jpg"
         assert entry["file_hash"] == "hash2"
+        assert entry["file_size"] == 200
         assert db.count() == 1
 
     def test_contains(self, isolated_hash_dir):
@@ -72,12 +80,14 @@ class TestHashDBStoreAndLookup:
 
     def test_all_entries(self, isolated_hash_dir):
         db = HashDB(isolated_hash_dir)
-        db.store("k1", "/a.jpg", "ha", "ua")
-        db.store("k2", "/b.jpg", "hb", "ub")
+        db.store("k1", "/a.jpg", "ha", "ua", 500)
+        db.store("k2", "/b.jpg", "hb", "ub", 600)
         entries = db.all_entries()
         assert len(entries) == 2
         assert "k1" in entries
         assert entries["k2"]["file_path"] == "/b.jpg"
+        assert entries["k1"]["file_size"] == 500
+        assert entries["k2"]["file_size"] == 600
 
 
 class TestHashDBMigration:
@@ -191,7 +201,123 @@ class TestHashDBRealHash:
         db = HashDB(isolated_hash_dir)
         url = "https://kemono.cr/data/12/34/1234abcd.jpg"
         url_hash = hashlib.md5(url.encode()).hexdigest()
-        db.store(url_hash, "/downloads/file.jpg", "filehash123", url)
+        db.store(url_hash, "/downloads/file.jpg", "filehash123", url, 4096)
         entry = db.lookup(url_hash)
         assert entry is not None
         assert entry["url"] == url
+        assert entry["file_size"] == 4096
+
+
+class TestHashDBFileSize:
+    """Tests for file_size column (corruption detection)."""
+
+    def test_file_size_defaults_to_zero(self, isolated_hash_dir):
+        """When file_size is not specified, it should default to 0."""
+        db = HashDB(isolated_hash_dir)
+        db.store("k1", "/f.jpg", "h1", "u1")
+        entry = db.lookup("k1")
+        assert entry is not None
+        assert entry["file_size"] == 0
+
+    def test_file_size_stored_and_retrieved(self, isolated_hash_dir):
+        """Stored file_size should be retrievable via lookup."""
+        db = HashDB(isolated_hash_dir)
+        db.store("k1", "/f.jpg", "h1", "u1", 12345)
+        entry = db.lookup("k1")
+        assert entry["file_size"] == 12345
+
+    def test_file_size_updated_on_replace(self, isolated_hash_dir):
+        """Overwriting an entry should update file_size."""
+        db = HashDB(isolated_hash_dir)
+        db.store("k1", "/f.jpg", "h1", "u1", 100)
+        db.store("k1", "/f.jpg", "h2", "u1", 200)
+        entry = db.lookup("k1")
+        assert entry["file_size"] == 200
+
+    def test_file_size_in_all_entries(self, isolated_hash_dir):
+        """all_entries() should return file_size for each entry."""
+        db = HashDB(isolated_hash_dir)
+        db.store("a", "/a.jpg", "ha", "ua", 111)
+        db.store("b", "/b.jpg", "hb", "ub", 222)
+        entries = db.all_entries()
+        assert entries["a"]["file_size"] == 111
+        assert entries["b"]["file_size"] == 222
+
+    def test_corruption_detection_by_size(self, isolated_hash_dir, tmp_path):
+        """Simulate corruption detection: actual file size != stored file_size."""
+        db = HashDB(isolated_hash_dir)
+        # Create a real file with known content
+        test_file = tmp_path / "test_image.jpg"
+        test_file.write_bytes(b"x" * 1000)
+        file_hash = hashlib.md5(b"x" * 1000).hexdigest()
+
+        db.store("k1", str(test_file), file_hash, "http://example.com/img.jpg", 1000)
+
+        # File is intact
+        entry = db.lookup("k1")
+        assert os.path.getsize(str(test_file)) == entry["file_size"]
+
+        # Simulate corruption by truncating the file
+        test_file.write_bytes(b"x" * 500)
+        assert os.path.getsize(str(test_file)) != entry["file_size"]
+
+    def test_legacy_entry_has_zero_file_size(self, isolated_hash_dir):
+        """Entries migrated from JSON (without file_size) should default to 0."""
+        os.makedirs(isolated_hash_dir, exist_ok=True)
+        legacy_data = {
+            "legacy1": {
+                "file_path": "/old/img.png",
+                "file_hash": "oldhash",
+                "url": "https://example.com/img.png",
+            },
+        }
+        json_path = os.path.join(isolated_hash_dir, "file_hashes.json")
+        with open(json_path, "w") as f:
+            json.dump(legacy_data, f)
+
+        db = HashDB(isolated_hash_dir)
+        entry = db.lookup("legacy1")
+        assert entry is not None
+        assert entry["file_size"] == 0
+
+
+class TestHashDBSchemaMigration:
+    """Test that existing databases without file_size column get migrated."""
+
+    def test_old_db_gets_file_size_column(self, isolated_hash_dir):
+        """A database created without file_size should gain the column on open."""
+        import sqlite3
+
+        os.makedirs(isolated_hash_dir, exist_ok=True)
+        db_path = os.path.join(isolated_hash_dir, "file_hashes.db")
+
+        # Create an old-style database without file_size
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            """
+            CREATE TABLE file_hashes (
+                url_hash   TEXT PRIMARY KEY,
+                file_path  TEXT NOT NULL,
+                file_hash  TEXT NOT NULL,
+                url        TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            "INSERT INTO file_hashes VALUES (?, ?, ?, ?)",
+            ("old_key", "/old/path.jpg", "oldhash", "https://old.url"),
+        )
+        conn.commit()
+        conn.close()
+
+        # Opening with HashDB should migrate the schema
+        db = HashDB(isolated_hash_dir)
+        entry = db.lookup("old_key")
+        assert entry is not None
+        assert entry["file_path"] == "/old/path.jpg"
+        assert entry["file_size"] == 0  # Default for migrated rows
+
+        # New stores should work with file_size
+        db.store("new_key", "/new.jpg", "newhash", "https://new.url", 999)
+        entry2 = db.lookup("new_key")
+        assert entry2["file_size"] == 999
