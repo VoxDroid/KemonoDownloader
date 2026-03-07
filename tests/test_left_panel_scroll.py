@@ -5,6 +5,7 @@ content remains accessible on lower screen resolutions without overlapping.
 """
 
 import os
+from typing import Optional
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QScrollArea, QWidget
@@ -51,7 +52,7 @@ class _MockParent:
 # ---------------------------------------------------------------------------
 
 
-def _find_left_scroll_area(tab: QWidget) -> QScrollArea | None:
+def _find_left_scroll_area(tab: QWidget) -> Optional[QScrollArea]:
     """Return the first QScrollArea child of *tab*, if any."""
     for child in tab.children():
         if isinstance(child, QScrollArea):
