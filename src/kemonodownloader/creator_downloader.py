@@ -2919,18 +2919,37 @@ class CreatorDownloaderTab(QWidget):
         lines = text.split("\n")
         added_count = 0
         skipped_count = 0
+        invalid_count = 0
 
         for line in lines:
             url = line.strip()
             if not url:
                 continue
             normalized_url = url.rstrip("/")
+
+            # Validate URL format (same rules as ValidationThread)
+            parts = normalized_url.split("/")
+            domain_config = get_domain_config(normalized_url)
+            if (
+                len(parts) < 5
+                or domain_config["domain"] not in normalized_url
+                or parts[-2] != "user"
+            ):
+                invalid_count += 1
+                self.append_log_to_console(
+                    translate(
+                        "log_warning",
+                        translate("invalid_creator_url", url),
+                    ),
+                    "WARNING",
+                )
+                continue
+
             if any(
                 item[0].rstrip("/") == normalized_url for item in self.creator_queue
             ):
                 skipped_count += 1
                 continue
-            # Add to queue — validation will happen in the existing flow
             self.creator_queue.append((url, False))
             added_count += 1
 
@@ -2939,6 +2958,8 @@ class CreatorDownloaderTab(QWidget):
             self.creator_multi_url_input.clear()
 
         summary = translate("bulk_add_summary", added_count, skipped_count)
+        if invalid_count:
+            summary += f" ({invalid_count} invalid)"
         self.append_log_to_console(translate("log_info", summary), "INFO")
 
     def add_creator_to_queue(self):
@@ -3227,7 +3248,18 @@ class CreatorDownloaderTab(QWidget):
         )
 
     def set_fetching_ui_state(self, is_fetching):
-        """Enable/disable UI elements during fetching"""
+        """Enable/disable UI elements during fetching.
+
+        When *disabling* (is_fetching=False) while a fast-mode batch
+        download is in progress, the call is skipped so that the
+        download-lock established by ``set_downloading_ui_state(True)``
+        stays in effect.
+        """
+        if not is_fetching and self._fast_mode_downloading:
+            # Keep everything locked — the download-state lock takes
+            # precedence over the fetching-state unlock.
+            return
+
         # Main action buttons
         self.creator_download_btn.setEnabled(not is_fetching)
         self.creator_cancel_btn.setEnabled(is_fetching)
@@ -3262,7 +3294,11 @@ class CreatorDownloaderTab(QWidget):
     def set_downloading_ui_state(self, is_downloading):
         """Lock/unlock ALL UI controls during an active download.
 
-        Only the Cancel button and Expand Logs remain enabled while downloading.
+        Only the Cancel button and Expand Logs remain enabled while
+        downloading.  When *unlocking* (is_downloading=False) and fast
+        mode is still active, controls that fast-mode locks (category
+        checkboxes, auto-rename, download-text, check-all) stay
+        disabled, and the multi-URL input stays read-only-visible.
         """
         enabled = not is_downloading
 
@@ -3311,6 +3347,17 @@ class CreatorDownloaderTab(QWidget):
                 translate("preparing_files") if is_downloading else translate("idle")
             )
 
+        # When re-enabling after download, respect fast-mode locks so
+        # that controls toggled off by fast mode stay disabled.
+        if enabled and self.fast_mode:
+            self.creator_main_check.setEnabled(False)
+            self.creator_attachments_check.setEnabled(False)
+            self.creator_content_check.setEnabled(False)
+            self.creator_auto_rename_check.setEnabled(False)
+            self.creator_download_text_check.setEnabled(False)
+            self.creator_check_all.setEnabled(False)
+            self.creator_check_all_all.setEnabled(False)
+
     def prev_page(self):
         """Go to previous page"""
         if self.current_page > 1:
@@ -3353,9 +3400,17 @@ class CreatorDownloaderTab(QWidget):
         )
 
     def update_pagination_controls(self):
-        """Update pagination UI controls"""
-        if self.total_pages <= 1:
-            self.page_label.setText("")
+        """Update pagination UI controls.
+
+        Pagination buttons stay disabled while a download is active so
+        that the user cannot navigate away from the current page.
+        """
+        if self.downloading or self.total_pages <= 1:
+            self.page_label.setText(
+                ""
+                if self.total_pages <= 1
+                else translate("page_info", self.current_page, self.total_pages)
+            )
             self.prev_page_btn.setEnabled(False)
             self.next_page_btn.setEnabled(False)
         else:
