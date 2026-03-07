@@ -18,6 +18,15 @@ class ExtensionTab(QWidget):
         self.parent = parent
         self.setup_ui()
         self.parent.settings_tab.language_changed.connect(self.update_ui_text)
+        self.parent.settings_tab.font_changed.connect(self._on_font_changed)
+
+    def _get_font_family(self):
+        """Get the current font family from settings."""
+        return self.parent.settings_tab.get_font()
+
+    def _on_font_changed(self, font_family):
+        """Refresh UI when font changes."""
+        self.update_ui_text()
 
     def setup_ui(self):
         # Main layout for the Extension tab
@@ -79,14 +88,14 @@ class ExtensionTab(QWidget):
 
         # Title
         title_label = QLabel(f"<h1>{translate('extension_title')}</h1>")
-        title_label.setFont(QFont("Poppins", 20, QFont.Weight.Bold))
+        title_label.setFont(QFont(self._get_font_family(), 20, QFont.Weight.Bold))
         title_label.setStyleSheet("color: white; padding: 10px;")
         title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.content_layout.addWidget(title_label)
 
         # Introduction
         intro_label = QLabel(translate("extension_intro"))
-        intro_label.setFont(QFont("Poppins", 12))
+        intro_label.setFont(QFont(self._get_font_family(), 12))
         intro_label.setStyleSheet("color: #D0D0D0; padding: 5px;")
         intro_label.setWordWrap(True)
         intro_label.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -94,12 +103,12 @@ class ExtensionTab(QWidget):
 
         # Usage Section
         usage_title = QLabel(f"<h2>{translate('extension_download_title')}</h2>")
-        usage_title.setFont(QFont("Poppins", 16, QFont.Weight.Bold))
+        usage_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
         usage_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
         self.content_layout.addWidget(usage_title)
 
         usage_text = QLabel(translate("extension_download_text"))
-        usage_text.setFont(QFont("Poppins", 12))
+        usage_text.setFont(QFont(self._get_font_family(), 12))
         usage_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
         usage_text.setWordWrap(True)
         usage_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -111,7 +120,7 @@ class ExtensionTab(QWidget):
         download_button_layout.addStretch()
 
         download_button = QPushButton("📦 " + translate("download"))
-        download_button.setFont(QFont("Poppins", 12, QFont.Weight.Bold))
+        download_button.setFont(QFont(self._get_font_family(), 12, QFont.Weight.Bold))
         download_button.setStyleSheet(
             """
             QPushButton {
@@ -141,12 +150,12 @@ class ExtensionTab(QWidget):
 
         # Install Section
         install_title = QLabel(f"<h2>{translate('extension_install_title')}</h2>")
-        install_title.setFont(QFont("Poppins", 16, QFont.Weight.Bold))
+        install_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
         install_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
         self.content_layout.addWidget(install_title)
 
         install_text = QLabel(translate("extension_install_text"))
-        install_text.setFont(QFont("Poppins", 12))
+        install_text.setFont(QFont(self._get_font_family(), 12))
         install_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
         install_text.setWordWrap(True)
         install_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -155,7 +164,7 @@ class ExtensionTab(QWidget):
 
         # Chrome/Edge installation
         chrome_install = QLabel(translate("extension_install_chrome"))
-        chrome_install.setFont(QFont("Poppins", 12))
+        chrome_install.setFont(QFont(self._get_font_family(), 12))
         chrome_install.setStyleSheet("color: #D0D0D0; padding: 5px;")
         chrome_install.setWordWrap(True)
         chrome_install.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -163,7 +172,7 @@ class ExtensionTab(QWidget):
 
         # Firefox installation
         firefox_install = QLabel(translate("extension_install_firefox"))
-        firefox_install.setFont(QFont("Poppins", 12))
+        firefox_install.setFont(QFont(self._get_font_family(), 12))
         firefox_install.setStyleSheet("color: #D0D0D0; padding: 5px;")
         firefox_install.setWordWrap(True)
         firefox_install.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -171,12 +180,12 @@ class ExtensionTab(QWidget):
 
         # Setup Section
         setup_title = QLabel(f"<h2>{translate('extension_setup_title')}</h2>")
-        setup_title.setFont(QFont("Poppins", 16, QFont.Weight.Bold))
+        setup_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
         setup_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
         self.content_layout.addWidget(setup_title)
 
         setup_text = QLabel(translate("extension_setup_text"))
-        setup_text.setFont(QFont("Poppins", 12))
+        setup_text.setFont(QFont(self._get_font_family(), 12))
         setup_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
         setup_text.setWordWrap(True)
         setup_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -184,12 +193,12 @@ class ExtensionTab(QWidget):
 
         # Manifest compatibility / notes
         manifest_title = QLabel(f"<h2>{translate('extension_manifest_title')}</h2>")
-        manifest_title.setFont(QFont("Poppins", 16, QFont.Weight.Bold))
+        manifest_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
         manifest_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
         self.content_layout.addWidget(manifest_title)
 
         manifest_text = QLabel(translate("extension_manifest_text"))
-        manifest_text.setFont(QFont("Poppins", 12))
+        manifest_text.setFont(QFont(self._get_font_family(), 12))
         manifest_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
         manifest_text.setWordWrap(True)
         manifest_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -197,21 +206,21 @@ class ExtensionTab(QWidget):
         self.content_layout.addWidget(manifest_text)
 
         chrome_manifest = QLabel(translate("extension_manifest_chrome"))
-        chrome_manifest.setFont(QFont("Poppins", 12))
+        chrome_manifest.setFont(QFont(self._get_font_family(), 12))
         chrome_manifest.setStyleSheet("color: #D0D0D0; padding: 5px;")
         chrome_manifest.setWordWrap(True)
         chrome_manifest.setAlignment(Qt.AlignmentFlag.AlignJustify)
         self.content_layout.addWidget(chrome_manifest)
 
         firefox_manifest = QLabel(translate("extension_manifest_firefox"))
-        firefox_manifest.setFont(QFont("Poppins", 12))
+        firefox_manifest.setFont(QFont(self._get_font_family(), 12))
         firefox_manifest.setStyleSheet("color: #D0D0D0; padding: 5px;")
         firefox_manifest.setWordWrap(True)
         firefox_manifest.setAlignment(Qt.AlignmentFlag.AlignJustify)
         self.content_layout.addWidget(firefox_manifest)
 
         manifest_quick = QLabel(translate("extension_manifest_quickcopy"))
-        manifest_quick.setFont(QFont("Poppins", 12))
+        manifest_quick.setFont(QFont(self._get_font_family(), 12))
         manifest_quick.setStyleSheet("color: #D0D0D0; padding: 5px;")
         manifest_quick.setWordWrap(True)
         manifest_quick.setAlignment(Qt.AlignmentFlag.AlignJustify)
@@ -221,12 +230,14 @@ class ExtensionTab(QWidget):
         troubleshooting_title = QLabel(
             f"<h2>{translate('extension_troubleshooting_title')}</h2>"
         )
-        troubleshooting_title.setFont(QFont("Poppins", 16, QFont.Weight.Bold))
+        troubleshooting_title.setFont(
+            QFont(self._get_font_family(), 16, QFont.Weight.Bold)
+        )
         troubleshooting_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
         self.content_layout.addWidget(troubleshooting_title)
 
         troubleshooting_text = QLabel(translate("extension_troubleshooting_text"))
-        troubleshooting_text.setFont(QFont("Poppins", 12))
+        troubleshooting_text.setFont(QFont(self._get_font_family(), 12))
         troubleshooting_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
         troubleshooting_text.setWordWrap(True)
         troubleshooting_text.setAlignment(Qt.AlignmentFlag.AlignJustify)

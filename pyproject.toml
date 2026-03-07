@@ -1,7 +1,7 @@
 [tool.briefcase]
 project_name = "Kemono Downloader"
 bundle = "com.voxdroid"
-version = "5.9.0"
+version = "5.10.0"
 url = "https://github.com/VoxDroid/KemonoDownloader"
 license.file = "LICENSE"
 author = "VoxDroid"
@@ -122,6 +122,8 @@ finish_arg."filesystem=home" = true
 flatpak_runtime = "org.kde.Platform"
 flatpak_runtime_version = "6.7"
 flatpak_sdk = "org.kde.Sdk"
+flatpak_base = "com.riverbankcomputing.PyQt.BaseApp"
+flatpak_base_version = "6.7"
 
 [tool.briefcase.app.kemonodownloader.windows]
 requires = [

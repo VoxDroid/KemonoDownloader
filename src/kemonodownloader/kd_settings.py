@@ -29,6 +29,7 @@ from kemonodownloader.kd_language import language_manager, translate
 class SettingsTab(QWidget):
     settings_applied = pyqtSignal()
     language_changed = pyqtSignal()
+    font_changed = pyqtSignal(str)
     download_started = pyqtSignal()
     download_finished = pyqtSignal()
 
@@ -53,6 +54,8 @@ class SettingsTab(QWidget):
             # Creator downloader filename/folder customization
             "creator_filename_template": "{post_id}_{orig_name}",
             "creator_folder_strategy": "per_post",  # per_post|single_folder|by_file_type
+            # Font setting
+            "font": "JetBrains Mono",  # "JetBrains Mono", "Poppins"
         }
         self.settings = self.load_settings()
         self.temp_settings = self.settings.copy()
@@ -145,6 +148,10 @@ class SettingsTab(QWidget):
             self.default_settings.get("creator_folder_strategy", "per_post"),
             type=str,
         )
+        # Font setting
+        settings_dict["font"] = self.qsettings.value(
+            "font", self.default_settings.get("font", "JetBrains Mono"), type=str
+        )
         return settings_dict
 
     def save_settings(self):
@@ -180,6 +187,11 @@ class SettingsTab(QWidget):
         self.qsettings.setValue(
             "creator_folder_strategy",
             self.settings.get("creator_folder_strategy", "per_post"),
+        )
+        # Font setting
+        self.qsettings.setValue(
+            "font",
+            self.settings.get("font", "JetBrains Mono"),
         )
         self.qsettings.sync()
 
@@ -479,6 +491,37 @@ class SettingsTab(QWidget):
         self.language_group.setLayout(language_layout)
         layout.addWidget(self.language_group)
 
+        # Font Settings Group
+        self.font_group = QGroupBox()
+        self.font_group.setStyleSheet(
+            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
+        )
+        font_layout = QGridLayout()
+
+        self.font_label = QLabel()
+        font_layout.addWidget(self.font_label, 0, 0)
+
+        self.font_combo = QComboBox()
+        self._available_fonts = [
+            ("JetBrains Mono", "JetBrains Mono"),
+            ("Poppins", "Poppins"),
+        ]
+        for display_name, font_family in self._available_fonts:
+            self.font_combo.addItem(display_name, font_family)
+        self.font_combo.setStyleSheet("padding: 5px; border-radius: 5px;")
+
+        # Set current font selection
+        current_font = self.temp_settings.get("font", "JetBrains Mono")
+        for i in range(self.font_combo.count()):
+            if self.font_combo.itemData(i) == current_font:
+                self.font_combo.setCurrentIndex(i)
+                break
+        self.font_combo.currentIndexChanged.connect(self.update_font)
+        font_layout.addWidget(self.font_combo, 0, 1)
+
+        self.font_group.setLayout(font_layout)
+        layout.addWidget(self.font_group)
+
         # Enable proxy checkbox (outside the proxy group so it's always visible)
         self.use_proxy_checkbox = QCheckBox()
         self.use_proxy_checkbox.setStyleSheet(
@@ -634,7 +677,7 @@ class SettingsTab(QWidget):
         self.tor_output_text = QTextEdit()
         self.tor_output_text.setMaximumHeight(150)
         self.tor_output_text.setStyleSheet(
-            "QTextEdit { border: 1px solid #4A5B7A; border-radius: 5px; padding: 5px; background: #2A2A2A; color: #FFFFFF; font-family: monospace; font-size: 10px; }"
+            "QTextEdit { border: 1px solid #4A5B7A; border-radius: 5px; padding: 5px; background: #2A2A2A; color: #FFFFFF; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 10px; }"
         )
         self.tor_output_text.setReadOnly(True)
         self.tor_output_text.setVisible(False)
@@ -718,6 +761,10 @@ class SettingsTab(QWidget):
     def update_language(self, index):
         language = self.language_combo.itemData(index)
         self.update_temp_setting("language", language)
+
+    def update_font(self, index):
+        font_family = self.font_combo.itemData(index)
+        self.update_temp_setting("font", font_family)
 
     def show_template_help(self):
         """Show help text explaining the available filename template placeholders."""
@@ -1042,6 +1089,7 @@ class SettingsTab(QWidget):
                 proxy_type_name,
                 filename_template_display,
                 folder_strategy_display,
+                self.temp_settings.get("font", "JetBrains Mono"),
             ),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,
@@ -1074,6 +1122,7 @@ class SettingsTab(QWidget):
                 return
 
         language_changed = self.settings["language"] != self.temp_settings["language"]
+        font_changed = self.settings.get("font") != self.temp_settings.get("font")
 
         self.settings = self.temp_settings.copy()
         self.settings["use_proxy"] = (
@@ -1102,6 +1151,9 @@ class SettingsTab(QWidget):
             self.language_changed.emit()
             self.parent.log(translate("language_changed"))
             self.update_ui_text()
+
+        if font_changed:
+            self.font_changed.emit(self.settings.get("font", "JetBrains Mono"))
 
         self.settings_applied.emit()
 
@@ -1147,6 +1199,7 @@ class SettingsTab(QWidget):
                 proxy_type_name,
                 filename_template_display,
                 folder_strategy_display,
+                self.settings.get("font", "JetBrains Mono"),
             ),
         )
 
@@ -1201,6 +1254,15 @@ class SettingsTab(QWidget):
 
         # Update language combo box
         self.update_language_combo()
+
+        # Update font combo box
+        default_font = self.temp_settings.get("font", "JetBrains Mono")
+        self.font_combo.blockSignals(True)
+        for i in range(self.font_combo.count()):
+            if self.font_combo.itemData(i) == default_font:
+                self.font_combo.setCurrentIndex(i)
+                break
+        self.font_combo.blockSignals(False)
 
         QMessageBox.information(
             self, translate("reset_to_defaults"), translate("settings_reset_message")
@@ -1314,6 +1376,9 @@ class SettingsTab(QWidget):
         self.language_label.setText(translate("language"))
         self.update_language_combo()
 
+        self.font_group.setTitle(translate("font_settings"))
+        self.font_label.setText(translate("font"))
+
         self.proxy_group.setTitle(translate("proxy_settings"))
         self.use_proxy_checkbox.setText(translate("use_proxy"))
         self.proxy_type_label.setText(translate("proxy_type"))
@@ -1354,6 +1419,9 @@ class SettingsTab(QWidget):
 
     def get_creator_folder_strategy(self):
         return self.settings.get("creator_folder_strategy", "per_post")
+
+    def get_font(self):
+        return self.settings.get("font", "JetBrains Mono")
 
     def get_proxy_type_index(self, proxy_type):
         type_map = {"custom": 0, "tor": 1}

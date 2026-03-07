@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.9.0-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.10.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -158,6 +158,8 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Creator Downloader** | Bulk download entire creator profiles or selected posts. Configurable options for main files, attachments, and content images. |
 | **File Type Support** | Handles images (JPG, PNG, GIF, WebP), videos (MP4, AVI, MOV), archives (ZIP, 7Z, RAR), documents (PDF, TXT), audio (MP3, WAV), and more. |
 | **URL Import** | Import multiple creator URLs from .txt files for batch processing. |
+| **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. In Creator Downloader, auto-detects and downloads all posts for each queued creator sequentially. |
+| **Download UI Lock** | All controls are disabled during active downloads (except Cancel and Expand Logs) to prevent accidental changes. |
 
 ### $\color{#90a4ae}{\sf{\text{Performance and Reliability}}}$
 
@@ -165,7 +167,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 |---------|-------------|
 | **Concurrent Downloads** | Adjustable parallel downloads (1-10 threads) for optimal performance. |
 | **Retry Mechanisms** | Configurable retries for posts fetching, data retrieval, file downloads, and API requests. |
-| **File Deduplication** | Prevents redundant downloads using URL-based hashing. |
+| **File Deduplication** | Prevents redundant downloads using SQLite-backed URL hashing (auto-migrates from legacy JSON). |
 | **Connection Pooling** | Efficient HTTP connection management with gzip compression support. |
 
 ### $\color{#90a4ae}{\sf{\text{User Interface and Experience}}}$
@@ -201,6 +203,11 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 - **Base Directory**: Custom root path for downloads
 - **Folder Name**: Configurable app data folder name
 - **Platform Defaults**: Auto-detection of appropriate directories per OS
+
+#### $\color{#90a4ae}{\sf{\text{Font Settings}}}$
+| Setting | Description | Default | Options |
+|---------|-------------|---------|---------|
+| Font | Application-wide font family (bundled Google Fonts) | JetBrains Mono | JetBrains Mono, Poppins |
 
 ### $\color{#90a4ae}{\sf{\text{Help and Documentation}}}$
 

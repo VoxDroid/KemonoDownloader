@@ -1321,6 +1321,19 @@ class KDLanguage:
                 "korean": "중국어 (간체)",
                 "chinese-simplified": "中文 (简体)",
             },
+            # Font settings
+            "font_settings": {
+                "english": "Font Settings",
+                "japanese": "フォント設定",
+                "korean": "글꼴 설정",
+                "chinese-simplified": "字体设置",
+            },
+            "font": {
+                "english": "Font:",
+                "japanese": "フォント:",
+                "korean": "글꼴:",
+                "chinese-simplified": "字体:",
+            },
             "full_logs": {
                 "english": "Full Logs",
                 "japanese": "完全なログ",
@@ -1347,10 +1360,10 @@ class KDLanguage:
                 "chinese-simplified": "确认设置更改",
             },
             "confirm_settings_message": {
-                "english": "Are you sure you want to apply these settings?\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}",
-                "japanese": "これらの設定を適用してもよろしいですか？\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}",
-                "korean": "이 설정을 적용하시겠습니까?\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}",
-                "chinese-simplified": "您确定要应用这些设置吗？\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}",
+                "english": "Are you sure you want to apply these settings?\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}\nFont: {9}",
+                "japanese": "これらの設定を適用してもよろしいですか？\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}\nフォント: {9}",
+                "korean": "이 설정을 적용하시겠습니까?\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}\n글꼴: {9}",
+                "chinese-simplified": "您确定要应用这些设置吗？\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}\n字体: {9}",
             },
             "enabled": {
                 "english": "Enabled",
@@ -1389,10 +1402,10 @@ class KDLanguage:
                 "chinese-simplified": "设置已应用",
             },
             "settings_applied_message": {
-                "english": "Settings have been successfully applied!\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}",
-                "japanese": "設定が正常に適用されました！\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}",
-                "korean": "설정이 성공적으로 적용되었습니다!\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}",
-                "chinese-simplified": "设置已成功应用！\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}",
+                "english": "Settings have been successfully applied!\n\nFolder Name: {0}\nSave Directory: {1}\nSimultaneous Downloads: {2}\nAuto Check Updates: {3}\nLanguage: {4}\nUse Proxy: {5}\nProxy Type: {6}\nFilename Template: {7}\nFolder Strategy: {8}\nFont: {9}",
+                "japanese": "設定が正常に適用されました！\n\nフォルダ名: {0}\n保存ディレクトリ: {1}\n同時ダウンロード数: {2}\n自動更新チェック: {3}\n言語: {4}\nプロキシを使用: {5}\nプロキシタイプ: {6}\nファイル名テンプレート: {7}\nフォルダ戦略: {8}\nフォント: {9}",
+                "korean": "설정이 성공적으로 적용되었습니다!\n\n폴더 이름: {0}\n저장 디렉토리: {1}\n동시 다운로드: {2}\n자동 업데이트 확인: {3}\n언어: {4}\n프록시 사용: {5}\n프록시 유형: {6}\n파일 이름 템플릿: {7}\n폴더 전략: {8}\n글꼴: {9}",
+                "chinese-simplified": "设置已成功应用！\n\n文件夹名称: {0}\n保存目录: {1}\n并行下载数: {2}\n自动检查更新: {3}\n语言: {4}\n使用代理: {5}\n代理类型: {6}\n文件名模板: {7}\n文件夹策略: {8}\n字体: {9}",
             },
             "proxy_settings": {
                 "english": "Proxy Settings",
@@ -3540,6 +3553,146 @@ class KDLanguage:
                 "japanese": "{0} のチェックボックスが {1} に切り替えられました、checked_urls数: {2}",
                 "korean": "{0}의 체크박스가 {1}으로 전환됨, checked_urls 수: {2}",
                 "chinese-simplified": "{0} 的复选框切换到 {1}，checked_urls 数量: {2}",
+            },
+            # ── Fast Mode & Multi-URL translations ──
+            "fast_mode": {
+                "english": "Fast Mode",
+                "japanese": "高速モード",
+                "korean": "빠른 모드",
+                "chinese-simplified": "快速模式",
+            },
+            "fast_mode_info_title": {
+                "english": "Fast Mode",
+                "japanese": "高速モード",
+                "korean": "빠른 모드",
+                "chinese-simplified": "快速模式",
+            },
+            "fast_mode_info_text": {
+                "english": (
+                    "Normal Mode gives you full control — you add one URL at a time "
+                    "and manually choose which file types to download (images, videos, "
+                    "attachments, text, etc.).\n\n"
+                    "Fast Mode is for when you just want everything downloaded quickly "
+                    "with minimal clicks:\n\n"
+                    "• All download categories are turned ON and locked, so nothing "
+                    "gets missed\n"
+                    "• A batch input area appears where you can paste many URLs at "
+                    "once (one per line)\n"
+                    "• Completed downloads are automatically removed from the queue\n\n"
+                    "Turn it off at any time to go back to manual control."
+                ),
+                "japanese": (
+                    "通常モードでは完全な制御が可能です — URLを1つずつ追加し、"
+                    "ダウンロードするファイルの種類（画像、動画、添付ファイル、テキスト"
+                    "など）を手動で選択します。\n\n"
+                    "高速モードは、最小限の操作ですべてを素早くダウンロードしたい時に"
+                    "使います：\n\n"
+                    "• すべてのダウンロードカテゴリがONになりロックされるため、"
+                    "何も見逃しません\n"
+                    "• 一括入力エリアが表示され、多数のURLを一度に貼り付けられます"
+                    "（1行に1つ）\n"
+                    "• 完了したダウンロードはキューから自動的に削除されます\n\n"
+                    "いつでもオフにして手動制御に戻せます。"
+                ),
+                "korean": (
+                    "일반 모드에서는 완전한 제어가 가능합니다 — URL을 하나씩 추가하고 "
+                    "다운로드할 파일 유형(이미지, 동영상, 첨부파일, 텍스트 등)을 "
+                    "직접 선택합니다.\n\n"
+                    "빠른 모드는 최소한의 클릭으로 모든 것을 빠르게 다운로드하고 싶을 때 "
+                    "사용합니다:\n\n"
+                    "• 모든 다운로드 카테고리가 켜지고 잠겨서 아무것도 놓치지 않습니다\n"
+                    "• 일괄 입력 영역이 나타나 여러 URL을 한 번에 붙여넣을 수 있습니다"
+                    "(한 줄에 하나)\n"
+                    "• 완료된 다운로드는 큐에서 자동으로 제거됩니다\n\n"
+                    "언제든지 끄면 수동 제어로 돌아갈 수 있습니다."
+                ),
+                "chinese-simplified": (
+                    "普通模式让您完全控制 — 每次添加一个URL，手动选择要下载的文件"
+                    "类型（图片、视频、附件、文本等）。\n\n"
+                    "快速模式适用于您想以最少的点击快速下载所有内容的情况：\n\n"
+                    "• 所有下载类别将被开启并锁定，确保不会遗漏任何内容\n"
+                    "• 会出现批量输入区域，您可以一次粘贴多个URL（每行一个）\n"
+                    "• 已完成的下载会自动从队列中移除\n\n"
+                    "随时关闭即可恢复手动控制。"
+                ),
+            },
+            "fast_mode_enabled": {
+                "english": "Fast Mode enabled – all files will be downloaded, options locked.",
+                "japanese": "高速モードが有効になりました – すべてのファイルがダウンロードされ、オプションがロックされます。",
+                "korean": "빠른 모드가 활성화되었습니다 – 모든 파일이 다운로드되며 옵션이 잠겼습니다.",
+                "chinese-simplified": "快速模式已启用 – 将下载所有文件，选项已锁定。",
+            },
+            "fast_mode_disabled": {
+                "english": "Fast Mode disabled – manual control restored.",
+                "japanese": "高速モードが無効になりました – 手動制御が復元されました。",
+                "korean": "빠른 모드가 비활성화되었습니다 – 수동 제어가 복원되었습니다.",
+                "chinese-simplified": "快速模式已禁用 – 手动控制已恢复。",
+            },
+            "fast_mode_removed_post_url": {
+                "english": "Fast Mode: removed completed post {0} from queue.",
+                "japanese": "高速モード: 完了した投稿 {0} をキューから削除しました。",
+                "korean": "빠른 모드: 완료된 게시물 {0}을(를) 큐에서 제거했습니다.",
+                "chinese-simplified": "快速模式：已从队列中移除已完成的帖子 {0}。",
+            },
+            "fast_mode_removed_posts": {
+                "english": "Fast Mode: removed {0} completed post(s) from queue.",
+                "japanese": "高速モード: 完了した{0}件の投稿をキューから削除しました。",
+                "korean": "빠른 모드: 완료된 {0}개의 게시물을 큐에서 제거했습니다.",
+                "chinese-simplified": "快速模式：已从队列中移除 {0} 个已完成的帖子。",
+            },
+            "fast_mode_removed_creator": {
+                "english": "Fast Mode: removed completed creator {0} from queue.",
+                "japanese": "高速モード: 完了したクリエイター {0} をキューから削除しました。",
+                "korean": "빠른 모드: 완료된 크리에이터 {0}을(를) 큐에서 제거했습니다.",
+                "chinese-simplified": "快速模式：已从队列中移除已完成的创作者 {0}。",
+            },
+            "fast_mode_batch_start": {
+                "english": "Fast Mode: starting batch download for {0} creator(s).",
+                "japanese": "高速モード: {0}人のクリエイターの一括ダウンロードを開始します。",
+                "korean": "빠른 모드: {0}명의 크리에이터 일괄 다운로드를 시작합니다.",
+                "chinese-simplified": "快速模式：开始批量下载 {0} 个创作者。",
+            },
+            "fast_mode_batch_complete": {
+                "english": "Fast Mode: batch download complete.",
+                "japanese": "高速モード: 一括ダウンロードが完了しました。",
+                "korean": "빠른 모드: 일괄 다운로드가 완료되었습니다.",
+                "chinese-simplified": "快速模式：批量下载完成。",
+            },
+            "fast_mode_processing_creator": {
+                "english": "Fast Mode: processing creator {0} ({1} remaining).",
+                "japanese": "高速モード: クリエイター {0} を処理中（残り {1} 件）。",
+                "korean": "빠른 모드: 크리에이터 {0} 처리 중 (나머지 {1}개).",
+                "chinese-simplified": "快速模式：正在处理创作者 {0}（剩余 {1} 个）。",
+            },
+            "fast_mode_no_posts_found": {
+                "english": "Fast Mode: no posts found for creator {0}, skipping.",
+                "japanese": "高速モード: クリエイター {0} の投稿が見つかりません。スキップします。",
+                "korean": "빠른 모드: 크리에이터 {0}의 게시물을 찾을 수 없습니다. 건너뜁니다.",
+                "chinese-simplified": "快速模式：未找到创作者 {0} 的帖子，跳过。",
+            },
+            "fast_mode_auto_selected": {
+                "english": "Fast Mode: auto-selected {0} post(s) for {1}.",
+                "japanese": "高速モード: {1} の {0} 件の投稿を自動選択しました。",
+                "korean": "빠른 모드: {1}에 대해 {0}개의 게시물을 자동 선택했습니다.",
+                "chinese-simplified": "快速模式：为 {1} 自动选择了 {0} 个帖子。",
+            },
+            "multi_url_placeholder": {
+                "english": "Paste multiple post URLs here, one per line…",
+                "japanese": "複数の投稿URLをここに貼り付けてください（1行に1つ）…",
+                "korean": "여기에 여러 게시물 URL을 붙여넣으세요 (한 줄에 하나)…",
+                "chinese-simplified": "在此粘贴多个帖子URL，每行一个…",
+            },
+            "multi_url_placeholder_creator": {
+                "english": "Paste multiple creator URLs here, one per line…",
+                "japanese": "複数のクリエイターURLをここに貼り付けてください（1行に1つ）…",
+                "korean": "여기에 여러 크리에이터 URL을 붙여넣으세요 (한 줄에 하나)…",
+                "chinese-simplified": "在此粘贴多个创作者URL，每行一个…",
+            },
+            "add_all_to_queue": {
+                "english": "Add All to Queue",
+                "japanese": "すべてキューに追加",
+                "korean": "모두 큐에 추가",
+                "chinese-simplified": "全部添加到队列",
             },
         }
 

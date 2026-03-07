@@ -9,16 +9,16 @@ from urllib.parse import urljoin
 
 try:
     from kemonodownloader.post_downloader import (
-        HEADERS,
         ThreadSettings,
         get_domain_config,
+        get_headers,
     )
 except ImportError:
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "src"))
     from kemonodownloader.post_downloader import (
-        HEADERS,
         ThreadSettings,
         get_domain_config,
+        get_headers,
     )
 
 
@@ -361,13 +361,15 @@ class TestHeadersConfiguration:
 
     def test_post_headers_have_required_fields(self):
         """Test that headers contain required fields."""
+        headers = get_headers()
         required_fields = ["User-Agent", "Referer", "Accept-Language", "Connection"]
 
         for field in required_fields:
-            assert field in HEADERS, f"Missing header field: {field}"
+            assert field in headers, f"Missing header field: {field}"
 
     def test_post_headers_values_not_empty(self):
         """Test that header values are not empty."""
-        for key, value in HEADERS.items():
+        headers = get_headers()
+        for key, value in headers.items():
             assert value is not None, f"Header {key} is None"
             assert len(str(value)) > 0, f"Header {key} is empty"
