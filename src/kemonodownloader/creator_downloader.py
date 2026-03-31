@@ -1319,6 +1319,8 @@ def sanitize_filename(name, max_length=100):
     sanitized = re.sub(r"_+", "_", sanitized)
     # Remove trailing dots (Windows compatibility)
     sanitized = sanitized.rstrip(".")
+    # Remove leading dots to avoid hidden/unsafe filenames
+    sanitized = sanitized.lstrip(".")
     # Trim leading/trailing underscores
     sanitized = sanitized.strip("_")
     # Limit length
