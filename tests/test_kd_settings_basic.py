@@ -1,7 +1,70 @@
 import subprocess
+import sys
 from types import SimpleNamespace
 
+from PyQt6.QtCore import QSettings
+
 from kemonodownloader import kd_settings as ks
+from kemonodownloader.kd_settings import SettingsTab
+
+
+def test_get_default_base_directory_platforms(monkeypatch, tmp_path):
+    # Windows
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setenv("APPDATA", str(tmp_path / "AppData"))
+    path = SettingsTab.get_default_base_directory(None)
+    assert "Kemono Downloader" in path
+
+    # macOS
+    monkeypatch.setattr(sys, "platform", "darwin")
+    path = SettingsTab.get_default_base_directory(None)
+    assert "Library/Application Support" in path
+
+    # Linux/other
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "xdg"))
+    path = SettingsTab.get_default_base_directory(None)
+    assert "Kemono Downloader" in path
+
+
+def test_save_and_load_settings_roundtrip(tmp_path):
+    ini_path = str(tmp_path / "test_settings.ini")
+    qs = QSettings(ini_path, QSettings.Format.IniFormat)
+
+    # Build a fake SettingsTab-like object for save_settings
+    s = SettingsTab.__new__(SettingsTab)
+    s.qsettings = qs
+    s.settings = {
+        "base_folder_name": "My Folder",
+        "base_directory": str(tmp_path / "base"),
+        "simultaneous_downloads": 3,
+        "auto_check_updates": False,
+        "language": "english",
+        "creator_posts_max_attempts": 10,
+        "post_data_max_retries": 2,
+        "file_download_max_retries": 5,
+        "api_request_max_retries": 1,
+        "proxy_type": "custom",
+        "custom_proxy_url": "http://127.0.0.1:8080",
+        "tor_path": "",
+        "creator_filename_template": "{post_id}_{orig_name}",
+        "creator_folder_strategy": "per_post",
+        "font": "JetBrains Mono",
+    }
+
+    # Call save_settings which should write to the INI
+    SettingsTab.save_settings(s)
+
+    # Now load settings using a fresh object
+    s2 = SettingsTab.__new__(SettingsTab)
+    s2.qsettings = QSettings(ini_path, QSettings.Format.IniFormat)
+    # Provide default_settings minimal shape referenced by load_settings
+    s2.default_settings = s.settings.copy()
+    loaded = SettingsTab.load_settings(s2)
+
+    assert loaded["base_folder_name"] == s.settings["base_folder_name"]
+    assert int(loaded["simultaneous_downloads"]) == s.settings["simultaneous_downloads"]
+    assert loaded["proxy_type"] == s.settings["proxy_type"]
 
 
 def make_tab(tmp_path):

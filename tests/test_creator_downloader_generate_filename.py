@@ -241,6 +241,187 @@ def test_post_population_and_filter_and_checkbox_threads():
     assert "1" in c_res["posts"]
 
 
+def test_creator_fetch_creator_and_post_info_and_download_text(tmp_path, monkeypatch):
+    # Setup dummy settings and thread
+    class DummySettingsTab:
+        def get_creator_filename_template(self):
+            return None
+
+        def get_creator_folder_strategy(self):
+            return "per_post"
+
+    class DummySettings:
+        def __init__(self):
+            self.settings_tab = None
+
+    service = "fanbox"
+    creator_id = "123"
+    download_folder = str(tmp_path / "dl")
+    selected_posts = ["1"]
+    files_to_download = []
+    files_to_posts_map = {}
+    console = None
+    other_files_dir = str(tmp_path / "other")
+    post_titles_map = {}
+
+    thread = cd.CreatorDownloadThread(
+        service,
+        creator_id,
+        download_folder,
+        selected_posts,
+        files_to_download,
+        files_to_posts_map,
+        console,
+        other_files_dir,
+        post_titles_map,
+        auto_rename_enabled=False,
+        settings=DummySettings(),
+        max_concurrent=1,
+    )
+
+    # Fake session that returns predictable JSON
+    class FakeResp:
+        def __init__(self, data, code=200):
+            self._data = data
+            self.status_code = code
+
+        def json(self):
+            return self._data
+
+    class FakeSession:
+        def get(self, url, headers=None, timeout=None):
+            if url.endswith("/profile"):
+                return FakeResp({"name": "Creator Name"}, 200)
+            else:
+                # post url
+                return FakeResp({"title": "My Post Title"}, 200)
+
+    monkeypatch.setattr(cd, "get_session", lambda settings_tab=None: FakeSession())
+
+    # Run fetch to populate creator_name and post_titles_map
+    thread.fetch_creator_and_post_info()
+    assert thread.creator_name is not None
+    key = (service, creator_id, "1")
+    assert key in thread.post_titles_map
+
+    # Test _download_text_sync writes description file when content present
+    # Monkeypatch session to return a post with content
+    class FakeResp2:
+        def __init__(self, data):
+            self._data = data
+            self.status_code = 200
+
+        def json(self):
+            return self._data
+
+    class FakeSession2:
+        def get(self, url, headers=None, timeout=None):
+            return FakeResp2({"content": "<p>Hello description</p>"})
+
+    monkeypatch.setattr(cd, "get_session", lambda settings_tab=None: FakeSession2())
+    post_folder = str(tmp_path / "postfolder")
+    os.makedirs(post_folder, exist_ok=True)
+    thread._download_text_sync("1", post_folder)
+    desc_path = os.path.join(post_folder, "desc_1.txt")
+    assert os.path.exists(desc_path)
+    assert "Hello description" in open(desc_path, encoding="utf-8").read()
+
+
+def test_creator_download_thread_uses_hash_db_entry(tmp_path):
+    # Create an existing file and a CreatorDownloadThread that should detect it
+    file_content = b"creator existing"
+    existing = tmp_path / "exist_creator.dat"
+    existing.write_bytes(file_content)
+    import hashlib as _hash
+
+    file_hash = _hash.md5(file_content).hexdigest()
+    file_url = "https://kemono.cr/files/orig_creator.jpg"
+
+    class DummySettings:
+        file_download_max_retries = 1
+        settings_tab = None
+
+    thread = cd.CreatorDownloadThread(
+        service="fanbox",
+        creator_id="123",
+        download_folder=str(tmp_path / "dl"),
+        selected_posts=["1"],
+        files_to_download=[file_url],
+        files_to_posts_map={file_url: "1"},
+        console=None,
+        other_files_dir=str(tmp_path / "other"),
+        post_titles_map={},
+        auto_rename_enabled=False,
+        settings=DummySettings(),
+        max_concurrent=1,
+    )
+
+    url_hash = _hash.md5(file_url.encode()).hexdigest()
+    thread.hash_db.lookup = lambda h: (
+        {
+            "file_path": str(existing),
+            "file_hash": file_hash,
+            "file_size": len(file_content),
+        }
+        if h == url_hash
+        else None
+    )
+
+    calls = []
+
+    def fake_safe_emit(signal, *args):
+        calls.append((signal, args))
+
+    thread._safe_emit = fake_safe_emit
+
+    import asyncio
+
+    asyncio.run(thread.download_file(file_url, str(tmp_path / "dl"), 0, 1))
+
+    # we expect progress 100 and a successful completion call
+    assert any(100 in args for (_, args) in calls)
+    assert any(True in args for (_, args) in calls)
+
+
+def test_creator_run_no_files_emits_finished(tmp_path):
+    class DummySettings:
+        file_download_max_retries = 1
+        post_data_max_retries = 1
+        settings_tab = None
+
+    thread = cd.CreatorDownloadThread(
+        service="fanbox",
+        creator_id="123",
+        download_folder=str(tmp_path / "dl"),
+        selected_posts=[],
+        files_to_download=[],
+        files_to_posts_map={},
+        console=None,
+        other_files_dir=str(tmp_path / "other"),
+        post_titles_map={},
+        auto_rename_enabled=False,
+        settings=DummySettings(),
+        max_concurrent=1,
+    )
+
+    # Prevent network calls
+    thread.fetch_creator_and_post_info = lambda: None
+
+    class DummySignal:
+        def __init__(self):
+            self.emitted = False
+
+        def emit(self, *args):
+            self.emitted = True
+
+    finished = DummySignal()
+    thread.finished = finished
+
+    # Run and expect finished to be emitted when no files
+    thread.run()
+    assert finished.emitted
+
+
 def test_detect_files_main_attachments_content(tmp_path):
     # Prepare fake checkboxes that indicate which extensions are enabled
     class FakeCheckbox:
@@ -303,3 +484,193 @@ def test_get_session_with_socks(monkeypatch):
     assert isinstance(sess, _req.sessions.Session)
     # proxies should be set on the returned session
     assert sess.proxies.get("http") == "socks5://127.0.0.1:1080"
+
+
+def test_download_file_size_mismatch_deletes_incomplete_and_marks_failed(
+    tmp_path, monkeypatch
+):
+
+    # Settings with a single retry (1 attempt)
+    class DummySettings:
+        file_download_max_retries = 1
+        settings_tab = None
+
+    file_url = "https://kemono.cr/files/partial.jpg"
+    service = "fanbox"
+    creator_id = "123"
+    download_folder = str(tmp_path / "dl")
+    selected_posts = ["1"]
+    files_to_download = [file_url]
+    files_to_posts_map = {file_url: "1"}
+    console = None
+    other_files_dir = str(tmp_path / "other")
+    post_titles_map = {}
+
+    thread = cd.CreatorDownloadThread(
+        service=service,
+        creator_id=creator_id,
+        download_folder=download_folder,
+        selected_posts=selected_posts,
+        files_to_download=files_to_download,
+        files_to_posts_map=files_to_posts_map,
+        console=console,
+        other_files_dir=other_files_dir,
+        post_titles_map=post_titles_map,
+        auto_rename_enabled=False,
+        settings=DummySettings(),
+        max_concurrent=1,
+    )
+    thread.creator_name = "Creator Name"
+
+    # Fake response that advertises 10 bytes but only yields 5
+    class FakeRespPartial:
+        def __init__(self):
+            self.status_code = 200
+            self.headers = {"content-length": "10"}
+
+        def raise_for_status(self):
+            return
+
+        def iter_content(self, chunk_size=8192):
+            yield b"12345"
+
+        def close(self):
+            return
+
+    class FakeSession:
+        def get(self, url, headers=None, stream=None, timeout=None):
+            return FakeRespPartial()
+
+    monkeypatch.setattr(cd, "get_session", lambda settings_tab=None: FakeSession())
+
+    calls = []
+
+    def fake_safe_emit(signal, *args):
+        calls.append((signal, args))
+
+    thread._safe_emit = fake_safe_emit
+
+    import asyncio
+
+    asyncio.run(thread.download_file(file_url, download_folder, 0, 1))
+
+    # Ensure incomplete file was removed and the file is marked as failed
+    target_folder, filename = thread.generate_filename_and_folder(
+        file_url, download_folder, 0, 1, "1", "Post Title"
+    )
+    full_path = os.path.join(target_folder, filename.replace("/", "_"))
+    assert not os.path.exists(full_path)
+    assert file_url in thread.failed_files
+    # file_completed should have been emitted with False
+    assert any(False in args for (_sig, args) in calls)
+
+
+def test_download_file_retries_and_succeeds(monkeypatch, tmp_path):
+    import asyncio
+
+    import requests as _req
+
+    class DummySettings:
+        file_download_max_retries = 2
+        settings_tab = None
+
+    file_url = "https://kemono.cr/files/retry.jpg"
+    service = "fanbox"
+    creator_id = "123"
+    download_folder = str(tmp_path / "dl")
+    selected_posts = ["1"]
+    files_to_download = [file_url]
+    files_to_posts_map = {file_url: "1"}
+    console = None
+    other_files_dir = str(tmp_path / "other")
+    post_titles_map = {}
+
+    thread = cd.CreatorDownloadThread(
+        service=service,
+        creator_id=creator_id,
+        download_folder=download_folder,
+        selected_posts=selected_posts,
+        files_to_download=files_to_download,
+        files_to_posts_map=files_to_posts_map,
+        console=console,
+        other_files_dir=other_files_dir,
+        post_titles_map=post_titles_map,
+        auto_rename_enabled=False,
+        settings=DummySettings(),
+        max_concurrent=1,
+    )
+    thread.creator_name = "Creator Name"
+
+    # First response raises a requests.RequestException during streaming,
+    # second response returns the full content.
+    class BrokenResp:
+        def __init__(self):
+            self.status_code = 200
+            self.headers = {"content-length": "5"}
+
+        def raise_for_status(self):
+            return
+
+        def iter_content(self, chunk_size=8192):
+            raise _req.RequestException("broken stream")
+
+        def close(self):
+            return
+
+    class GoodResp:
+        def __init__(self):
+            self.status_code = 200
+            self.headers = {"content-length": "5"}
+
+        def raise_for_status(self):
+            return
+
+        def iter_content(self, chunk_size=8192):
+            yield b"12345"
+
+        def close(self):
+            return
+
+    class SeqSession:
+        def __init__(self):
+            self.calls = 0
+
+        def get(self, url, headers=None, stream=None, timeout=None):
+            self.calls += 1
+            if self.calls == 1:
+                return BrokenResp()
+            return GoodResp()
+
+    seq = SeqSession()
+    monkeypatch.setattr(cd, "get_session", lambda settings_tab=None: seq)
+
+    # Make sleep a fast no-op to avoid slowing tests
+    async def _fast_sleep(_):
+        return
+
+    monkeypatch.setattr(cd.asyncio, "sleep", _fast_sleep)
+
+    calls = []
+
+    def fake_safe_emit(signal, *args):
+        calls.append((signal, args))
+
+    thread._safe_emit = fake_safe_emit
+
+    asyncio.run(thread.download_file(file_url, download_folder, 0, 1))
+
+    target_folder, filename = thread.generate_filename_and_folder(
+        file_url, download_folder, 0, 1, "1", "Post Title"
+    )
+    full_path = os.path.join(target_folder, filename.replace("/", "_"))
+
+    # After success the file should exist and hash_db should contain the entry
+    assert os.path.exists(full_path)
+    import hashlib as _hash
+
+    url_hash = _hash.md5(file_url.encode()).hexdigest()
+    entry = thread.hash_db.lookup(url_hash)
+    assert entry is not None
+    assert entry["file_path"] == full_path
+    # file_completed True should have been emitted
+    assert any(True in args for (_sig, args) in calls)
