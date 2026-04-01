@@ -1955,6 +1955,36 @@ class CreatorDownloadThread(QThread):
                     ),
                     "ERROR",
                 )
+                # Attempt to remove any incomplete file left on disk
+                try:
+                    if os.path.exists(full_path):
+                        try:
+                            os.remove(full_path)
+                            self._safe_emit(
+                                self.log,
+                                translate(
+                                    "log_info",
+                                    translate("deleted_incomplete_file", full_path),
+                                ),
+                                "INFO",
+                            )
+                        except OSError as e_remove:
+                            self._safe_emit(
+                                self.log,
+                                translate(
+                                    "log_error",
+                                    translate(
+                                        "failed_to_delete_incomplete_file",
+                                        full_path,
+                                        str(e_remove),
+                                    ),
+                                ),
+                                "ERROR",
+                            )
+                except Exception:
+                    # Best-effort deletion; ignore errors here to avoid masking original exception
+                    pass
+
                 with self.failed_files_lock:
                     self.failed_files[file_url] = str(e)
                 self._safe_emit(self.file_progress, file_index, 0)
