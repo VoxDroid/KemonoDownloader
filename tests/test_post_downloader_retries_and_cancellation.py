@@ -163,3 +163,44 @@ def test_post_cancellation_deletes_incomplete(monkeypatch, tmp_path):
         for f in files:
             found.append(os.path.join(root, f))
     assert len(found) == 0
+
+
+def test_post_cancellation_remove_failure_is_ignored(monkeypatch, tmp_path):
+    download_folder = str(tmp_path / "pd_cancel_remove_fail")
+    other_files_dir = str(tmp_path / "other_pd_cancel_remove_fail")
+    os.makedirs(download_folder, exist_ok=True)
+    os.makedirs(other_files_dir, exist_ok=True)
+
+    file_url = "https://kemono.cr/files/cancel_post_remove_fail.png"
+    selected_files = [file_url]
+    files_to_posts_map = {file_url: "1"}
+
+    chunks = [b"first", b"second"]
+
+    settings = make_settings(tmp_path)
+    thread = DownloadThread(
+        url="https://kemono.cr/service/user/creator/post/1",
+        download_folder=download_folder,
+        selected_files=selected_files,
+        files_to_posts_map=files_to_posts_map,
+        console=None,
+        other_files_dir=other_files_dir,
+        post_id="1",
+        settings=settings,
+        max_concurrent=1,
+        auto_rename=False,
+        download_text=False,
+    )
+
+    monkeypatch.setattr(
+        "kemonodownloader.post_downloader.get_session",
+        lambda settings_tab=None: FakeSessionCancel(chunks, thread),
+    )
+    monkeypatch.setattr(
+        "kemonodownloader.post_downloader.os.remove",
+        lambda _p: (_ for _ in ()).throw(OSError("cannot remove")),
+    )
+
+    thread.download_file(file_url, download_folder, 0, total_files=1)
+
+    assert file_url not in thread.completed_files
