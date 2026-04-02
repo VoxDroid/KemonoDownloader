@@ -1600,6 +1600,7 @@ class DownloadThread(QThread):
                 except Exception:
                     file_size = 0
                 downloaded_size = 0
+                was_interrupted = False
 
                 with open(full_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
@@ -1611,8 +1612,8 @@ class DownloadThread(QThread):
                                 ),
                                 "WARNING",
                             )
-                            os.remove(full_path) if os.path.exists(full_path) else None
-                            return
+                            was_interrupted = True
+                            break
                         if chunk:
                             f.write(chunk)
                             downloaded_size += len(chunk)
@@ -1621,6 +1622,14 @@ class DownloadThread(QThread):
                             else:
                                 progress = 0
                             self.file_progress.emit(file_index, min(progress, 100))
+
+                if was_interrupted:
+                    if os.path.exists(full_path):
+                        try:
+                            os.remove(full_path)
+                        except OSError:
+                            pass
+                    return
 
                 # Validate downloaded size matches content-length
                 if file_size > 0 and downloaded_size != file_size:

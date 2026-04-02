@@ -78,8 +78,9 @@ class SettingsTab(QWidget):
         elif sys.platform == "darwin":  # macOS
             return os.path.expanduser("~/Library/Application Support/Kemono Downloader")
         else:  # Linux and others
+            fallback_data_home = os.path.join(os.path.expanduser("~"), ".local/share")
             return os.path.join(
-                os.getenv("XDG_DATA_HOME", os.path.expanduser("~/.local/share")),
+                os.getenv("XDG_DATA_HOME", fallback_data_home),
                 "Kemono Downloader",
             )
 
