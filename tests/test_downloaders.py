@@ -1475,10 +1475,26 @@ class TestPostDownloaderTab:
         assert mock_prep_thread.start.called
 
     def test_media_preview_modal_init(self, qtbot, post_tab, monkeypatch):
+        from PyQt6.QtMultimedia import QMediaPlayer as RealQMediaPlayer
+
         from kemonodownloader.post_downloader import MediaPreviewModal
+
+        class FakeQMediaPlayer:
+            PlaybackState = RealQMediaPlayer.PlaybackState
+            MediaStatus = RealQMediaPlayer.MediaStatus
+
+            def __new__(cls, *args, **kwargs):
+                return MagicMock(spec=RealQMediaPlayer)
 
         monkeypatch.setattr(
             "kemonodownloader.post_downloader.translate", lambda k, *a: k
+        )
+        # Avoid constructing real multimedia backends in CI.
+        monkeypatch.setattr(
+            "kemonodownloader.post_downloader.QMediaPlayer", FakeQMediaPlayer
+        )
+        monkeypatch.setattr(
+            "kemonodownloader.post_downloader.QAudioOutput", MagicMock()
         )
         # Mock PreviewThread to avoid actual download
         monkeypatch.setattr(
@@ -4496,11 +4512,27 @@ class TestPreviewThread:
 class TestMediaPreviewModal:
     @pytest.fixture
     def modal(self, qtbot, tmp_path, monkeypatch):
+        from PyQt6.QtMultimedia import QMediaPlayer as RealQMediaPlayer
+
         from kemonodownloader.post_downloader import MediaPreviewModal
+
+        class FakeQMediaPlayer:
+            PlaybackState = RealQMediaPlayer.PlaybackState
+            MediaStatus = RealQMediaPlayer.MediaStatus
+
+            def __new__(cls, *args, **kwargs):
+                return MagicMock(spec=RealQMediaPlayer)
 
         monkeypatch.setattr(MediaPreviewModal, "start_preview", lambda self: None)
         monkeypatch.setattr(
             "kemonodownloader.post_downloader.translate", lambda k, *a: k
+        )
+        # Keep tests away from real multimedia backends to avoid native aborts.
+        monkeypatch.setattr(
+            "kemonodownloader.post_downloader.QMediaPlayer", FakeQMediaPlayer
+        )
+        monkeypatch.setattr(
+            "kemonodownloader.post_downloader.QAudioOutput", MagicMock()
         )
         m = MediaPreviewModal("https://example.com/test.jpg", str(tmp_path))
         qtbot.addWidget(m)
@@ -4590,14 +4622,28 @@ class TestMediaPreviewModal:
         assert modal.content_label is not None
 
     def test_start_preview_unsupported(self, monkeypatch, tmp_path):
+        from PyQt6.QtMultimedia import QMediaPlayer as RealQMediaPlayer
         from PyQt6.QtWidgets import QWidget
 
         from kemonodownloader.post_downloader import MediaPreviewModal
+
+        class FakeQMediaPlayer:
+            PlaybackState = RealQMediaPlayer.PlaybackState
+            MediaStatus = RealQMediaPlayer.MediaStatus
+
+            def __new__(cls, *args, **kwargs):
+                return MagicMock(spec=RealQMediaPlayer)
 
         mock_tab = QWidget()
         mock_tab.append_log_to_console = MagicMock()
         monkeypatch.setattr(
             "kemonodownloader.post_downloader.translate", lambda k, *a: k
+        )
+        monkeypatch.setattr(
+            "kemonodownloader.post_downloader.QMediaPlayer", FakeQMediaPlayer
+        )
+        monkeypatch.setattr(
+            "kemonodownloader.post_downloader.QAudioOutput", MagicMock()
         )
         monkeypatch.setattr(MediaPreviewModal, "close", MagicMock())
         modal = MediaPreviewModal("test.xyz", str(tmp_path), mock_tab)
