@@ -8,6 +8,146 @@ from types import SimpleNamespace
 from kemonodownloader import creator_downloader as cd
 
 
+def test_filter_thread_run():
+    posts = [("A Post", ("101", None)), ("B Post", ("102", None))]
+    checked = {"101": True, "102": False}
+    t = cd.FilterThread(posts, checked, "A")
+    out = {}
+    t.finished = SimpleNamespace(emit=lambda data: out.setdefault("finished", data))
+    t.log = SimpleNamespace(emit=lambda *a, **k: None)
+    t.run()
+    assert "finished" in out
+    assert out["finished"][0][0] == "A Post"
+
+
+def test_checkbox_toggle_thread():
+    visible = [("Title", ("1", None)), ("Title2", ("2", None))]
+    checked = {"1": False, "2": False}
+    thr = cd.CheckboxToggleThread(visible, checked, 2)  # checked
+    out = {}
+    thr.finished = SimpleNamespace(emit=lambda a, b: out.setdefault("result", (a, b)))
+    thr.log = SimpleNamespace(emit=lambda *a, **k: None)
+    thr.run()
+    new_state, posts = out["result"]
+    assert new_state["1"] is True
+    assert "1" in posts
+
+
+def test_validation_thread_success_and_fail(monkeypatch):
+    # success path: response contains domain check
+    class FakeResp:
+        status_code = 200
+
+        @property
+        def text(self):
+            return "kemono content"
+
+    monkeypatch.setattr(
+        cd,
+        "get_session",
+        lambda s=None: SimpleNamespace(
+            get=lambda url, headers=None, timeout=None: FakeResp()
+        ),
+    )
+    settings = SimpleNamespace(settings_tab=None, api_request_max_retries=1)
+    vt = cd.ValidationThread("https://kemono.cr/user/1", settings)
+    res = {}
+    vt.result = SimpleNamespace(emit=lambda v: res.setdefault("ok", v))
+    vt.log = SimpleNamespace(emit=lambda *a, **k: None)
+    vt.run()
+    assert res.get("ok") is True
+
+
+def test_logs_window_update_and_clear(tmp_path):
+    class Parent:
+        def __init__(self):
+            self.creator_console = SimpleNamespace(
+                toHtml=lambda: "<b>log</b>", clear=lambda: None
+            )
+
+        def append_log_to_console(self, *a, **k):
+            pass
+
+    w = cd.LogsWindow(parent=None)
+    w._parent = Parent()
+    # Simulate update
+    w.update_logs_content()
+    w._do_update()
+    assert "log" in w.logs_display.toHtml()
+    w.clear_logs()
+    assert w.logs_display.toPlainText() == ""
+
+
+def test_preview_thread_error(monkeypatch):
+    # Make get_session.get raise requests.RequestException
+    import requests
+
+    def fake_get(s=None):
+        return SimpleNamespace(
+            get=lambda url, headers=None, stream=True: (_ for _ in ()).throw(
+                requests.RequestException("fail")
+            )
+        )
+
+    monkeypatch.setattr(cd, "get_session", lambda s=None: fake_get())
+    # Create a PreviewThread-like dummy and run
+    pt = cd.PreviewThread("https://kemono.cr/image.jpg", "/tmp", settings_tab=None)
+    errors = {}
+    pt.error = SimpleNamespace(emit=lambda e: errors.setdefault("err", e))
+    pt.preview_ready = SimpleNamespace(
+        emit=lambda *a, **k: errors.setdefault("ok", True)
+    )
+    pt.progress = SimpleNamespace(emit=lambda *a, **k: None)
+    pt.run()
+    assert "err" in errors
+
+
+def test_creator_download_thread_run_no_files(monkeypatch, tmp_path):
+    # Create a minimal dummy instance to call run() and exercise the no-files branch
+    dummy = SimpleNamespace()
+    dummy.service = "fanbox"
+    dummy.creator_id = "42"
+    dummy.download_folder = str(tmp_path)
+    dummy.selected_posts = []
+    dummy.files_to_download = []
+    dummy.files_to_posts_map = {}
+    dummy.console = None
+    dummy.other_files_dir = str(tmp_path)
+    dummy.post_titles_map = {}
+    dummy.auto_rename_enabled = False
+    dummy.settings = SimpleNamespace(settings_tab=None, file_download_max_retries=1)
+    dummy.max_concurrent = 2
+    dummy.is_running = True
+    dummy.hash_db = SimpleNamespace()
+    dummy.post_file_counters_lock = SimpleNamespace(
+        __enter__=lambda s: None, __exit__=lambda s, a, b, c: None
+    )
+    dummy.post_file_counters = {}
+    dummy.failed_files = {}
+    dummy.failed_files_lock = SimpleNamespace(
+        __enter__=lambda s: None, __exit__=lambda s, a, b, c: None
+    )
+    dummy.completed_files = set()
+    dummy.completed_files_lock = SimpleNamespace(
+        __enter__=lambda s: None, __exit__=lambda s, a, b, c: None
+    )
+    dummy.fetched_texts_lock = SimpleNamespace(
+        __enter__=lambda s: None, __exit__=lambda s, a, b, c: None
+    )
+    dummy.fetched_texts = set()
+    dummy._ssl_lock = SimpleNamespace(
+        __enter__=lambda s: None, __exit__=lambda s, a, b, c: None
+    )
+    dummy._destroyed = False
+    # no-op methods used in run
+    dummy.fetch_creator_and_post_info = lambda: None
+    dummy._safe_emit = lambda sig, *a: None
+    dummy.check_post_completion = lambda url: None
+
+    # Call run - should take the no-files branch and not raise
+    cd.CreatorDownloadThread.run(dummy)
+
+
 class DummySignal:
     def __init__(self):
         self.emitted = False

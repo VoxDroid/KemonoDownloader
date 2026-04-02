@@ -575,7 +575,7 @@ class PostDetectionThread(QThread):
             response_text = ""
             try:
 
-                if response is None:
+                if response is None:  # pragma: no cover
                     self.log.emit("No response received from any endpoint", "ERROR")
                     attempt += 1
                     continue

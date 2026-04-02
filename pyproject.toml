@@ -140,3 +140,8 @@ supported = false
 [tool.briefcase.app.kemonodownloader.web]
 supported = false
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:urllib3 v2 only supports OpenSSL 1\\.1\\.1\\+, currently the 'ssl' module is compiled with 'LibreSSL.*:Warning",
+]
+

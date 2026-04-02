@@ -1,8 +1,240 @@
 import asyncio
+import gzip
+import hashlib
+import json
 import os
 from types import SimpleNamespace
 
 from kemonodownloader import creator_downloader as cd
+
+
+def test_sanitize_filename_and_domain():
+    assert cd.sanitize_filename("Hello World.jpg") == "Hello_World.jpg"
+    assert cd.sanitize_filename("") == "unnamed"
+    cfg = cd.get_domain_config("https://coomer.st/user/1")
+    assert cfg["domain"] == "coomer.st"
+
+
+def make_settings(filename_template=None, strategy="per_post"):
+    settings_tab = SimpleNamespace()
+    settings_tab.get_creator_filename_template = lambda: filename_template
+    settings_tab.get_creator_folder_strategy = lambda: strategy
+    return SimpleNamespace(settings_tab=settings_tab)
+
+
+def test_generate_filename_and_folder_variants(tmp_path):
+    # Create a dummy instance (not a real QThread) with required attributes
+    dummy = SimpleNamespace()
+    dummy.service = "fanbox"
+    dummy.creator_id = "42"
+    dummy.post_titles_map = {("fanbox", "42", "101"): "My Post"}
+    dummy.creator_name = "Creator"
+    dummy.auto_rename_enabled = True
+    dummy.post_file_counters = {}
+    import threading
+
+    dummy.post_file_counters_lock = threading.Lock()
+    # Default settings (no template)
+    dummy.settings = make_settings(None, "per_post")
+
+    target_folder, filename = cd.CreatorDownloadThread.generate_filename_and_folder(
+        dummy,
+        "https://kemono.cr/files/img.png?f=orig.png",
+        str(tmp_path),
+        0,
+        1,
+        "101",
+        "My Post",
+    )
+    assert "42_Creator" in target_folder
+    assert filename.endswith(".png")
+
+    # by_file_type strategy
+    dummy.settings = make_settings("{post_id}_{orig_name}", "by_file_type")
+    tf, fn = cd.CreatorDownloadThread.generate_filename_and_folder(
+        dummy,
+        "https://kemono.cr/files/doc.pdf",
+        str(tmp_path),
+        0,
+        1,
+        "101",
+        "My Post",
+    )
+    assert os.path.basename(tf) == "pdf"
+
+
+def test_get_desc_folder_for_post(tmp_path):
+    dummy = SimpleNamespace()
+    dummy.settings = make_settings(None, "single_folder")
+    folder = cd.CreatorDownloadThread.get_desc_folder_for_post(
+        dummy, str(tmp_path), "101", "Title"
+    )
+    assert folder == str(tmp_path)
+    dummy.settings = make_settings(None, "by_file_type")
+    folder2 = cd.CreatorDownloadThread.get_desc_folder_for_post(
+        dummy, str(tmp_path), "101", "Title"
+    )
+    assert folder2.endswith("txt")
+
+
+def test_file_preparation_detect_files():
+    # Test the detect_files helper with main file, attachments and content images
+
+    settings = SimpleNamespace()
+    # enable all detection checks
+    fpt = cd.FilePreparationThread([], {}, {}, True, True, True, settings)
+    post = {
+        "id": "101",
+        "file": {"path": "/media/img1.jpg", "name": "img1.jpg"},
+        "attachments": [{"path": "/media/att.zip", "name": "att.zip"}],
+        "content": '<p>Some text <img src="/media/inline.png"/></p>',
+    }
+    domain = {"base_url": "https://kemono.cr"}
+    files = fpt.detect_files(post, [".jpg", ".zip", ".png"], domain)
+    # Should include main file, attachment and content image
+    names = [n for n, u in files]
+    assert any("img1" in n for n in names)
+    assert any("att" in n for n in names)
+    assert any("inline" in n for n in names)
+
+
+def _make_fake_response(content_bytes, status=200, headers=None):
+    class FakeResp:
+        def __init__(self, content, status, headers):
+            self.content = content
+            self.status_code = status
+            self._headers = headers or {}
+
+        @property
+        def text(self):
+            try:
+                return self.content.decode("utf-8")
+            except Exception:
+                return ""
+
+        def json(self):
+            return json.loads(self.text)
+
+        def raise_for_status(self):
+            if not (200 <= self.status_code < 300):
+                raise Exception("status")
+
+        def close(self):
+            pass
+
+        def iter_content(self, chunk_size=8192):
+            # yield the entire content as single chunk
+            yield self.content
+
+        @property
+        def headers(self):
+            return self._headers
+
+    return FakeResp(content_bytes, status, headers)
+
+
+def test_post_detection_thread_plain_and_gzipped(monkeypatch):
+    # Prepare gzipped JSON list response
+    posts = [{"id": "101", "title": "Hello"}]
+    gz = gzip.compress(json.dumps(posts).encode())
+
+    def fake_get(session_tab=None):
+        return SimpleNamespace(
+            get=lambda url, headers=None, timeout=None: _make_fake_response(gz)
+        )
+
+    monkeypatch.setattr(cd, "get_session", lambda s=None: fake_get())
+
+    post_titles_map = {}
+    settings = SimpleNamespace(settings_tab=None, creator_posts_max_attempts=1)
+    thread = cd.PostDetectionThread(
+        "https://kemono.cr/user/42", post_titles_map, settings
+    )
+
+    collected = {}
+
+    # Replace signals with simple emit capture
+    thread.posts_batch = SimpleNamespace(
+        emit=lambda data: collected.setdefault("batch", data)
+    )
+    thread.finished = SimpleNamespace(
+        emit=lambda data: collected.setdefault("finished", data)
+    )
+    thread.log = SimpleNamespace(emit=lambda *a, **k: None)
+    thread.error = SimpleNamespace(emit=lambda e: collected.setdefault("error", e))
+
+    thread.run()
+    assert "finished" in collected
+    assert (
+        collected["finished"][0][0].startswith("Hello")
+        or collected["finished"][0][0] == "Hello"
+    )
+
+
+def test_download_file_skips_when_hash_matches(tmp_path, monkeypatch):
+    # Prepare dummy instance attributes
+    dummy = SimpleNamespace()
+    dummy.service = "fanbox"
+    dummy.creator_id = "42"
+    dummy.post_titles_map = {("fanbox", "42", "101"): "Title"}
+    dummy.creator_name = "Creator"
+    dummy.auto_rename_enabled = False
+    dummy.post_file_counters_lock = None
+    dummy.post_file_counters = {}
+    dummy.settings = SimpleNamespace(settings_tab=None, file_download_max_retries=1)
+    dummy.files_to_download = ["http://example.com/file.jpg"]
+    dummy.files_to_posts_map = {"http://example.com/file.jpg": "101"}
+    dummy.is_running = True
+    dummy.hash_db = SimpleNamespace()
+
+    # Create an existing file with known contents
+    existing = tmp_path / "existing.jpg"
+    existing.write_bytes(b"hello")
+    existing_hash = hashlib.md5(b"hello").hexdigest()
+    dummy.hash_db.lookup = lambda h: {
+        "file_path": str(existing),
+        "file_hash": existing_hash,
+        "file_size": 5,
+    }
+    dummy.hash_db.store = lambda *a, **k: None
+
+    # Capture emits
+    emitted = {"progress": [], "completed": []}
+    dummy.file_progress = SimpleNamespace(
+        emit=lambda i, p: emitted["progress"].append((i, p))
+    )
+    dummy.file_completed = SimpleNamespace(
+        emit=lambda idx, url, ok: emitted["completed"].append((idx, url, ok))
+    )
+    dummy.log = SimpleNamespace(emit=lambda *a, **k: None)
+    import contextlib
+
+    dummy.completed_files_lock = contextlib.nullcontext()
+    dummy.completed_files = set()
+    dummy.completed_files = set()
+    dummy.check_post_completion = lambda url: None
+
+    dummy.download_text = False
+    # provide _safe_emit helper used by the method
+    dummy._safe_emit = lambda signal, *args: signal.emit(*args)
+
+    # Monkeypatch generate_filename_and_folder to avoid filesystem complexity
+    dummy.generate_filename_and_folder = (
+        lambda file_url, folder, file_index, total_files, post_id, post_title: (
+            str(tmp_path),
+            "existing.jpg",
+        )
+    )
+
+    # Run the async download_file
+    asyncio.run(
+        cd.CreatorDownloadThread.download_file(
+            dummy, "http://example.com/file.jpg", str(tmp_path), 0, 1
+        )
+    )
+
+    # Should have recorded a completed emit with success True
+    assert any(c for c in emitted["completed"] if c[2] is True)
 
 
 def test_sanitize_filename_various():
