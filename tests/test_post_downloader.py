@@ -182,12 +182,13 @@ class TestAllowedExtensions:
 
     def test_archive_extensions_allowed(self):
         """Test that common archive extensions are in allowed list."""
-        allowed = [".zip", ".rar", ".7z"]
+        allowed = [".zip", ".rar", ".7z", ".var"]
 
         test_files = [
             ("files.zip", True),
             ("archive.rar", True),
             ("compressed.7z", True),
+            ("scene.var", True),
         ]
 
         for filename, should_be_allowed in test_files:

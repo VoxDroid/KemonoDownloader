@@ -850,6 +850,7 @@ class PostDetectionThread(QThread):
             ".mp3",
             ".wav",
             ".flac",
+            ".var",
             ".rar",
             ".mov",
             ".docx",
@@ -2257,6 +2258,7 @@ class PostDownloaderTab(QWidget):
             ".mp3": QCheckBox("MP3"),
             ".wav": QCheckBox("WAV"),
             ".flac": QCheckBox("FLAC"),
+            ".var": QCheckBox("VAR"),
             ".rar": QCheckBox("RAR"),
             ".mov": QCheckBox("MOV"),
             ".docx": QCheckBox("DOCX"),
@@ -3804,6 +3806,7 @@ class PostDownloaderTab(QWidget):
                 ".7z",
                 ".rar",
                 ".clip",
+                ".var",
                 "jpe",
             ]
             supported_extensions = [

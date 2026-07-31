@@ -2639,6 +2639,7 @@ class CreatorDownloaderTab(QWidget):
             ".mp3": QCheckBox("MP3"),
             ".wav": QCheckBox("WAV"),
             ".flac": QCheckBox("FLAC"),
+            ".var": QCheckBox("VAR"),
             ".rar": QCheckBox("RAR"),
             ".mov": QCheckBox("MOV"),
             ".docx": QCheckBox("DOCX"),
