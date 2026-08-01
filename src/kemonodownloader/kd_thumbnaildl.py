@@ -4,19 +4,15 @@ import concurrent.futures
 import hashlib
 import os
 import re
-import sys
 import time
 import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import qtawesome as qta
-import requests
 from bs4 import BeautifulSoup
-from PyQt6.QtCore import QSize, Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QColor, QFont, QIcon, QPixmap
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
     QAbstractItemView,
-    QApplication,
     QCheckBox,
     QComboBox,
     QFileDialog,
@@ -29,7 +25,6 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QProgressBar,
     QPushButton,
-    QScrollArea,
     QSpinBox,
     QTextEdit,
     QVBoxLayout,
@@ -37,11 +32,9 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.creator_downloader import get_session
-from kemonodownloader.domain_config import clean_file_url, get_domain_config, get_domains
-from kemonodownloader.hash_db import HashDB
+from kemonodownloader.domain_config import get_domain_config
 from kemonodownloader.kd_language import translate
-from kemonodownloader.post_downloader import MediaPreviewModal, get_headers
-
+from kemonodownloader.post_downloader import MediaPreviewModal
 
 SUPPORTED_THUMBNAIL_EXTS = (".jpg", ".jpeg", ".png", ".gif", ".webp")
 
@@ -66,7 +59,9 @@ def make_thumbnail_url(raw_path_or_url: str, domain: str) -> str:
     if raw.startswith("http://") or raw.startswith("https://"):
         parsed = urllib.parse.urlparse(raw)
         path = parsed.path
-        if ("img." in parsed.netloc or parsed.netloc.startswith("img.")) and "/thumbnail/" in path:
+        if (
+            "img." in parsed.netloc or parsed.netloc.startswith("img.")
+        ) and "/thumbnail/" in path:
             return raw
     else:
         path = raw
@@ -100,9 +95,7 @@ def classify_url(url: str) -> str:
     if post_match:
         return "post"
 
-    creator_match = re.search(
-        r"https?://(?:www\.)?[^/]+/([^/]+)/user/([^/\?\#]+)", url
-    )
+    creator_match = re.search(r"https?://(?:www\.)?[^/]+/([^/]+)/user/([^/\?\#]+)", url)
     if creator_match:
         return "creator"
 
@@ -125,9 +118,7 @@ def parse_creator_url(url: str) -> Optional[Tuple[str, str, str]]:
     """Parse creator URL into (domain, service, user_id)."""
     domain_cfg = get_domain_config(url)
     domain = domain_cfg.get("domain", "kemono.cr")
-    m = re.search(
-        r"https?://(?:www\.)?[^/]+/([^/]+)/user/([^/\?\#]+)", url
-    )
+    m = re.search(r"https?://(?:www\.)?[^/]+/([^/]+)/user/([^/\?\#]+)", url)
     if m:
         return domain, m.group(1), m.group(2)
     return None
@@ -150,7 +141,9 @@ class ThumbnailDetectionThread(QThread):
         self.is_cancelled = True
 
     def run(self):
-        all_detected: List[Tuple[str, str, List[str]]] = []  # (title, post_id, thumb_urls)
+        all_detected: List[Tuple[str, str, List[str]]] = (
+            []
+        )  # (title, post_id, thumb_urls)
         session = get_session(self.settings_tab)
         from kemonodownloader.post_downloader import get_headers
 
@@ -179,8 +172,12 @@ class ThumbnailDetectionThread(QThread):
                     self.log_message.emit(f"Invalid post URL: {url}")
                     continue
                 domain, service, user_id, post_id = parsed
-                api_url = f"https://{domain}/api/v1/{service}/user/{user_id}/post/{post_id}"
-                creator_name = self._fetch_creator_name(session, domain, service, user_id, req_headers)
+                api_url = (
+                    f"https://{domain}/api/v1/{service}/user/{user_id}/post/{post_id}"
+                )
+                creator_name = self._fetch_creator_name(
+                    session, domain, service, user_id, req_headers
+                )
 
                 try:
                     res = session.get(api_url, headers=req_headers, timeout=15)
@@ -197,22 +194,33 @@ class ThumbnailDetectionThread(QThread):
                             ):
                                 target_post["attachments"] = post_data["attachments"]
                             items = self._extract_thumbnails_from_post(
-                                target_post, domain, service, user_id, creator_name, mode="post"
+                                target_post,
+                                domain,
+                                service,
+                                user_id,
+                                creator_name,
+                                mode="post",
                             )
                             all_detected.extend(items)
                             self.batch_received.emit(items)
                     else:
-                        self.log_message.emit(f"API HTTP {res.status_code} for {api_url}")
+                        self.log_message.emit(
+                            f"API HTTP {res.status_code} for {api_url}"
+                        )
                 except Exception as e:
                     self.log_message.emit(f"Error fetching post {post_id}: {str(e)}")
 
-            elif url_type == "creator" or (url_type != "post" and self.mode == "creator"):
+            elif url_type == "creator" or (
+                url_type != "post" and self.mode == "creator"
+            ):
                 parsed = parse_creator_url(url)
                 if not parsed:
                     self.log_message.emit(f"Invalid creator URL: {url}")
                     continue
                 domain, service, user_id = parsed
-                creator_name = self._fetch_creator_name(session, domain, service, user_id, req_headers)
+                creator_name = self._fetch_creator_name(
+                    session, domain, service, user_id, req_headers
+                )
                 offset = 0
 
                 endpoints = [
@@ -223,7 +231,9 @@ class ThumbnailDetectionThread(QThread):
                 working_endpoint = endpoints[0]
                 for ep in endpoints:
                     try:
-                        test_res = session.get(f"{ep}?o=0", headers=req_headers, timeout=10)
+                        test_res = session.get(
+                            f"{ep}?o=0", headers=req_headers, timeout=10
+                        )
                         if test_res.status_code == 200:
                             test_json = test_res.json()
                             if isinstance(test_json, list):
@@ -246,7 +256,12 @@ class ThumbnailDetectionThread(QThread):
                         for post in posts:
                             if isinstance(post, dict):
                                 items = self._extract_thumbnails_from_post(
-                                    post, domain, service, user_id, creator_name, mode="creator"
+                                    post,
+                                    domain,
+                                    service,
+                                    user_id,
+                                    creator_name,
+                                    mode="creator",
                                 )
                                 batch_items.extend(items)
 
@@ -258,12 +273,16 @@ class ThumbnailDetectionThread(QThread):
                             break
                         offset += 50
                     except Exception as e:
-                        self.log_message.emit(f"Error fetching creator posts (offset {offset}): {str(e)}")
+                        self.log_message.emit(
+                            f"Error fetching creator posts (offset {offset}): {str(e)}"
+                        )
                         break
 
         self.detection_finished.emit(all_detected)
 
-    def _fetch_creator_name(self, session, domain: str, service: str, user_id: str, req_headers: dict) -> str:
+    def _fetch_creator_name(
+        self, session, domain: str, service: str, user_id: str, req_headers: dict
+    ) -> str:
         """Fetch the creator name from the profile endpoint. Returns 'Unknown_Creator' on failure."""
         profile_url = f"https://{domain}/api/v1/{service}/user/{user_id}/profile"
         try:
@@ -277,7 +296,13 @@ class ThumbnailDetectionThread(QThread):
         return "Unknown_Creator"
 
     def _extract_thumbnails_from_post(
-        self, post: dict, domain: str, service: str, user_id: str, creator_name: str, mode: str = "post"
+        self,
+        post: dict,
+        domain: str,
+        service: str,
+        user_id: str,
+        creator_name: str,
+        mode: str = "post",
     ) -> List[Tuple]:
         """Extract thumbnail URLs from a post dict.
         Returns list of (title, post_id, thumb_urls, service, user_id, creator_name, domain).
@@ -308,7 +333,9 @@ class ThumbnailDetectionThread(QThread):
             return []
 
         display_title = f"[{service.capitalize()}] {post_title} (ID: {post_id}) [{len(thumb_urls)} Thumbnails]"
-        return [(display_title, post_id, thumb_urls, service, user_id, creator_name, domain)]
+        return [
+            (display_title, post_id, thumb_urls, service, user_id, creator_name, domain)
+        ]
 
 
 class ThumbnailDownloadThread(QThread):
@@ -320,7 +347,9 @@ class ThumbnailDownloadThread(QThread):
 
     def __init__(
         self,
-        download_items: List[Tuple[str, str, List[str]]],  # (title, post_id, thumb_urls)
+        download_items: List[
+            Tuple[str, str, List[str]]
+        ],  # (title, post_id, thumb_urls)
         save_dir: str,
         simultaneous_downloads: int = 3,
         skip_existing: bool = True,
@@ -372,7 +401,9 @@ class ThumbnailDownloadThread(QThread):
         """
         parsed_url = urllib.parse.urlparse(thumb_url)
         filename = override_filename or os.path.basename(parsed_url.path)
-        if not filename or not any(filename.lower().endswith(e) for e in SUPPORTED_THUMBNAIL_EXTS):
+        if not filename or not any(
+            filename.lower().endswith(e) for e in SUPPORTED_THUMBNAIL_EXTS
+        ):
             # Check if override_filename was given but lacks a valid extension
             base = override_filename or ""
             fallback = f"{hashlib.md5(thumb_url.encode()).hexdigest()[:12]}.jpg"
@@ -413,7 +444,9 @@ class ThumbnailDownloadThread(QThread):
         os.makedirs(target_folder, exist_ok=True)
         return os.path.join(target_folder, filename)
 
-    def _save_post_text(self, post_id: str, service: str, user_id: str, domain: str, dest_folder: str) -> None:
+    def _save_post_text(
+        self, post_id: str, service: str, user_id: str, domain: str, dest_folder: str
+    ) -> None:
         """Fetch post content from the API and save it as desc_{post_id}.txt beside the thumbnails."""
         try:
             # For by_file_type strategy the desc goes into the creator root, not the ext subfolder
@@ -433,6 +466,7 @@ class ThumbnailDownloadThread(QThread):
                 )
             else:
                 from .domain_config import _build_config
+
                 domain_cfg = _build_config(domain)
 
             api_url = f"https://{domain_cfg['domain']}/api/v1/{service}/user/{user_id}/post/{post_id}"
@@ -442,7 +476,9 @@ class ThumbnailDownloadThread(QThread):
                     "AppleWebKit/537.36 (KHTML, like Gecko) "
                     "Chrome/131.0.0.0 Safari/537.36"
                 ),
-                "Referer": domain_cfg.get("referer", f"https://{domain_cfg['domain']}/"),
+                "Referer": domain_cfg.get(
+                    "referer", f"https://{domain_cfg['domain']}/"
+                ),
             }
             session = get_session(self.settings_tab)
             res = None
@@ -496,8 +532,9 @@ class ThumbnailDownloadThread(QThread):
                     f.write(full_text)
                 self.log_message.emit(translate("saved_post_description", post_id))
         except Exception as e:
-            self.log_message.emit(translate("failed_save_post_description", post_id, str(e)))
-
+            self.log_message.emit(
+                translate("failed_save_post_description", post_id, str(e))
+            )
 
     def run(self):
         # Flatten items — each entry is (title, post_id, thumb_urls, service, user_id, creator_name, domain)
@@ -517,10 +554,32 @@ class ThumbnailDownloadThread(QThread):
             post_title = m.group(1).strip() if m else ""
 
             if isinstance(thumb_urls, str):
-                flattened_items.append((title, post_id, thumb_urls, service, user_id, creator_name, domain, post_title))
+                flattened_items.append(
+                    (
+                        title,
+                        post_id,
+                        thumb_urls,
+                        service,
+                        user_id,
+                        creator_name,
+                        domain,
+                        post_title,
+                    )
+                )
             elif isinstance(thumb_urls, (list, tuple)):
                 for u in thumb_urls:
-                    flattened_items.append((title, post_id, u, service, user_id, creator_name, domain, post_title))
+                    flattened_items.append(
+                        (
+                            title,
+                            post_id,
+                            u,
+                            service,
+                            user_id,
+                            creator_name,
+                            domain,
+                            post_title,
+                        )
+                    )
 
         total = len(flattened_items)
         completed = 0
@@ -536,7 +595,16 @@ class ThumbnailDownloadThread(QThread):
             if self.is_cancelled:
                 return False
 
-            title, post_id, thumb_url, service, user_id, creator_name, domain, post_title = sub_item
+            (
+                title,
+                post_id,
+                thumb_url,
+                service,
+                user_id,
+                creator_name,
+                domain,
+                post_title,
+            ) = sub_item
 
             # --- Auto rename: prefix filename with sequential order number per post ---
             parsed_url = urllib.parse.urlparse(thumb_url)
@@ -549,15 +617,27 @@ class ThumbnailDownloadThread(QThread):
                     self._post_file_counters[post_id] += 1
                     order = self._post_file_counters[post_id]
                 # Prepend order index to filename (e.g. "1_filename.jpg")
-                orig_filename = f"{order}_{orig_filename}" if orig_filename else f"{order}.jpg"
+                orig_filename = (
+                    f"{order}_{orig_filename}" if orig_filename else f"{order}.jpg"
+                )
 
             filepath = self._get_save_path(
-                title, post_id, thumb_url, service, user_id, creator_name, post_title,
+                title,
+                post_id,
+                thumb_url,
+                service,
+                user_id,
+                creator_name,
+                post_title,
                 override_filename=orig_filename if self.auto_rename else None,
             )
             out_filename = os.path.basename(filepath)
 
-            if self.skip_existing and os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+            if (
+                self.skip_existing
+                and os.path.exists(filepath)
+                and os.path.getsize(filepath) > 0
+            ):
                 self.log_message.emit(f"Skipping existing: {out_filename}")
                 self.file_completed.emit(title, filepath)
                 return True
@@ -571,8 +651,9 @@ class ThumbnailDownloadThread(QThread):
                     if not already_saved:
                         self._saved_texts.add(post_id)
                 if not already_saved:
-                    self._save_post_text(post_id, service, user_id, domain, os.path.dirname(filepath))
-
+                    self._save_post_text(
+                        post_id, service, user_id, domain, os.path.dirname(filepath)
+                    )
 
             session = get_session(self.settings_tab)
             headers = {
@@ -605,7 +686,9 @@ class ThumbnailDownloadThread(QThread):
                             hasher.update(chunk)
                             downloaded_bytes += len(chunk)
                             if total_bytes > 0:
-                                self.file_progress_updated.emit(downloaded_bytes, total_bytes)
+                                self.file_progress_updated.emit(
+                                    downloaded_bytes, total_bytes
+                                )
 
                 if os.path.exists(filepath):
                     os.remove(filepath)
@@ -625,8 +708,12 @@ class ThumbnailDownloadThread(QThread):
                 self.log_message.emit(f"Failed download ({thumb_url}): {str(e)}")
                 return False
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.simultaneous_downloads) as executor:
-            futures = [executor.submit(download_single, item) for item in flattened_items]
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=self.simultaneous_downloads
+        ) as executor:
+            futures = [
+                executor.submit(download_single, item) for item in flattened_items
+            ]
             for future in concurrent.futures.as_completed(futures):
                 if self.is_cancelled:
                     break
@@ -653,14 +740,24 @@ class ThumbnailDownloaderTab(QWidget):
             self.cache_dir = parent.cache_folder
         else:
             base = getattr(parent, "base_folder", None)
-            base_str = base if isinstance(base, str) and base else os.path.join(os.path.expanduser("~"), ".cache")
+            base_str = (
+                base
+                if isinstance(base, str) and base
+                else os.path.join(os.path.expanduser("~"), ".cache")
+            )
             self.cache_dir = os.path.join(base_str, "Cache")
 
-        if hasattr(parent, "other_files_folder") and isinstance(parent.other_files_folder, str):
+        if hasattr(parent, "other_files_folder") and isinstance(
+            parent.other_files_folder, str
+        ):
             self.other_files_dir = parent.other_files_folder
         else:
             base = getattr(parent, "base_folder", None)
-            base_str = base if isinstance(base, str) and base else os.path.join(os.path.expanduser("~"), "Other Files")
+            base_str = (
+                base
+                if isinstance(base, str) and base
+                else os.path.join(os.path.expanduser("~"), "Other Files")
+            )
             self.other_files_dir = os.path.join(base_str, "Other Files")
 
         os.makedirs(self.cache_dir, exist_ok=True)
@@ -668,13 +765,20 @@ class ThumbnailDownloaderTab(QWidget):
 
         self.detection_thread: Optional[ThumbnailDetectionThread] = None
         self.download_thread: Optional[ThumbnailDownloadThread] = None
-        self.detected_items: List[Tuple[str, str, str]] = []  # (title, post_id, thumb_url)
-        self.post_url_map: Dict[str, Tuple[str, str]] = {}  # title -> (post_id, thumb_url)
+        self.detected_items: List[Tuple[str, str, str]] = (
+            []
+        )  # (title, post_id, thumb_url)
+        self.post_url_map: Dict[str, Tuple[str, str]] = (
+            {}
+        )  # title -> (post_id, thumb_url)
 
         self.setup_ui()
         self.refresh_ui()
 
-        if hasattr(self.parent, "settings_tab") and self.parent.settings_tab is not None:
+        if (
+            hasattr(self.parent, "settings_tab")
+            and self.parent.settings_tab is not None
+        ):
             try:
                 self.parent.settings_tab.settings_applied.connect(self.refresh_ui)
                 self.parent.settings_tab.language_changed.connect(self.update_ui_text)
@@ -696,12 +800,16 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Mode Selection Group
         self.mode_group = QGroupBox(translate("download_mode"))
-        self.mode_group.setStyleSheet("QGroupBox { color: white; font-weight: bold; padding: 10px; }")
+        self.mode_group.setStyleSheet(
+            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
+        )
         mode_layout = QHBoxLayout(self.mode_group)
         self.mode_label = QLabel(translate("download_mode"))
         self.mode_combo = QComboBox()
         self.mode_combo.addItems([translate("post_mode"), translate("creator_mode")])
-        self.mode_combo.setStyleSheet("background: #4A5B7A; color: white; padding: 5px; border-radius: 5px;")
+        self.mode_combo.setStyleSheet(
+            "background: #4A5B7A; color: white; padding: 5px; border-radius: 5px;"
+        )
         self.mode_combo.currentIndexChanged.connect(self.on_mode_changed)
         mode_layout.addWidget(self.mode_label)
         mode_layout.addWidget(self.mode_combo)
@@ -709,7 +817,9 @@ class ThumbnailDownloaderTab(QWidget):
 
         # URL Input & Queue controls
         self.queue_group = QGroupBox(translate("thumbnail_downloader_tab"))
-        self.queue_group.setStyleSheet("QGroupBox { color: white; font-weight: bold; padding: 10px; }")
+        self.queue_group.setStyleSheet(
+            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
+        )
         queue_layout = QVBoxLayout(self.queue_group)
         queue_layout.setSpacing(8)
 
@@ -720,12 +830,18 @@ class ThumbnailDownloaderTab(QWidget):
         self.url_input.returnPressed.connect(self.add_url_to_queue)
 
         self.add_url_button = QPushButton(qta.icon("fa5s.plus", color="white"), "")
-        self.add_url_button.setStyleSheet("background: #4A5B7A; padding: 5px; border-radius: 5px;")
+        self.add_url_button.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
         self.add_url_button.setToolTip(translate("added_to_queue"))
         self.add_url_button.clicked.connect(self.add_url_to_queue)
 
-        self.import_file_button = QPushButton(qta.icon("fa5s.file-import", color="white"), "")
-        self.import_file_button.setStyleSheet("background: #4A5B7A; padding: 5px; border-radius: 5px;")
+        self.import_file_button = QPushButton(
+            qta.icon("fa5s.file-import", color="white"), ""
+        )
+        self.import_file_button.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
         self.import_file_button.setToolTip(translate("add_links_from_file_title"))
         self.import_file_button.clicked.connect(self.import_urls_from_file)
 
@@ -737,7 +853,9 @@ class ThumbnailDownloaderTab(QWidget):
         # Multi-line URL area
         self.multi_url_input = QTextEdit()
         self.multi_url_input.setPlaceholderText(translate("multi_url_placeholder"))
-        self.multi_url_input.setStyleSheet("background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;")
+        self.multi_url_input.setStyleSheet(
+            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
+        )
         self.multi_url_input.setFixedHeight(70)
         self.multi_url_input.setVisible(False)
         queue_layout.addWidget(self.multi_url_input)
@@ -745,27 +863,41 @@ class ThumbnailDownloaderTab(QWidget):
         # Queue List
         self.queue_list = QListWidget()
         self.queue_list.setFixedHeight(110)
-        self.queue_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.queue_list.setSelectionMode(
+            QAbstractItemView.SelectionMode.ExtendedSelection
+        )
         self.queue_list.setStyleSheet(
             "QListWidget { background: #2A3B5A; border: 1px solid #3A4B6A; border-radius: 6px; color: white; }"
         )
         queue_layout.addWidget(self.queue_list)
 
         queue_btn_row = QHBoxLayout()
-        self.remove_queue_btn = QPushButton(qta.icon("fa5s.trash-alt", color="white"), translate("remove"))
-        self.remove_queue_btn.setStyleSheet("background: #4A5B7A; padding: 5px; border-radius: 5px;")
+        self.remove_queue_btn = QPushButton(
+            qta.icon("fa5s.trash-alt", color="white"), translate("remove")
+        )
+        self.remove_queue_btn.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
         self.remove_queue_btn.clicked.connect(self.remove_selected_from_queue)
 
-        self.clear_queue_btn = QPushButton(qta.icon("fa5s.eraser", color="white"), translate("clear"))
-        self.clear_queue_btn.setStyleSheet("background: #4A5B7A; padding: 5px; border-radius: 5px;")
+        self.clear_queue_btn = QPushButton(
+            qta.icon("fa5s.eraser", color="white"), translate("clear")
+        )
+        self.clear_queue_btn.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
         self.clear_queue_btn.clicked.connect(self.clear_queue)
 
         queue_btn_row.addWidget(self.remove_queue_btn)
         queue_btn_row.addWidget(self.clear_queue_btn)
         queue_layout.addLayout(queue_btn_row)
 
-        self.detect_button = QPushButton(qta.icon("fa5s.search", color="white"), translate("detect_thumbnails"))
-        self.detect_button.setStyleSheet("background: #3A5B7A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;")
+        self.detect_button = QPushButton(
+            qta.icon("fa5s.search", color="white"), translate("detect_thumbnails")
+        )
+        self.detect_button.setStyleSheet(
+            "background: #3A5B7A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;"
+        )
         self.detect_button.clicked.connect(self.start_detection)
         queue_layout.addWidget(self.detect_button)
 
@@ -773,7 +905,9 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Settings Options Group
         self.options_group = QGroupBox(translate("download_options"))
-        self.options_group.setStyleSheet("QGroupBox { color: white; font-weight: bold; padding: 10px; }")
+        self.options_group.setStyleSheet(
+            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
+        )
         options_layout = QVBoxLayout(self.options_group)
 
         sim_row = QHBoxLayout()
@@ -782,10 +916,16 @@ class ThumbnailDownloaderTab(QWidget):
         self.threads_spin = QSpinBox()
         self.threads_spin.setRange(1, 10)
         default_threads = 3
-        if hasattr(self.parent, "settings_tab") and hasattr(self.parent.settings_tab, "settings"):
-            default_threads = self.parent.settings_tab.settings.get("simultaneous_downloads", 3)
+        if hasattr(self.parent, "settings_tab") and hasattr(
+            self.parent.settings_tab, "settings"
+        ):
+            default_threads = self.parent.settings_tab.settings.get(
+                "simultaneous_downloads", 3
+            )
         self.threads_spin.setValue(default_threads)
-        self.threads_spin.setStyleSheet("background: #2A3B5A; color: white; padding: 3px; border-radius: 4px;")
+        self.threads_spin.setStyleSheet(
+            "background: #2A3B5A; color: white; padding: 3px; border-radius: 4px;"
+        )
         sim_row.addWidget(sim_label)
         sim_row.addWidget(self.threads_spin)
         options_layout.addLayout(sim_row)
@@ -821,7 +961,9 @@ class ThumbnailDownloaderTab(QWidget):
         )
         progress_layout.addWidget(self.file_progress_bar)
 
-        self.overall_progress_label = QLabel(translate("thumbnail_overall_progress", 0, 0))
+        self.overall_progress_label = QLabel(
+            translate("thumbnail_overall_progress", 0, 0)
+        )
         self.overall_progress_label.setStyleSheet("color: white;")
         progress_layout.addWidget(self.overall_progress_label)
 
@@ -836,12 +978,20 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Action Buttons Row
         action_btn_layout = QHBoxLayout()
-        self.download_button = QPushButton(qta.icon("fa5s.download", color="white"), translate("start_download"))
-        self.download_button.setStyleSheet("background: #4A6B9A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;")
+        self.download_button = QPushButton(
+            qta.icon("fa5s.download", color="white"), translate("start_download")
+        )
+        self.download_button.setStyleSheet(
+            "background: #4A6B9A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;"
+        )
         self.download_button.clicked.connect(self.start_download)
 
-        self.cancel_button = QPushButton(qta.icon("fa5s.times", color="white"), translate("cancel"))
-        self.cancel_button.setStyleSheet("background: #A94A4A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;")
+        self.cancel_button = QPushButton(
+            qta.icon("fa5s.times", color="white"), translate("cancel")
+        )
+        self.cancel_button.setStyleSheet(
+            "background: #A94A4A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;"
+        )
         self.cancel_button.setEnabled(False)
         self.cancel_button.clicked.connect(self.cancel_operation)
 
@@ -863,7 +1013,9 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Group Box for Thumbnails List
         self.thumbnails_group = QGroupBox(translate("thumbnails_to_download"))
-        self.thumbnails_group.setStyleSheet("QGroupBox { color: white; font-weight: bold; padding: 10px; }")
+        self.thumbnails_group.setStyleSheet(
+            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
+        )
         thumbnails_group_layout = QVBoxLayout(self.thumbnails_group)
         thumbnails_group_layout.setSpacing(8)
 
@@ -902,7 +1054,9 @@ class ThumbnailDownloaderTab(QWidget):
         # Item actions (Preview button)
         item_action_row = QHBoxLayout()
         self.preview_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-        self.preview_button.setStyleSheet("background: #4A5B7A; padding: 5px; border-radius: 5px;")
+        self.preview_button.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
         self.preview_button.setToolTip(translate("media_preview"))
         self.preview_button.clicked.connect(self.preview_selected_thumbnail)
         item_action_row.addWidget(self.preview_button)
@@ -915,7 +1069,9 @@ class ThumbnailDownloaderTab(QWidget):
         log_header = QHBoxLayout()
         log_label = QLabel(translate("log_console"))
         log_label.setStyleSheet("font-weight: bold; color: white;")
-        self.toggle_logs_btn = QPushButton(qta.icon("fa5s.chevron-down", color="white"), "")
+        self.toggle_logs_btn = QPushButton(
+            qta.icon("fa5s.chevron-down", color="white"), ""
+        )
         self.toggle_logs_btn.setFixedSize(24, 24)
         self.toggle_logs_btn.setStyleSheet("background: #4A5B7A; border-radius: 5px;")
         self.toggle_logs_btn.setToolTip(translate("expand_logs"))
@@ -966,7 +1122,9 @@ class ThumbnailDownloaderTab(QWidget):
         self.auto_rename_check.setText(translate("auto_rename"))
         self.download_text_check.setText(translate("download_text"))
         self.file_progress_label.setText(translate("file_progress", 0))
-        self.overall_progress_label.setText(translate("thumbnail_overall_progress", 0, 0))
+        self.overall_progress_label.setText(
+            translate("thumbnail_overall_progress", 0, 0)
+        )
 
         self.update_selected_count()
 
@@ -979,7 +1137,9 @@ class ThumbnailDownloaderTab(QWidget):
             msg = QMessageBox(self)
             msg.setWindowTitle(translate("mode_switch_warning_title"))
             msg.setText(translate("mode_switch_warning_msg"))
-            msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
+            msg.setStandardButtons(
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel
+            )
             reply = msg.exec()
             if reply == QMessageBox.StandardButton.Ok:
                 self.queue_list.clear()
@@ -997,18 +1157,26 @@ class ThumbnailDownloaderTab(QWidget):
         url_type = classify_url(url)
 
         if current_mode == "post" and url_type == "creator":
-            QMessageBox.warning(self, translate("error"), translate("mixed_links_error"))
+            QMessageBox.warning(
+                self, translate("error"), translate("mixed_links_error")
+            )
             return
         elif current_mode == "creator" and url_type == "post":
-            QMessageBox.warning(self, translate("error"), translate("mixed_links_error"))
+            QMessageBox.warning(
+                self, translate("error"), translate("mixed_links_error")
+            )
             return
         elif url_type == "invalid":
-            QMessageBox.warning(self, translate("error"), translate("invalid_url_format_from_txt"))
+            QMessageBox.warning(
+                self, translate("error"), translate("invalid_url_format_from_txt")
+            )
             return
 
         for i in range(self.queue_list.count()):
             if self.queue_list.item(i).text() == url:
-                QMessageBox.information(self, translate("warning"), translate("url_already_in_queue"))
+                QMessageBox.information(
+                    self, translate("warning"), translate("url_already_in_queue")
+                )
                 return
 
         self.queue_list.addItem(url)
@@ -1017,7 +1185,10 @@ class ThumbnailDownloaderTab(QWidget):
 
     def import_urls_from_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
-            self, translate("select_links_file"), "", "Text Files (*.txt);;All Files (*)"
+            self,
+            translate("select_links_file"),
+            "",
+            "Text Files (*.txt);;All Files (*)",
         )
         if not file_path:
             return
@@ -1034,9 +1205,11 @@ class ThumbnailDownloaderTab(QWidget):
                 if not url:
                     continue
                 url_type = classify_url(url)
-                if (current_mode == "post" and url_type == "creator") or (
-                    current_mode == "creator" and url_type == "post"
-                ) or url_type == "invalid":
+                if (
+                    (current_mode == "post" and url_type == "creator")
+                    or (current_mode == "creator" and url_type == "post")
+                    or url_type == "invalid"
+                ):
                     skipped += 1
                     continue
 
@@ -1052,11 +1225,15 @@ class ThumbnailDownloaderTab(QWidget):
                     skipped += 1
 
             QMessageBox.information(
-                self, translate("bulk_add_complete"), translate("bulk_add_summary", added, skipped)
+                self,
+                translate("bulk_add_complete"),
+                translate("bulk_add_summary", added, skipped),
             )
         except Exception as e:
             QMessageBox.critical(
-                self, translate("file_read_error_title"), translate("file_read_error", str(e))
+                self,
+                translate("file_read_error_title"),
+                translate("file_read_error", str(e)),
             )
 
     def remove_selected_from_queue(self):
@@ -1073,7 +1250,9 @@ class ThumbnailDownloaderTab(QWidget):
             urls.append(current_input)
 
         if not urls:
-            QMessageBox.warning(self, translate("warning"), translate("thumbnail_queue_placeholder"))
+            QMessageBox.warning(
+                self, translate("warning"), translate("thumbnail_queue_placeholder")
+            )
             return
 
         self.detected_list.clear()
@@ -1110,8 +1289,25 @@ class ThumbnailDownloaderTab(QWidget):
                 counter += 1
                 unique_title = f"{title} ({counter})"
 
-            self.detected_items.append((unique_title, post_id, thumb_urls, service, user_id, creator_name, domain))
-            self.post_url_map[unique_title] = (post_id, thumb_urls, service, user_id, creator_name, domain)
+            self.detected_items.append(
+                (
+                    unique_title,
+                    post_id,
+                    thumb_urls,
+                    service,
+                    user_id,
+                    creator_name,
+                    domain,
+                )
+            )
+            self.post_url_map[unique_title] = (
+                post_id,
+                thumb_urls,
+                service,
+                user_id,
+                creator_name,
+                domain,
+            )
 
             list_item = QListWidgetItem(unique_title)
             list_item.setFlags(list_item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
@@ -1126,7 +1322,9 @@ class ThumbnailDownloaderTab(QWidget):
         self.status_label.setText(translate("thumbnails_detected", count))
         self.append_log(translate("thumbnails_detected", count))
         if count == 0:
-            QMessageBox.information(self, translate("information"), translate("no_thumbnails_found"))
+            QMessageBox.information(
+                self, translate("information"), translate("no_thumbnails_found")
+            )
 
     def start_download(self):
         checked_items = []
@@ -1142,30 +1340,52 @@ class ThumbnailDownloaderTab(QWidget):
                     user_id = entry[3] if len(entry) > 3 else ""
                     creator_name = entry[4] if len(entry) > 4 else "Unknown_Creator"
                     domain = entry[5] if len(entry) > 5 else ""
-                    checked_items.append((title, post_id, thumb_urls, service, user_id, creator_name, domain))
+                    checked_items.append(
+                        (
+                            title,
+                            post_id,
+                            thumb_urls,
+                            service,
+                            user_id,
+                            creator_name,
+                            domain,
+                        )
+                    )
 
         if not checked_items:
-            QMessageBox.warning(self, translate("warning"), translate("no_items_selected_download"))
+            QMessageBox.warning(
+                self, translate("warning"), translate("no_items_selected_download")
+            )
             return
 
-        download_folder = getattr(self.parent, "download_folder", os.path.join(os.path.expanduser("~"), "Downloads"))
+        download_folder = getattr(
+            self.parent,
+            "download_folder",
+            os.path.join(os.path.expanduser("~"), "Downloads"),
+        )
         save_dir = os.path.join(download_folder, "Thumbnails")
         sim_downloads = self.threads_spin.value()
         skip_exist = self.skip_existing_check.isChecked()
 
         # Resolve folder strategy from settings
         folder_strategy = "single_folder"
-        if hasattr(self.parent, "settings_tab") and hasattr(self.parent.settings_tab, "get_creator_folder_strategy"):
+        if hasattr(self.parent, "settings_tab") and hasattr(
+            self.parent.settings_tab, "get_creator_folder_strategy"
+        ):
             folder_strategy = self.parent.settings_tab.get_creator_folder_strategy()
 
         self.set_working_ui_state(True)
         self.file_progress_bar.setValue(0)
         self.file_progress_label.setText(translate("file_progress", 0))
         self.overall_progress_bar.setValue(0)
-        self.overall_progress_label.setText(translate("thumbnail_overall_progress", 0, 0))
+        self.overall_progress_label.setText(
+            translate("thumbnail_overall_progress", 0, 0)
+        )
         self.status_label.setText(translate("downloading_thumbnails"))
 
-        if hasattr(self.parent, "settings_tab") and hasattr(self.parent.settings_tab, "download_started"):
+        if hasattr(self.parent, "settings_tab") and hasattr(
+            self.parent.settings_tab, "download_started"
+        ):
             self.parent.settings_tab.download_started.emit()
 
         self.download_thread = ThumbnailDownloadThread(
@@ -1193,19 +1413,27 @@ class ThumbnailDownloaderTab(QWidget):
     def on_overall_progress(self, completed: int, total: int):
         pct = int((completed / total) * 100) if total > 0 else 0
         self.overall_progress_bar.setValue(min(pct, 100))
-        self.overall_progress_label.setText(translate("thumbnail_overall_progress", completed, total))
-        self.status_label.setText(f"{translate('downloading_thumbnails')} ({completed}/{total})")
+        self.overall_progress_label.setText(
+            translate("thumbnail_overall_progress", completed, total)
+        )
+        self.status_label.setText(
+            f"{translate('downloading_thumbnails')} ({completed}/{total})"
+        )
 
     def on_download_finished(self, success_count: int, total_count: int):
         self.set_working_ui_state(False)
         self.status_label.setText(translate("thumbnails_downloaded", success_count))
         self.append_log(translate("thumbnails_downloaded", success_count))
 
-        if hasattr(self.parent, "settings_tab") and hasattr(self.parent.settings_tab, "download_finished"):
+        if hasattr(self.parent, "settings_tab") and hasattr(
+            self.parent.settings_tab, "download_finished"
+        ):
             self.parent.settings_tab.download_finished.emit()
 
         QMessageBox.information(
-            self, translate("completed"), translate("thumbnails_downloaded", success_count)
+            self,
+            translate("completed"),
+            translate("thumbnails_downloaded", success_count),
         )
 
     def cancel_operation(self):
@@ -1233,7 +1461,11 @@ class ThumbnailDownloaderTab(QWidget):
         self.cancel_button.setEnabled(working)
 
     def toggle_check_all(self, state: int):
-        check_state = Qt.CheckState.Checked if state == 2 or state == Qt.CheckState.Checked.value else Qt.CheckState.Unchecked
+        check_state = (
+            Qt.CheckState.Checked
+            if state == 2 or state == Qt.CheckState.Checked.value
+            else Qt.CheckState.Unchecked
+        )
         for i in range(self.detected_list.count()):
             item = self.detected_list.item(i)
             if not item.isHidden():
@@ -1259,14 +1491,22 @@ class ThumbnailDownloaderTab(QWidget):
     def preview_selected_thumbnail(self):
         selected = self.detected_list.selectedItems()
         if not selected:
-            QMessageBox.information(self, translate("information"), "Please select an item from the list to preview.")
+            QMessageBox.information(
+                self,
+                translate("information"),
+                "Please select an item from the list to preview.",
+            )
             return
 
         title = selected[0].text()
         if title in self.post_url_map:
             entry = self.post_url_map[title]
-            thumb_urls = entry[1]  # (post_id, thumb_urls, service, user_id, creator_name)
-            target_url = thumb_urls[0] if isinstance(thumb_urls, (list, tuple)) else thumb_urls
+            thumb_urls = entry[
+                1
+            ]  # (post_id, thumb_urls, service, user_id, creator_name)
+            target_url = (
+                thumb_urls[0] if isinstance(thumb_urls, (list, tuple)) else thumb_urls
+            )
             modal = MediaPreviewModal(target_url, self.cache_dir, tab_parent=self)
             modal.exec()
 

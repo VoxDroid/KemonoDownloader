@@ -1,21 +1,22 @@
 import os
 import shutil
 import tempfile
-import pytest
 from unittest.mock import MagicMock, patch
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QApplication, QMessageBox
 
-from kemonodownloader.kd_thumbnaildl import (
-    ThumbnailDownloaderTab,
-    ThumbnailDetectionThread,
-    ThumbnailDownloadThread,
-    make_thumbnail_url,
-    classify_url,
-    parse_post_url,
-    parse_creator_url,
-)
+import pytest
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QMessageBox
+
 from kemonodownloader.app import KemonoDownloader
+from kemonodownloader.kd_thumbnaildl import (
+    ThumbnailDetectionThread,
+    ThumbnailDownloaderTab,
+    ThumbnailDownloadThread,
+    classify_url,
+    make_thumbnail_url,
+    parse_creator_url,
+    parse_post_url,
+)
 
 
 @pytest.fixture
@@ -32,17 +33,26 @@ def test_make_thumbnail_url():
     # Kemono
     path1 = "/data/1a/42/1a428c2147a822fb85c9df8e9c6564e9319dce937adba9f2e8ab547067f256a0.jpg"
     res1 = make_thumbnail_url(path1, "kemono.cr")
-    assert res1 == "https://img.kemono.cr/thumbnail/data/1a/42/1a428c2147a822fb85c9df8e9c6564e9319dce937adba9f2e8ab547067f256a0.jpg"
+    assert (
+        res1
+        == "https://img.kemono.cr/thumbnail/data/1a/42/1a428c2147a822fb85c9df8e9c6564e9319dce937adba9f2e8ab547067f256a0.jpg"
+    )
 
     # Coomer
     path2 = "/data/f0/40/f0400f17df56a975802e2367b963d45c1ec426a540734c296a7938e4d6478dcb.jpg"
     res2 = make_thumbnail_url(path2, "coomer.st")
-    assert res2 == "https://img.coomer.st/thumbnail/data/f0/40/f0400f17df56a975802e2367b963d45c1ec426a540734c296a7938e4d6478dcb.jpg"
+    assert (
+        res2
+        == "https://img.coomer.st/thumbnail/data/f0/40/f0400f17df56a975802e2367b963d45c1ec426a540734c296a7938e4d6478dcb.jpg"
+    )
 
     # Pawchive
     path3 = "/data/93/39/9339b8b09047ee78042c154c136923be3bd2a7555bfdccf77392a6442801523a.jpg"
     res3 = make_thumbnail_url(path3, "pawchive.pw")
-    assert res3 == "https://img.pawchive.pw/thumbnail/data/93/39/9339b8b09047ee78042c154c136923be3bd2a7555bfdccf77392a6442801523a.jpg"
+    assert (
+        res3
+        == "https://img.pawchive.pw/thumbnail/data/93/39/9339b8b09047ee78042c154c136923be3bd2a7555bfdccf77392a6442801523a.jpg"
+    )
 
     # Already full thumbnail URL
     full_thumb = "https://img.kemono.cr/thumbnail/data/1a/42/1a42.jpg"
@@ -140,7 +150,9 @@ def test_import_urls_from_file(qapp, temp_dir):
         f.write("https://coomer.st/onlyfans/user/invalid_mode\n")
         f.write("invalid_link\n")
 
-    with patch("PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=(txt_path, "")):
+    with patch(
+        "PyQt6.QtWidgets.QFileDialog.getOpenFileName", return_value=(txt_path, "")
+    ):
         with patch.object(QMessageBox, "information") as mock_info:
             tab.import_urls_from_file()
             assert mock_info.called
@@ -199,11 +211,11 @@ def test_thumbnail_detection_thread_post_and_creator(qapp):
     # Post thumbnails are now grouped into one entry with 2 URLs
     post_item = detected_results[0]
     assert post_item[1] == "67890"  # post_id
-    assert len(post_item[2]) == 2    # two thumbnail URLs
+    assert len(post_item[2]) == 2  # two thumbnail URLs
     assert "1a42.jpg" in post_item[2][0]
     assert "9339.jpg" in post_item[2][1]
-    assert post_item[3] == "patreon"   # service
-    assert post_item[4] == "12345"     # user_id
+    assert post_item[3] == "patreon"  # service
+    assert post_item[4] == "12345"  # user_id
     # Creator thumbnail
     creator_item = detected_results[1]
     assert "aabb.jpg" in creator_item[2][0]
@@ -296,17 +308,19 @@ def test_filtering_and_selection_controls(qapp, temp_dir):
 
     tab = ThumbnailDownloaderTab(mock_main)
 
-    tab.on_detection_batch([
-        ("Alpha Item", "1", ["https://img.kemono.cr/thumbnail/data/1.jpg"]),
-        ("Beta Item", "2", ["https://img.kemono.cr/thumbnail/data/2.jpg"]),
-    ])
+    tab.on_detection_batch(
+        [
+            ("Alpha Item", "1", ["https://img.kemono.cr/thumbnail/data/1.jpg"]),
+            ("Beta Item", "2", ["https://img.kemono.cr/thumbnail/data/2.jpg"]),
+        ]
+    )
 
     assert tab.detected_list.count() == 2
 
     # Filter
     tab.filter_input.setText("alpha")
-    assert tab.detected_list.item(0).isHidden() == False
-    assert tab.detected_list.item(1).isHidden() == True
+    assert not tab.detected_list.item(0).isHidden()
+    assert tab.detected_list.item(1).isHidden()
 
     # Check all
     tab.filter_input.clear()
@@ -317,7 +331,7 @@ def test_filtering_and_selection_controls(qapp, temp_dir):
 
 def test_app_thumbnail_tab_integration(qapp):
     win = KemonoDownloader()
-    main_widget = win.setup_main_ui()
+    win.main_widget = win.setup_main_ui()
     assert hasattr(win, "thumbnail_tab")
     assert win.tabs.count() == 6
     assert win.tabs.tabText(2) == "Thumbnail Downloader"
@@ -383,4 +397,3 @@ def test_thumbnail_download_thread_saves_post_text(qapp, temp_dir):
         text = f.read()
     assert "Post Title" in text
     assert "This is the post description content." in text
-
