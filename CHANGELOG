@@ -1,5 +1,26 @@
 # Kemono Downloader Release Notes
 
+## v5.12.0 (01 August 2026)
+**feat: Thumbnail Downloader tab, Auto Rename by order, and Post Text description downloading**
+
+- Add new Thumbnail Downloader tab (`kd_thumbnaildl.py`).
+  Introduces a dynamic thumbnail-only downloader tab supporting both Post Mode and Creator Mode. Features URL queue management, bulk file import, filter search, multi-selection, preview modal integration, and UI locking during detection and download operations.
+
+- Mirror creator folder strategy settings for thumbnail downloads.
+  Thumbnails follow the exact folder layout configured in settings (`per_post`, `by_file_type`, or `single_folder`) under `Downloads/Thumbnails/{user_id}_{creator_name}/`.
+
+- Add "Auto Rename and sort File name by order" option for thumbnails.
+  Optionally prepends per-post sequential ordering indexes (`1_`, `2_`, `3_`...) to downloaded thumbnail filenames for easy sorting.
+
+- Add "Download Post Text" description option for thumbnails.
+  Optionally fetches and saves post descriptions (`desc_{post_id}.txt`) alongside thumbnails with automatic HTML stripping via BeautifulSoup and 403 HTTP bypass handling (`Accept: text/css`).
+
+- Dynamic domain context propagation and robust API error handling.
+  Ensures service API calls, creator profile metadata resolution, and post text extraction correctly target the originating domain (`kemono.cr`, `coomer.st`, etc.) with 403 Cloudflare bypass retries.
+
+- Unit tests and integration test suite expansion.
+  Adds 11 comprehensive unit tests covering thumbnail detection, download thread, folder strategies, hash DB integration, preview modal, UI filter controls, and post text file creation.
+
 ## v5.11.1 (05 July 2026)
 **fix: dynamic pawchive domain suffix resolution and documentation refresh**
 

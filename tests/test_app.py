@@ -51,6 +51,7 @@ def mock_app_dependencies(monkeypatch):
     monkeypatch.setattr("kemonodownloader.app.SettingsTab", MockTab)
     monkeypatch.setattr("kemonodownloader.app.PostDownloaderTab", MockTab)
     monkeypatch.setattr("kemonodownloader.app.CreatorDownloaderTab", MockTab)
+    monkeypatch.setattr("kemonodownloader.app.ThumbnailDownloaderTab", MockTab)
     monkeypatch.setattr("kemonodownloader.app.HelpTab", MockTab)
     monkeypatch.setattr("kemonodownloader.app.ExtensionTab", MockTab)
 
@@ -110,13 +111,17 @@ class TestKemonoDownloader:
             window._finish_intro_transition()
 
             assert hasattr(window, "tabs")
-            assert window.tabs.count() == 5
+            assert window.tabs.count() == 6
 
             # Test disable/enable
             window.disable_other_tabs()
+            current = window.tabs.currentWidget()
             for i in range(window.tabs.count()):
-                if window.tabs.widget(i) != window.settings_tab:
+                w = window.tabs.widget(i)
+                if w != current and w != window.settings_tab:
                     assert not window.tabs.isTabEnabled(i)
+                else:
+                    assert window.tabs.isTabEnabled(i)
 
             window.enable_other_tabs()
             for i in range(window.tabs.count()):
