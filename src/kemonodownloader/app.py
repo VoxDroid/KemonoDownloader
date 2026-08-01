@@ -28,11 +28,12 @@ from kemonodownloader.kd_extension import ExtensionTab
 from kemonodownloader.kd_help import HelpTab
 from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_settings import SettingsTab
+from kemonodownloader.kd_thumbnaildl import ThumbnailDownloaderTab
 from kemonodownloader.post_downloader import PostDownloaderTab
 
 warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
-CURRENT_VERSION = "5.11.1"
+CURRENT_VERSION = "5.12.0"
 GITHUB_REPO = "VoxDroid/KemonoDownloader"
 
 # Available Google Fonts bundled with the app
@@ -315,8 +316,10 @@ class KemonoDownloader(QMainWindow):
 
     def disable_other_tabs(self):
         if hasattr(self, "tabs"):
+            current = self.tabs.currentWidget()
             for i in range(self.tabs.count()):
-                if self.tabs.widget(i) != self.settings_tab:
+                w = self.tabs.widget(i)
+                if w != current and w != self.settings_tab:
                     self.tabs.setTabEnabled(i, False)
 
     def enable_other_tabs(self):
@@ -380,6 +383,13 @@ class KemonoDownloader(QMainWindow):
             translate("creator_downloader_tab"),
         )
 
+        self.thumbnail_tab = ThumbnailDownloaderTab(self)
+        self.tabs.addTab(
+            self.thumbnail_tab,
+            qta.icon("fa5s.images", color="white"),
+            translate("thumbnail_downloader_tab"),
+        )
+
         self.tabs.addTab(
             self.settings_tab,
             qta.icon("fa5s.cog", color="white"),
@@ -411,7 +421,6 @@ class KemonoDownloader(QMainWindow):
         self.dev_label = QLabel(
             f"{translate('developed_by')} | GitHub: @VoxDroid | {translate('current_version', CURRENT_VERSION)}"
         )
-        self.dev_label.setStyleSheet("color: white; font-size: 12px;")
         footer_layout.addWidget(self.dev_label)
         main_layout.addWidget(footer)
 
@@ -426,9 +435,10 @@ class KemonoDownloader(QMainWindow):
         if self.main_widget:
             self.tabs.setTabText(0, translate("post_downloader_tab"))
             self.tabs.setTabText(1, translate("creator_downloader_tab"))
-            self.tabs.setTabText(2, translate("settings_tab"))
-            self.tabs.setTabText(3, translate("help_tab"))
-            self.tabs.setTabText(4, translate("extension_tab"))
+            self.tabs.setTabText(2, translate("thumbnail_downloader_tab"))
+            self.tabs.setTabText(3, translate("settings_tab"))
+            self.tabs.setTabText(4, translate("help_tab"))
+            self.tabs.setTabText(5, translate("extension_tab"))
 
             if (
                 self.status_label.text() == "Idle"
@@ -443,6 +453,7 @@ class KemonoDownloader(QMainWindow):
 
             self.post_tab.refresh_ui()
             self.creator_tab.refresh_ui()
+            self.thumbnail_tab.refresh_ui()
             self.settings_tab.update_ui_text()
             self.help_tab.update_ui_text()
             self.extension_tab.update_ui_text()

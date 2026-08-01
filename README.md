@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.11.1-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.12.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -114,15 +114,16 @@ We strongly encourage users to:
 
 ### $\color{#90a4ae}{\sf{\text{Site Availability Status}}}$ <a name="site-availability-status"></a>
 
-As of **June 17, 2026**, the media download servers for **Kemono.cr** and **Coomer.st** are currently unavailable or not being updated. To ensure continued functionality, **Pawchive.pw** has been added as an alternative source for content.
+As of **August 01, 2026**, primary full-resolution media download servers for **Kemono.cr** and **Coomer.st** may experience downtime, rotation, or outages. To ensure users can always archive content, **Pawchive.pw** serves as an alternative full-resolution media source, and the new **Thumbnail Downloader** tab has been introduced. Because thumbnail delivery servers (`img.kemono.cr`, `img.coomer.st`, `img.pawchive.pw`) remain active and operational during media server outages, the Thumbnail Downloader tab allows users to continue downloading post preview images and post text descriptions (`desc_{post_id}.txt`), providing a working fallback option (albeit at thumbnail resolution).
 
-| Site | Status | Last Checked |
+| Site / Server | Status | Last Checked |
 | :--- | :---: | :--- |
-| [Kemono.cr](https://kemono.cr) | 🔴 Unavailable | July, 5 2026 |
-| [Coomer.st](https://coomer.st) | 🔴 Unavailable | July, 5 2026 |
-| [Pawchive.pw](https://pawchive.pw) | 🟢 Available | July, 5 2026 |
+| [Kemono.cr Media Server](https://kemono.cr) | 🔴 Intermittent / Unavailable | August 1, 2026 |
+| [Coomer.st Media Server](https://coomer.st) | 🔴 Intermittent / Unavailable | August 1, 2026 |
+| [Pawchive.pw Media Server](https://pawchive.pw) | 🟢 Available | August 1, 2026 |
+| Thumbnail Delivery Servers (`img.*`) | 🟢 Available | August 1, 2026 |
 
-*Note: Status reflects the availability of media download servers. Front-end availability may vary.*
+*Note: Status reflects the availability of backend media download servers. Front-end availability and thumbnail servers may vary.*
 
 ## $\color{#546e7a}{\sf{\text{Community Standards}}}$ <a name="community-standards"></a>
 
@@ -145,6 +146,7 @@ We are committed to fostering a welcoming and respectful community around Kemono
   - [Getting Started](#getting-started)
   - [Post Downloader Tab](#post-downloader-tab)
   - [Creator Downloader Tab](#creator-downloader-tab)
+  - [Thumbnail Downloader Tab](#thumbnail-downloader-tab)
   - [Settings Tab](#settings-tab)
   - [Help Tab](#help-tab)
 - [Screenshots](#screenshots)
@@ -169,6 +171,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 |---------|-------------|
 | **Post Downloader** | Download files from individual posts using direct URLs. Supports previewing, filtering by file type, and batch selection. |
 | **Creator Downloader** | Bulk download entire creator profiles or selected posts. Configurable options for main files, attachments, and content images. |
+| **Thumbnail Downloader** | Dedicated fallback tab that downloads post/creator preview thumbnails and post descriptions (`desc_{post_id}.txt`) even when main media download servers are down or unavailable. |
 | **File Type Support** | Handles images (JPG, PNG, GIF, WebP), videos (MP4, AVI, MOV), archives (ZIP, 7Z, RAR), documents (PDF, TXT), audio (MP3, WAV), and more. |
 | **URL Import** | Import multiple creator URLs from .txt files for batch processing. |
 | **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. In Creator Downloader, auto-detects and downloads all posts for each queued creator sequentially. |
@@ -365,6 +368,15 @@ Upon launching, you’ll see an introductory screen with a "Launch" button. Clic
   2. Click "Add to Queue" to add it to the list.
   3. Click the eye icon to fetch posts, configure options (Main File, Attachments, Content Images), and select posts.
   4. Click "Download" to begin, and track progress via the interface.
+
+### $\color{#90a4ae}{\sf{\text{Thumbnail Downloader Tab}}}$ <a name="thumbnail-downloader-tab"></a>
+- **Purpose**: Download thumbnails and post text descriptions when primary media servers are down or offline.
+- **How to Use**:
+  1. Select Post Mode or Creator Mode from the mode selector.
+  2. Enter post or creator URLs in the queue.
+  3. Click "Detect Thumbnails" to scan and list thumbnail images.
+  4. Configure "Auto Rename and sort File name by order" and "Download Post Text" options as desired.
+  5. Click "Start Download" to archive thumbnails and post text descriptions into organized creator/post folders.
 
 ### $\color{#90a4ae}{\sf{\text{Settings Tab}}}$ <a name="settings-tab"></a>
 - **Purpose**: Customize the application’s behavior.

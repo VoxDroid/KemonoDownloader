@@ -148,6 +148,9 @@ def clean_file_url(file_url: str, domain_config: Dict[str, str]) -> str:
 
     For example, pawchive.<suffix> uses file.pawchive.<suffix> for file downloads.
     """
+    if "/thumbnail/" in file_url or "img." in file_url:
+        return file_url
+
     from urllib.parse import urljoin, urlparse, urlunparse
 
     base = domain_config.get("base_url", "")
