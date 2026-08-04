@@ -105,7 +105,7 @@ class TestFileDetectionLogic:
 
     def test_archive_extensions_detection(self):
         """Test detection of common archive file extensions."""
-        archive_extensions = [".zip", ".rar", ".7z"]
+        archive_extensions = [".zip", ".rar", ".7z", ".var"]
         for ext in archive_extensions:
             filename = f"archive{ext}"
             _, file_ext = os.path.splitext(filename)
