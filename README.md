@@ -480,7 +480,7 @@ Check out how **Kemono Downloader** is doing in the GitHub community!
 
 ## $\color{#546e7a}{\sf{\text{Star History}}}$ <a name="star-history"></a>
 
-[![Star History Chart](https://api.star-history.com/svg?repos=VoxDroid/KemonoDownloader&type=Date)](https://www.star-history.com/#VoxDroid/KemonoDownloader&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=VoxDroid/KemonoDownloader&type=Date)](https://star-history.dera.page/#VoxDroid/KemonoDownloader&Date)
 
 ---
 

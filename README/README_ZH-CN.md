@@ -323,7 +323,7 @@ Kemono Downloader是开源的，我们鼓励贡献！在提交问题或拉取请
 
 ## 星标历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=VoxDroid/KemonoDownloader&type=Date)](https://www.star-history.com/#VoxDroid/KemonoDownloader&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=VoxDroid/KemonoDownloader&type=Date)](https://star-history.dera.page/#VoxDroid/KemonoDownloader&Date)
 
 ---
 
