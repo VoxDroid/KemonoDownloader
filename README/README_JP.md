@@ -323,7 +323,7 @@ GitHubコミュニティで**Kemono Downloader**がどのような状況かチ�
 
 ## スター履歴
 
-[![Star History Chart](https://api.star-history.com/svg?repos=VoxDroid/KemonoDownloader&type=Date)](https://www.star-history.com/#VoxDroid/KemonoDownloader&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=VoxDroid/KemonoDownloader&type=Date)](https://star-history.dera.page/#VoxDroid/KemonoDownloader&Date)
 
 ---
 
