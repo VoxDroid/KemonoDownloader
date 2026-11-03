@@ -11,6 +11,7 @@ HELP_SECTIONS = [
     ("help_creator_downloader_title", "help_creator_downloader_text"),
     ("help_settings_title", "help_settings_text"),
     ("help_help_tab_title", "help_help_tab_text"),
+    ("help_history_title", "help_history_text"),
     ("help_troubleshooting_title", "help_troubleshooting_text"),
     ("help_support_title", "help_support_text"),
 ]

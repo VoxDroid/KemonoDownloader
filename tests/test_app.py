@@ -111,7 +111,7 @@ class TestKemonoDownloader:
             window._finish_intro_transition()
 
             assert hasattr(window, "tabs")
-            assert window.tabs.count() == 6
+            assert window.tabs.count() == 7  # History tab added
 
             # Test disable/enable
             window.disable_other_tabs()

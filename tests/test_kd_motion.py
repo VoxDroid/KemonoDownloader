@@ -236,7 +236,7 @@ def test_background_build_then_instant_launch(
             qapp.processEvents()
         prebuilt = window._prebuilt_main_widget
         assert prebuilt is not None
-        assert window.tabs.count() == 6
+        assert window.tabs.count() == 7  # History tab added
 
         window.transition_to_main()
         assert window.main_widget is prebuilt
@@ -297,9 +297,9 @@ def test_launch_during_background_build_finishes_it(
         window.transition_to_main()
         assert window.centralWidget() is window.main_widget
         assert window.main_widget.isVisible()
-        assert window.tabs.count() == 6
+        assert window.tabs.count() == 7  # History tab added
         assert window._main_ui_builder is None
         pump(qapp, 0.05)  # pending build steps must not run again
-        assert window.tabs.count() == 6
+        assert window.tabs.count() == 7  # History tab added
     finally:
         window.deleteLater()

@@ -37,6 +37,19 @@ from kemonodownloader.download_utils import (
     ProgressTracker,
     response_content_length,
 )
+from kemonodownloader.history_store import (
+    KIND_THUMBNAIL,
+    QUEUE_ADDED,
+    QUEUE_BUSY,
+    QUEUE_DUPLICATE,
+    QUEUE_INVALID,
+    QUEUE_MODE_MISMATCH,
+    HistoryEntry,
+    HistoryStore,
+    download_status,
+    link_kind,
+    normalize_link,
+)
 from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import get_session
@@ -1418,6 +1431,10 @@ class ThumbnailDownloaderTab(QWidget):
         self.download_thread.overall_progress_updated.connect(self.on_overall_progress)
         self.download_thread.log_message.connect(self.append_log)
         self.download_thread.download_finished.connect(self.on_download_finished)
+        self._history_sources = [
+            self.queue_list.item(i).text() for i in range(self.queue_list.count())
+        ]
+        self._history_started = time.time()
         self.download_thread.start()
 
     def on_file_progress(self, current: int, total: int):
@@ -1437,6 +1454,7 @@ class ThumbnailDownloaderTab(QWidget):
         )
 
     def on_download_finished(self, success_count: int, total_count: int):
+        self._record_download(success_count, total_count)
         self.set_working_ui_state(False)
         self.status_label.setText(translate("thumbnails_downloaded", success_count))
         self.append_log(translate("thumbnails_downloaded", success_count))
@@ -1451,6 +1469,81 @@ class ThumbnailDownloaderTab(QWidget):
             translate("completed"),
             translate("thumbnails_downloaded", success_count),
         )
+
+    def _record_download(self, success_count: int, total_count: int) -> None:
+        """Add a finished thumbnail batch to the History tab."""
+        store = getattr(self.parent, "history_store", None)
+        thread = self.download_thread
+        if not isinstance(store, HistoryStore) or thread is None:
+            return
+        items = list(getattr(thread, "download_items", []))
+        posts = {(it[3] if len(it) > 3 else "", it[1]) for it in items}
+        creators = {
+            (it[4] if len(it) > 4 else "", it[5] if len(it) > 5 else "Unknown_Creator")
+            for it in items
+            if it[1] != "direct"
+        }
+        sources = list(getattr(self, "_history_sources", []))
+        names = sorted({name for _, name in creators})
+        folder = thread.save_dir
+        has_direct = any(it[1] == "direct" for it in items)
+        if len(creators) == 1 and not has_direct:
+            # One creator: the thread saved into that creator's own folder.
+            user_id, name = next(iter(creators))
+            folder = os.path.join(
+                thread.save_dir,
+                f"{_sanitize(user_id or 'unknown')}_{_sanitize(name or 'Unknown_Creator')}",
+            )
+        store.record(
+            HistoryEntry(
+                kind=KIND_THUMBNAIL,
+                url=sources[0] if sources else "",
+                title=", ".join(names)[:120] or f"{len(posts)} posts",
+                service=", ".join(sorted({svc for svc, _ in posts if svc})),
+                creator=", ".join(names)[:120],
+                folder=folder,
+                files_total=total_count,
+                files_done=success_count,
+                files_failed=max(0, total_count - success_count),
+                posts_total=len(posts),
+                posts_done=len(posts) if success_count >= total_count else 0,
+                status=download_status(
+                    total_count,
+                    success_count,
+                    bool(getattr(thread, "is_cancelled", False)),
+                ),
+                started_at=getattr(self, "_history_started", None),
+                extra_urls=sources[1:],
+            )
+        )
+
+    def _is_busy(self) -> bool:
+        return any(
+            thread is not None and thread.isRunning()
+            for thread in (self.detection_thread, self.download_thread)
+        )
+
+    def enqueue_from_library(self, url: str) -> str:
+        """Queue a link chosen in the History tab; returns a QUEUE_* code."""
+        if self._is_busy():
+            return QUEUE_BUSY
+        url = normalize_link(url)
+        kind = link_kind(url)
+        if kind is None:
+            return QUEUE_INVALID
+        if kind != self.get_current_mode():
+            if self.queue_list.count():
+                return QUEUE_MODE_MISMATCH
+            # Empty queue: nothing to lose by switching mode for this link.
+            self.mode_combo.blockSignals(True)
+            self.mode_combo.setCurrentIndex(0 if kind == "post" else 1)
+            self.mode_combo.blockSignals(False)
+        for i in range(self.queue_list.count()):
+            if normalize_link(self.queue_list.item(i).text()) == url:
+                return QUEUE_DUPLICATE
+        self.queue_list.addItem(url)
+        self.append_log(f"{translate('added_to_queue')}: {url}")
+        return QUEUE_ADDED
 
     def cancel_operation(self):
         if self.detection_thread and self.detection_thread.isRunning():

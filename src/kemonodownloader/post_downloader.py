@@ -64,6 +64,18 @@ from kemonodownloader.download_utils import (
     wait_for_workers,
 )
 from kemonodownloader.hash_db import HashDB
+from kemonodownloader.history_store import (
+    KIND_POST,
+    QUEUE_ADDED,
+    QUEUE_BUSY,
+    QUEUE_DUPLICATE,
+    QUEUE_INVALID,
+    HistoryEntry,
+    HistoryStore,
+    download_status,
+    link_kind,
+    normalize_link,
+)
 from kemonodownloader.kd_logs import format_log_line, share_console_document
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
@@ -1804,6 +1816,13 @@ class PostDownloaderTab(QWidget):
         )
         self.post_add_from_file_btn.setToolTip(translate("add_links_from_file"))
         post_url_layout.addWidget(self.post_add_from_file_btn)
+        self.post_bookmark_btn = QPushButton(qta.icon("fa5s.star", color="white"), "")
+        self.post_bookmark_btn.clicked.connect(self.bookmark_current_link)
+        self.post_bookmark_btn.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
+        self.post_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))
+        post_url_layout.addWidget(self.post_bookmark_btn)
         left_layout.addLayout(post_url_layout)
 
         # Multi-URL input area
@@ -2077,6 +2096,7 @@ class PostDownloaderTab(QWidget):
     def update_ui_text(self):
         self.post_url_input.setPlaceholderText(translate("enter_post_url"))
         self.post_add_to_queue_btn.setText(translate("add_to_queue"))
+        self.post_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))
         self.post_add_from_file_btn.setToolTip(translate("add_links_from_file"))
         self.post_add_from_file_btn.setText(translate("add_links_from_file_title"))
 
@@ -2202,6 +2222,89 @@ class PostDownloaderTab(QWidget):
 
         summary = translate("bulk_add_summary", added_count, skipped_count)
         self.append_log_to_console(translate("log_info", summary), "INFO")
+
+    def _record_download(self, thread, cancelled=False):
+        """Add a finished or cancelled post download to the History tab."""
+        store = getattr(self.parent, "history_store", None)
+        if not isinstance(store, HistoryStore) or getattr(
+            thread, "_history_recorded", False
+        ):
+            return
+        thread._history_recorded = True
+        selected = list(dict.fromkeys(thread.selected_files))
+        done = sum(1 for url in selected if url in thread.completed_files)
+        failed = sum(1 for url in selected if url in self.failed_files)
+        parts = thread.url.rstrip("/").split("/")
+        # Same folder name DownloadThread.download_file writes into.
+        folder = os.path.join(
+            thread.download_folder,
+            thread.service,
+            f"{thread.post_id}_{thread.post_title}",
+        )
+        store.record(
+            HistoryEntry(
+                kind=KIND_POST,
+                url=thread.url,
+                title=thread.post_title or f"Post_{thread.post_id}",
+                service=thread.service,
+                creator=parts[-3] if len(parts) >= 7 else "",
+                folder=folder if thread.post_title else "",
+                files_total=len(selected),
+                files_done=done,
+                files_failed=failed,
+                posts_total=1,
+                posts_done=1 if selected and done >= len(selected) else 0,
+                status=download_status(len(selected), done, cancelled),
+                started_at=getattr(thread, "started_at", None),
+            )
+        )
+
+    def enqueue_from_library(self, url):
+        """Queue a post link chosen in the History tab; returns a QUEUE_* code.
+
+        History and favorites links are already known to be well-formed, so
+        they skip the network check the input box does.
+        """
+        if self.downloading:
+            return QUEUE_BUSY
+        url = normalize_link(url)
+        if link_kind(url) != KIND_POST:
+            return QUEUE_INVALID
+        if any(queued.rstrip("/") == url for queued, _ in self.post_queue):
+            return QUEUE_DUPLICATE
+        self.post_queue.append((url, False))
+        self.update_post_queue_list()
+        self.append_log_to_console(
+            translate("log_info", translate("added_post_url", url)), "INFO"
+        )
+        if self.download_all_links.isChecked():
+            self.check_all_posts()
+        return QUEUE_ADDED
+
+    def bookmark_current_link(self):
+        """Save the link in the box, or the post being viewed, to Favorites."""
+        url = self.post_url_input.text().strip() or (self.current_post_url or "")
+        store = getattr(self.parent, "history_store", None)
+        if not url:
+            self.append_log_to_console(
+                translate("log_warning", translate("bookmark_no_link")), "WARNING"
+            )
+            return
+        if not isinstance(store, HistoryStore):
+            return
+        if store.add_favorite(url):
+            self.append_log_to_console(
+                translate("log_info", translate("favorites_added", url)), "INFO"
+            )
+        elif store.is_favorite(url):
+            self.append_log_to_console(
+                translate("log_warning", translate("favorites_already", url)),
+                "WARNING",
+            )
+        else:
+            self.append_log_to_console(
+                translate("log_error", translate("library_invalid_link", url)), "ERROR"
+            )
 
     def add_post_to_queue(self):
         url = self.post_url_input.text().strip()
@@ -2941,6 +3044,7 @@ class PostDownloaderTab(QWidget):
             auto_rename,
             download_text=self.post_download_text_check.isChecked(),
         )
+        self.thread.started_at = time.time()
         self.active_threads.append(self.thread)
         self.thread.file_progress.connect(self.update_file_progress)
         self.thread.file_completed.connect(self.update_file_completion)
@@ -2976,6 +3080,8 @@ class PostDownloaderTab(QWidget):
         self.prepare_files_for_download(remaining_urls)
 
     def cleanup_thread(self, thread, remaining_urls):
+        if isinstance(thread, DownloadThread):
+            self._record_download(thread)
         self.append_log_to_console(
             translate("log_info", translate("cleaning_up_thread", remaining_urls)),
             "INFO",
@@ -3040,6 +3146,8 @@ class PostDownloaderTab(QWidget):
                     thread, (DownloadThread, PostDetectionThread, FilePreparationThread)
                 ):
                     thread.stop()
+                    if isinstance(thread, DownloadThread):
+                        self._record_download(thread, cancelled=True)
                     self.append_log_to_console(
                         translate("log_warning", translate("cancelling_downloads")),
                         "WARNING",

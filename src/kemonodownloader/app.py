@@ -34,8 +34,10 @@ from PyQt6.QtWidgets import (
 
 from kemonodownloader.creator_downloader import CreatorDownloaderTab
 from kemonodownloader.domain_config import startup_request_lock
+from kemonodownloader.history_store import HistoryStore
 from kemonodownloader.kd_extension import ExtensionTab
 from kemonodownloader.kd_help import HelpTab
+from kemonodownloader.kd_history import HistoryTab
 from kemonodownloader.kd_language import language_manager, translate
 from kemonodownloader.kd_motion import (
     FADE_IN_MS,
@@ -263,6 +265,8 @@ class KemonoDownloader(QMainWindow):
         self.cache_folder = os.path.join(self.base_folder, "Cache")
         self.other_files_folder = os.path.join(self.base_folder, "Other Files")
         self.ensure_folders_exist()
+        # History and favorites live beside the hash database.
+        self.history_store = HistoryStore(self.other_files_folder)
 
         self.setWindowIcon(QIcon(resource_path("resources/KemonoDownloader.png")))
 
@@ -425,11 +429,11 @@ class KemonoDownloader(QMainWindow):
             QTabBar::tab {
                 background: #3A4B6A;
                 color: white;
-                padding: 10px 20px;
+                padding: 10px 14px;
                 margin-right: 2px;
                 border-top-left-radius: 8px;
                 border-top-right-radius: 8px;
-                min-width: 100px;
+                min-width: 70px;
             }
             QTabBar::tab:selected {
                 background: #4A5B7A;
@@ -446,6 +450,10 @@ class KemonoDownloader(QMainWindow):
             }
         """
         )
+        # Seven tabs: shorten labels when the window is narrow instead of
+        # hiding tabs behind scroll arrows.
+        self.tabs.tabBar().setElideMode(Qt.TextElideMode.ElideRight)
+        self.tabs.tabBar().setUsesScrollButtons(False)
         main_layout.addWidget(self.tabs)
         self._tab_snapshot = None
         self.tabs.tabBarClicked.connect(self._snapshot_current_tab)
@@ -481,6 +489,16 @@ class KemonoDownloader(QMainWindow):
         )
         yield
         self._settle(self.thumbnail_tab)
+        yield
+
+        self.history_tab = HistoryTab(self)
+        self.tabs.addTab(
+            self.history_tab,
+            qta.icon("fa5s.history", color="white"),
+            translate("history_tab"),
+        )
+        yield
+        self._settle(self.history_tab)
         yield
 
         self.tabs.addTab(
@@ -557,12 +575,19 @@ class KemonoDownloader(QMainWindow):
             self.intro_screen.update_ui_text()
 
         if self.main_widget:
-            self.tabs.setTabText(0, translate("post_downloader_tab"))
-            self.tabs.setTabText(1, translate("creator_downloader_tab"))
-            self.tabs.setTabText(2, translate("thumbnail_downloader_tab"))
-            self.tabs.setTabText(3, translate("settings_tab"))
-            self.tabs.setTabText(4, translate("help_tab"))
-            self.tabs.setTabText(5, translate("extension_tab"))
+            # By widget, not position, so adding a tab cannot shift the labels.
+            for tab, key in (
+                (self.post_tab, "post_downloader_tab"),
+                (self.creator_tab, "creator_downloader_tab"),
+                (self.thumbnail_tab, "thumbnail_downloader_tab"),
+                (self.history_tab, "history_tab"),
+                (self.settings_tab, "settings_tab"),
+                (self.help_tab, "help_tab"),
+                (self.extension_tab, "extension_tab"),
+            ):
+                index = self.tabs.indexOf(tab)
+                if index >= 0:
+                    self.tabs.setTabText(index, translate(key))
 
             idle_texts = {
                 language_manager.get_text("idle", language)
@@ -578,6 +603,7 @@ class KemonoDownloader(QMainWindow):
             self.post_tab.refresh_ui()
             self.creator_tab.refresh_ui()
             self.thumbnail_tab.refresh_ui()
+            self.history_tab.update_ui_text()
             self.settings_tab.update_ui_text()
             self.help_tab.update_ui_text()
             self.extension_tab.update_ui_text()
@@ -727,6 +753,9 @@ def main():
     remove_filter = getattr(app, "removeEventFilter", None)
     if remove_filter is not None:
         remove_filter(_wheel_scroller)
+    store = getattr(window, "history_store", None)
+    if isinstance(store, HistoryStore):
+        store.close()
     sys.exit(exit_code)
 
 

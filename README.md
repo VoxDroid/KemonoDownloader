@@ -148,6 +148,7 @@ We are committed to fostering a welcoming and respectful community around Kemono
   - [Post Downloader Tab](#post-downloader-tab)
   - [Creator Downloader Tab](#creator-downloader-tab)
   - [Thumbnail Downloader Tab](#thumbnail-downloader-tab)
+  - [History Tab](#history-tab)
   - [Settings Tab](#settings-tab)
   - [Help Tab](#help-tab)
 - [Screenshots](#screenshots)
@@ -177,6 +178,8 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **URL Import** | Import multiple creator URLs from .txt files for batch processing. |
 | **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. In Creator Downloader, auto-detects and downloads all posts for each queued creator sequentially. |
 | **Download UI Lock** | All controls are disabled during active downloads (except Cancel and Expand Logs) to prevent accidental changes. |
+| **Download History** | Every finished post, creator and thumbnail download is recorded with files, posts, size, duration and status. Open its folder (with recovery options if the folder was moved or deleted), copy its links, queue it again, or export the list as CSV. Recording can be paused and the history cleared at any time. |
+| **Favorites** | Bookmark posts and creators with the star button in the Post or Creator tab, from the history, or by pasting a link. Edit titles and notes, see when each was last downloaded, queue them in one click, and import or export them as a .txt list. |
 
 ### $\color{#90a4ae}{\sf{\text{Performance and Reliability}}}$
 
@@ -378,6 +381,14 @@ Upon launching, you’ll see an introductory screen with a "Launch" button. Clic
   3. Click "Detect Thumbnails" to scan and list thumbnail images.
   4. Configure "Auto Rename and sort File name by order" and "Download Post Text" options as desired.
   5. Click "Start Download" to archive thumbnails and post text descriptions into organized creator/post folders.
+
+### $\color{#90a4ae}{\sf{\text{History Tab}}}$ <a name="history-tab"></a>
+- **Purpose**: Look back at what you downloaded and keep a list of favorite posts and creators.
+- **How to Use**:
+  1. Open the History tab to see finished downloads; search, filter by type, or sort any column.
+  2. Select rows to open their folder, copy links, add them back to a queue, or save them to Favorites. If a folder no longer exists you can locate it, open its parent folder, or download it again.
+  3. Switch to Favorites to manage saved links: paste a link and press Save, double-click a title or note to edit it, or double-click a row to queue it.
+  4. Untick "Record download history" to pause recording. History and favorites are stored in `library.db` inside the app's "Other Files" folder; removing entries never deletes downloaded files.
 
 ### $\color{#90a4ae}{\sf{\text{Settings Tab}}}$ <a name="settings-tab"></a>
 - **Purpose**: Customize the application’s behavior.

@@ -59,6 +59,18 @@ from kemonodownloader.download_utils import (
     wait_for_workers,
 )
 from kemonodownloader.hash_db import HashDB
+from kemonodownloader.history_store import (
+    KIND_CREATOR,
+    QUEUE_ADDED,
+    QUEUE_BUSY,
+    QUEUE_DUPLICATE,
+    QUEUE_INVALID,
+    HistoryEntry,
+    HistoryStore,
+    download_status,
+    link_kind,
+    normalize_link,
+)
 from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_logs import format_log_line, share_console_document
 from kemonodownloader.kd_motion import SmoothProgressBar
@@ -2259,8 +2271,17 @@ class CreatorDownloaderTab(QWidget):
         self.creator_add_from_file_btn.setStyleSheet(
             "background: #4A5B7A; padding: 5px; border-radius: 5px;"
         )
+        self.creator_bookmark_btn = QPushButton(
+            qta.icon("fa5s.star", color="white"), ""
+        )
+        self.creator_bookmark_btn.clicked.connect(self.bookmark_current_link)
+        self.creator_bookmark_btn.setStyleSheet(
+            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
+        )
+        self.creator_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))
         self.creator_add_from_file_btn.setToolTip(translate("add_links_from_file"))
         creator_url_layout.addWidget(self.creator_add_from_file_btn)
+        creator_url_layout.addWidget(self.creator_bookmark_btn)
         left_layout.addLayout(creator_url_layout)
 
         # Multi-URL input area
@@ -2597,6 +2618,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_add_to_queue_btn.setText(translate("add_to_queue"))
         self.creator_add_from_file_btn.setToolTip(translate("add_links_from_file"))
         self.creator_add_from_file_btn.setText(translate("add_links_from_file_title"))
+        self.creator_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))
 
         self.creator_queue_group.setTitle(translate("creator_queue"))
         self.creator_options_group.setTitle(translate("download_options"))
@@ -2744,6 +2766,101 @@ class CreatorDownloaderTab(QWidget):
         if invalid_count:
             summary += f" ({invalid_count} invalid)"
         self.append_log_to_console(translate("log_info", summary), "INFO")
+
+    def _record_download(self, thread, cancelled=False):
+        """Add a finished or cancelled creator download to the History tab."""
+        store = getattr(self._parent, "history_store", None)
+        if not isinstance(store, HistoryStore) or getattr(
+            thread, "_history_recorded", False
+        ):
+            return
+        thread._history_recorded = True
+        total = len(thread.files_to_download)
+        done = sum(
+            1 for url in thread.files_to_download if url in thread.completed_files
+        )
+        posts_done = sum(
+            1
+            for files in thread.post_files_map.values()
+            if files and all(url in thread.completed_files for url in files)
+        )
+        url = getattr(thread, "source_url", "") or (
+            f"{thread.domain_config['base_url']}/{thread.service}"
+            f"/user/{thread.creator_id}"
+        )
+        name = thread.creator_name
+        store.record(
+            HistoryEntry(
+                kind=KIND_CREATOR,
+                url=url,
+                title=name or thread.creator_id,
+                service=thread.service,
+                creator=name or thread.creator_id,
+                # Same folder name CreatorDownloadThread.run creates; unknown
+                # when the run was cancelled before the profile was fetched.
+                folder=(
+                    os.path.join(thread.download_folder, f"{thread.creator_id}_{name}")
+                    if name
+                    else ""
+                ),
+                files_total=total,
+                files_done=done,
+                files_failed=len(thread.failed_files),
+                posts_total=len(thread.selected_posts),
+                posts_done=posts_done,
+                status=download_status(total, done, cancelled or not thread.is_running),
+                started_at=getattr(thread, "started_at", None),
+            )
+        )
+
+    def _is_fetching(self):
+        thread = getattr(self, "post_detection_thread", None)
+        return thread is not None and thread.isRunning()
+
+    def enqueue_from_library(self, url):
+        """Queue a creator link chosen in the History tab; returns a QUEUE_* code.
+
+        History and favorites links are already known to be well-formed, so
+        they skip the validation request the input box makes.
+        """
+        if self.downloading or self._is_fetching():
+            return QUEUE_BUSY
+        url = normalize_link(url)
+        if link_kind(url) != KIND_CREATOR:
+            return QUEUE_INVALID
+        if any(queued.rstrip("/") == url for queued, _ in self.creator_queue):
+            return QUEUE_DUPLICATE
+        self.creator_queue.append((url, False))
+        self.update_creator_queue_list()
+        self.append_log_to_console(
+            translate("log_info", translate("added_creator_url", url)), "INFO"
+        )
+        return QUEUE_ADDED
+
+    def bookmark_current_link(self):
+        """Save the link in the box, or the creator being viewed, to Favorites."""
+        url = self.creator_url_input.text().strip() or (self.current_creator_url or "")
+        store = getattr(self._parent, "history_store", None)
+        if not url:
+            self.append_log_to_console(
+                translate("log_warning", translate("bookmark_no_link")), "WARNING"
+            )
+            return
+        if not isinstance(store, HistoryStore):
+            return
+        if store.add_favorite(url):
+            self.append_log_to_console(
+                translate("log_info", translate("favorites_added", url)), "INFO"
+            )
+        elif store.is_favorite(url):
+            self.append_log_to_console(
+                translate("log_warning", translate("favorites_already", url)),
+                "WARNING",
+            )
+        else:
+            self.append_log_to_console(
+                translate("log_error", translate("library_invalid_link", url)), "ERROR"
+            )
 
     def add_creator_to_queue(self):
         url = self.creator_url_input.text().strip()
@@ -3594,6 +3711,8 @@ class CreatorDownloaderTab(QWidget):
             settings.simultaneous_downloads,
             download_text=self.creator_download_text_check.isChecked(),
         )
+        thread.source_url = url
+        thread.started_at = time.time()
         thread.file_progress.connect(self.update_creator_file_progress)
         thread.file_completed.connect(self.update_file_completion)
         thread.post_completed.connect(self.update_post_completion)
@@ -3626,6 +3745,8 @@ class CreatorDownloaderTab(QWidget):
 
     def cleanup_thread(self, thread, remaining_urls):
         """Clean up a download thread and proceed to the next creator or finish."""
+        if isinstance(thread, CreatorDownloadThread):
+            self._record_download(thread)
         # Transfer failed files from thread to tab if present (handle threads
         # that weren't tracked in active_threads as well)
         try:
@@ -3859,6 +3980,8 @@ class CreatorDownloaderTab(QWidget):
         threads_to_delete = self.active_threads[:]
         self.active_threads = []
         for thread in threads_to_delete:
+            if isinstance(thread, CreatorDownloadThread):
+                self._record_download(thread, cancelled=True)
             try:
                 # Ensure the thread has fully exited before scheduling deletion.
                 # Without this, deleteLater can destroy the QThread while the
