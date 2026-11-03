@@ -1,8 +1,19 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
-from PyQt6.QtWidgets import QLabel, QScrollArea, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QFrame, QLabel, QTextBrowser, QVBoxLayout, QWidget
 
 from kemonodownloader.kd_language import translate
+
+# (title key, body key) for each section of the manual, in order.
+HELP_SECTIONS = [
+    ("help_getting_started_title", "help_getting_started_text"),
+    ("help_post_downloader_title", "help_post_downloader_text"),
+    ("help_creator_downloader_title", "help_creator_downloader_text"),
+    ("help_settings_title", "help_settings_text"),
+    ("help_help_tab_title", "help_help_tab_text"),
+    ("help_troubleshooting_title", "help_troubleshooting_text"),
+    ("help_support_title", "help_support_text"),
+]
 
 
 class HelpTab(QWidget):
@@ -26,14 +37,33 @@ class HelpTab(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(15, 15, 15, 15)
 
-        scroll_area = QScrollArea()
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(
+        panel = QFrame()
+        panel.setObjectName("helpPanel")
+        panel.setStyleSheet(
+            "QFrame#helpPanel { background: #2A3B5A; border-radius: 5px; }"
+        )
+        panel_layout = QVBoxLayout(panel)
+        panel_layout.setContentsMargins(10, 10, 4, 10)
+        panel_layout.setSpacing(10)
+
+        self.title_label = QLabel()
+        self.title_label.setStyleSheet(
+            "color: white; padding: 10px; background: transparent;"
+        )
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        panel_layout.addWidget(self.title_label)
+
+        # One document instead of a label per paragraph: word-wrapped labels
+        # are re-measured over and over as a layout settles, which made this
+        # tab take a third of a second to build and resize.
+        self.manual = QTextBrowser()
+        self.manual.setOpenExternalLinks(True)
+        self.manual.setFrameShape(QFrame.Shape.NoFrame)
+        self.manual.setStyleSheet(
             """
-            QScrollArea {
+            QTextBrowser {
+                background: transparent;
                 border: none;
-                background: #2A3B5A;
-                border-radius: 5px;
             }
             QScrollBar:vertical {
                 border: none;
@@ -52,150 +82,34 @@ class HelpTab(QWidget):
             }
         """
         )
-
-        content_widget = QWidget()
-        self.content_layout = QVBoxLayout(content_widget)
-        self.content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.content_layout.setSpacing(20)
+        panel_layout.addWidget(self.manual, stretch=1)
+        main_layout.addWidget(panel)
 
         self.update_ui_text()
-
-        scroll_area.setWidget(content_widget)
-        main_layout.addWidget(scroll_area)
-
         self.setMinimumSize(300, 400)
 
+    def _manual_html(self):
+        def paragraph(text):
+            return f'<p align="justify" style="margin: 4px 5px 14px 5px;">{text}</p>'
+
+        parts = [paragraph(translate("help_intro"))]
+        for title_key, body_key in HELP_SECTIONS:
+            parts.append(
+                '<p style="color: white; font-size: 16pt; font-weight: bold;'
+                f' margin: 18px 5px 6px 5px;">{translate(title_key)}</p>'
+            )
+            parts.append(paragraph(translate(body_key)))
+        return f'<div style="color: #D0D0D0;">{"".join(parts)}</div>'
+
     def update_ui_text(self):
-        while self.content_layout.count():
-            item = self.content_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+        family = self._get_font_family()
+        self.title_label.setText(f"<h1>{translate('help_title')}</h1>")
+        self.title_label.setFont(QFont(family, 20, QFont.Weight.Bold))
 
-        # Title
-        title_label = QLabel(f"<h1>{translate('help_title')}</h1>")
-        title_label.setFont(QFont(self._get_font_family(), 20, QFont.Weight.Bold))
-        title_label.setStyleSheet("color: white; padding: 10px;")
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.content_layout.addWidget(title_label)
-
-        # Introduction
-        intro_label = QLabel(translate("help_intro"))
-        intro_label.setFont(QFont(self._get_font_family(), 12))
-        intro_label.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        intro_label.setWordWrap(True)
-        intro_label.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(intro_label)
-
-        # Section: Getting Started
-        getting_started_title = QLabel(
-            f"<h2>{translate('help_getting_started_title')}</h2>"
-        )
-        getting_started_title.setFont(
-            QFont(self._get_font_family(), 16, QFont.Weight.Bold)
-        )
-        getting_started_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(getting_started_title)
-
-        getting_started_text = QLabel(translate("help_getting_started_text"))
-        getting_started_text.setFont(QFont(self._get_font_family(), 12))
-        getting_started_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        getting_started_text.setWordWrap(True)
-        getting_started_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(getting_started_text)
-
-        # Section: Using the Post Downloader Tab
-        post_downloader_title = QLabel(
-            f"<h2>{translate('help_post_downloader_title')}</h2>"
-        )
-        post_downloader_title.setFont(
-            QFont(self._get_font_family(), 16, QFont.Weight.Bold)
-        )
-        post_downloader_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(post_downloader_title)
-
-        post_downloader_text = QLabel(translate("help_post_downloader_text"))
-        post_downloader_text.setFont(QFont(self._get_font_family(), 12))
-        post_downloader_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        post_downloader_text.setWordWrap(True)
-        post_downloader_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(post_downloader_text)
-
-        # Section: Using the Creator Downloader Tab
-        creator_downloader_title = QLabel(
-            f"<h2>{translate('help_creator_downloader_title')}</h2>"
-        )
-        creator_downloader_title.setFont(
-            QFont(self._get_font_family(), 16, QFont.Weight.Bold)
-        )
-        creator_downloader_title.setStyleSheet(
-            "color: white; padding: 10px 5px 5px 5px;"
-        )
-        self.content_layout.addWidget(creator_downloader_title)
-
-        creator_downloader_text = QLabel(translate("help_creator_downloader_text"))
-        creator_downloader_text.setFont(QFont(self._get_font_family(), 12))
-        creator_downloader_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        creator_downloader_text.setWordWrap(True)
-        creator_downloader_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(creator_downloader_text)
-
-        # Section: Using the Settings Tab
-        settings_title = QLabel(f"<h2>{translate('help_settings_title')}</h2>")
-        settings_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
-        settings_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(settings_title)
-
-        settings_text = QLabel(translate("help_settings_text"))
-        settings_text.setFont(QFont(self._get_font_family(), 12))
-        settings_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        settings_text.setWordWrap(True)
-        settings_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(settings_text)
-
-        # Section: Using the Help Tab
-        help_tab_title = QLabel(f"<h2>{translate('help_help_tab_title')}</h2>")
-        help_tab_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
-        help_tab_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(help_tab_title)
-
-        help_tab_text = QLabel(translate("help_help_tab_text"))
-        help_tab_text.setFont(QFont(self._get_font_family(), 12))
-        help_tab_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        help_tab_text.setWordWrap(True)
-        help_tab_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(help_tab_text)
-
-        # Section: Troubleshooting
-        troubleshooting_title = QLabel(
-            f"<h2>{translate('help_troubleshooting_title')}</h2>"
-        )
-        troubleshooting_title.setFont(
-            QFont(self._get_font_family(), 16, QFont.Weight.Bold)
-        )
-        troubleshooting_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(troubleshooting_title)
-
-        troubleshooting_text = QLabel(translate("help_troubleshooting_text"))
-        troubleshooting_text.setFont(QFont(self._get_font_family(), 12))
-        troubleshooting_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        troubleshooting_text.setWordWrap(True)
-        troubleshooting_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(troubleshooting_text)
-
-        # Section: Contact and Support
-        support_title = QLabel(f"<h2>{translate('help_support_title')}</h2>")
-        support_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
-        support_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(support_title)
-
-        support_text = QLabel(translate("help_support_text"))
-        support_text.setFont(QFont(self._get_font_family(), 12))
-        support_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        support_text.setWordWrap(True)
-        support_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(support_text)
-
-        self.content_layout.addStretch()
+        scroll = self.manual.verticalScrollBar().value()
+        self.manual.document().setDefaultFont(QFont(family, 12))
+        self.manual.setHtml(self._manual_html())
+        self.manual.verticalScrollBar().setValue(scroll)
 
     def refresh_ui(self):
         self.update_ui_text()

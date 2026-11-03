@@ -8,7 +8,16 @@ import qtawesome as qta
 import requests
 from bs4 import MarkupResemblesLocatorWarning
 from packaging import version
-from PyQt6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import (
+    QEasingCurve,
+    QPoint,
+    QPropertyAnimation,
+    QRect,
+    Qt,
+    QThread,
+    QTimer,
+    pyqtSignal,
+)
 from PyQt6.QtGui import QColor, QCursor, QFont, QFontDatabase, QIcon, QPalette, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -28,6 +37,14 @@ from kemonodownloader.domain_config import startup_request_lock
 from kemonodownloader.kd_extension import ExtensionTab
 from kemonodownloader.kd_help import HelpTab
 from kemonodownloader.kd_language import language_manager, translate
+from kemonodownloader.kd_motion import (
+    FADE_IN_MS,
+    TAB_FADE_MS,
+    SmoothWheelScroller,
+    enable_pixel_scrolling,
+    fade_in,
+    fade_out_snapshot,
+)
 from kemonodownloader.kd_settings import SettingsTab
 from kemonodownloader.kd_thumbnaildl import ThumbnailDownloaderTab
 from kemonodownloader.post_downloader import PostDownloaderTab
@@ -37,9 +54,8 @@ warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 CURRENT_VERSION = "5.13.0"
 GITHUB_REPO = "VoxDroid/KemonoDownloader"
 
-# Window opacity only affects top-level windows, so this is purely how long the
-# tabs stay hidden after they have been built.
-INTRO_TRANSITION_MS = 100
+# Kept alive for the whole run; installed on the application by main().
+_wheel_scroller = SmoothWheelScroller()
 
 # Available Google Fonts bundled with the app
 BUNDLED_FONTS = {
@@ -218,13 +234,9 @@ class IntroScreen(QWidget):
         self.launch_button.setText(translate("launch_button"))
 
     def start_fade_in(self):
-        self.setWindowOpacity(0)
-        fade_in = QPropertyAnimation(self, b"windowOpacity")
-        fade_in.setDuration(1000)
-        fade_in.setStartValue(0)
-        fade_in.setEndValue(1)
-        fade_in.setEasingCurve(QEasingCurve.Type.OutCubic)
-        fade_in.start()
+        # Window opacity only applies to top-level windows; an opacity effect
+        # fades this embedded screen.
+        self.fade_in_animation = fade_in(self, FADE_IN_MS)
 
 
 def resource_path(relative_path):
@@ -256,6 +268,8 @@ class KemonoDownloader(QMainWindow):
 
         self.intro_screen = IntroScreen(self)
         self.main_widget = None
+        self._main_ui_builder = None
+        self._prebuilt_main_widget = None
         self.setCentralWidget(self.intro_screen)
         self.apply_palette()
 
@@ -334,7 +348,67 @@ class KemonoDownloader(QMainWindow):
                 self.tabs.setTabEnabled(i, True)
 
     def setup_main_ui(self):
-        main_widget = QWidget()
+        builder = self._build_main_ui()
+        while True:
+            try:
+                next(builder)
+            except StopIteration as done:
+                return done.value
+
+    def start_background_build(self):
+        """Build the tabs a piece at a time while the intro screen is showing.
+
+        Constructing and styling every tab takes around a second. Spread over
+        idle moments it goes unnoticed, and Launch then only has to swap
+        screens.
+        """
+        if self.main_widget is not None or self._main_ui_builder is not None:
+            return
+        self._main_ui_builder = self._build_main_ui()
+        QTimer.singleShot(0, self._advance_background_build)
+
+    def _advance_background_build(self):
+        builder = self._main_ui_builder
+        if builder is None:
+            return
+        try:
+            next(builder)
+        except StopIteration as done:
+            self._prebuilt_main_widget = done.value
+            self._main_ui_builder = None
+            return
+        QTimer.singleShot(0, self._advance_background_build)
+
+    def _take_main_ui(self):
+        """Return the main UI, finishing whatever the background build left."""
+        if self._prebuilt_main_widget is not None:
+            main_widget, self._prebuilt_main_widget = self._prebuilt_main_widget, None
+            return main_widget
+        builder, self._main_ui_builder = self._main_ui_builder, None
+        if builder is None:
+            return self.setup_main_ui()
+        while True:
+            try:
+                next(builder)
+            except StopIteration as done:
+                return done.value
+
+    def _settle(self, widget):
+        """Style *widget* now, while nobody is waiting on it.
+
+        Qt otherwise applies every style sheet in the tree at the moment the
+        tabs first appear. It is only worth doing ahead of time on screen.
+        """
+        if self.isVisible():
+            widget.ensurePolished()
+            enable_pixel_scrolling(widget)
+
+    def _build_main_ui(self):
+        """Generator that builds the main UI, yielding between heavy steps."""
+        # Parented from the start, so styling happens once, in its final place.
+        # (Not hidden explicitly: that would keep it hidden once it becomes the
+        # central widget. A child added to a shown window stays hidden anyway.)
+        main_widget = QWidget(self)
         main_layout = QVBoxLayout(main_widget)
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(15)
@@ -373,6 +447,10 @@ class KemonoDownloader(QMainWindow):
         """
         )
         main_layout.addWidget(self.tabs)
+        self._tab_snapshot = None
+        self.tabs.tabBarClicked.connect(self._snapshot_current_tab)
+        self.tabs.currentChanged.connect(self._fade_from_snapshot)
+        yield
 
         # Add Tabs
         self.post_tab = PostDownloaderTab(self)
@@ -381,6 +459,9 @@ class KemonoDownloader(QMainWindow):
             qta.icon("fa5s.download", color="white"),
             translate("post_downloader_tab"),
         )
+        yield
+        self._settle(self.post_tab)
+        yield
 
         self.creator_tab = CreatorDownloaderTab(self)
         self.tabs.addTab(
@@ -388,6 +469,9 @@ class KemonoDownloader(QMainWindow):
             qta.icon("fa5s.user-edit", color="white"),
             translate("creator_downloader_tab"),
         )
+        yield
+        self._settle(self.creator_tab)
+        yield
 
         self.thumbnail_tab = ThumbnailDownloaderTab(self)
         self.tabs.addTab(
@@ -395,12 +479,18 @@ class KemonoDownloader(QMainWindow):
             qta.icon("fa5s.images", color="white"),
             translate("thumbnail_downloader_tab"),
         )
+        yield
+        self._settle(self.thumbnail_tab)
+        yield
 
         self.tabs.addTab(
             self.settings_tab,
             qta.icon("fa5s.cog", color="white"),
             translate("settings_tab"),
         )
+        yield
+        self._settle(self.settings_tab)
+        yield
 
         self.help_tab = HelpTab(self)
         self.tabs.addTab(
@@ -408,6 +498,9 @@ class KemonoDownloader(QMainWindow):
             qta.icon("fa5s.question-circle", color="white"),
             translate("help_tab"),
         )
+        yield
+        self._settle(self.help_tab)
+        yield
 
         self.extension_tab = ExtensionTab(self)
         self.tabs.addTab(
@@ -415,6 +508,9 @@ class KemonoDownloader(QMainWindow):
             qta.icon("fa5s.puzzle-piece", color="white"),
             translate("extension_tab"),
         )
+        yield
+        self._settle(self.extension_tab)
+        yield
 
         # Footer
         footer = QWidget()
@@ -429,8 +525,30 @@ class KemonoDownloader(QMainWindow):
         )
         footer_layout.addWidget(self.dev_label)
         main_layout.addWidget(footer)
+        self._settle(main_widget)
 
         return main_widget
+
+    def _snapshot_current_tab(self, index):
+        """Picture the page being left, just before a click switches tabs."""
+        self._tab_snapshot = None
+        page = self.tabs.currentWidget()
+        if (
+            page is None
+            or index == self.tabs.currentIndex()
+            or not self.tabs.isTabEnabled(index)
+            or not page.isVisible()
+        ):
+            return
+        top_left = page.mapTo(self.tabs, QPoint(0, 0))
+        self._tab_snapshot = (page.grab(), QRect(top_left, page.size()))
+
+    def _fade_from_snapshot(self, _index):
+        """Dissolve from the previous page instead of cutting to the new one."""
+        snapshot, self._tab_snapshot = self._tab_snapshot, None
+        if snapshot is not None:
+            pixmap, geometry = snapshot
+            self.tab_fade = fade_out_snapshot(self.tabs, pixmap, geometry, TAB_FADE_MS)
 
     def update_all_ui(self):
         self.setWindowTitle(translate("app_title"))
@@ -465,31 +583,19 @@ class KemonoDownloader(QMainWindow):
             self.extension_tab.update_ui_text()
 
     def transition_to_main(self):
-        self.main_widget = self.setup_main_ui()
-        self.main_widget.setParent(self)
-        self.main_widget.move(0, 0)
-        self.main_widget.resize(self.size())
-        self.main_widget.setWindowOpacity(0)
-
-        self.intro_fade = QPropertyAnimation(self.intro_screen, b"windowOpacity")
-        self.intro_fade.setDuration(INTRO_TRANSITION_MS)
-        self.intro_fade.setStartValue(1)
-        self.intro_fade.setEndValue(0)
-        self.intro_fade.setEasingCurve(QEasingCurve.Type.InOutQuad)
-
-        self.main_fade = QPropertyAnimation(self.main_widget, b"windowOpacity")
-        self.main_fade.setDuration(INTRO_TRANSITION_MS)
-        self.main_fade.setStartValue(0)
-        self.main_fade.setEndValue(1)
-        self.main_fade.setEasingCurve(QEasingCurve.Type.InOutQuad)
-
-        self.intro_fade.finished.connect(self._finish_intro_transition)
-        self.intro_fade.start()
-        self.main_fade.start()
+        self.main_widget = self._take_main_ui()
+        intro = self.intro_screen
+        snapshot = intro.grab() if self.isVisible() else None
+        geometry = intro.geometry()
+        # Swap screens at once, then fade a picture of the intro away on top.
+        self._finish_intro_transition()
+        if snapshot is not None:
+            self.intro_fade = fade_out_snapshot(self, snapshot, geometry)
 
     def _finish_intro_transition(self):
         """Complete the intro-to-main transition and release the intro screen."""
         self.setCentralWidget(self.main_widget)
+        self.main_widget.show()
         self.intro_screen = None
 
     def check_for_updates(self):
@@ -584,7 +690,9 @@ class KemonoDownloader(QMainWindow):
         msg.exec()
 
     def animate_button(self, button, enter):
-        anim = QPropertyAnimation(button, b"geometry")
+        # Owned by the button: a parentless local animation is garbage-collected
+        # before it plays a single frame.
+        anim = QPropertyAnimation(button, b"geometry", button)
         anim.setDuration(200)
         anim.setEasingCurve(QEasingCurve.Type.InOutQuad)
         rect = button.geometry()
@@ -592,7 +700,7 @@ class KemonoDownloader(QMainWindow):
             anim.setEndValue(rect.adjusted(-3, -3, 3, 3))
         else:
             anim.setEndValue(rect.adjusted(3, 3, -3, -3))
-        anim.start()
+        anim.start(QPropertyAnimation.DeletionPolicy.DeleteWhenStopped)
 
     def log(self, message):
         self.status_label.setText(message)
@@ -603,9 +711,23 @@ def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     load_bundled_fonts()
+    install_filter = getattr(app, "installEventFilter", None)
+    if install_filter is not None:
+        install_filter(_wheel_scroller)
     window = KemonoDownloader()
     window.show()
-    sys.exit(app.exec())
+    start_build = getattr(window, "start_background_build", None)
+    if start_build is not None:
+        # After the intro has faded in, so the fade itself stays smooth.
+        QTimer.singleShot(FADE_IN_MS + 80, start_build)
+    exit_code = app.exec()
+    # Detach before shutdown: Qt keeps dispatching events while it destroys
+    # the window, and calling into a Python filter while the interpreter is
+    # being torn down crashes natively (an access violation on exit).
+    remove_filter = getattr(app, "removeEventFilter", None)
+    if remove_filter is not None:
+        remove_filter(_wheel_scroller)
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

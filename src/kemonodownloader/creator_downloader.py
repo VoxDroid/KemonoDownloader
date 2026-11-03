@@ -61,6 +61,7 @@ from kemonodownloader.download_utils import (
 from kemonodownloader.hash_db import HashDB
 from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_logs import format_log_line, share_console_document
+from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     _thread_local,
     accept_language,
@@ -2394,7 +2395,7 @@ class CreatorDownloaderTab(QWidget):
         creator_progress_layout = QVBoxLayout()
         self.creator_file_progress_label = QLabel()
         creator_progress_layout.addWidget(self.creator_file_progress_label)
-        self.creator_file_progress = QProgressBar()
+        self.creator_file_progress = SmoothProgressBar()
         self.creator_file_progress.setStyleSheet(
             "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
         )
@@ -2402,7 +2403,7 @@ class CreatorDownloaderTab(QWidget):
         creator_progress_layout.addWidget(self.creator_file_progress)
         self.creator_overall_progress_label = QLabel()
         creator_progress_layout.addWidget(self.creator_overall_progress_label)
-        self.creator_overall_progress = QProgressBar()
+        self.creator_overall_progress = SmoothProgressBar()
         self.creator_overall_progress.setStyleSheet(
             "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
         )

@@ -24,7 +24,6 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMessageBox,
-    QProgressBar,
     QPushButton,
     QSpinBox,
     QTextEdit,
@@ -39,6 +38,7 @@ from kemonodownloader.download_utils import (
     response_content_length,
 )
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import get_session
 from kemonodownloader.post_downloader import MediaPreviewModal
 
@@ -969,7 +969,7 @@ class ThumbnailDownloaderTab(QWidget):
         self.file_progress_label.setStyleSheet("color: white;")
         progress_layout.addWidget(self.file_progress_label)
 
-        self.file_progress_bar = QProgressBar()
+        self.file_progress_bar = SmoothProgressBar()
         self.file_progress_bar.setRange(0, 100)
         self.file_progress_bar.setStyleSheet(
             "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; text-align: center; color: white; }"
@@ -983,7 +983,7 @@ class ThumbnailDownloaderTab(QWidget):
         self.overall_progress_label.setStyleSheet("color: white;")
         progress_layout.addWidget(self.overall_progress_label)
 
-        self.overall_progress_bar = QProgressBar()
+        self.overall_progress_bar = SmoothProgressBar()
         self.overall_progress_bar.setRange(0, 100)
         self.overall_progress_bar.setStyleSheet(
             "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; text-align: center; color: white; }"

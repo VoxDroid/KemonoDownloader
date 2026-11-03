@@ -65,6 +65,7 @@ from kemonodownloader.download_utils import (
 )
 from kemonodownloader.hash_db import HashDB
 from kemonodownloader.kd_logs import format_log_line, share_console_document
+from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     accept_language,
     get_headers,
@@ -1842,7 +1843,7 @@ class PostDownloaderTab(QWidget):
         post_progress_layout = QVBoxLayout()
         self.post_file_progress_label = QLabel()
         post_progress_layout.addWidget(self.post_file_progress_label)
-        self.post_file_progress = QProgressBar()
+        self.post_file_progress = SmoothProgressBar()
         self.post_file_progress.setStyleSheet(
             "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
         )
@@ -1850,7 +1851,7 @@ class PostDownloaderTab(QWidget):
         post_progress_layout.addWidget(self.post_file_progress)
         self.post_overall_progress_label = QLabel()
         post_progress_layout.addWidget(self.post_overall_progress_label)
-        self.post_overall_progress = QProgressBar()
+        self.post_overall_progress = SmoothProgressBar()
         self.post_overall_progress.setStyleSheet(
             "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
         )
