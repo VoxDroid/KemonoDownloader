@@ -1,6 +1,8 @@
 import hashlib
 import os
 
+from kemonodownloader import kd_network
+
 
 def test_get_user_agent_fallback(monkeypatch):
     import kemonodownloader.post_downloader as pd
@@ -10,9 +12,9 @@ def test_get_user_agent_fallback(monkeypatch):
         def __init__(self):
             raise Exception("no ua")
 
-    monkeypatch.setattr(pd, "UserAgent", BadUA)
+    monkeypatch.setattr(kd_network, "UserAgent", BadUA)
     # Reset cached value
-    monkeypatch.setattr(pd, "_user_agent", None)
+    monkeypatch.setattr(kd_network, "_user_agent", None)
     ua = pd.get_user_agent()
     assert "Mozilla/5.0" in ua
 
@@ -30,7 +32,7 @@ def test_get_headers_cached(monkeypatch):
     import kemonodownloader.post_downloader as pd
 
     # Reset HEADERS
-    monkeypatch.setattr(pd, "HEADERS", None)
+    monkeypatch.setattr(kd_network, "HEADERS", None)
     h1 = pd.get_headers()
     h2 = pd.get_headers()
     assert h1 is h2

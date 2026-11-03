@@ -5,7 +5,7 @@ import json
 import os
 from types import SimpleNamespace
 
-from kemonodownloader import creator_downloader as cd
+from kemonodownloader import creator_downloader as cd, kd_network
 
 
 def test_sanitize_filename_and_domain():
@@ -255,13 +255,13 @@ def test_get_domain_config():
 
 def test_get_user_agent_fallback(monkeypatch):
     # Force a UserAgent error to exercise fallback
-    monkeypatch.setattr(cd, "_user_agent", None)
+    monkeypatch.setattr(kd_network, "_user_agent", None)
 
     class BrokenUA:
         def __init__(self):
             raise RuntimeError("nope")
 
-    monkeypatch.setattr(cd, "UserAgent", BrokenUA)
+    monkeypatch.setattr(kd_network, "UserAgent", BrokenUA)
     ua = cd.get_user_agent()
     assert ua.startswith("Mozilla/")
 
@@ -580,32 +580,32 @@ def test_fetch_creator_and_post_info_populates_titles(tmp_path, monkeypatch):
 def teardown_module(module):
     # Clean any thread-local or cached state that could leak between tests
     try:
-        cd._user_agent = None
+        kd_network._user_agent = None
     except Exception:
         pass
     try:
-        cd.HEADERS = None
+        kd_network.HEADERS = None
     except Exception:
         pass
     try:
-        cd._thread_local.__dict__.clear()
+        kd_network._thread_local.__dict__.clear()
     except Exception:
         pass
 
 
 def test_get_headers_caching():
-    cd.HEADERS = None
+    kd_network.HEADERS = None
     h1 = cd.get_headers()
     assert isinstance(h1, dict)
     h2 = cd.get_headers()
     assert h1 is h2
     # cleanup
-    cd.HEADERS = None
+    kd_network.HEADERS = None
 
 
 def test_get_session_thread_local_and_socks(monkeypatch):
     # Reset thread local storage
-    cd._thread_local.__dict__.clear()
+    kd_network._thread_local.__dict__.clear()
 
     s1 = cd.get_session(None)
     s2 = cd.get_session(None)
@@ -617,14 +617,14 @@ def test_get_session_thread_local_and_socks(monkeypatch):
 
     socks_session = cd.get_session(S())
     # socks_session should be stored on thread local
-    assert getattr(cd._thread_local, "socks_session", None) is not None
-    assert getattr(cd._thread_local, "socks_session") is socks_session
+    assert getattr(kd_network._thread_local, "socks_session", None) is not None
+    assert getattr(kd_network._thread_local, "socks_session") is socks_session
 
     # calling again returns same socks session instance
     socks_session2 = cd.get_session(S())
     assert socks_session is socks_session2
     # cleanup
-    cd._thread_local.__dict__.clear()
+    kd_network._thread_local.__dict__.clear()
 
 
 # duplicate sanitize_filename test removed to avoid redefinition

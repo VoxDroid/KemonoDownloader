@@ -24,9 +24,10 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.creator_downloader import CreatorDownloaderTab
+from kemonodownloader.domain_config import startup_request_lock
 from kemonodownloader.kd_extension import ExtensionTab
 from kemonodownloader.kd_help import HelpTab
-from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_language import language_manager, translate
 from kemonodownloader.kd_settings import SettingsTab
 from kemonodownloader.kd_thumbnaildl import ThumbnailDownloaderTab
 from kemonodownloader.post_downloader import PostDownloaderTab
@@ -35,6 +36,10 @@ warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 CURRENT_VERSION = "5.13.0"
 GITHUB_REPO = "VoxDroid/KemonoDownloader"
+
+# Window opacity only affects top-level windows, so this is purely how long the
+# tabs stay hidden after they have been built.
+INTRO_TRANSITION_MS = 100
 
 # Available Google Fonts bundled with the app
 BUNDLED_FONTS = {
@@ -68,7 +73,8 @@ class VersionChecker(QThread):
     def run(self):
         try:
             url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
-            response = requests.get(url, timeout=5)
+            with startup_request_lock:
+                response = requests.get(url, timeout=5)
             response.raise_for_status()
             data = response.json()
             latest_version = data["tag_name"].lstrip("v")
@@ -440,11 +446,11 @@ class KemonoDownloader(QMainWindow):
             self.tabs.setTabText(4, translate("help_tab"))
             self.tabs.setTabText(5, translate("extension_tab"))
 
-            if (
-                self.status_label.text() == "Idle"
-                or self.status_label.text() == "アイドル"
-                or self.status_label.text() == "대기 중"
-            ):
+            idle_texts = {
+                language_manager.get_text("idle", language)
+                for language in language_manager.get_available_languages()
+            }
+            if self.status_label.text() in idle_texts:
                 self.status_label.setText(translate("idle"))
 
             self.dev_label.setText(
@@ -466,13 +472,13 @@ class KemonoDownloader(QMainWindow):
         self.main_widget.setWindowOpacity(0)
 
         self.intro_fade = QPropertyAnimation(self.intro_screen, b"windowOpacity")
-        self.intro_fade.setDuration(800)
+        self.intro_fade.setDuration(INTRO_TRANSITION_MS)
         self.intro_fade.setStartValue(1)
         self.intro_fade.setEndValue(0)
         self.intro_fade.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
         self.main_fade = QPropertyAnimation(self.main_widget, b"windowOpacity")
-        self.main_fade.setDuration(800)
+        self.main_fade.setDuration(INTRO_TRANSITION_MS)
         self.main_fade.setStartValue(0)
         self.main_fade.setEndValue(1)
         self.main_fade.setEasingCurve(QEasingCurve.Type.InOutQuad)

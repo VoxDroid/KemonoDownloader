@@ -6,13 +6,16 @@ Fetches the list of supported domains dynamically from the remote config URL.
 Domain list URL:
     https://raw.githubusercontent.com/VoxDroid/KemonoDownloader/refs/heads/main/assets/config/domain
 
-The remote list is fetched once per process and cached in memory.  If the
-fetch fails (network error, timeout, etc.) the module falls back to:
+Callers must never wait on the network: this module is reached at import time
+and from the GUI thread.  The first lookup therefore answers immediately from
 
 1. The bundled ``assets/config/domain`` file (relative to the repository
    root, resolved at import time).
 2. A hardcoded list of known-good domains so the application can always
    start even offline.
+
+and starts a single background refresh that swaps in the remote list when it
+arrives.  A failed refresh simply leaves the local list in place.
 
 Each domain in the list follows a consistent API structure:
 
@@ -27,6 +30,7 @@ config dict, defaulting to the first domain in the list (kemono.cr).
 from __future__ import annotations
 
 import os
+import re
 import threading
 from typing import Dict, List, Optional
 
@@ -61,11 +65,26 @@ _FALLBACK_DOMAINS: List[str] = [
 
 _domains_cache: Optional[List[str]] = None
 _cache_lock = threading.Lock()
+_DOMAIN_PATTERN = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$", re.IGNORECASE)
+
+# Held around the HTTPS requests made in the background during startup: they
+# run on plain ``requests.get``, whose concurrent SSL handshakes and proxy
+# registry lookups are not safe on Windows + Python 3.14.
+startup_request_lock = threading.Lock()
 
 
 def _load_domains_from_text(text: str) -> List[str]:
     """Parse a newline-separated domain list, ignoring blank lines."""
     return [line.strip() for line in text.splitlines() if line.strip()]
+
+
+def _refresh_domains() -> None:
+    """Replace the cached list with the remote one, if it can be fetched."""
+    global _domains_cache
+    with startup_request_lock:
+        domains = _fetch_remote_domains()
+    if domains and all(_DOMAIN_PATTERN.match(domain) for domain in domains):
+        _domains_cache = domains
 
 
 def _fetch_remote_domains() -> Optional[List[str]]:
@@ -97,28 +116,28 @@ def _load_local_domains() -> Optional[List[str]]:
 def get_domains() -> List[str]:
     """Return the list of supported domains.
 
-    The list is fetched from the remote config URL on the first call and
-    cached for the lifetime of the process.  If the remote fetch fails the
-    function falls back to the local bundled file, then to the hardcoded list.
+    The first call answers from the local bundled file, then the hardcoded
+    list, and refreshes from the remote config URL in the background.  The
+    result is cached for the lifetime of the process.
     """
     global _domains_cache
-    if _domains_cache is not None:
-        return _domains_cache
+    domains = _domains_cache
+    if domains is not None:
+        return domains
 
     with _cache_lock:
         # Double-checked locking
         if _domains_cache is not None:
             return _domains_cache
 
-        domains = _fetch_remote_domains()
-        if domains is None:
-            domains = _load_local_domains()
+        domains = _load_local_domains()
         if domains is None:
             domains = list(_FALLBACK_DOMAINS)
 
         _domains_cache = domains
 
-    return _domains_cache
+    threading.Thread(target=_refresh_domains, daemon=True).start()
+    return domains
 
 
 def _is_pawchive_domain(domain: str) -> bool:

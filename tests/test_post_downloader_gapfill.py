@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from PyQt6.QtCore import QSize
 from PyQt6.QtGui import QMovie
 
-from kemonodownloader import post_downloader as pd
+from kemonodownloader import kd_network, post_downloader as pd
 
 
 def make_file_prep_thread(max_retries=2, max_concurrent=1):
@@ -81,7 +81,8 @@ def test_post_module_import_executes_locale_windows_branches(monkeypatch):
     )
     monkeypatch.setattr(locale, "windows_locale", {1033: "en_US"}, raising=False)
 
-    runpy.run_path(pd.__file__, run_name="post_cov_import")
+    # The locale detection both downloaders use lives in kd_network.
+    runpy.run_path(kd_network.__file__, run_name="post_cov_import")
 
     assert calls["n"] >= 2
 

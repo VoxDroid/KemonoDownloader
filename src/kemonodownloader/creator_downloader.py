@@ -1,20 +1,16 @@
 import asyncio
-import ctypes
+import concurrent.futures
 import gzip
 import hashlib
 import json
-import locale
 import os
-import re
 import threading
 import time
-from typing import Optional
 from urllib.parse import parse_qs, urlparse
 
 import qtawesome as qta
 import requests
 from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
 from PyQt6.QtCore import QByteArray, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
@@ -37,7 +33,6 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from requests.adapters import HTTPAdapter  # type: ignore[import]
 
 from kemonodownloader.domain_config import (
     clean_file_url,
@@ -49,165 +44,38 @@ from kemonodownloader.download_policy import (
     get_request_headers,
     release_pawchive_download,
 )
+from kemonodownloader.download_utils import (
+    DOWNLOAD_CHUNK_SIZE,
+    ProgressTracker,
+    ThreadSettings,
+    abbreviate,
+    create_connection_guard,
+    extension_allowed,
+    filename_from_url,
+    iter_post_files,
+    md5_file,
+    response_content_length,
+    sanitize_filename,
+    wait_for_workers,
+)
 from kemonodownloader.hash_db import HashDB
 from kemonodownloader.kd_language import translate
-
-
-class ThreadSettings:
-    """Settings container for thread operations"""
-
-    def __init__(
-        self,
-        creator_posts_max_attempts,
-        post_data_max_retries,
-        file_download_max_retries,
-        api_request_max_retries,
-        simultaneous_downloads,
-        settings_tab=None,
-    ):
-        self.creator_posts_max_attempts = creator_posts_max_attempts
-        self.post_data_max_retries = post_data_max_retries
-        self.file_download_max_retries = file_download_max_retries
-        self.api_request_max_retries = api_request_max_retries
-        self.simultaneous_downloads = simultaneous_downloads
-        self.settings_tab = settings_tab
-
-
-try:
-    locale.setlocale(locale.LC_ALL, "")
-except locale.Error:
-    locale.setlocale(locale.LC_ALL, "C")
-
-if hasattr(ctypes, "windll"):
-    lcid = ctypes.windll.kernel32.GetUserDefaultLCID()
-    system_language = locale.windows_locale.get(lcid, "en_US")
-else:
-    locale_info = locale.getlocale(locale.LC_CTYPE)
-    system_language = locale_info[0] if locale_info and locale_info[0] else "en_US"
-
-system_language = system_language.replace("_", "-")
-accept_language = f"{system_language},en;q=0.9"
-
-_user_agent: Optional[str] = None
-
-
-def get_user_agent() -> str:
-    global _user_agent
-    if _user_agent is None:
-        try:
-            ua = UserAgent()
-            _user_agent = ua.chrome
-        except Exception:
-            _user_agent = (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/131.0.0.0 Safari/537.36"
-            )
-    assert _user_agent is not None
-    return _user_agent
-
+from kemonodownloader.kd_logs import format_log_line, share_console_document
+from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
+    _thread_local,
+    accept_language,
+    get_headers,
+    get_session,
+    get_user_agent,
+)
 
 # get_domain_config is imported from domain_config; re-exported for
 # any callers that import it directly from this module.
 __all__ = ["get_domain_config", "get_domains"]
 
 
-# Default headers (will be updated per request based on domain)
-def _build_headers() -> dict:
-    # Use the first/default domain's referer for the generic header set
-    default_referer = get_domain_config("")["referer"]
-    return {
-        "User-Agent": get_user_agent(),
-        "Referer": default_referer,
-        "Accept": "text/css",
-        "Accept-Language": accept_language,
-        "Accept-Encoding": "gzip, deflate",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-    }
-
-
-HEADERS = None  # Built lazily via get_headers()
-
-
-def get_headers() -> dict:
-    global HEADERS
-    if HEADERS is None:
-        HEADERS = _build_headers()
-    return HEADERS
-
-
 # API_BASE kept for backwards compatibility; resolves to first domain's api_base
 API_BASE = get_domain_config("")["api_base"]
-
-
-# Thread-local storage for per-thread sessions.
-# Using a shared session across ThreadPoolExecutor workers causes
-# concurrent SSL handshakes through the same connection pool, which
-# triggers access-violation crashes on Windows (Python 3.14 / OpenSSL).
-# Giving each thread its own session avoids the problem entirely.
-_thread_local = threading.local()
-
-
-def get_session(settings_tab=None):
-    """Get or create a per-thread requests session with connection pooling.
-
-    Each thread receives its own ``requests.Session`` (and connection pool)
-    so that concurrent SSL handshakes never share underlying OpenSSL state,
-    preventing access-violation crashes on Windows.
-    """
-    session: Optional[requests.Session] = getattr(_thread_local, "session", None)
-    if session is None:
-        session = requests.Session()
-        # Disable automatic environment/registry proxy lookup.
-        # On Windows, concurrent threads calling proxy_bypass_registry
-        # via winreg cause "access violation" crashes.  The app manages
-        # its own proxy settings through the Settings tab instead.
-        session.trust_env = False
-        # Configure connection pool (per-thread, so modest sizes suffice)
-        adapter = HTTPAdapter(
-            pool_connections=10, pool_maxsize=10, max_retries=3, pool_block=False
-        )
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
-        _thread_local.session = session
-
-    # Set proxies if settings_tab is provided
-    if settings_tab:
-        proxies = settings_tab.get_proxy_settings()
-        if proxies:
-            # Check if this is a SOCKS proxy
-            is_socks = any(
-                proxy_url.startswith(("socks4://", "socks5://", "socks5h://"))
-                for proxy_url in proxies.values()
-            )
-            if is_socks:
-                # Reuse a per-thread SOCKS session to avoid creating one
-                # on every call while still keeping threads isolated.
-                socks_session: Optional[requests.Session] = getattr(
-                    _thread_local, "socks_session", None
-                )
-                if socks_session is None:
-                    socks_session = requests.Session()
-                    socks_session.trust_env = False
-                    socks_adapter = HTTPAdapter(
-                        pool_connections=5,
-                        pool_maxsize=5,
-                        max_retries=3,
-                        pool_block=False,
-                    )
-                    socks_session.mount("http://", socks_adapter)
-                    socks_session.mount("https://", socks_adapter)
-                    _thread_local.socks_session = socks_session
-                socks_session.proxies.update(proxies)
-                return socks_session
-            else:
-                # For HTTP proxies, use the per-thread session
-                session.proxies.update(proxies)
-        else:
-            session.proxies.clear()
-
-    return session
 
 
 class PreviewThread(QThread):
@@ -239,27 +107,19 @@ class PreviewThread(QThread):
 
             try:
                 response = get_session(self.settings_tab).get(
-                    self.url, headers=get_headers(), stream=True
+                    self.url, headers=get_headers(), stream=True, timeout=(30, 30)
                 )
                 response.raise_for_status()
-                header = response.headers.get("content-length")
-                try:
-                    total_size = int(header) if header is not None else 0
-                except Exception:
-                    total_size = 0
-                self.total_size = total_size
+                self.total_size = response_content_length(response)
+                tracker = ProgressTracker(self.total_size)
                 downloaded_data = bytearray()
-                for chunk in response.iter_content(chunk_size=8192):
+                for chunk in response.iter_content(chunk_size=DOWNLOAD_CHUNK_SIZE):
                     if chunk:
                         downloaded_data.extend(chunk)
                         self.downloaded_size += len(chunk)
-                        if self.total_size > 0:
-                            progress = int(
-                                (self.downloaded_size / self.total_size) * 100
-                            )
-                        else:
-                            progress = 0
-                        self.progress.emit(min(progress, 100))
+                        progress = tracker.advance(len(chunk))
+                        if progress is not None:
+                            self.progress.emit(progress)
                 pixmap = QPixmap()
                 if not pixmap.loadFromData(QByteArray(bytes(downloaded_data))):
                     self.error.emit(
@@ -863,18 +723,6 @@ class PostPopulationThread(QThread):
         for post_title, (post_id, thumbnail_url) in self.detected_posts:
             unique_title = f"{post_title} (ID: {post_id})"
             post_url_map[unique_title] = (post_id, thumbnail_url)
-            self.log.emit(
-                translate(
-                    "log_debug",
-                    translate(
-                        "mapped_title_to_id_and_thumbnail",
-                        unique_title,
-                        post_id,
-                        thumbnail_url,
-                    ),
-                ),
-                "INFO",
-            )
         self.log.emit(
             translate(
                 "log_debug",
@@ -911,12 +759,6 @@ class FilterThread(QThread):
             if not self.search_text or self.search_text in post_title.lower():
                 is_checked = self.checked_urls.get(post_id, False)
                 filtered_items.append((post_title, post_id, thumbnail_url, is_checked))
-                self.log.emit(
-                    translate(
-                        "log_debug", translate("filtered_post", post_title, post_id)
-                    ),
-                    "INFO",
-                )
         self.finished.emit(filtered_items)
 
 
@@ -960,116 +802,27 @@ class FilePreparationThread(QThread):
             "INFO",
         )
 
-        def get_effective_extension(file_path, file_name):
-            name_ext = os.path.splitext(file_name)[1].lower()
-            path_ext = os.path.splitext(file_path)[1].lower()
-            return name_ext if name_ext else path_ext
-
-        # Main file detection
-        if (
-            self.creator_main_check
-            and "file" in post
-            and post["file"]
-            and "path" in post["file"]
+        labels = {
+            "main": ("checking_main_file", "added_main_file"),
+            "attachment": ("checking_attachment", "added_attachment"),
+            "content": ("checking_content_image", "added_content_image"),
+        }
+        for kind, name, url, ext in iter_post_files(
+            post,
+            domain_config,
+            main=self.creator_main_check,
+            attachments=self.creator_attachments_check,
+            content=self.creator_content_check,
         ):
-            file_path = post["file"]["path"]
-            file_name = post["file"].get("name", "")
-            file_ext = get_effective_extension(file_path, file_name)
-            file_url = clean_file_url(file_path, domain_config)
-            if "f=" not in file_url and file_name:
-                file_url += f"?f={file_name}"
+            checking_key, added_key = labels[kind]
             self.log.emit(
-                translate(
-                    "log_debug", translate("checking_main_file", file_name, file_ext)
-                ),
-                "INFO",
+                translate("log_debug", translate(checking_key, name, ext)), "INFO"
             )
-            if ".jpg" in allowed_extensions and file_ext in [".jpg", ".jpeg"]:
+            if extension_allowed(ext, allowed_extensions):
                 self.log.emit(
-                    translate("log_debug", translate("added_main_file", file_name)),
-                    "INFO",
+                    translate("log_debug", translate(added_key, name)), "INFO"
                 )
-                files_to_download.append((file_name, file_url))
-            elif file_ext in allowed_extensions:
-                self.log.emit(
-                    translate("log_debug", translate("added_main_file", file_name)),
-                    "INFO",
-                )
-                files_to_download.append((file_name, file_url))
-
-        # Attachments detection
-        if self.creator_attachments_check and "attachments" in post:
-            for attachment in post["attachments"]:
-                if isinstance(attachment, dict) and "path" in attachment:
-                    attachment_path = attachment["path"]
-                    attachment_name = attachment.get("name", "")
-                    attachment_ext = get_effective_extension(
-                        attachment_path, attachment_name
-                    )
-                    attachment_url = clean_file_url(attachment_path, domain_config)
-                    if "f=" not in attachment_url and attachment_name:
-                        attachment_url += f"?f={attachment_name}"
-                    self.log.emit(
-                        translate(
-                            "log_debug",
-                            translate(
-                                "checking_attachment", attachment_name, attachment_ext
-                            ),
-                        ),
-                        "INFO",
-                    )
-                    if ".jpg" in allowed_extensions and attachment_ext in [
-                        ".jpg",
-                        ".jpeg",
-                    ]:
-                        self.log.emit(
-                            translate(
-                                "log_debug",
-                                translate("added_attachment", attachment_name),
-                            ),
-                            "INFO",
-                        )
-                        files_to_download.append((attachment_name, attachment_url))
-                    elif attachment_ext in allowed_extensions:
-                        self.log.emit(
-                            translate(
-                                "log_debug",
-                                translate("added_attachment", attachment_name),
-                            ),
-                            "INFO",
-                        )
-                        files_to_download.append((attachment_name, attachment_url))
-
-        # Content images detection
-        if self.creator_content_check and "content" in post and post["content"]:
-            soup = BeautifulSoup(post["content"], "html.parser")
-            for img in soup.select("img[src]"):
-                img_url = clean_file_url(str(img.get("src")), domain_config)
-                img_ext = os.path.splitext(img_url)[1].lower()
-                img_name = os.path.basename(img_url)
-                self.log.emit(
-                    translate(
-                        "log_debug",
-                        translate("checking_content_image", img_name, img_ext),
-                    ),
-                    "INFO",
-                )
-                if ".jpg" in allowed_extensions and img_ext in [".jpg", ".jpeg"]:
-                    self.log.emit(
-                        translate(
-                            "log_debug", translate("added_content_image", img_name)
-                        ),
-                        "INFO",
-                    )
-                    files_to_download.append((img_name, img_url))
-                elif img_ext in allowed_extensions:
-                    self.log.emit(
-                        translate(
-                            "log_debug", translate("added_content_image", img_name)
-                        ),
-                        "INFO",
-                    )
-                    files_to_download.append((img_name, img_url))
+                files_to_download.append((name, url))
 
         self.log.emit(
             translate(
@@ -1104,7 +857,7 @@ class FilePreparationThread(QThread):
                 headers = get_headers().copy()
                 headers["Referer"] = domain_config["referer"]
                 response = get_session(self.settings.settings_tab).get(
-                    api_url, headers=headers
+                    api_url, headers=headers, timeout=30
                 )
                 if response.status_code != 200:
                     if response.status_code == 429 and attempt < max_retries:
@@ -1139,15 +892,6 @@ class FilePreparationThread(QThread):
                     post_data
                     if isinstance(post_data, dict) and "post" not in post_data
                     else post_data.get("post", {})
-                )
-                self.log.emit(
-                    translate(
-                        "log_debug",
-                        translate(
-                            "post_data_for_id", post_id, json.dumps(post, indent=2)
-                        ),
-                    ),
-                    "INFO",
                 )
                 allowed_extensions = [
                     ext.lower()
@@ -1213,10 +957,11 @@ class FilePreparationThread(QThread):
         completed_posts = 0
 
         # Find the creator URL(s) associated with these post_ids
+        wanted_post_ids = set(self.post_ids)
         creator_urls = set()
         for creator_url, posts in self.all_files_map.items():
             for _, (post_id, _) in posts:
-                if post_id in self.post_ids:
+                if post_id in wanted_post_ids:
                     creator_urls.add(creator_url)
                     break
 
@@ -1230,10 +975,11 @@ class FilePreparationThread(QThread):
         # Build work list: (post_id, creator_url) pairs
         work_items = []
         for creator_url in creator_urls:
+            creator_post_ids = {
+                p[1][0] for p in self.all_files_map.get(creator_url, [])
+            }
             for post_id in self.post_ids:
-                if any(
-                    p[1][0] == post_id for p in self.all_files_map.get(creator_url, [])
-                ):
+                if post_id in creator_post_ids:
                     work_items.append((post_id, creator_url))
 
         # Use pure Lock + polling instead of Semaphore/Event to avoid
@@ -1296,14 +1042,7 @@ class FilePreparationThread(QThread):
             t.start()
             workers.append(t)
 
-        # Wait for all workers so none outlive the QThread C++ object.
-        # Thread.join() internally uses Event.wait() which triggers
-        # Condition.notify() access violations on Python 3.14 + Windows,
-        # so poll is_alive() instead.
-        _deadline = time.monotonic() + 30
-        for w in workers:
-            while w.is_alive() and time.monotonic() < _deadline:
-                time.sleep(0.05)
+        wait_for_workers(workers, lambda: self.is_running)
 
         if self.is_running:
             files_to_download = list(dict.fromkeys(files_to_download))
@@ -1315,29 +1054,6 @@ class FilePreparationThread(QThread):
                 "INFO",
             )
             self.finished.emit(files_to_download, files_to_posts_map)
-
-
-def sanitize_filename(name, max_length=100):
-    """Sanitize a filename by removing invalid characters, trailing dots, and limiting length."""
-    if not name:
-        return "unnamed"
-    # Remove invalid characters
-    sanitized = re.sub(r'[<>:"/\\|?*]', "_", name)
-    # Replace spaces with underscores
-    sanitized = sanitized.replace(" ", "_")
-    # Remove multiple consecutive underscores
-    sanitized = re.sub(r"_+", "_", sanitized)
-    # Remove trailing dots (Windows compatibility)
-    sanitized = sanitized.rstrip(".")
-    # Remove leading dots to avoid hidden/unsafe filenames
-    sanitized = sanitized.lstrip(".")
-    # Trim leading/trailing underscores
-    sanitized = sanitized.strip("_")
-    # Limit length
-    if len(sanitized) > max_length:
-        sanitized = sanitized[:max_length].rstrip(".").strip("_")
-    # Ensure non-empty
-    return sanitized if sanitized else "unnamed"
 
 
 class CreatorDownloadThread(QThread):
@@ -1392,12 +1108,7 @@ class CreatorDownloadThread(QThread):
         self.completed_files_lock = threading.Lock()
         self.fetched_texts_lock = threading.Lock()
         self.fetched_texts = set()
-        # Lock to serialize SSL connection establishment across workers.
-        # On Windows + Python 3.14, concurrent SSL handshakes / reads in
-        # OpenSSL trigger native access-violation crashes.  Serialising
-        # only the session.get() call (which does SSL + redirects) while
-        # allowing concurrent body streaming avoids the problem.
-        self._ssl_lock = threading.Lock()
+        self._ssl_lock = create_connection_guard()
         # Defence flag: set in stop() *before* any cleanup.  Workers
         # check this before emitting signals so they never touch the
         # C++ object after it has been scheduled for deletion.
@@ -1519,11 +1230,7 @@ class CreatorDownloadThread(QThread):
         Returns (target_folder, filename)
         """
         # Determine raw filename from URL
-        raw_filename = (
-            file_url.split("f=")[-1]
-            if "f=" in file_url
-            else file_url.split("/")[-1].split("?")[0]
-        )
+        raw_filename = filename_from_url(file_url)
         file_ext = os.path.splitext(raw_filename)[1]
         original_name = os.path.splitext(raw_filename)[0]
 
@@ -1760,8 +1467,8 @@ class CreatorDownloadThread(QThread):
                         "INFO",
                     )
                 else:
-                    with open(existing_path, "rb") as f:
-                        file_hash = hashlib.md5(f.read()).hexdigest()
+                    # Off the event loop: it schedules every other download.
+                    file_hash = await asyncio.to_thread(md5_file, existing_path)
                     if file_hash == entry["file_hash"]:
                         self._safe_emit(
                             self.log,
@@ -1825,43 +1532,40 @@ class CreatorDownloadThread(QThread):
                         # SSL connection and can stream data concurrently.
                         try:
                             response.raise_for_status()
-                            header = response.headers.get("content-length")
-                            try:
-                                file_size = int(header) if header is not None else 0
-                            except Exception:
-                                file_size = 0
+                            file_size = response_content_length(response)
+                            tracker = ProgressTracker(file_size)
+                            hasher = hashlib.md5()
                             downloaded_size = 0
 
                             file_handle = open(full_path, "wb")
                             try:
-                                for chunk in response.iter_content(chunk_size=8192):
+                                for chunk in response.iter_content(
+                                    chunk_size=DOWNLOAD_CHUNK_SIZE
+                                ):
                                     if not self.is_running:
                                         raise Exception("Download interrupted by user")
                                     if chunk:
                                         file_handle.write(chunk)
+                                        hasher.update(chunk)
                                         downloaded_size += len(chunk)
-                                        if file_size > 0:
-                                            progress = int(
-                                                (downloaded_size / file_size) * 100
+                                        progress = tracker.advance(len(chunk))
+                                        if progress is not None:
+                                            self._safe_emit(
+                                                self.file_progress,
+                                                file_index,
+                                                progress,
                                             )
-                                        else:
-                                            progress = 0
-                                        self._safe_emit(
-                                            self.file_progress,
-                                            file_index,
-                                            min(progress, 100),
-                                        )
                             finally:
                                 file_handle.close()
 
-                            return file_size, downloaded_size
+                            return file_size, downloaded_size, hasher.hexdigest()
                         finally:
                             response.close()
                     finally:
                         release_pawchive_download(file_url)
 
                 # Run the download in a thread to avoid blocking
-                file_size, downloaded_size = await asyncio.to_thread(
+                file_size, downloaded_size, file_hash = await asyncio.to_thread(
                     download_with_requests
                 )
 
@@ -1903,8 +1607,6 @@ class CreatorDownloadThread(QThread):
                         f"Size mismatch: downloaded {downloaded_size} bytes, expected {file_size} bytes"
                     )
 
-                with open(full_path, "rb") as f:
-                    file_hash = hashlib.md5(f.read()).hexdigest()
                 actual_file_size = os.path.getsize(full_path)
                 self.hash_db.store(
                     url_hash, full_path, file_hash, file_url, actual_file_size
@@ -1932,6 +1634,12 @@ class CreatorDownloadThread(QThread):
                     )
                     with self.failed_files_lock:
                         self.failed_files[file_url] = str(e)
+                    # A partial file looks like a finished one in the folder.
+                    try:
+                        if os.path.exists(full_path):
+                            os.remove(full_path)
+                    except OSError:
+                        pass
                     self._safe_emit(self.file_progress, file_index, 0)
                     self._safe_emit(self.file_completed, file_index, file_url, False)
                     self.check_post_completion(file_url)
@@ -2092,6 +1800,15 @@ class CreatorDownloadThread(QThread):
         if total_files > 0:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
+            # The default executor is capped by CPU count, which would silently
+            # lower the "simultaneous downloads" setting. Downloads block on the
+            # network, not the CPU, and text fetches and hash checks share the
+            # pool with them.
+            loop.set_default_executor(
+                concurrent.futures.ThreadPoolExecutor(
+                    max_workers=self.max_concurrent * 2
+                )
+            )
             try:
                 queue = asyncio.Queue()
                 for i, file_url in enumerate(self.files_to_download):
@@ -2368,6 +2085,10 @@ class LogsWindow(QDialog):
         self.update_timer.setInterval(500)  # Update every 500ms instead of every log
         self.needs_update = False
 
+        self._shares_console = self._parent is not None and share_console_document(
+            self.logs_display, getattr(self._parent, "creator_console", None)
+        )
+
         # Update logs content
         self.update_logs_content()
 
@@ -2384,7 +2105,8 @@ class LogsWindow(QDialog):
             and self._parent
             and hasattr(self._parent, "creator_console")
         ):
-            self.logs_display.setHtml(self._parent.creator_console.toHtml())
+            if not self._shares_console:
+                self.logs_display.setHtml(self._parent.creator_console.toHtml())
             self.needs_update = False
 
     def closeEvent(self, a0):
@@ -4406,6 +4128,8 @@ class CreatorDownloaderTab(QWidget):
     def expand_logs(self):
         """Open the full logs window"""
         if not hasattr(self, "logs_window") or not self.logs_window.isVisible():
+            if hasattr(self, "logs_window"):
+                self.logs_window.deleteLater()
             self.logs_window = LogsWindow(self)
             self.logs_window.show()
         else:
@@ -4549,7 +4273,7 @@ class CreatorDownloaderTab(QWidget):
                     translate(
                         "no_posts_selected_for_creator",
                         self.current_creator_url,
-                        self.checked_urls,
+                        abbreviate(self.checked_urls),
                     ),
                 ),
                 "WARNING",
@@ -4565,7 +4289,7 @@ class CreatorDownloaderTab(QWidget):
                     len(self.posts_to_download),
                     len(self.checked_urls),
                     len(self.all_detected_posts),
-                    self.posts_to_download,
+                    abbreviate(self.posts_to_download),
                 ),
             ),
             "INFO",
@@ -4581,6 +4305,9 @@ class CreatorDownloaderTab(QWidget):
                 translate("log_warning", translate("filtering_already_in_progress")),
                 "WARNING",
             )
+            # Run again afterwards, or the list would not match the text typed
+            # while this pass was in flight.
+            self._filter_rerun_requested = True
             return
         self.background_task_label.setText(translate("filtering_posts"))
         self.background_task_progress.setRange(0, 0)
@@ -4628,28 +4355,15 @@ class CreatorDownloaderTab(QWidget):
                 self.active_threads.remove(self.filter_thread)
             self.filter_thread.deleteLater()
             self.filter_thread = None
+        if getattr(self, "_filter_rerun_requested", False):
+            self._filter_rerun_requested = False
+            self.filter_items()
 
     def add_list_item(self, text, url, is_checked):
         item = QListWidgetItem()
         item.setData(Qt.UserRole, url)
         post_id = self.post_url_map[text][0]
         item.setData(Qt.UserRole + 1, post_id)
-        widget = QWidget()
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(5)
-
-        check_box = QCheckBox()
-        check_box.setStyleSheet("color: white;")
-        check_box.setChecked(is_checked)
-        check_box.clicked.connect(lambda: self.toggle_checkbox_state(text))
-        layout.addWidget(check_box)
-
-        label = QLabel(text)
-        label.setStyleSheet("color: white;")
-        label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
-        layout.addWidget(label, stretch=1)
-
         widget = QWidget()
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -4830,10 +4544,7 @@ class CreatorDownloaderTab(QWidget):
                 self.previous_selected_widgets.append(widget)
 
     def append_log_to_console(self, message, level="INFO"):
-        color = {"INFO": "green", "WARNING": "yellow", "ERROR": "red"}.get(
-            level, "white"
-        )
-        self.creator_console.append(f"<span style='color:{color}'>{message}</span>")
+        self.creator_console.append(format_log_line(message, level))
 
         if hasattr(self, "logs_window") and self.logs_window.isVisible():
             self.logs_window.update_logs_content()

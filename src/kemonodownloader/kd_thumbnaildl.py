@@ -4,6 +4,7 @@ import concurrent.futures
 import hashlib
 import os
 import re
+import threading
 import time
 import urllib.parse
 from typing import Dict, List, Optional, Tuple
@@ -31,9 +32,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from kemonodownloader.creator_downloader import get_session
 from kemonodownloader.domain_config import get_domain_config
+from kemonodownloader.download_utils import (
+    DOWNLOAD_CHUNK_SIZE,
+    ProgressTracker,
+    response_content_length,
+)
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_network import get_session
 from kemonodownloader.post_downloader import MediaPreviewModal
 
 SUPPORTED_THUMBNAIL_EXTS = (".jpg", ".jpeg", ".png", ".gif", ".webp")
@@ -370,10 +376,10 @@ class ThumbnailDownloadThread(QThread):
         self.is_cancelled = False
         # Per-post file counters for auto-rename (shared across threads, protected by lock)
         self._post_file_counters: dict = {}
-        self._post_file_counters_lock = __import__("threading").Lock()
+        self._post_file_counters_lock = threading.Lock()
         # Track which post text files we've already saved
         self._saved_texts: set = set()
-        self._saved_texts_lock = __import__("threading").Lock()
+        self._saved_texts_lock = threading.Lock()
         os.makedirs(self.save_dir, exist_ok=True)
 
     def cancel(self):
@@ -665,17 +671,18 @@ class ThumbnailDownloadThread(QThread):
                 "Referer": get_domain_config(thumb_url)["referer"],
             }
 
+            temp_path = filepath + ".tmp"
+            res = None
             try:
                 res = session.get(thumb_url, headers=headers, timeout=20, stream=True)
                 res.raise_for_status()
 
-                total_bytes = int(res.headers.get("content-length", 0))
-                downloaded_bytes = 0
+                total_bytes = response_content_length(res)
+                tracker = ProgressTracker(total_bytes)
 
-                temp_path = filepath + ".tmp"
                 hasher = hashlib.md5()
                 with open(temp_path, "wb") as f:
-                    for chunk in res.iter_content(chunk_size=8192):
+                    for chunk in res.iter_content(chunk_size=DOWNLOAD_CHUNK_SIZE):
                         if self.is_cancelled:
                             f.close()
                             if os.path.exists(temp_path):
@@ -684,10 +691,11 @@ class ThumbnailDownloadThread(QThread):
                         if chunk:
                             f.write(chunk)
                             hasher.update(chunk)
-                            downloaded_bytes += len(chunk)
-                            if total_bytes > 0:
+                            if tracker.advance(len(chunk)) is not None and (
+                                total_bytes > 0
+                            ):
                                 self.file_progress_updated.emit(
-                                    downloaded_bytes, total_bytes
+                                    tracker.downloaded, total_bytes
                                 )
 
                 if os.path.exists(filepath):
@@ -706,7 +714,15 @@ class ThumbnailDownloadThread(QThread):
 
             except Exception as e:
                 self.log_message.emit(f"Failed download ({thumb_url}): {str(e)}")
+                try:
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                except OSError:
+                    pass
                 return False
+            finally:
+                if res is not None:
+                    res.close()
 
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=self.simultaneous_downloads

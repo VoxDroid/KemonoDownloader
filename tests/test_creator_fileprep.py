@@ -65,7 +65,7 @@ def test_fetch_and_detect_files_success(monkeypatch, qapp):
             }
 
     class S:
-        def get(self, url, headers=None):
+        def get(self, url, headers=None, timeout=None):
             return Resp()
 
     monkeypatch.setattr(cd, "get_session", lambda st: S())
@@ -105,7 +105,7 @@ def test_fetch_and_detect_files_429_retry(monkeypatch, qapp):
     calls = {"i": 0}
 
     class S:
-        def get(self, url, headers=None):
+        def get(self, url, headers=None, timeout=None):
             calls["i"] += 1
             return Resp429() if calls["i"] == 1 else Resp200()
 

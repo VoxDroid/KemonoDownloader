@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from kemonodownloader import kd_network
 from kemonodownloader.creator_downloader import CreatorDownloadThread
 
 
@@ -505,11 +506,11 @@ class TestHelpers:
 
         # Force exception in UserAgent
         monkeypatch.setattr(
-            "kemonodownloader.creator_downloader.UserAgent",
+            "kemonodownloader.kd_network.UserAgent",
             MagicMock(side_effect=Exception("Mock Fail")),
         )
         # Clear cached UA
-        monkeypatch.setattr(kemonodownloader.creator_downloader, "_user_agent", None)
+        monkeypatch.setattr(kd_network, "_user_agent", None)
         ua = get_user_agent()
         assert "Mozilla" in ua
 
@@ -519,11 +520,11 @@ class TestHelpers:
 
         # Force exception in UserAgent
         monkeypatch.setattr(
-            "kemonodownloader.post_downloader.UserAgent",
+            "kemonodownloader.kd_network.UserAgent",
             MagicMock(side_effect=Exception("Mock Fail")),
         )
         # Clear cached UA
-        monkeypatch.setattr(kemonodownloader.post_downloader, "_user_agent", None)
+        monkeypatch.setattr(kd_network, "_user_agent", None)
         ua = get_user_agent()
         assert "Mozilla" in ua
 

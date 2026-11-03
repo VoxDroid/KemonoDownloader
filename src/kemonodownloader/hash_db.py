@@ -41,7 +41,6 @@ class HashDB:
     def _get_connection(self) -> sqlite3.Connection:
         """Create a new connection (one per call – safe for threads)."""
         conn = sqlite3.connect(self.db_path, timeout=30)
-        conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA synchronous=NORMAL")
         conn.row_factory = sqlite3.Row
         return conn
@@ -51,6 +50,9 @@ class HashDB:
         with self._lock:
             conn = self._get_connection()
             try:
+                # journal_mode is stored in the database file, so setting it
+                # once here covers every later connection.
+                conn.execute("PRAGMA journal_mode=WAL")
                 conn.execute(
                     """
                     CREATE TABLE IF NOT EXISTS file_hashes (

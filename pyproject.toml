@@ -31,7 +31,6 @@ requires = [
     "packaging",
     "pillow",
     "fake-useragent",
-    "aiohttp",
     "PySocks",
 ]
 
