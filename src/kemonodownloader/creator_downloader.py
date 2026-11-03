@@ -884,6 +884,8 @@ class FilePreparationThread(QThread):
                             "WARNING",
                         )
                         for i in range(retry_delay_seconds, 0, -1):
+                            if not self.is_running:
+                                return None  # cancelled: stop retrying
                             self.log.emit(
                                 translate("log_info", translate("trying_again_in", i)),
                                 "INFO",
@@ -943,6 +945,8 @@ class FilePreparationThread(QThread):
                     "WARNING",
                 )
                 for i in range(retry_delay_seconds, 0, -1):
+                    if not self.is_running:
+                        return None
                     self.log.emit(
                         translate("log_info", translate("trying_again_in", i)), "INFO"
                     )
@@ -1933,6 +1937,8 @@ class ValidationThread(QThread):
         retry_delay = 2
 
         for attempt in range(1, max_retries + 1):
+            if not self.is_running:
+                return  # cancelled: no verdict to report
             try:
                 # Use fallback validation with robust headers
                 fallback_headers = {

@@ -1452,9 +1452,11 @@ class TestPostDownloaderTab:
 
     def test_start_post_download_full(self, post_tab, monkeypatch):
         post_tab.post_queue = [("https://kemono.cr/post/1", False)]
-        post_tab.download_all_links.setChecked(True)
         post_tab.checked_urls = {"url1": True}
+        # Detected files first: ticking "Download all links" with none known
+        # starts a real detection thread for every queued URL.
         post_tab.all_files_map = {"https://kemono.cr/post/1": [("title", "1")]}
+        post_tab.download_all_links.setChecked(True)
 
         # Mocking to avoid UI dependency issues
         monkeypatch.setattr(

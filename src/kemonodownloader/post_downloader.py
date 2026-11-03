@@ -736,6 +736,8 @@ class PostDetectionThread(QThread):
         if max_retries is None:
             max_retries = self.settings.api_request_max_retries
         for attempt in range(max_retries):
+            if not self.is_running:
+                return None  # cancelled: don't sleep through the retries
             try:
                 response = get_session(self.settings.settings_tab).get(
                     url, headers=get_headers(), timeout=10
@@ -880,6 +882,8 @@ class FilePreparationThread(QThread):
                             "WARNING",
                         )
                         for i in range(retry_delay_seconds, 0, -1):
+                            if not self.is_running:
+                                return None
                             self.log.emit(
                                 translate("log_info", f"Trying again in {i}"), "INFO"
                             )
@@ -939,6 +943,8 @@ class FilePreparationThread(QThread):
                     "WARNING",
                 )
                 for i in range(retry_delay_seconds, 0, -1):
+                    if not self.is_running:
+                        return None
                     self.log.emit(translate("log_info", f"Trying again in {i}"), "INFO")
                     time.sleep(1)
 
@@ -946,6 +952,8 @@ class FilePreparationThread(QThread):
         if max_retries is None:
             max_retries = self.settings.api_request_max_retries
         for attempt in range(max_retries):
+            if not self.is_running:
+                return None  # cancelled: don't sleep through the retries
             try:
                 response = get_session(self.settings.settings_tab).get(
                     url, headers=get_headers(), timeout=10
@@ -1167,6 +1175,8 @@ class DownloadThread(QThread):
         if max_retries is None:
             max_retries = self.settings.api_request_max_retries
         for attempt in range(max_retries):
+            if not self.is_running:
+                return None  # cancelled: don't sleep through the retries
             try:
                 response = get_session(self.settings.settings_tab).get(
                     url, headers=get_headers(), timeout=10
