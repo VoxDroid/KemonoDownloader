@@ -1,5 +1,50 @@
 # Kemono Downloader Release Notes
 
+## v5.14.0 (03 November 2026)
+**feat: History tab with download history and favorites, a smoother and faster interface, and download reliability fixes**
+
+- Add a History tab (`kd_history.py`, `history_store.py`).
+  Every finished or cancelled post, creator and thumbnail download is recorded with its links, files (done/total and failures), posts, size on disk, duration, status and folder. Search, filter by type, sort any column, and see totals for what is shown. Open a download's folder, or recover when it was moved, renamed or deleted (locate it, open the nearest parent folder, or download it again). Copy links, send them back to the right downloader queue, save them to favorites, remove entries or clear the history (downloaded files are never touched), export the list as CSV, or pause recording.
+
+- Add Favorites.
+  Save post and creator links with the new star button in the Post and Creator tabs, from the history, or by pasting a link. Edit titles and notes, see when each favorite was last downloaded, queue it in one click, open it in the browser, and import or export favorites as a `.txt` list. History and favorites are stored in `library.db` beside the hash database; an unreadable file is set aside and recreated, and an unwritable folder falls back to an in-memory store with a warning.
+
+- Make launching instant and the interface smoother.
+  The tabs are built in the background while the intro screen is showing, so clicking Launch responds in milliseconds instead of blocking for about a second. The intro now fades in, Launch crossfades into the main screen, and switching tabs by click crossfades between pages (the previous window-opacity fades never displayed). Mouse-wheel scrolling glides, lists scroll by pixel, and the file and overall progress bars ease to new values. The Help manual is rendered as one document (about 430 ms faster to build) and its links are clickable.
+
+- Start faster and stop waiting on the network at startup.
+  The supported-domain list is read from the bundled file and refreshed in the background, so the app no longer blocks on it (startup without a network connection: about 6 s to 1 s).
+
+- Make downloads lighter on the interface and memory.
+  Progress is reported at most once per percentage point and files stream in 64 KB chunks (a 200 MB file sends about 101 progress updates instead of 25,600). Files are hashed while they download and existing files are verified in 1 MB blocks, off the creator downloader's event loop (peak memory for a 200 MB file: about 210 MB to 12 MB). The full logs window shares the console's document instead of re-rendering a copy every half second, and large debug dumps are shortened. The creator downloader's worker pool now honours the "simultaneous downloads" setting above the CPU count.
+
+- Fix downloads reported finished too early.
+  The post downloader stopped waiting for its workers after 30 seconds, so large files could be marked complete while still downloading, and file preparation could silently drop files. Workers are now awaited for as long as a download runs, with a grace period only after cancelling.
+
+- Fix several download and interface bugs.
+  - Server-supplied file names can no longer escape the download folder (for example `..\..\file.exe`), and characters Windows rejects are replaced.
+  - Partial files are removed when a download finally fails.
+  - Compressed responses no longer fail with a false size mismatch.
+  - Missing request timeouts were added, so a stalled server can no longer hang a download thread.
+  - Cancelling stops retry and back-off loops promptly instead of letting threads sleep through their remaining retries.
+  - Creator post search no longer drops text typed while a search is running.
+  - Creator post rows were built twice; they are now built once.
+  - The Post tab no longer shows stray numbers such as "0 0 0 0" after progress labels.
+  - Log lines escape titles and file names instead of rendering them as markup.
+  - The idle status label updates in every language, including Simplified Chinese.
+  - Six translation keys the app already used were missing, so some dialog titles showed raw names such as "warning"; they are now translated in all four languages.
+
+- Fix native crashes.
+  Closing the app no longer crashes on exit, clicking Launch during the intro fade no longer crashes, and scrolling over a tab no longer crashes. The History tab destroys its tables before their data models.
+
+- Refactor shared code into `download_utils.py`, `kd_network.py`, `kd_logs.py` and `kd_motion.py`.
+  Removes code that was duplicated between the downloaders (about 560 fewer lines) and the dependency of the Post Downloader on the Creator Downloader module.
+
+- Remove the unused `aiohttp` and `asyncio` requirements.
+
+- Make the test suite reliable and offline.
+  Tests can no longer reach the internet, a test that started a real network thread was fixed, and leaked test threads are stopped cooperatively before any forced termination; together these fix an intermittent access-violation crash in full test runs. Adds tests for the history store and tab, the recording hooks, translation coverage in every language, the motion helpers, and the download fixes.
+
 ## v5.13.0 (27 September 2026)
 **fix: responsible Pawchive request pacing and improved resilience to HTTP 403 responses**
 

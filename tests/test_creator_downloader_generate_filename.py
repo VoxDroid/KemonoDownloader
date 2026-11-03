@@ -1,6 +1,6 @@
 import os
 
-from kemonodownloader import creator_downloader as cd
+from kemonodownloader import creator_downloader as cd, kd_network
 
 
 class DummySettingsTab:
@@ -28,18 +28,18 @@ def test_sanitize_filename_various():
 
 
 def test_get_user_agent_fallback(monkeypatch):
-    orig_UserAgent = cd.UserAgent
+    orig_UserAgent = kd_network.UserAgent
 
     class BadUA:
         def __init__(self):
             raise Exception("no UA")
 
-    monkeypatch.setattr(cd, "UserAgent", BadUA)
-    cd._user_agent = None
+    monkeypatch.setattr(kd_network, "UserAgent", BadUA)
+    kd_network._user_agent = None
     ua = cd.get_user_agent()
     assert "Mozilla/5.0" in ua
     # restore (monkeypatch will revert automatically, but be explicit)
-    monkeypatch.setattr(cd, "UserAgent", orig_UserAgent)
+    monkeypatch.setattr(kd_network, "UserAgent", orig_UserAgent)
 
 
 def test_generate_filename_and_folder(tmp_path):
@@ -465,10 +465,10 @@ def test_detect_files_main_attachments_content(tmp_path):
 
 def test_get_session_with_socks(monkeypatch):
     # Clear any existing thread-local sessions
-    if hasattr(cd._thread_local, "session"):
-        delattr(cd._thread_local, "session")
-    if hasattr(cd._thread_local, "socks_session"):
-        delattr(cd._thread_local, "socks_session")
+    if hasattr(kd_network._thread_local, "session"):
+        delattr(kd_network._thread_local, "session")
+    if hasattr(kd_network._thread_local, "socks_session"):
+        delattr(kd_network._thread_local, "socks_session")
 
     class FakeSettingsTabObj:
         def get_proxy_settings(self):

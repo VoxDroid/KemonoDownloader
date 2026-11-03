@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.13.0-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.14.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -119,10 +119,10 @@ As of **August 01, 2026**, primary full-resolution media download servers for **
 
 | Site / Server | Status | Last Checked |
 | :--- | :---: | :--- |
-| [Kemono.cr Media Server](https://kemono.cr) | 🔴 Intermittent / Unavailable | August 1, 2026 |
-| [Coomer.st Media Server](https://coomer.st) | 🔴 Intermittent / Unavailable | August 1, 2026 |
-| [Pawchive.pw Media Server](https://pawchive.pw) | 🟢 Available | August 1, 2026 |
-| Thumbnail Delivery Servers (`img.*`) | 🟢 Available | August 1, 2026 |
+| [Kemono.cr Media Server](https://kemono.cr) | 🔴 Intermittent / Unavailable | November 3, 2026 |
+| [Coomer.st Media Server](https://coomer.st) | 🔴 Intermittent / Unavailable | November 3, 2026 |
+| [Pawchive.pw Media Server](https://pawchive.pw) | 🟢 Available | November 3, 2026 |
+| Thumbnail Delivery Servers (`img.*`) | 🟢 Available | November 3, 2026 |
 
 *Note: Status reflects the availability of backend media download servers. Front-end availability and thumbnail servers may vary.*
 
@@ -148,6 +148,7 @@ We are committed to fostering a welcoming and respectful community around Kemono
   - [Post Downloader Tab](#post-downloader-tab)
   - [Creator Downloader Tab](#creator-downloader-tab)
   - [Thumbnail Downloader Tab](#thumbnail-downloader-tab)
+  - [History Tab](#history-tab)
   - [Settings Tab](#settings-tab)
   - [Help Tab](#help-tab)
 - [Screenshots](#screenshots)
@@ -177,6 +178,8 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **URL Import** | Import multiple creator URLs from .txt files for batch processing. |
 | **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. In Creator Downloader, auto-detects and downloads all posts for each queued creator sequentially. |
 | **Download UI Lock** | All controls are disabled during active downloads (except Cancel and Expand Logs) to prevent accidental changes. |
+| **Download History** | Every finished post, creator and thumbnail download is recorded with files, posts, size, duration and status. Open its folder (with recovery options if the folder was moved or deleted), copy its links, queue it again, or export the list as CSV. Recording can be paused and the history cleared at any time. |
+| **Favorites** | Bookmark posts and creators with the star button in the Post or Creator tab, from the history, or by pasting a link. Edit titles and notes, see when each was last downloaded, queue them in one click, and import or export them as a .txt list. |
 
 ### $\color{#90a4ae}{\sf{\text{Performance and Reliability}}}$
 
@@ -186,6 +189,9 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Retry Mechanisms** | Configurable retries for posts fetching, data retrieval, file downloads, and API requests. |
 | **File Deduplication** | Prevents redundant downloads using SQLite-backed URL hashing (auto-migrates from legacy JSON). |
 | **Connection Pooling** | Efficient HTTP connection management with gzip compression support. |
+| **Fast Startup** | The supported-domain list loads from the bundled file and refreshes in the background, so the app never waits on the network to start. |
+| **Lightweight Downloads** | Files are hashed while they download and progress is reported once per percent, keeping memory low and the interface responsive even for multi-gigabyte files. |
+| **Safe File Handling** | Server-supplied file names cannot escape the download folder, partial files are removed after a failed download, and large downloads are never reported complete early. |
 
 ### $\color{#90a4ae}{\sf{\text{User Interface and Experience}}}$
 
@@ -195,6 +201,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Multilingual Support** | Dynamic language switching between English, Japanese, Korean, and Simplified Chinese. |
 | **Media Playback** | Built-in video and GIF preview with play/pause/seek/volume controls. |
 | **Real-time Logging** | In-app console with progress bars and detailed status updates. |
+| **Smooth Interface** | Tabs are prepared while the intro is showing so Launch is instant; crossfades between screens and tabs, gliding mouse-wheel scrolling, and progress bars that ease to new values. |
 
 ### $\color{#90a4ae}{\sf{\text{Advanced Features}}}$
 
@@ -247,7 +254,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | Feature | Description |
 |---------|-------------|
 | **Local Storage** | All data stored locally with user-specified paths |
-| **No Data Collection** | No transmission of user data or download history |
+| **No Data Collection** | No transmission of user data. Download history and favorites stay on your computer in `library.db`; recording can be paused and the history cleared at any time |
 | **HTTPS Only** | Secure connections to Kemono.cr, Coomer.st, and Pawchive.pw APIs |
 | **Ethical Design** | Promotes legal and responsible content access |
 
@@ -347,7 +354,7 @@ Support ongoing development and get access here: **[Ko-fi Binaries Page](https:/
    - **Note**: An internet connection is required to fetch content from Kemono.cr, Coomer.st, and Pawchive.pw.
 
 ## $\color{#546e7a}{\sf{\text{Usage}}}$ <a name="usage"></a>
-Upon launching, you’ll see an introductory screen with a "Launch" button. Click it to enter the main interface, featuring four tabs: **Post Downloader**, **Creator Downloader**, **Settings**, and **Help**. The in-app Help tab contains a comprehensive user manual.
+Upon launching, you’ll see an introductory screen with a "Launch" button. Click it to enter the main interface, featuring seven tabs: **Post Downloader**, **Creator Downloader**, **Thumbnail Downloader**, **History**, **Settings**, **Help**, and **Browser Extension**. The in-app Help tab contains a comprehensive user manual.
 
 ### $\color{#90a4ae}{\sf{\text{Getting Started}}}$ <a name="getting-started"></a>
 - The application creates default directories (`Downloads`, `Cache`, `Other Files`) in the specified save location.
@@ -378,6 +385,14 @@ Upon launching, you’ll see an introductory screen with a "Launch" button. Clic
   3. Click "Detect Thumbnails" to scan and list thumbnail images.
   4. Configure "Auto Rename and sort File name by order" and "Download Post Text" options as desired.
   5. Click "Start Download" to archive thumbnails and post text descriptions into organized creator/post folders.
+
+### $\color{#90a4ae}{\sf{\text{History Tab}}}$ <a name="history-tab"></a>
+- **Purpose**: Look back at what you downloaded and keep a list of favorite posts and creators.
+- **How to Use**:
+  1. Open the History tab to see finished downloads; search, filter by type, or sort any column.
+  2. Select rows to open their folder, copy links, add them back to a queue, or save them to Favorites. If a folder no longer exists you can locate it, open its parent folder, or download it again.
+  3. Switch to Favorites to manage saved links: paste a link and press Save, double-click a title or note to edit it, or double-click a row to queue it.
+  4. Untick "Record download history" to pause recording. History and favorites are stored in `library.db` inside the app's "Other Files" folder; removing entries never deletes downloaded files.
 
 ### $\color{#90a4ae}{\sf{\text{Settings Tab}}}$ <a name="settings-tab"></a>
 - **Purpose**: Customize the application’s behavior.

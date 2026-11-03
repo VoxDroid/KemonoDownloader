@@ -1,5 +1,7 @@
 from types import SimpleNamespace
 
+from kemonodownloader import kd_network
+
 
 def test_get_user_agent_fallback_creator(monkeypatch):
     import kemonodownloader.creator_downloader as cd
@@ -8,8 +10,8 @@ def test_get_user_agent_fallback_creator(monkeypatch):
         def __init__(self):
             raise Exception("no ua")
 
-    monkeypatch.setattr(cd, "UserAgent", BadUA)
-    monkeypatch.setattr(cd, "_user_agent", None)
+    monkeypatch.setattr(kd_network, "UserAgent", BadUA)
+    monkeypatch.setattr(kd_network, "_user_agent", None)
     ua = cd.get_user_agent()
     assert "Mozilla/5.0" in ua
 
@@ -26,8 +28,8 @@ def test_get_session_thread_local(monkeypatch):
 
     # Reset thread-local sessions
     if hasattr(cd, "_thread_local"):
-        cd._thread_local.session = None
-        cd._thread_local.socks_session = None
+        kd_network._thread_local.session = None
+        kd_network._thread_local.socks_session = None
 
     s1 = cd.get_session()
     s2 = cd.get_session()
@@ -42,7 +44,7 @@ def test_get_session_thread_local(monkeypatch):
             }
 
     # Reset to force creation of socks session
-    cd._thread_local.socks_session = None
+    kd_network._thread_local.socks_session = None
     socks = cd.get_session(StubSettings())
     assert hasattr(socks, "proxies")
 

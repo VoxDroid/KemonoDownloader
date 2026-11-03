@@ -43,7 +43,7 @@ def test_preview_thread_network_success_post(tmp_path, monkeypatch):
             return
 
     class FakeSession:
-        def get(self, url, headers=None, stream=None):
+        def get(self, url, headers=None, stream=None, timeout=None):
             return FakeResp()
 
     monkeypatch.setattr(pd, "get_session", lambda settings_tab=None: FakeSession())

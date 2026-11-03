@@ -1,16 +1,16 @@
 import os
 
-from kemonodownloader import creator_downloader as cd
+from kemonodownloader import creator_downloader as cd, kd_network
 
 
 def _clear_thread_local():
     # Clear any per-thread session state to keep tests isolated
     try:
-        delattr(cd._thread_local, "session")
+        delattr(kd_network._thread_local, "session")
     except Exception:
         pass
     try:
-        delattr(cd._thread_local, "socks_session")
+        delattr(kd_network._thread_local, "socks_session")
     except Exception:
         pass
 
@@ -25,10 +25,10 @@ def test_sanitize_and_domain_getters():
 def test_get_user_agent_fallback(monkeypatch):
     # Force UserAgent constructor to raise to exercise fallback
     monkeypatch.setattr(
-        cd, "UserAgent", lambda: (_ for _ in ()).throw(Exception("no ua"))
+        kd_network, "UserAgent", lambda: (_ for _ in ()).throw(Exception("no ua"))
     )
     # Reset cached value
-    monkeypatch.setattr(cd, "_user_agent", None)
+    monkeypatch.setattr(kd_network, "_user_agent", None)
     ua = cd.get_user_agent()
     assert isinstance(ua, str)
     assert ua.startswith("Mozilla/")
@@ -39,10 +39,10 @@ def test_get_headers(monkeypatch):
     class FakeUA:
         chrome = "FAKE_CHROME"
 
-    monkeypatch.setattr(cd, "UserAgent", lambda: FakeUA())
-    monkeypatch.setattr(cd, "_user_agent", None)
+    monkeypatch.setattr(kd_network, "UserAgent", lambda: FakeUA())
+    monkeypatch.setattr(kd_network, "_user_agent", None)
     # Reset HEADERS
-    monkeypatch.setattr(cd, "HEADERS", None)
+    monkeypatch.setattr(kd_network, "HEADERS", None)
     headers = cd.get_headers()
     assert "User-Agent" in headers
     assert headers["User-Agent"] == "FAKE_CHROME"
@@ -69,8 +69,8 @@ def test_get_session_proxy_http_and_socks(monkeypatch):
     socks_settings = FakeSettings({"http": "socks5://127.0.0.1:9050"})
     s2 = cd.get_session(socks_settings)
     # The module stores a socks_session on thread-local storage
-    assert getattr(cd._thread_local, "socks_session", None) is not None
-    assert s2 is getattr(cd._thread_local, "socks_session")
+    assert getattr(kd_network._thread_local, "socks_session", None) is not None
+    assert s2 is getattr(kd_network._thread_local, "socks_session")
 
 
 def test_detect_files_main_attachments_and_content(qapp):
@@ -227,7 +227,7 @@ def test_fetch_and_detect_files_retry(monkeypatch):
 
     def fake_get_session(tab=None):
         class S:
-            def get(self, url, headers=None):
+            def get(self, url, headers=None, timeout=None):
                 calls["count"] += 1
                 if calls["count"] == 1:
                     return FakeResp429()

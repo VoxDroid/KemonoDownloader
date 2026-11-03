@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from kemonodownloader import kd_network
 from kemonodownloader.creator_downloader import CreatorDownloadThread
 
 
@@ -505,11 +506,11 @@ class TestHelpers:
 
         # Force exception in UserAgent
         monkeypatch.setattr(
-            "kemonodownloader.creator_downloader.UserAgent",
+            "kemonodownloader.kd_network.UserAgent",
             MagicMock(side_effect=Exception("Mock Fail")),
         )
         # Clear cached UA
-        monkeypatch.setattr(kemonodownloader.creator_downloader, "_user_agent", None)
+        monkeypatch.setattr(kd_network, "_user_agent", None)
         ua = get_user_agent()
         assert "Mozilla" in ua
 
@@ -519,11 +520,11 @@ class TestHelpers:
 
         # Force exception in UserAgent
         monkeypatch.setattr(
-            "kemonodownloader.post_downloader.UserAgent",
+            "kemonodownloader.kd_network.UserAgent",
             MagicMock(side_effect=Exception("Mock Fail")),
         )
         # Clear cached UA
-        monkeypatch.setattr(kemonodownloader.post_downloader, "_user_agent", None)
+        monkeypatch.setattr(kd_network, "_user_agent", None)
         ua = get_user_agent()
         assert "Mozilla" in ua
 
@@ -1451,9 +1452,11 @@ class TestPostDownloaderTab:
 
     def test_start_post_download_full(self, post_tab, monkeypatch):
         post_tab.post_queue = [("https://kemono.cr/post/1", False)]
-        post_tab.download_all_links.setChecked(True)
         post_tab.checked_urls = {"url1": True}
+        # Detected files first: ticking "Download all links" with none known
+        # starts a real detection thread for every queued URL.
         post_tab.all_files_map = {"https://kemono.cr/post/1": [("title", "1")]}
+        post_tab.download_all_links.setChecked(True)
 
         # Mocking to avoid UI dependency issues
         monkeypatch.setattr(

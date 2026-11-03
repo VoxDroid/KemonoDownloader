@@ -1,5 +1,6 @@
 import gc
 import os
+import socket
 import sys
 from pathlib import Path
 
@@ -12,6 +13,48 @@ sys.path.append(str(src_path))
 # Hold a strong reference so the QApplication is not garbage-collected.
 _qapp_instance = None
 
+_LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+
+
+def _block_real_network():
+    """Make any attempt to reach a real host fail at once.
+
+    Tests must never touch the internet. Besides being slow and flaky, a test
+    that accidentally starts a real request leaves a thread blocked in network
+    I/O after it ends; the thread cleanup below then has to kill it, and
+    killing a thread mid-read corrupts the interpreter and crashes a later
+    test natively. Failing fast turns that into an ordinary handled error.
+    """
+    real_getaddrinfo = socket.getaddrinfo
+    real_connect = socket.socket.connect
+    real_connect_ex = socket.socket.connect_ex
+
+    def is_local(host):
+        if isinstance(host, bytes):
+            host = host.decode(errors="replace")
+        return host in (None, "") or str(host) in _LOOPBACK
+
+    def getaddrinfo(host, *args, **kwargs):
+        if not is_local(host):
+            raise socket.gaierror(f"network access is blocked in tests: {host}")
+        return real_getaddrinfo(host, *args, **kwargs)
+
+    def check(address):
+        if isinstance(address, tuple) and not is_local(address[0]):
+            raise OSError(f"network access is blocked in tests: {address[0]}")
+
+    def connect(self, address):
+        check(address)
+        return real_connect(self, address)
+
+    def connect_ex(self, address):
+        check(address)
+        return real_connect_ex(self, address)
+
+    socket.getaddrinfo = getaddrinfo
+    socket.socket.connect = connect
+    socket.socket.connect_ex = connect_ex
+
 
 def pytest_configure(config):
     """Create a QApplication early so modules that import Qt at import-time can succeed.
@@ -21,6 +64,9 @@ def pytest_configure(config):
     qt_qpa_platform = "offscreen", but we also apply it here as a safety net.
     """
     global _qapp_instance
+    # Before anything is imported: importing the app starts a background
+    # domain-list refresh.
+    _block_real_network()
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         import faulthandler
@@ -99,11 +145,12 @@ def cleanup_qt_threads_after_test():
                 continue
 
             # Cooperatively request shutdown first.
-            try:
-                if hasattr(obj, "stop"):
-                    obj.stop()
-            except Exception:
-                pass
+            for request in ("stop", "cancel"):
+                try:
+                    if hasattr(obj, request):
+                        getattr(obj, request)()
+                except Exception:
+                    pass
             try:
                 obj.requestInterruption()
             except Exception:
@@ -112,8 +159,10 @@ def cleanup_qt_threads_after_test():
                 obj.quit()
             except Exception:
                 pass
+            # Generous: terminate() below kills the thread wherever it is, and
+            # killing one that is running Python corrupts the interpreter.
             try:
-                obj.wait(2000)
+                obj.wait(10000)
             except Exception:
                 pass
 

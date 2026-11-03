@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 from PyQt6.QtWidgets import QWidget
 
-from kemonodownloader import creator_downloader as cd
+from kemonodownloader import creator_downloader as cd, kd_network
 
 
 class Recorder:
@@ -21,7 +21,7 @@ class Recorder:
 def _clear_thread_local_sessions():
     for name in ("session", "socks_session"):
         try:
-            delattr(cd._thread_local, name)
+            delattr(kd_network._thread_local, name)
         except Exception:
             pass
 
@@ -446,7 +446,7 @@ def test_file_prep_fetch_detect_cleans_query_parts(monkeypatch):
         status_code = 500
 
     class Sess:
-        def get(self, url, headers=None):
+        def get(self, url, headers=None, timeout=None):
             called["url"] = url
             return Resp()
 
@@ -469,7 +469,7 @@ def test_file_prep_fetch_detect_unknown_service_fallback(monkeypatch):
         status_code = 500
 
     class Sess:
-        def get(self, url, headers=None):
+        def get(self, url, headers=None, timeout=None):
             called["url"] = url
             return Resp()
 
@@ -795,7 +795,8 @@ def test_creator_module_import_executes_locale_and_windows_branches(monkeypatch)
     )
     monkeypatch.setattr(locale, "windows_locale", {1033: "en_US"}, raising=False)
 
-    runpy.run_path(cd.__file__, run_name="creator_cov_import")
+    # The locale detection both downloaders use lives in kd_network.
+    runpy.run_path(kd_network.__file__, run_name="creator_cov_import")
 
     assert call_count["n"] >= 2
 

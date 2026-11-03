@@ -2,7 +2,7 @@ import threading
 
 import requests
 
-from kemonodownloader import creator_downloader as cd
+from kemonodownloader import creator_downloader as cd, kd_network
 
 
 def test_get_user_agent_fallback(monkeypatch):
@@ -10,9 +10,9 @@ def test_get_user_agent_fallback(monkeypatch):
         def __init__(self):
             raise Exception("no ua")
 
-    monkeypatch.setattr(cd, "UserAgent", BadUA)
+    monkeypatch.setattr(kd_network, "UserAgent", BadUA)
     # Force reset of cached value
-    monkeypatch.setattr(cd, "_user_agent", None)
+    monkeypatch.setattr(kd_network, "_user_agent", None)
     ua = cd.get_user_agent()
     assert ua and "Mozilla" in ua
 
@@ -26,7 +26,7 @@ def test_get_domain_config_variants():
 
 def test_get_headers_is_cached(monkeypatch):
     # Reset module HEADERS
-    monkeypatch.setattr(cd, "HEADERS", None, raising=False)
+    monkeypatch.setattr(kd_network, "HEADERS", None, raising=False)
     h1 = cd.get_headers()
     h2 = cd.get_headers()
     assert h1 is h2
@@ -43,7 +43,7 @@ def test_sanitize_filename_edge_cases():
 
 def test_get_session_with_proxies(monkeypatch):
     # Isolate thread-local storage for test
-    monkeypatch.setattr(cd, "_thread_local", threading.local())
+    monkeypatch.setattr(kd_network, "_thread_local", threading.local())
 
     class Settings:
         def __init__(self, proxies):
@@ -59,10 +59,10 @@ def test_get_session_with_proxies(monkeypatch):
     assert sess.proxies.get("http") == "http://proxy:8080"
 
     # Reset thread local
-    monkeypatch.setattr(cd, "_thread_local", threading.local())
+    monkeypatch.setattr(kd_network, "_thread_local", threading.local())
 
     # Test SOCKS proxy returns a socks_session on the thread-local
     s_socks = Settings({"http": "socks5://127.0.0.1:9050"})
     sess2 = cd.get_session(s_socks)
     # socks_session stored on _thread_local
-    assert getattr(cd._thread_local, "socks_session", None) is sess2
+    assert getattr(kd_network._thread_local, "socks_session", None) is sess2

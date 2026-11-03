@@ -5,7 +5,7 @@ import json
 import os
 from types import SimpleNamespace
 
-from kemonodownloader import creator_downloader as cd
+from kemonodownloader import creator_downloader as cd, kd_network
 
 
 def test_filter_thread_run():
@@ -322,18 +322,18 @@ def test_download_post_text_if_needed_calls_once(tmp_path):
 
 def test_get_headers_and_session_proxy_behavior(monkeypatch):
     # Reset cached headers and user agent
-    monkeypatch.setattr(cd, "HEADERS", None)
-    monkeypatch.setattr(cd, "_user_agent", "test-agent")
+    monkeypatch.setattr(kd_network, "HEADERS", None)
+    monkeypatch.setattr(kd_network, "_user_agent", "test-agent")
     headers = cd.get_headers()
     assert headers["User-Agent"] == "test-agent"
 
     # Clear thread-local sessions if present
     try:
-        delattr(cd._thread_local, "session")
+        delattr(kd_network._thread_local, "session")
     except Exception:
         pass
     try:
-        delattr(cd._thread_local, "socks_session")
+        delattr(kd_network._thread_local, "socks_session")
     except Exception:
         pass
 
@@ -346,18 +346,18 @@ def test_get_headers_and_session_proxy_behavior(monkeypatch):
 
     # SOCKS proxy uses socks_session
     try:
-        delattr(cd._thread_local, "session")
+        delattr(kd_network._thread_local, "session")
     except Exception:
         pass
     try:
-        delattr(cd._thread_local, "socks_session")
+        delattr(kd_network._thread_local, "socks_session")
     except Exception:
         pass
     settings_tab2 = SimpleNamespace(
         get_proxy_settings=lambda: {"http": "socks5://127.0.0.1:1080"}
     )
     socks = cd.get_session(settings_tab2)
-    assert hasattr(cd._thread_local, "socks_session")
+    assert hasattr(kd_network._thread_local, "socks_session")
     assert "socks5" in list(socks.proxies.values())[0]
 
 

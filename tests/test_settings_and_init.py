@@ -4,7 +4,7 @@ import runpy
 import sys
 from types import SimpleNamespace
 
-from kemonodownloader import creator_downloader as cd, kd_settings as ks
+from kemonodownloader import creator_downloader as cd, kd_network, kd_settings as ks
 
 
 def test___main_calls_app_main(monkeypatch):
@@ -73,9 +73,9 @@ def test_get_user_agent_fallback(monkeypatch):
         def __init__(self):
             raise Exception("no ua")
 
-    monkeypatch.setattr(cd, "UserAgent", BadUA)
+    monkeypatch.setattr(kd_network, "UserAgent", BadUA)
     # Reset cached agent
-    monkeypatch.setattr(cd, "_user_agent", None)
+    monkeypatch.setattr(kd_network, "_user_agent", None)
     ua = cd.get_user_agent()
     assert isinstance(ua, str) and "Mozilla" in ua
 
