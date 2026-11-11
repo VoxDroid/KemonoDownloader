@@ -2,12 +2,12 @@
 
 ## Supported Versions
 
-KemonoDownloader is actively maintained, and security updates are provided for the latest release (currently v3.0.0 and above). We recommend using the most recent version to ensure you have the latest security fixes.
+KemonoDownloader is actively maintained. Security fixes are released for the latest version only, so please keep the app up to date.
 
-| Version   | Supported          |
-|-----------|--------------------|
-| v3.0.0+   | ✅                 |
-| < v3.0.0  | ❌ (Please upgrade)|
+| Version          | Supported           |
+|------------------|---------------------|
+| Latest release   | ✅                  |
+| Older releases   | ❌ (Please upgrade) |
 
 ## Reporting a Vulnerability
 
@@ -19,8 +19,8 @@ If you discover a security vulnerability in KemonoDownloader, we encourage respo
   - Steps to reproduce the issue, if known.
   - The potential impact (e.g., unauthorized access, data exposure).
   - Any suggested mitigations, if applicable.
-- **Alternative**: Use the [Security Report issue template](.github/ISSUE_TEMPLATE/security_report.yml) on our [Issues page](https://github.com/VoxDroid/KemonoDownloader/issues). However, we strongly recommend private reporting via email to avoid public disclosure before a fix is available.
-- **Sensitive Matters**: For highly sensitive issues, you may open a private issue labeled "Security Violation" on the [Issues page](https://github.com/VoxDroid/KemonoDownloader/issues), visible only to maintainers.
+- **Private GitHub report**: On the repository's [Security tab](https://github.com/VoxDroid/KemonoDownloader/security), click **Report a vulnerability**. Only you and the maintainers can see the report.
+- **Low-risk issues only**: The [Security Report issue template](.github/ISSUE_TEMPLATE/security_report.yml) creates a **public** issue. GitHub issues are always visible to everyone, so never include exploit details or anything that could put users at risk; use email or a private GitHub report instead.
 
 ### What to Expect
 - **Acknowledgment**: We will acknowledge your report within 48 hours.
@@ -43,6 +43,6 @@ To use KemonoDownloader securely:
 - Comply with the ethical use guidelines in our [README](README.md) to respect creators’ rights and avoid legal risks.
 
 ## Contact
-For security-related questions or follow-ups, email [izeno.contact@gmail.com](mailto:izeno.contact@gmail.com) or open a private issue labeled "Security Violation."
+For security-related questions or follow-ups, email [izeno.contact@gmail.com](mailto:izeno.contact@gmail.com) or use a private GitHub report from the [Security tab](https://github.com/VoxDroid/KemonoDownloader/security).
 
 Thank you for helping keep KemonoDownloader and its community safe!

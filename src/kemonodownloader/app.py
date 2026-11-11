@@ -35,6 +35,7 @@ from PyQt6.QtWidgets import (
 from kemonodownloader.creator_downloader import CreatorDownloaderTab
 from kemonodownloader.domain_config import startup_request_lock
 from kemonodownloader.history_store import HistoryStore
+from kemonodownloader.kd_errors import install_exception_hook
 from kemonodownloader.kd_extension import ExtensionTab
 from kemonodownloader.kd_help import HelpTab
 from kemonodownloader.kd_history import HistoryTab
@@ -735,6 +736,8 @@ class KemonoDownloader(QMainWindow):
 
 def main():
     app = QApplication(sys.argv)
+    # Without this, any exception that escapes a slot or thread aborts the app.
+    install_exception_hook()
     app.setStyle("Fusion")
     load_bundled_fonts()
     install_filter = getattr(app, "installEventFilter", None)

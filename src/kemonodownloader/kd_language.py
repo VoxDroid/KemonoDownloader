@@ -124,12 +124,6 @@ class KDLanguage:
                 "korean": "스레드 {0} 가 정상적으로 종료되지 않았습니다. 강제 종료를 시도합니다.",
                 "chinese-simplified": "线程 {0} 未正常退出，正在尝试终止。",
             },
-            "filtered_post": {
-                "english": "Filtered post: {0} (ID: {1})",
-                "japanese": "フィルタリングされた投稿：{0}（ID：{1}）",
-                "korean": "필터링된 게시물: {0} (ID: {1})",
-                "chinese-simplified": "已过滤的帖子：{0}（ID：{1}）",
-            },
             "creator_download_thread_started": {
                 "english": "CreatorDownloadThread started for service: {0}, creator_id: {1}",
                 "japanese": "サービス {0}、クリエイターID {1} のためにCreatorDownloadThreadを開始しました",
@@ -424,12 +418,6 @@ class KDLanguage:
                 "korean": "마지막 페이지에 도달했습니다 ({0}개의 게시물 수신, {1}개 예상). 가져온 총 게시물 수: {2}",
                 "chinese-simplified": "已到达最后一页（收到 {0} 个帖子，预期 {1} 个）。获取的帖子总数：{2}",
             },
-            "mapped_title_to_id_and_thumbnail": {
-                "english": "Mapped title '{0}' to ID: {1}, Thumbnail: {2}",
-                "japanese": "タイトル '{0}' をID：{1}、サムネイル：{2} にマッピングしました",
-                "korean": "제목 '{0}'을(를) ID: {1}, 썸네일: {2}에 매핑했습니다",
-                "chinese-simplified": "将标题 '{0}' 映射到ID：{1}，缩略图：{2}",
-            },
             "prepared_posts_for_population": {
                 "english": "Prepared {0} posts for population, unique titles: {1}",
                 "japanese": "{0} 件の投稿を入力用に準備しました、ユニークなタイトル数：{1}",
@@ -502,12 +490,6 @@ class KDLanguage:
                 "korean": "게시물 폴더 {0} 생성에 실패했습니다: {1}. 폴더 이름이 유효하지 않을 가능성이 있습니다.",
                 "chinese-simplified": "无法创建帖子文件夹 {0}：{1}。可能是由于文件夹名称无效。",
             },
-            "failed_to_remove_interrupted_file": {
-                "english": "Failed to remove interrupted file {0}: {1}",
-                "japanese": "中断されたファイル {0} の削除に失敗しました：{1}",
-                "korean": "중단된 파일 {0} 제거에 실패했습니다: {1}",
-                "chinese-simplified": "无法删除中断的文件 {0}：{1}",
-            },
             "unexpected_error_downloading": {
                 "english": "Unexpected error downloading {0}: {1}",
                 "japanese": "{0} のダウンロード中に予期しないエラー：{1}",
@@ -520,18 +502,6 @@ class KDLanguage:
                 "korean": "다운로드 작업자 오류: {0}",
                 "chinese-simplified": "下载工作进程错误：{0}",
             },
-            "failed_to_load_file_hashes": {
-                "english": "Failed to load file hashes: {0}",
-                "japanese": "ファイルハッシュの読み込みに失敗しました：{0}",
-                "korean": "파일 해시 로드에 실패했습니다: {0}",
-                "chinese-simplified": "无法加载文件哈希：{0}",
-            },
-            "failed_to_save_file_hashes": {
-                "english": "Failed to save file hashes: {0}",
-                "japanese": "ファイルハッシュの保存に失敗しました：{0}",
-                "korean": "파일 해시 저장에 실패했습니다: {0}",
-                "chinese-simplified": "无法保存文件哈希：{0}",
-            },
             "rate_limit_hit": {
                 "english": "Rate limit hit for {0} (attempt {1}/{2}). Retrying...",
                 "japanese": "{0} のレート制限に達しました（試行 {1}/{2}）。再試行中...",
@@ -543,12 +513,6 @@ class KDLanguage:
                 "japanese": "{0} の取得に失敗しました - ステータスコード：{1}",
                 "korean": "{0} 가져오기에 실패했습니다 - 상태 코드: {1}",
                 "chinese-simplified": "无法获取 {0} - 状态码：{1}",
-            },
-            "post_data_for_id": {
-                "english": "Post data for {0}: {1}",
-                "japanese": "{0} の投稿データ：{1}",
-                "korean": "{0}에 대한 게시물 데이터: {1}",
-                "chinese-simplified": "{0} 的帖子数据：{1}",
             },
             "error_fetching_post_max_attempts": {
                 "english": "Error fetching post {0} after {1} attempts: {2}",
@@ -802,12 +766,6 @@ class KDLanguage:
                 "korean": "파일 이름 템플릿",
                 "chinese-simplified": "文件名模板",
             },
-            "filename_template_placeholder": {
-                "english": "Use placeholders: {post_title}, {post_id}, {orig_name}, {ext}, {creator_name}, {creator_id}",
-                "japanese": "プレースホルダを使用: {post_title}, {post_id}, {orig_name}, {ext}, {creator_name}, {creator_id}",
-                "korean": "자리 표시자 사용: {post_title}, {post_id}, {orig_name}, {ext}, {creator_name}, {creator_id}",
-                "chinese-simplified": "使用占位符: {post_title}, {post_id}, {orig_name}, {ext}, {creator_name}, {creator_id}",
-            },
             "tmpl_postid_orig": {
                 "english": "{post_id}_{orig_name}",
                 "japanese": "{post_id}_{orig_name}",
@@ -942,12 +900,6 @@ class KDLanguage:
                 "chinese-simplified": "设置已重置为默认值。单击“应用更改”以保存它们。",
             },
             # For post_downloader.py fallback validation
-            "first_validation_failed_exception": {
-                "english": "First validation method failed with exception for {0}, trying fallback method...",
-                "japanese": "最初の検証方法が {0} で例外で失敗しました、フォールバック方法を試しています...",
-                "korean": "첫 번째 검증 방법이 {0}에 대해 예외로 실패했습니다, 대체 방법을 시도 중...",
-                "chinese-simplified": "第一次验证方法失败：{0}尝试备用方法...",
-            },
             "attempting_fallback_validation": {
                 "english": "Attempting fallback validation for {0}",
                 "japanese": "{0} のフォールバック検証を試みています",
@@ -967,12 +919,6 @@ class KDLanguage:
                 "chinese-simplified": "备用验证失败：{0}",
             },
             # For creator_downloader.py fallback validation
-            "first_validation_failed": {
-                "english": "First validation method failed for {0}, trying fallback method...",
-                "japanese": "最初の検証方法が {0} で失敗しました、フォールバック方法を試しています...",
-                "korean": "첫 번째 검증 방법이 {0}에 대해 실패했습니다, 대체 방법을 시도 중...",
-                "chinese-simplified": "第一次验证方法失败。尝试备用方法...",
-            },
             # Main window and common elements
             "app_title": {
                 "english": "Kemono Downloader",
@@ -1423,24 +1369,6 @@ class KDLanguage:
                 "korean": "비활성화",
                 "chinese-simplified": "禁用",
             },
-            "yes": {
-                "english": "Yes",
-                "japanese": "はい",
-                "korean": "예",
-                "chinese-simplified": "是",
-            },
-            "no": {
-                "english": "No",
-                "japanese": "いいえ",
-                "korean": "아니오",
-                "chinese-simplified": "否",
-            },
-            "ok": {
-                "english": "OK",
-                "japanese": "OK",
-                "korean": "확인",
-                "chinese-simplified": "确定",
-            },
             "settings_applied": {
                 "english": "Settings Applied",
                 "japanese": "設定が適用されました",
@@ -1530,12 +1458,6 @@ class KDLanguage:
                 "japanese": "ダウンロード中...",
                 "korean": "다운로드 중...",
                 "chinese-simplified": "下载中...",
-            },
-            "extracting": {
-                "english": "Extracting...",
-                "japanese": "展開中...",
-                "korean": "압축 해제 중...",
-                "chinese-simplified": "解压中...",
             },
             "tor_download_successful": {
                 "english": "Tor downloaded successfully!",
@@ -1688,12 +1610,6 @@ class KDLanguage:
                 "korean": "폴더 이름은 비워둘 수 없습니다.",
                 "chinese-simplified": "文件夹名称不能为空。",
             },
-            "directory_not_exist": {
-                "english": "Selected directory does not exist.",
-                "japanese": "選択したディレクトリが存在しません。",
-                "korean": "선택한 디렉토리가 존재하지 않습니다.",
-                "chinese-simplified": "所选目录不存在。",
-            },
             "update_check_failed": {
                 "english": "Update Check Failed",
                 "japanese": "更新チェックに失敗しました",
@@ -1785,12 +1701,6 @@ class KDLanguage:
                 "japanese": "チェックボックスを更新中...",
                 "korean": "체크박스 업데이트 중...",
                 "chinese-simplified": "更新复选框...",
-            },
-            "updating_download_mode": {
-                "english": "Updating download mode...",
-                "japanese": "ダウンロードモードを更新中...",
-                "korean": "다운로드 모드 업데이트 중...",
-                "chinese-simplified": "更新下载模式...",
             },
             "toggling_checkbox": {
                 "english": "Toggling checkbox...",
@@ -1884,12 +1794,6 @@ class KDLanguage:
                 "korean": "크리에이터 보는 중: {0}",
                 "chinese-simplified": "查看创作者: {0}",
             },
-            "refetching_posts_for_creator": {
-                "english": "Refetching posts for creator: {0}",
-                "japanese": "クリエイターの投稿を再取得中: {0}",
-                "korean": "크리에이터의 게시물 다시 가져오는 중: {0}",
-                "chinese-simplified": "重新获取创作者的投稿: {0}",
-            },
             "link_removed": {
                 "english": "Link ({0}) is removed from the queue.",
                 "japanese": "リンク ({0}) がキューから削除されました。",
@@ -1943,12 +1847,6 @@ class KDLanguage:
                 "japanese": "キュー内のすべての投稿のファイルを準備中",
                 "korean": "대기열의 모든 게시물에 대한 파일 준비 중",
                 "chinese-simplified": "正在准备队列中所有投稿的文件",
-            },
-            "preparing_files_all_creators": {
-                "english": "Preparing files for all creators in queue",
-                "japanese": "キュー内のすべてのクリエイターのファイルを準備中",
-                "korean": "대기열의 모든 크리에이터에 대한 파일 준비 중",
-                "chinese-simplified": "正在准备队列中所有创作者的文件",
             },
             "download_all_disabled": {
                 "english": "Download All Links disabled. Reverted to current post.",
@@ -2034,12 +1932,6 @@ class KDLanguage:
                 "korean": "{0}에 대한 다운로드가 중단됨",
                 "chinese-simplified": "{0} 的下载已中断",
             },
-            "error_downloading": {
-                "english": "Error downloading {0}: {1}",
-                "japanese": "{0} のダウンロード中にエラー: {1}",
-                "korean": "{0} 다운로드 중 오류: {1}",
-                "chinese-simplified": "下载 {0} 时出错: {1}",
-            },
             "post_fully_downloaded": {
                 "english": "Post {0} fully downloaded.",
                 "japanese": "投稿 {0} が完全にダウンロードされました。",
@@ -2051,12 +1943,6 @@ class KDLanguage:
                 "japanese": "投稿 {0} のすべてのファイルがダウンロードされました",
                 "korean": "게시물 {0}의 모든 파일이 다운로드되었습니다",
                 "chinese-simplified": "所有文件已下载完毕: {0}",
-            },
-            "no_files_selected_post": {
-                "english": "No files selected for download for this post.",
-                "japanese": "この投稿ではダウンロードするファイルが選択されていません。",
-                "korean": "이 게시물에 대해 다운로드할 파일이 선택되지 않았습니다.",
-                "chinese-simplified": "未选择要下载的文件。",
             },
             "language_changed": {
                 "english": "Language changed to English",
@@ -2367,7 +2253,7 @@ class KDLanguage:
                 "  - Example: If downloading from https://kemono.cr/patreon/user/123456785/post/12345678, files will be saved in '[Save Directory]/patreon/post_12345678/'.<br>"
                 "- Files are named based on their original URLs, with any special characters (e.g., '/') replaced with underscores to ensure compatibility with your filesystem.<br><br>"
                 "<b>2.7 Additional Features</b><br>"
-                "- <b>Concurrent Downloads</b>: The application supports downloading multiple files simultaneously, with the number of concurrent downloads set in the Settings tab (default is 10, adjustable between 1-10).<br>"
+                "- <b>Concurrent Downloads</b>: The application supports downloading multiple files simultaneously, with the number of concurrent downloads set in the Settings tab (default is 5, adjustable between 1-20).<br>"
                 "- <b>File Deduplication</b>: The application uses URL hashes to detect and skip previously downloaded files, preventing duplicates. Hash data is stored in the 'Other Files' directory as 'file_hashes.json'.<br>"
                 "- <b>Image Caching</b>: When previewing images, they are cached in the 'Cache' directory to speed up future previews of the same image.<br>"
                 "- <b>Logging</b>: The console provides detailed logs of all operations, including file detection, download progress, and errors. This is useful for debugging issues.",
@@ -2415,7 +2301,7 @@ class KDLanguage:
                 "  - 例: https://kemono.cr/patreon/user/123456785/post/12345678 からダウンロードする場合、ファイルは「[保存ディレクトリ]/patreon/post_12345678/」に保存されます。<br>"
                 "- ファイル名は元のURLに基づいて命名され、ファイルシステムとの互換性を確保するために特殊文字（例: 「/」）はアンダースコアに置き換えられます。<br><br>"
                 "<b>2.7 追加機能</b><br>"
-                "- <b>同時ダウンロード</b>：アプリケーションは複数のファイルを同時にダウンロードでき、同時ダウンロードの数は設定タブで設定されます（デフォルトは10、1-10の間で調整可能）。<br>"
+                "- <b>同時ダウンロード</b>：アプリケーションは複数のファイルを同時にダウンロードでき、同時ダウンロードの数は設定タブで設定されます（デフォルトは5、1-20の間で調整可能）。<br>"
                 "- <b>ファイルの重複排除</b>：アプリケーションはURLハッシュを使用して以前にダウンロードされたファイルを検出し、重複を防ぎます。ハッシュデータは「その他のファイル」ディレクトリ内の「file_hashes.json」に保存されます。<br>"
                 "- <b>画像キャッシュ</b>：画像をプレビューする際、それらは「キャッシュ」ディレクトリにキャッシュされ、同じ画像の将来のプレビューを高速化します。<br>"
                 "- <b>ログ記録</b>：コンソールは、ファイル検出、ダウンロード進捗、エラーを含むすべての操作の詳細なログを提供し、問題のデバッグに役立ちます。",
@@ -2463,7 +2349,7 @@ class KDLanguage:
                 "  - 예: https://kemono.cr/patreon/user/123456785/post/12345678에서 다운로드하면 파일은 '[저장 디렉토리]/patreon/post_12345678/'에 저장됩니다.<br>"
                 "- 파일 이름은 원래 URL을 기반으로 하며, 파일 시스템 호환성을 보장하기 위해 특수 문자(예: '/')는 밑줄로 대체됩니다.<br><br>"
                 "<b>2.7 추가 기능</b><br>"
-                "- <b>동시 다운로드</b>: 애플리케이션은 여러 파일을 동시에 다운로드할 수 있으며, 동시 다운로드 수는 설정 탭에서 설정됩니다(기본값은 10, 1-10 사이에서 조정 가능).<br>"
+                "- <b>동시 다운로드</b>: 애플리케이션은 여러 파일을 동시에 다운로드할 수 있으며, 동시 다운로드 수는 설정 탭에서 설정됩니다(기본값은 5, 1-20 사이에서 조정 가능).<br>"
                 "- <b>파일 중복 제거</b>: 애플리케이션은 URL 해시를 사용하여 이전에 다운로드된 파일을 감지하고 중복을 방지합니다. 해시 데이터는 '기타 파일' 디렉토리의 'file_hashes.json'에 저장됩니다.<br>"
                 "- <b>이미지 캐싱</b>: 이미지를 미리 볼 때, '캐시' 디렉토리에 캐시되어 동일한 이미지의 향후 미리보기를 빠르게 합니다.<br>"
                 "- <b>로깅</b>: 콘솔은 파일 감지, 다운로드 진행 상황, 오류를 포함한 모든 작업에 대한 자세한 로그를 제공하여 문제 디버깅에 유용합니다.",
@@ -2511,7 +2397,7 @@ class KDLanguage:
                 "  - 示例：从 https://kemono.cr/patreon/user/123456785/post/12345678 下载的文件将保存在“[保存目录]/patreon/post_12345678/”中。<br>"
                 "- 文件名基于其原始 URL，任何特殊字符（例如“/”）都将替换为下划线，以确保与文件系统的兼容性。<br><br>"
                 "<b>2.7 附加功能</b><br>"
-                "- <b>并发下载</b>：应用程序支持同时下载多个文件，并发下载数量在设置选项卡中设置（默认为 10，可在 1-10 之间调整）。<br>"
+                "- <b>并发下载</b>：应用程序支持同时下载多个文件，并发下载数量在设置选项卡中设置（默认为 5，可在 1-20 之间调整）。<br>"
                 "- <b>文件去重</b>：应用程序使用 URL 哈希检测并跳过之前下载的文件，防止重复。哈希数据存储在“其他文件”目录中的“file_hashes.json”中。<br>"
                 "- <b>图片缓存</b>：预览图片时，图片会缓存到“缓存”目录中，以加快相同图片的未来预览速度。<br>"
                 "- <b>日志记录</b>：控制台提供所有操作的详细日志，包括文件检测、下载进度和错误。这对于调试问题非常有用。",
@@ -2583,7 +2469,7 @@ class KDLanguage:
                 "- Files are named based on their original URLs, with any special characters (e.g., '/') replaced with underscores to ensure compatibility with your filesystem.<br>"
                 "- <b>File Deduplication</b>: The application uses URL hashes to detect and skip previously downloaded files, storing hash data in 'file_hashes.json' in the 'Other Files' directory.<br><br>"
                 "<b>3.8 Additional Features</b><br>"
-                "- <b>Concurrent Downloads</b>: The application supports downloading multiple files simultaneously, with the number of concurrent downloads set in the Settings tab (default is 10, adjustable between 1-10).<br>"
+                "- <b>Concurrent Downloads</b>: The application supports downloading multiple files simultaneously, with the number of concurrent downloads set in the Settings tab (default is 5, adjustable between 1-20).<br>"
                 "- <b>Image Caching</b>: Thumbnails and preview images are cached in the 'Cache' directory to speed up future previews of the same image.<br>"
                 "- <b>Logging</b>: The console provides detailed logs of all operations, including post detection, file preparation, download progress, and errors. This is useful for debugging issues.<br>"
                 "- <b>Batch Processing</b>: When 'Download All Links' is enabled, the application processes creators sequentially, preparing and downloading files for each creator one at a time to manage resources efficiently.",
@@ -2647,7 +2533,7 @@ class KDLanguage:
                 "- ファイル名は元のURLに基づいて命名され、ファイルシステムとの互換性を確保するために特殊文字（例: 「/」）はアンダースコアに置き換えられます。<br>"
                 "- <b>ファイルの重複排除</b>：アプリケーションはURLハッシュを使用して以前にダウンロードされたファイルを検出しスキップし、ハッシュデータは「その他のファイル」ディレクトリの「file_hashes.json」に保存されます。<br><br>"
                 "<b>3.8 追加機能</b><br>"
-                "- <b>同時ダウンロード</b>：アプリケーションは複数のファイルを同時にダウンロードでき、同時ダウンロードの数は設定タブで設定されます（デフォルトは10、1-10の間で調整可能）。<br>"
+                "- <b>同時ダウンロード</b>：アプリケーションは複数のファイルを同時にダウンロードでき、同時ダウンロードの数は設定タブで設定されます（デフォルトは5、1-20の間で調整可能）。<br>"
                 "- <b>画像キャッシュ</b>：サムネイルやプレビュー画像は「キャッシュ」ディレクトリにキャッシュされ、同じ画像の将来のプレビューを高速化します。<br>",
                 "korean": "크리에이터 다운로더 탭은 Kemono.su에서 크리에이터의 전체 프로필에서 콘텐츠를 대량으로 다운로드하도록 설계되었습니다. 여러 크리에이터를 대기열에 추가하고, 그들의 게시물을 가져오며, 다운로드할 특정 콘텐츠를 선택하고 진행 상황을 모니터링할 수 있습니다. 이 탭은 크리에이터의 작업을 아카이빙하거나 여러 크리에이터의 콘텐츠를 한 번에 다운로드하는 데 이상적입니다. 아래는 이 탭을 효과적으로 사용하는 자세한 단계입니다:<br><br>"
                 "<b>3.1 크리에이터를 대기열에 추가하기</b><br>"
@@ -2709,7 +2595,7 @@ class KDLanguage:
                 "- 파일 이름은 원래 URL을 기반으로 하며, 파일 시스템 호환성을 보장하기 위해 특수 문자(예: '/')는 밑줄로 대체됩니다.<br>"
                 "- <b>파일 중복 제거</b>: 애플리케이션은 URL 해시를 사용하여 이전에 다운로드된 파일을 감지하고 건너뛰며, 해시 데이터는 '기타 파일' 디렉토리의 'file_hashes.json'에 저장됩니다.<br><br>"
                 "<b>3.8 추가 기능</b><br>"
-                "- <b>동시 다운로드</b>: 애플리케이션은 여러 파일을 동시에 다운로드할 수 있으며, 동시 다운로드 수는 설정 탭에서 설정됩니다(기본값은 10, 1-10 사이에서 조정 가능).<br>"
+                "- <b>동시 다운로드</b>: 애플리케이션은 여러 파일을 동시에 다운로드할 수 있으며, 동시 다운로드 수는 설정 탭에서 설정됩니다(기본값은 5, 1-20 사이에서 조정 가능).<br>"
                 "- <b>이미지 캐싱</b>: 썸네일 및 미리보기 이미지는 '캐시' 디렉토리에 캐시되어 동일한 이미지의 향후 미리보기를 빠르게 합니다.<br>"
                 "- <b>로깅</b>: 콘솔은 게시물 감지, 파일 준비, 다운로드 진행 상황, 오류를 포함한 모든 작업에 대한 자세한 로그를 제공하여 문제 디버깅에 유용합니다.<br>"
                 "- <b>배치 처리</b>: '모든 링크 다운로드'가 활성화되면 애플리케이션은 자원을 효율적으로 관리하기 위해 각 크리에이터를 순차적으로 처리하며, 한 번에 한 크리에이터의 파일을 준비하고 다운로드합니다.",
@@ -2773,7 +2659,7 @@ class KDLanguage:
                 "- 文件名基于其原始 URL，任何特殊字符（例如“/”）都将替换为下划线，以确保与文件系统的兼容性。<br>"
                 "- <b>文件去重</b>：应用程序使用 URL 哈希检测并跳过之前下载的文件，哈希数据存储在“其他文件”目录中的“file_hashes.json”中。<br><br>"
                 "<b>3.8 附加功能</b><br>"
-                "- <b>并发下载</b>：应用程序支持同时下载多个文件，并发下载数量在设置选项卡中设置（默认为 10，可在 1-10 之间调整）。<br>"
+                "- <b>并发下载</b>：应用程序支持同时下载多个文件，并发下载数量在设置选项卡中设置（默认为 5，可在 1-20 之间调整）。<br>"
                 "- <b>图片缓存</b>：缩略图和预览图片缓存到“缓存”目录中，以加快相同图片的未来预览速度。<br>"
                 "- <b>日志记录</b>：控制台提供所有操作的详细日志，包括帖子检测、文件准备、下载进度和错误。这对于调试问题非常有用。<br>"
                 "- <b>批量处理</b>：启用“下载所有链接”时，应用程序按顺序处理创作者，逐一准备和下载每个创作者的文件，以有效管理资源。",
@@ -3770,12 +3656,6 @@ class KDLanguage:
                 "korean": "대기열에서 포스트와 크리에이터 링크를 혼합할 수 없습니다.",
                 "chinese-simplified": "队列中不能混合帖子和创作者链接。",
             },
-            "invalid_link_for_mode": {
-                "english": "The link '{0}' does not match the selected download mode ({1}).",
-                "japanese": "リンク '{0}' は選択されたダウンロードモード ({1}) と一致しません。",
-                "korean": "'{0}' 링크가 선택한 다운로드 모드({1})와 일치하지 않습니다.",
-                "chinese-simplified": "链接 '{0}' 与选择的下载模式 ({1}) 不匹配。",
-            },
             "no_thumbnails_found": {
                 "english": "No thumbnails found for the given link(s).",
                 "japanese": "指定されたリンクのサムネイルが見つかりませんでした。",
@@ -4358,6 +4238,84 @@ class KDLanguage:
                 "japanese": "<b>6.1 ダウンロード履歴</b><br>- 完了した投稿・クリエイター・サムネイルのダウンロードが、日時、種類、ファイル数（完了数/合計と失敗数）、投稿数、ディスク上のサイズ、所要時間、状態とともに一覧表示されます。<br>- タイトル、リンク、クリエイターで検索し、種類で絞り込めます。表の上の行には表示中の項目の合計が表示されます。<br>- 「フォルダーを開く」（またはダブルクリック）で保存先を開きます。フォルダーが移動・名前変更・削除されていた場合はその旨を表示し、フォルダーの指定、最も近い親フォルダーを開く、再ダウンロードのいずれかを選べます。<br>- 「リンクをコピー」「キューに追加」（適切なダウンローダータブに送られます）「お気に入りに追加」は、複数の行を選択してまとめて実行できます。「削除」と「履歴を消去」は記録だけを削除し、ファイルは削除しません。<br>- 「ダウンロード履歴を記録」のチェックを外すと記録を停止します。「CSVにエクスポート」で一覧を表計算ソフト用に保存できます。<br><br><b>6.2 お気に入り</b><br>- 投稿・クリエイタータブの星ボタン、履歴、またはお気に入り画面へのリンク貼り付けでリンクを保存できます。<br>- タイトルやメモをダブルクリックすると編集できます。行のそれ以外の場所をダブルクリックするとリンクをキューに追加します。<br>- リンクのコピー、ブラウザーで開く、1行に1リンクの.txtファイルとしてのインポート・エクスポートができます。",
                 "korean": "<b>6.1 다운로드 기록</b><br>- 완료된 게시물, 크리에이터, 썸네일 다운로드가 날짜, 유형, 파일(완료/전체 및 실패), 게시물 수, 디스크 크기, 소요 시간, 상태와 함께 표시됩니다.<br>- 제목, 링크, 크리에이터로 검색하고 유형별로 필터링할 수 있습니다. 표 위의 줄에는 표시된 항목의 합계가 나옵니다.<br>- '폴더 열기'(또는 더블클릭)로 파일이 저장된 위치를 엽니다. 폴더가 이동되었거나 이름이 바뀌었거나 삭제된 경우 알려 주고, 폴더 찾기, 가장 가까운 상위 폴더 열기, 다시 다운로드 중에서 선택할 수 있습니다.<br>- '링크 복사', '대기열에 추가'(알맞은 다운로더 탭으로 전송), '즐겨찾기에 추가'는 여러 행을 선택해 한 번에 실행할 수 있습니다. '삭제'와 '기록 지우기'는 기록만 삭제하며 파일은 삭제하지 않습니다.<br>- '다운로드 기록 저장'의 체크를 해제하면 기록을 멈춥니다. 'CSV로 내보내기'로 목록을 스프레드시트용으로 저장할 수 있습니다.<br><br><b>6.2 즐겨찾기</b><br>- 게시물 또는 크리에이터 탭의 별 버튼, 기록, 또는 즐겨찾기 화면에 링크를 붙여넣어 저장할 수 있습니다.<br>- 제목이나 메모를 더블클릭하면 편집할 수 있고, 행의 다른 곳을 더블클릭하면 링크를 대기열에 추가합니다.<br>- 링크를 복사하거나 브라우저에서 열거나, 한 줄에 하나씩 링크가 담긴 .txt 파일로 가져오고 내보낼 수 있습니다.",
                 "chinese-simplified": "<b>6.1 下载历史</b><br>- 每个已完成的帖子、创作者和缩略图下载都会列出日期、类型、文件（完成/总数及失败数）、帖子数、磁盘大小、用时和状态。<br>- 可按标题、链接或创作者搜索，并按类型筛选。表格上方的一行汇总当前显示的内容。<br>- “打开文件夹”（或双击）会打开文件的保存位置。如果文件夹已被移动、重命名或删除，应用会提示你，并可选择定位文件夹、打开最近的上级文件夹或重新下载。<br>- “复制链接”“添加到队列”（发送到对应的下载选项卡）和“添加到收藏夹”可同时作用于多个选中的行。“删除”和“清除历史”只删除记录，绝不删除你的文件。<br>- 取消勾选“记录下载历史”即可停止记录。“导出 CSV”可将列表保存为电子表格。<br><br><b>6.2 收藏夹</b><br>- 可通过帖子或创作者选项卡中的星形按钮、历史记录，或在收藏夹视图中粘贴链接来保存链接。<br>- 双击标题或备注可进行编辑；双击行的其他位置会将链接添加到队列。<br>- 可复制链接、在浏览器中打开，或以每行一个链接的 .txt 文件导入和导出。",
+            },
+            "unexpected_error_title": {
+                "english": "Unexpected Error",
+                "japanese": "予期しないエラー",
+                "korean": "예기치 않은 오류",
+                "chinese-simplified": "意外错误",
+            },
+            "unexpected_error_text": {
+                "english": "Something went wrong, but Kemono Downloader is still running. If something stops working, restart the app. To report the problem, open an issue on GitHub and include the error details.",
+                "japanese": "問題が発生しましたが、Kemono Downloaderは引き続き動作しています。動作がおかしい場合はアプリを再起動してください。問題を報告するには、GitHubでIssueを作成し、エラーの詳細を添えてください。",
+                "korean": "문제가 발생했지만 Kemono Downloader는 계속 실행 중입니다. 제대로 작동하지 않으면 앱을 다시 시작하세요. 문제를 신고하려면 GitHub에서 이슈를 열고 오류 세부 정보를 첨부하세요.",
+                "chinese-simplified": "出现了问题，但 Kemono Downloader 仍在运行。如果某些功能无法正常工作，请重新启动应用。如需报告此问题，请在 GitHub 上创建 Issue 并附上错误详情。",
+            },
+            "tor_checksum_mismatch": {
+                "english": "The downloaded Tor package doesn't match its published checksum, so it was not installed. Please try again later.",
+                "japanese": "ダウンロードしたTorパッケージが公開されているチェックサムと一致しないため、インストールしませんでした。しばらくしてからもう一度お試しください。",
+                "korean": "다운로드한 Tor 패키지가 공개된 체크섬과 일치하지 않아 설치하지 않았습니다. 나중에 다시 시도하세요.",
+                "chinese-simplified": "下载的 Tor 软件包与公布的校验和不匹配，因此未安装。请稍后重试。",
+            },
+            "help_button": {
+                "english": "Help",
+                "japanese": "ヘルプ",
+                "korean": "도움말",
+                "chinese-simplified": "帮助",
+            },
+            "custom_proxy": {
+                "english": "Custom Proxy",
+                "japanese": "カスタムプロキシ",
+                "korean": "사용자 지정 프록시",
+                "chinese-simplified": "自定义代理",
+            },
+            "tor_help_title": {
+                "english": "Tor Setup Help",
+                "japanese": "Torセットアップのヘルプ",
+                "korean": "Tor 설정 도움말",
+                "chinese-simplified": "Tor 设置帮助",
+            },
+            "tor_help_text": {
+                "english": "<b>How to set up Tor for downloading:</b><br><br>1. Click <b>Download Tor</b> to download the Tor Expert Bundle (the Tor program, without the Tor Browser).<br>2. Wait for the download to finish.<br>3. Click <b>Start Tor</b> to start the Tor process.<br>4. Click <b>Test Tor</b> to check that Tor is working.<br>5. Tick <b>Use Proxy</b> with <b>Tor</b> selected, then start downloading.<br><br><b>Note:</b> Tor provides anonymity but is usually slower than a direct connection. While Tor is selected, downloads only go through Tor: if Tor isn't running, they fail instead of connecting directly.",
+                "japanese": "<b>ダウンロードにTorを設定する方法:</b><br><br>1. <b>Torをダウンロード</b>をクリックして、Tor Expert Bundle（Tor Browserを含まないTor本体）をダウンロードします。<br>2. ダウンロードが完了するまで待ちます。<br>3. <b>Torを開始</b>をクリックしてTorプロセスを起動します。<br>4. <b>Torをテスト</b>をクリックしてTorが動作していることを確認します。<br>5. <b>Tor</b>を選択した状態で<b>プロキシを使用</b>にチェックを入れ、ダウンロードを開始します。<br><br><b>注意:</b> Torは匿名性を提供しますが、通常は直接接続より遅くなります。Torを選択している間、ダウンロードはTor経由でのみ行われます。Torが起動していない場合は、直接接続せずに失敗します。",
+                "korean": "<b>다운로드에 Tor를 설정하는 방법:</b><br><br>1. <b>Tor 다운로드</b>를 클릭하여 Tor Expert Bundle(Tor Browser를 제외한 Tor 프로그램)을 다운로드합니다.<br>2. 다운로드가 끝날 때까지 기다립니다.<br>3. <b>Tor 시작</b>을 클릭하여 Tor 프로세스를 시작합니다.<br>4. <b>Tor 테스트</b>를 클릭하여 Tor가 작동하는지 확인합니다.<br>5. <b>Tor</b>를 선택한 상태에서 <b>프록시 사용</b>을 체크한 다음 다운로드를 시작합니다.<br><br><b>참고:</b> Tor는 익명성을 제공하지만 보통 직접 연결보다 느립니다. Tor를 선택한 동안에는 다운로드가 Tor를 통해서만 이루어지며, Tor가 실행 중이 아니면 직접 연결하지 않고 실패합니다.",
+                "chinese-simplified": "<b>如何设置 Tor 进行下载：</b><br><br>1. 点击<b>下载Tor</b>，下载 Tor Expert Bundle（不含 Tor 浏览器的 Tor 程序）。<br>2. 等待下载完成。<br>3. 点击<b>启动Tor</b>启动 Tor 进程。<br>4. 点击<b>测试Tor</b>确认 Tor 正常工作。<br>5. 选择 <b>Tor</b> 并勾选<b>使用代理</b>，然后开始下载。<br><br><b>注意：</b>Tor 提供匿名性，但通常比直接连接慢。选择 Tor 时，下载只会通过 Tor 进行：如果 Tor 未运行，下载会失败，而不会直接连接。",
+            },
+            "could_not_create_directory": {
+                "english": "Could not create directory: {0}",
+                "japanese": "ディレクトリを作成できませんでした: {0}",
+                "korean": "디렉터리를 만들 수 없습니다: {0}",
+                "chinese-simplified": "无法创建目录：{0}",
+            },
+            "could_not_open_directory": {
+                "english": "Could not open directory: {0}",
+                "japanese": "ディレクトリを開けませんでした: {0}",
+                "korean": "디렉터리를 열 수 없습니다: {0}",
+                "chinese-simplified": "无法打开目录：{0}",
+            },
+            "no_logs_to_save": {
+                "english": "There are no logs to save yet.",
+                "japanese": "保存するログはまだありません。",
+                "korean": "아직 저장할 로그가 없습니다.",
+                "chinese-simplified": "暂无可保存的日志。",
+            },
+            "logs_saved_to": {
+                "english": "Logs saved to: {0}",
+                "japanese": "ログを保存しました: {0}",
+                "korean": "로그를 저장했습니다: {0}",
+                "chinese-simplified": "日志已保存到：{0}",
+            },
+            "failed_to_save_logs": {
+                "english": "Failed to save logs: {0}",
+                "japanese": "ログを保存できませんでした: {0}",
+                "korean": "로그를 저장하지 못했습니다: {0}",
+                "chinese-simplified": "保存日志失败：{0}",
+            },
+            "select_item_to_preview": {
+                "english": "Select an item in the list to preview it.",
+                "japanese": "プレビューするには、リストから項目を選択してください。",
+                "korean": "미리 보려면 목록에서 항목을 선택하세요.",
+                "chinese-simplified": "请先在列表中选择要预览的项目。",
             },
         }
 

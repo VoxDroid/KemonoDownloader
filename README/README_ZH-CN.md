@@ -148,7 +148,7 @@ KemonoDownloader与Kemono.cr的内容交互，其中可能包括最初发布在P
 - **帖子下载**：使用URL轻松下载特定Kemono.cr帖子中的文件。
 - **创作者存档**：一键批量下载创作者档案中的所有帖子和文件。
 - **文件类型支持**：处理图像（JPG、PNG、GIF）、视频（MP4）、存档（ZIP、7Z）、PDF等。
-- **并发下载**：调整同时下载数量（1-10）以获得最佳性能。
+- **并发下载**：调整同时下载数量（1-20）以获得最佳性能。
 - **文件去重**：使用URL哈希防止冗余下载。
 - **图像预览**：在下载前预览图像以验证内容。
 - **详细日志**：通过应用内控制台跟踪进度和排除故障。
@@ -192,7 +192,7 @@ Kemono Downloader现在使用[Briefcase](https://briefcase.readthedocs.io/)打�
 3. 创建并激活虚拟环境：
     ```bash
     python -m venv .venv
-    .venv/Scripts/activate # Windows 
+    .venv\Scripts\activate # Windows 
     source .venv/bin/activate # Linux
     ```
 4. 安装依赖项：
@@ -261,7 +261,7 @@ Kemono Downloader现在使用[Briefcase](https://briefcase.readthedocs.io/)打�
 - **目的**：自定义应用程序的行为。
 - **使用方法**：
   1. 设置下载的文件夹名称和保存目录。
-  2. 使用滑块或旋转框调整同时下载数量（1-10）。
+  2. 使用滑块或旋转框调整同时下载数量（1-20）。
   3. 点击"应用更改"保存。
 
 ### 帮助选项卡

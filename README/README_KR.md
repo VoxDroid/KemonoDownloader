@@ -148,7 +148,7 @@ KemonoDownloader는 Patreon, Pixiv Fanbox, Gumroad와 같은 유료 플랫폼에
 - **게시물 다운로드**: URL을 사용하여 특정 Kemono.cr 게시물에서 파일을 쉽게 다운로드.
 - **크리에이터 아카이브**: 한 번의 클릭으로 크리에이터 프로필에서 모든 게시물과 파일을 일괄 다운로드.
 - **파일 유형 지원**: 이미지(JPG, PNG, GIF), 비디오(MP4), 아카이브(ZIP, 7Z), PDF 등을 처리.
-- **동시 다운로드**: 최적의 성능을 위해 동시 다운로드 수(1-10)를 조정.
+- **동시 다운로드**: 최적의 성능을 위해 동시 다운로드 수(1-20)를 조정.
 - **파일 중복 제거**: URL 해시를 사용하여 중복 다운로드 방지.
 - **이미지 미리보기**: 콘텐츠를 확인하기 위해 다운로드 전에 이미지 미리보기.
 - **상세 로깅**: 앱 내 콘솔로 진행 상황을 추적하고 문제를 해결.
@@ -192,7 +192,7 @@ Kemono Downloader는 현재 [Briefcase](https://briefcase.readthedocs.io/)를 �
 3. 가상 환경을 만들고 활성화합니다:
     ```bash
     python -m venv .venv
-    .venv/Scripts/activate # Windows 
+    .venv\Scripts\activate # Windows 
     source .venv/bin/activate # Linux
     ```
 4. 의존성을 설치합니다:
@@ -261,7 +261,7 @@ Kemono Downloader는 현재 [Briefcase](https://briefcase.readthedocs.io/)를 �
 - **목적**: 애플리케이션의 동작 사용자 지정.
 - **사용법**:
   1. 다운로드를 위한 폴더 이름과 저장 디렉토리를 설정합니다.
-  2. 슬라이더나 스핀박스를 사용하여 동시 다운로드 수(1-10)를 조정합니다.
+  2. 슬라이더나 스핀박스를 사용하여 동시 다운로드 수(1-20)를 조정합니다.
   3. "변경사항 적용"을 클릭하여 저장합니다.
 
 ### 도움말 탭

@@ -185,7 +185,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 
 | Feature | Description |
 |---------|-------------|
-| **Concurrent Downloads** | Adjustable parallel downloads (1-10 threads) for optimal performance. |
+| **Concurrent Downloads** | Adjustable parallel downloads (1-20 threads) for optimal performance. |
 | **Retry Mechanisms** | Configurable retries for posts fetching, data retrieval, file downloads, and API requests. |
 | **File Deduplication** | Prevents redundant downloads using SQLite-backed URL hashing (auto-migrates from legacy JSON). |
 | **Connection Pooling** | Efficient HTTP connection management with gzip compression support. |
@@ -217,11 +217,11 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 #### $\color{#90a4ae}{\sf{\text{Download Settings}}}$
 | Setting | Description | Default | Range |
 |---------|-------------|---------|-------|
-| Simultaneous Downloads | Number of parallel threads | 5 | 1-10 |
+| Simultaneous Downloads | Number of parallel threads | 5 | 1-20 |
 | Creator Posts Max Attempts | Max attempts to fetch posts | 200 | 1-1000 |
-| Post Data Max Retries | Retries for post data | 7 | 1-50 |
-| File Download Max Retries | Retries for files | 50 | 1-100 |
-| API Request Max Retries | Retries for API calls | 3 | 1-10 |
+| Post Data Max Retries | Retries for post data | 7 | 1-100 |
+| File Download Max Retries | Retries for files | 50 | 1-200 |
+| API Request Max Retries | Retries for API calls | 3 | 1-50 |
 
 #### $\color{#90a4ae}{\sf{\text{Folder Settings}}}$
 - **Base Directory**: Custom root path for downloads
@@ -334,7 +334,7 @@ Support ongoing development and get access here: **[Ko-fi Binaries Page](https:/
 3. Create and activate virtual environment:
     ```bash
     python -m venv .venv
-    .venv/Scripts/activate # Windows 
+    .venv\Scripts\activate # Windows 
     source .venv/bin/activate # Linux
     ```
 4. Install dependencies:
@@ -403,7 +403,7 @@ Upon launching, you’ll see an introductory screen with a "Launch" button. Clic
 - **Purpose**: Customize the application’s behavior.
 - **How to Use**:
   1. Set the folder name and save directory for downloads.
-  2. Adjust simultaneous downloads (1-10) using the slider or spinbox.
+  2. Adjust simultaneous downloads (1-20) using the slider or spinbox.
   3. Click "Apply Changes" to save.
 
 ### $\color{#90a4ae}{\sf{\text{Help Tab}}}$ <a name="help-tab"></a>

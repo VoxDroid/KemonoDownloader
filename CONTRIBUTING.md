@@ -52,17 +52,20 @@ Before starting work, check the [Issues page](https://github.com/VoxDroid/Kemono
 
 ### Development Environment
 1. Ensure you have **Python 3.9+** installed.
-2. Install the required dependencies:
+2. Create and activate a virtual environment:
    ```bash
-   pip install -r requirements.txt
+   python -m venv .venv
+   .venv\Scripts\activate      # Windows
+   source .venv/bin/activate   # macOS / Linux
    ```
-3. Install [Briefcase](https://briefcase.readthedocs.io/) for building the app:
+3. Install the dependencies (this includes [Briefcase](https://briefcase.readthedocs.io/), pytest and the pre-commit tools):
    ```bash
-   pip install briefcase
+   python -m pip install -r requirements.txt
    ```
-4. Test the app locally to ensure it runs:
+   On Linux, Qt also needs the `xcb-cursor` system library; see the [README](README.md#installation) if the app fails to start.
+4. Run the app from source to check it starts:
    ```bash
-   briefcase run
+   briefcase dev
    ```
 
 ### Making Changes
@@ -72,6 +75,13 @@ Before starting work, check the [Issues page](https://github.com/VoxDroid/Kemono
 - Update documentation (e.g., `README.md`, `SUPPORT.md`, in-app Help tab) if your changes affect usage or installation.
 
 ### Testing
+- Run the test suite and the code checks before opening a pull request; CI runs the tests on Windows, macOS and Linux (Python 3.9 to 3.14) and the checks once, and fails if either does:
+  ```bash
+  python -m pytest -q          # test suite (offscreen Qt, no network access)
+  pre-commit install           # once: run the checks automatically on every commit
+  pre-commit run --all-files   # black, isort, ruff, mypy and pyright
+  ```
+- Add or update tests for the behaviour you change, in the `tests/` folder.
 - Test your changes thoroughly on your local machine across supported platforms (Windows, macOS, Linux) if possible, using Briefcase commands (e.g., `briefcase run windows`).
 - Ensure the app works as expected (e.g., downloading posts, archiving creators, UI functionality).
 - Verify that your changes don’t break existing features or introduce new bugs.

@@ -1,7 +1,33 @@
 # Kemono Downloader Release Notes
 
 ## Unreleased
-**fix: Pawchive previews, creator-tab crashes, the Tor setup on Linux, Linux packaging and CI**
+**fix: crash-proof error handling, Tor that never falls back to a direct connection, Pawchive previews, Linux packaging, translations, docs and CI**
+
+- Keep the app running after an unexpected error.
+  An error that nothing else caught used to make PyQt abort the whole app without a message (on Windows, exit code 0xC0000409). The app now prints the error, shows a dialog with the details to include in a bug report, and keeps running.
+
+- Never bypass Tor when it is selected.
+  With Tor chosen as the proxy but not running, downloads used to go straight to the site without any proxy, and a missing PySocks package switched to a Privoxy port the app never starts. Requests now always go to Tor's SOCKS port and fail if Tor isn't available, so the real IP address is never used by accident. This also works with a Tor service you run yourself on the default port. Proxy settings are no longer printed to the console on every request.
+
+- Update the built-in Tor download to 16.0.1 and verify it.
+  "Download Tor" now fetches the Tor 16.0.1 Expert Bundle, checks it against the SHA-256 published in Tor's signed checksum list before extracting anything, and refuses a file that doesn't match. Linux on ARM64 gets the matching bundle, and an unsupported system shows a message instead of downloading a bundle that can't run.
+
+- Translate the remaining English-only interface text.
+  The Tor status while starting, the Tor Help button and help dialog, the "Custom Proxy" option, folder errors in Settings, the Post tab's log saving messages, the Creator tab's log messages and Expand Logs tooltip, and the Thumbnail tab's preview hint now follow the selected language. Changing the language while Tor runs no longer shows it as stopped. Twenty unused translations were removed.
+
+- Use one "JPG/JPEG" file-type option in the Post tab, as in the Creator tab; both extensions were already filtered together.
+
+- Correct the documentation.
+  The simultaneous downloads range is 1-20 (the docs and the in-app Help said 1-10, and the Help gave the default as 10 instead of 5), and the README's retry limits now match the app. The security policy covers the latest release, explains that GitHub issues are public, and offers private GitHub vulnerability reports; the Code of Conduct and Support page no longer suggest "private issues". The pull request template names the current sites, and the contributing guide explains how to run the tests and checks.
+
+- Trim dependencies and update the build configuration.
+  Pillow is no longer installed: the app never used it. `requirements.txt` names `beautifulsoup4` like the packaging config. Flatpak builds use the KDE 6.11 runtime and the matching PyQt base app instead of 6.7.
+
+- Test every supported Python in CI.
+  Tests now run on Python 3.9 to 3.14 (3.9, 3.11 and 3.14 on Windows, macOS and Linux; 3.10, 3.12 and 3.13 on Linux), where they ran on 3.9 to 3.11 only. The code checks run once in their own job instead of in every test job, and pyright is pinned so a new release can't fail CI on unchanged code.
+
+- Fix the website's build steps and links.
+  The page replaced several sections with translations that had lost their markup, so the build steps showed no commands, and the Support, Contributing and License links disappeared, in English, Japanese and Korean. The steps now match the README (virtual environment, Linux libraries, `briefcase dev`), the dependency list is complete, and documentation links open the rendered pages on GitHub.
 
 - Fix crashes when creator background tasks finish.
   The Creator tab's URL validation, post detection, file preparation, filtering and check-all threads could be destroyed while they were still finishing, and Qt then aborted the whole app ("QThread: Destroyed while thread is still running"). Their cleanup now waits for each thread to exit first.

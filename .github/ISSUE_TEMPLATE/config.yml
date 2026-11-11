@@ -6,6 +6,9 @@ contact_links:
   - name: Support Resources
     url: https://github.com/VoxDroid/KemonoDownloader/blob/main/SUPPORT.md
     about: Check the Support page for common issues and solutions.
+  - name: Private Security Report
+    url: https://github.com/VoxDroid/KemonoDownloader/security/advisories/new
+    about: Report a vulnerability privately on GitHub; only the maintainers can see it.
   - name: Security Contact
     url: mailto:izeno.contact@gmail.com
     about: For sensitive security issues, please email us directly instead of opening a public issue.

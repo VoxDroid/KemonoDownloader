@@ -1722,7 +1722,9 @@ class LogsWindow(QDialog):
         logs_content = self.logs_display.toPlainText()
 
         if not logs_content.strip():
-            QMessageBox.information(self, "No Logs", "No logs to download.")
+            QMessageBox.information(
+                self, translate("information"), translate("no_logs_to_save")
+            )
             return
 
         # Generate default filename with timestamp
@@ -1731,16 +1733,23 @@ class LogsWindow(QDialog):
 
         # Open file dialog
         file_path, _ = QFileDialog.getSaveFileName(
-            self, "Save Logs", default_filename, "Text Files (*.txt);;All Files (*)"
+            self,
+            translate("download_logs"),
+            default_filename,
+            "Text Files (*.txt);;All Files (*)",
         )
 
         if file_path:
             try:
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(logs_content)
-                QMessageBox.information(self, "Success", f"Logs saved to:\n{file_path}")
+                QMessageBox.information(
+                    self, translate("success"), translate("logs_saved_to", file_path)
+                )
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to save logs:\n{str(e)}")
+                QMessageBox.critical(
+                    self, translate("error"), translate("failed_to_save_logs", str(e))
+                )
 
     def windowTitle(self):
         """Return the current translated window title.
@@ -2015,8 +2024,9 @@ class PostDownloaderTab(QWidget):
         self.post_filter_group.setStyleSheet("QGroupBox { color: white; }")
         filter_layout = QGridLayout()
         self.post_filter_checks = {
-            ".jpg": QCheckBox("JPG"),
-            ".jpeg": QCheckBox("JPEG"),
+            # One option for both spellings, as in the Creator tab;
+            # extension_allowed() lets .jpeg through under .jpg.
+            ".jpg": QCheckBox("JPG/JPEG"),
             ".png": QCheckBox("PNG"),
             ".zip": QCheckBox("ZIP"),
             ".mp4": QCheckBox("MP4"),
@@ -2129,6 +2139,7 @@ class PostDownloaderTab(QWidget):
         self.post_download_btn.setText(translate("download"))
         self.post_cancel_btn.setText(translate("cancel"))
         self.post_expand_logs_btn.setText(translate("expand_logs"))
+        self.post_expand_logs_btn.setToolTip(translate("expand_logs"))
 
         self.post_check_all.setText(translate("check_all"))
         self.download_all_links.setText(translate("download_all_links"))

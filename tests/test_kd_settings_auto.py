@@ -77,12 +77,13 @@ def test_get_proxy_settings_tor_without_socks(monkeypatch, qtbot, tmp_path):
 
     st.tor_process = FakeProc()
 
-    # Simulate PySocks not present
+    # Simulate PySocks not present: still Tor's SOCKS URL (no HTTP fallback);
+    # requests then refuses it instead of connecting directly.
     monkeypatch.setattr(importlib.util, "find_spec", lambda name: None)
 
     proxies = st.get_proxy_settings()
     assert proxies is not None
-    assert proxies["http"].startswith("http://127.0.0.1")
+    assert proxies["http"].startswith("socks5h://")
 
 
 def test_test_tor_not_configured(monkeypatch, qtbot, tmp_path):

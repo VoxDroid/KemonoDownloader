@@ -1,10 +1,9 @@
 pyqt6
-bs4
+beautifulsoup4
 qtawesome
 requests
 types-requests
 packaging
-pillow
 briefcase
 fake-useragent
 PySocks
