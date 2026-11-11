@@ -491,6 +491,11 @@ def test_post_tab_cleanup_records_real_thread(qapp, store, tmp_path):
 
     parent = MagicMock()
     parent.history_store = store
+    # Real folders: the tab creates them, and a MagicMock path would become a
+    # "MagicMock/..." folder in the current directory.
+    parent.cache_folder = str(tmp_path / "cache")
+    parent.download_folder = str(tmp_path / "downloads")
+    parent.other_files_folder = str(tmp_path / "other")
     tab = PostDownloaderTab(parent)
     try:
         settings = SimpleNamespace(api_request_max_retries=1, settings_tab=None)

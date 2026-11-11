@@ -13,8 +13,11 @@ from kemonodownloader.app import (
 
 
 @pytest.fixture
-def mock_app_dependencies(monkeypatch):
+def mock_app_dependencies(monkeypatch, tmp_path):
     """Mock all external dependencies for KemonoDownloader."""
+    # The window creates its folders and history database under the settings'
+    # base directory, so keep that inside the test's temporary folder.
+    base_directory = str(tmp_path)
     # Mock Translation in the source module
     import kemonodownloader.kd_language
 
@@ -27,7 +30,7 @@ def mock_app_dependencies(monkeypatch):
         def __init__(self, parent=None):
             super().__init__(parent)
             self.settings = {
-                "base_directory": "/tmp",
+                "base_directory": base_directory,
                 "base_folder_name": "Kemono",
                 "language": "en",
             }
@@ -306,13 +309,22 @@ class TestKemonoDownloaderExtra:
         checker.run()
         assert len(results) > 0
 
-    def test_auto_update_check(self, qapp, mock_app_dependencies, monkeypatch):
+    def test_auto_update_check(
+        self, qapp, mock_app_dependencies, monkeypatch, tmp_path
+    ):
         # Mock SettingsTab to return True for auto-check
         import kemonodownloader.app
 
         mock_settings = MagicMock()
         mock_settings.is_auto_check_updates_enabled.return_value = True
         mock_settings.get_font.return_value = "Arial"
+        # Real paths: a MagicMock here becomes a "MagicMock/..." folder (with a
+        # history database in it) in the current directory.
+        mock_settings.settings = {
+            "base_directory": str(tmp_path),
+            "base_folder_name": "Kemono",
+            "language": "en",
+        }
         monkeypatch.setattr(
             kemonodownloader.app, "SettingsTab", lambda parent: mock_settings
         )
