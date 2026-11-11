@@ -1384,6 +1384,10 @@ class TestPostDownloaderTab:
 
         with qtbot.waitSignal(thread.finished, timeout=5000) as blocker:
             thread.start()
+        # `finished` here is the class's own signal, emitted from inside run(),
+        # so the thread may still be running. Dropping the last reference to a
+        # running QThread makes Qt abort the whole test process.
+        assert thread.wait(5000)
 
         assert blocker.args[0] == [("Test Title", "1")]
 
@@ -1434,6 +1438,9 @@ class TestPostDownloaderTab:
 
         with qtbot.waitSignal(thread.finished, timeout=5000) as blocker:
             thread.start()
+        # See test_post_detection_thread_run: let run() return before the
+        # thread object goes out of scope.
+        assert thread.wait(5000)
 
         assert "url1" in blocker.args[0]
         assert blocker.args[1]["url1"] == "1"

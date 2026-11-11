@@ -4,24 +4,35 @@ on:
   push:
     branches: ["main", "master"]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   test:
     name: Test on ${{ matrix.os }} / Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     strategy:
+      # Let every leg finish so one broken runner doesn't hide results from the others.
+      fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
         python-version: ['3.9', '3.10', '3.11']
+        # ubuntu-latest is Ubuntu 26.04, which has no Python 3.9 build in setup-python,
+        # so the 3.9 Linux leg runs on 24.04 instead.
+        exclude:
+          - os: ubuntu-latest
+            python-version: '3.9'
+        include:
+          - os: ubuntu-24.04
+            python-version: '3.9'
     steps:
       - uses: actions/checkout@v4
       - name: Install system libraries (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0 libx11-6 libxkbcommon0 libxcb-xinerama0 libpulse0 libpulse-mainloop-glib0 libasound2t64 mesa-utils
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -38,14 +49,18 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest -q
+          python -m pytest -q --junitxml=test-results/junit.xml
       - name: Upload test logs (optional)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           # Make artifact name unique per matrix job and run to avoid 409 Conflict when multiple jobs upload
           name: pytest-logs-${{ matrix.os }}-${{ matrix.python-version }}-${{ github.run_id }}
-          path: ./
+          path: |
+            test-results/
+            logs/
+          if-no-files-found: ignore
+          retention-days: 14
 
   type-check:
     name: Type checking (pyright)
@@ -57,7 +72,7 @@ jobs:
         with:
           node-version: '18'
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       - name: Install dependencies

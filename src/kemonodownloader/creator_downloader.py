@@ -91,6 +91,23 @@ __all__ = ["get_domain_config", "get_domains"]
 API_BASE = get_domain_config("")["api_base"]
 
 
+def _wait_for_thread_exit(thread, timeout_ms=5000):
+    """Block until ``thread`` has returned from run().
+
+    Several worker threads declare their own ``finished`` signal, which hides
+    QThread.finished and is emitted from inside run(), so the thread is still
+    running when cleanup slots connected to it fire. Destroying a running
+    QThread (deleteLater, or dropping the last reference) aborts the process.
+    """
+    if not isinstance(thread, QThread):
+        return
+    try:
+        if thread.isRunning():
+            thread.wait(timeout_ms)
+    except RuntimeError:
+        pass  # C++ object already deleted
+
+
 class PreviewThread(QThread):
     preview_ready = pyqtSignal(str, object)
     progress = pyqtSignal(int)
@@ -2906,6 +2923,7 @@ class CreatorDownloaderTab(QWidget):
         if self.validation_thread in self.active_threads:
             self.active_threads.remove(self.validation_thread)
         if self.validation_thread:
+            _wait_for_thread_exit(self.validation_thread)
             self.validation_thread.deleteLater()
             self.validation_thread = None
 
@@ -3074,6 +3092,7 @@ class CreatorDownloaderTab(QWidget):
         """Clean up the post detection thread after it finishes."""
         if self.post_detection_thread in self.active_threads:
             self.active_threads.remove(self.post_detection_thread)
+        _wait_for_thread_exit(self.post_detection_thread)
         self.post_detection_thread = None
 
     def on_post_detection_finished(self, detected_posts):
@@ -3645,6 +3664,7 @@ class CreatorDownloaderTab(QWidget):
             and self.file_preparation_thread in self.active_threads
         ):
             self.active_threads.remove(self.file_preparation_thread)
+            _wait_for_thread_exit(self.file_preparation_thread)
             self.file_preparation_thread.deleteLater()
         self.file_preparation_thread = None
 
@@ -4314,6 +4334,7 @@ class CreatorDownloaderTab(QWidget):
         if self.checkbox_toggle_thread in self.active_threads:
             self.active_threads.remove(self.checkbox_toggle_thread)
         if self.checkbox_toggle_thread:
+            _wait_for_thread_exit(self.checkbox_toggle_thread)
             self.checkbox_toggle_thread.deleteLater()
             self.checkbox_toggle_thread = None
 
@@ -4483,6 +4504,7 @@ class CreatorDownloaderTab(QWidget):
         if self.filter_thread is not None:
             if self.filter_thread in self.active_threads:
                 self.active_threads.remove(self.filter_thread)
+            _wait_for_thread_exit(self.filter_thread)
             self.filter_thread.deleteLater()
             self.filter_thread = None
         if getattr(self, "_filter_rerun_requested", False):
