@@ -10,8 +10,8 @@ author_email = "izeno.contact@gmail.com"
 
 [tool.briefcase.app.kemonodownloader]
 formal_name = "KemonoDownloader"
-description = "A cross-platform Python app built with PyQt6 to download posts and creator content from Kemono.cr and Coomer.st."
-long_description = """A cross-platform Python app built with PyQt6 to download posts and creator content from Kemono.cr and Coomer.st. Supports concurrent downloads, file deduplication, and customizable settings."""
+description = "Download posts and creator content from Kemono, Coomer and Pawchive."
+long_description = """A cross-platform Python app built with PyQt6 to download posts and creator content from Kemono.cr, Coomer.st and Pawchive.pw. Supports concurrent downloads, file deduplication, and customizable settings."""
 signing_identity = ""
 icon = "assets/icons/KemonoDownloader"  
 
@@ -84,28 +84,63 @@ system_requires = [
     "mesa-utils",
 ]
 
+# X11 libraries the Qt xcb platform plugin bundled with PyQt6 loads at launch.
+# Since Qt 6.5 this includes xcb-cursor, which desktop installs often lack;
+# without it the app aborts with "Could not load the Qt platform plugin xcb".
+# Package names checked on Debian 12/13 and Ubuntu 22.04/24.04/26.04.
 system_runtime_requires = [
+    "libdbus-1-3",
+    "libegl1",
+    "libfontconfig1",
+    "libgl1",
+    "libxcb-cursor0",
+    "libxcb-icccm4",
+    "libxcb-image0",
+    "libxcb-keysyms1",
+    "libxcb-randr0",
+    "libxcb-render-util0",
+    "libxcb-shape0",
+    "libxcb-xfixes0",
+    "libxcb-xkb1",
+    "libxkbcommon-x11-0",
 ]
 
 [tool.briefcase.app.kemonodownloader.linux.system.rhel]
 system_requires = [
 ]
 
+# See the Debian section. Package names checked on Fedora 43 and Rocky Linux 9
+# (AppStream; early RHEL 9 minor releases only had xcb-util-cursor in EPEL).
 system_runtime_requires = [
+    "libxkbcommon-x11",
+    "xcb-util-cursor",
+    "xcb-util-image",
+    "xcb-util-keysyms",
+    "xcb-util-renderutil",
+    "xcb-util-wm",
 ]
 
 [tool.briefcase.app.kemonodownloader.linux.system.suse]
 system_requires = [
 ]
 
+# Checked on openSUSE Tumbleweed and Leap 15.6.
 system_runtime_requires = [
+    "libxcb-cursor0",
 ]
 
 [tool.briefcase.app.kemonodownloader.linux.system.arch]
 system_requires = [
 ]
 
+# Checked on Arch Linux.
 system_runtime_requires = [
+    "libxkbcommon-x11",
+    "xcb-util-cursor",
+    "xcb-util-image",
+    "xcb-util-keysyms",
+    "xcb-util-renderutil",
+    "xcb-util-wm",
 ]
 
 [tool.briefcase.app.kemonodownloader.linux.appimage]

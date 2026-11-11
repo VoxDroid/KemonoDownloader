@@ -2039,8 +2039,11 @@ class DownloadTorThread(QThread):
 
         import requests
 
+        tmp_archive = None
         try:
-            response = requests.get(self.tor_url, stream=True)
+            # (connect, read) timeouts: without them a stalled connection
+            # leaves this thread, and the settings UI, waiting forever.
+            response = requests.get(self.tor_url, stream=True, timeout=(30, 60))
             response.raise_for_status()
 
             total_size = int(response.headers.get("content-length", 0))
@@ -2073,25 +2076,43 @@ class DownloadTorThread(QThread):
                     except Exception:
                         return False
 
+                # The "data" filter (Python 3.12+, backported to 3.9.17,
+                # 3.10.12 and 3.11.4) also rejects links that point outside
+                # the target folder and special files, which the path check
+                # below cannot see.
+                extract_kwargs = (
+                    {"filter": "data"} if hasattr(tarfile, "data_filter") else {}
+                )
                 for member in tar_ref.getmembers():
                     member_path = os.path.join(self.tor_path, member.name)
                     if not _is_within_directory(self.tor_path, member_path):
                         # Skip unsafe member
                         continue
-                    tar_ref.extract(member, self.tor_path)
+                    tar_ref.extract(member, self.tor_path, **extract_kwargs)
 
             # Clean up
             os.unlink(tmp_archive)
+            tmp_archive = None
 
-            # Find tor executable - search entire extracted directory tree
+            # Find the tor executable. The expert bundle keeps it in tor/; check
+            # there first, then search the rest of the tree. The Linux bundle
+            # also ships debug symbols as debug/tor, which cannot be run, so
+            # that folder is skipped.
             tor_exe = None
-            for root, dirs, files in os.walk(self.tor_path):
-                for f in files:
-                    if f.lower() in ("tor.exe", "tor"):
-                        tor_exe = os.path.join(root, f)
-                        break
-                if tor_exe:
+            for name in ("tor.exe", "tor"):
+                candidate = os.path.join(self.tor_path, "tor", name)
+                if os.path.isfile(candidate):
+                    tor_exe = candidate
                     break
+            if tor_exe is None:
+                for root, dirs, files in os.walk(self.tor_path):
+                    dirs[:] = sorted(d for d in dirs if d.lower() != "debug")
+                    for f in files:
+                        if f.lower() in ("tor.exe", "tor"):
+                            tor_exe = os.path.join(root, f)
+                            break
+                    if tor_exe:
+                        break
 
             if tor_exe:
                 self.finished_success.emit(tor_exe)
@@ -2099,4 +2120,10 @@ class DownloadTorThread(QThread):
                 self.finished_error.emit("tor_exe_not_found")
 
         except Exception as e:
+            # Don't leave a partial download in the temp folder.
+            if tmp_archive is not None:
+                try:
+                    os.unlink(tmp_archive)
+                except OSError:
+                    pass
             self.finished_error.emit(str(e))

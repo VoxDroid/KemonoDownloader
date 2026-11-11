@@ -1,5 +1,32 @@
 # Kemono Downloader Release Notes
 
+## Unreleased
+**fix: Pawchive previews, creator-tab crashes, the Tor setup on Linux, Linux packaging and CI**
+
+- Fix crashes when creator background tasks finish.
+  The Creator tab's URL validation, post detection, file preparation, filtering and check-all threads could be destroyed while they were still finishing, and Qt then aborted the whole app ("QThread: Destroyed while thread is still running"). Their cleanup now waits for each thread to exit first.
+
+- Fix Pawchive file previews.
+  Previews in the Post and Creator tabs now send the same identifiable user agent as downloads; Pawchive's file server refuses browser user agents with HTTP 403. The Pawchive request policy (user agent, pacing and the five-download cap) now also applies to every `pawchive.<suffix>` domain instead of only `pawchive.pw`.
+
+- Accept Pawchive post URLs by the site's own name.
+  Post URL validation no longer depends on a Pawchive page mentioning Kemono or Coomer.
+
+- Fix the built-in Tor setup.
+  On Linux it could configure the bundle's debug symbols (`debug/tor`) as the Tor program, which cannot run; it now uses `tor/tor`. The Tor download has a timeout instead of waiting forever on a stalled connection, links in the archive that point outside the Tor folder are refused, and a failed download no longer leaves its partial archive in the temp folder.
+
+- Declare the system libraries Qt needs on Linux.
+  The `.deb`, `.rpm`, openSUSE and Arch packages now depend on the X11 libraries the Qt platform plugin loads, including `xcb-cursor`, whose absence made the app abort at launch with "Could not load the Qt platform plugin xcb". The package description was shortened to Briefcase's recommended length and now mentions Pawchive.
+
+- Update the documentation.
+  The READMEs explain how to install `xcb-cursor` on Linux and now say correctly where builds are available (pre-compiled binaries on Ko-fi; the GitHub Releases page has release notes and source code). The website mentions Pawchive and has the five Simplified Chinese strings it was missing (its language button showed "undefined").
+
+- Improve CI.
+  Tests run on the new Ubuntu 26.04 runners (Python 3.9 stays on Ubuntu 24.04, which still has it), one failing job no longer cancels the others, GitHub Actions are updated to their Node 24 versions, pip downloads are cached, the workflow can be run manually, superseded pull request runs are cancelled, and only test reports are uploaded.
+
+- Make the test suite more reliable.
+  Thread tests wait for their threads to stop before returning (an intermittent abort in CI), tests no longer write a history database into the repository or `/tmp`, and new tests cover the Pawchive request policy, the Tor download and the version numbers.
+
 ## v5.14.0 (03 November 2026)
 **feat: History tab with download history and favorites, a smoother and faster interface, and download reliability fixes**
 

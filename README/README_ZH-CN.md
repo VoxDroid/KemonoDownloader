@@ -199,6 +199,11 @@ Kemono Downloader现在使用[Briefcase](https://briefcase.readthedocs.io/)打�
    ```bash
    python -m pip install -r requirements.txt
    ```
+   - **仅限 Linux**：Qt 6.5+ 需要 `xcb-cursor` 库，某些桌面环境（例如 Linux Mint）默认未安装。如果启动时出现 `Could not load the Qt platform plugin "xcb"` 错误，请安装它：
+     - **Debian/Ubuntu/Mint**：`sudo apt install libxcb-cursor0`
+     - **Fedora/RHEL**：`sudo dnf install xcb-util-cursor`
+     - **Arch**：`sudo pacman -S xcb-util-cursor`
+     - **openSUSE**：`sudo zypper install libxcb-cursor0`
 5. 构建应用程序：
    - **Windows**: `briefcase build windows`
    - **macOS**: `briefcase build macos`
@@ -293,11 +298,9 @@ Kemono Downloader现在使用[Briefcase](https://briefcase.readthedocs.io/)打�
 </table>
 
 ## 发布版本
-- **Windows**：预编译的`.exe`文件在[发布部分](https://github.com/VoxDroid/KemonoDownloader/releases)中提供。
-- **macOS**：预编译的通用`.dmg`（x86_64和Apple Silicon）在[发布部分](https://github.com/VoxDroid/KemonoDownloader/releases)中提供。
-- **Linux**：预编译的`.rpm`（用于Fedora/Red Hat）、`.deb`（用于Debian/Ubuntu）或`.pkg.tar.tsz`（用于Arch/Pacman）在[发布页面](https://github.com/VoxDroid/KemonoDownloader/releases)中提供。
-- 查看发布说明了解新功能、错误修复和版本更新的详细信息。
-- Briefcase构建的Python源代码仍然是支持所有平台的主要方法，需要适当的设置。
+- **预编译二进制文件**：Windows（`.exe`、`.msi`）、macOS（适用于 Apple Silicon 和 Intel 的 `.dmg`）和 Linux（`.deb`、`.rpm`、`.pkg.tar.zst`）版本可在 [Ko-fi](https://ko-fi.com/izeno/shop) 获取，完整列表见上方的“预编译二进制文件”部分。
+- [GitHub Releases 页面](https://github.com/VoxDroid/KemonoDownloader/releases)提供每个版本的发布说明和源代码。
+- 使用 Briefcase 从源代码构建是免费的，并且适用于所有平台，请参阅上方的“使用Briefcase构建（所有平台）”部分。
 
 ## 支持
 有关获得帮助、报告问题或支持项目开发的方法，请参阅[支持页面](SUPPORT.md)。

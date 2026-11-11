@@ -11,9 +11,14 @@ PAWCHIVE_REQUEST_INTERVAL = 1.0
 
 
 def is_pawchive_url(url: str) -> bool:
-    """Return whether *url* belongs to pawchive or its file server."""
-    hostname = (urlparse(url).hostname or "").lower()
-    return hostname == "pawchive.pw" or hostname.endswith(".pawchive.pw")
+    """Return whether *url* belongs to pawchive or one of its servers.
+
+    Matches ``pawchive.<suffix>`` and its subdomains (``file.``, ``img.``) for
+    any suffix, since the site has moved between domains (see domain_config).
+    """
+    hostname = (urlparse(url).hostname or "").lower().rstrip(".")
+    labels = hostname.split(".")
+    return len(labels) >= 2 and labels[-2] == "pawchive" and bool(labels[-1])
 
 
 def get_request_headers(headers: dict, url: str) -> dict:

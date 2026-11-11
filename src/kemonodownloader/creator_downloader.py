@@ -136,8 +136,14 @@ class PreviewThread(QThread):
                     return
 
             try:
+                # Pawchive's file server rejects browser user agents (HTTP
+                # 403), so previews need the same identifiable agent as
+                # downloads.
                 response = get_session(self.settings_tab).get(
-                    self.url, headers=get_headers(), stream=True, timeout=(30, 30)
+                    self.url,
+                    headers=get_request_headers(get_headers(), self.url),
+                    stream=True,
+                    timeout=(30, 30),
                 )
                 response.raise_for_status()
                 self.total_size = response_content_length(response)

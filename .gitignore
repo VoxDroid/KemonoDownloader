@@ -76,3 +76,6 @@ debug_*.py
 
 # database
 *.db*
+
+# pytest JUnit report written by CI
+test-results/
