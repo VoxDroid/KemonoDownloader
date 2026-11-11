@@ -75,7 +75,7 @@ Before starting work, check the [Issues page](https://github.com/VoxDroid/Kemono
 - Update documentation (e.g., `README.md`, `SUPPORT.md`, in-app Help tab) if your changes affect usage or installation.
 
 ### Testing
-- Run the test suite and the code checks before opening a pull request; CI runs both on Windows, macOS and Linux and will fail if either does:
+- Run the test suite and the code checks before opening a pull request; CI runs the tests on Windows, macOS and Linux (Python 3.9 to 3.14) and the checks once, and fails if either does:
   ```bash
   python -m pytest -q          # test suite (offscreen Qt, no network access)
   pre-commit install           # once: run the checks automatically on every commit

@@ -29,7 +29,6 @@ requires = [
     "beautifulsoup4",
     "qtawesome",
     "packaging",
-    "pillow",
     "fake-useragent",
     "PySocks",
 ]
@@ -154,11 +153,13 @@ linuxdeploy_plugins = [
 
 [tool.briefcase.app.kemonodownloader.linux.flatpak]
 finish_arg."filesystem=home" = true
+# The PyQt BaseApp branch is built on the KDE runtime of the same version, so
+# keep the two in step, on a branch Flathub still supports.
 flatpak_runtime = "org.kde.Platform"
-flatpak_runtime_version = "6.7"
+flatpak_runtime_version = "6.11"
 flatpak_sdk = "org.kde.Sdk"
 flatpak_base = "com.riverbankcomputing.PyQt.BaseApp"
-flatpak_base_version = "6.7"
+flatpak_base_version = "6.11"
 
 [tool.briefcase.app.kemonodownloader.windows]
 requires = [

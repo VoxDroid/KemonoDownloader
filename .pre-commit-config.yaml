@@ -31,4 +31,5 @@ repos:
         language: node
         pass_filenames: false
         types: [python]
-        additional_dependencies: ["pyright"]
+        # Keep in sync with PYRIGHT_VERSION in .github/workflows/ci.yml.
+        additional_dependencies: ["pyright@1.1.414"]
