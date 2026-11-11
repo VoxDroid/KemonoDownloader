@@ -37,8 +37,9 @@ def test_download_tor_thread_skips_path_traversal(monkeypatch, tmp_path):
         def getmembers(self):
             return self._members
 
-        def extract(self, member, path):
-            # record the member name that would be extracted
+        def extract(self, member, path, **kwargs):
+            # record the member name that would be extracted (kwargs carries
+            # the tarfile extraction filter on Pythons that support it)
             self.extracted.append(member.name)
 
         def close(self):
