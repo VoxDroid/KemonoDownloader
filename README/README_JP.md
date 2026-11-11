@@ -199,6 +199,11 @@ Kemono Downloaderは現在、[Briefcase](https://briefcase.readthedocs.io/)を�
    ```bash
    python -m pip install -r requirements.txt
    ```
+   - **Linuxのみ**：Qt 6.5以降では`xcb-cursor`ライブラリが必要ですが、一部のデスクトップ環境（Linux Mintなど）には既定でインストールされていません。起動時に`Could not load the Qt platform plugin "xcb"`と表示される場合は、次のコマンドでインストールしてください：
+     - **Debian/Ubuntu/Mint**：`sudo apt install libxcb-cursor0`
+     - **Fedora/RHEL**：`sudo dnf install xcb-util-cursor`
+     - **Arch**：`sudo pacman -S xcb-util-cursor`
+     - **openSUSE**：`sudo zypper install libxcb-cursor0`
 5. アプリケーションをビルドします：
    - **Windows**: `briefcase build windows`
    - **macOS**: `briefcase build macos`
@@ -293,11 +298,9 @@ Kemono Downloaderのメインタブのプレビューです：
 </table>
 
 ## リリース
-- **Windows**: 事前にコンパイルされた`.exe`が[リリースセクション](https://github.com/VoxDroid/KemonoDownloader/releases)で利用可能。
-- **macOS**: 事前にコンパイルされたユニバーサル`.dmg`（x86_64およびApple Silicon）が[リリースセクション](https://github.com/VoxDroid/KemonoDownloader/releases)で利用可能。
-- **Linux**: 事前にコンパイルされた`.rpm`（Fedora/Red Hat用）、`.deb`（Debian/Ubuntu用）、または`.pkg.tar.tsz`（Arch/Pacman用）が[リリースページ](https://github.com/VoxDroid/KemonoDownloader/releases)で利用可能。
-- 新機能、バグ修正、バージョン更新の詳細についてはリリースノートを確認してください。
-- Briefcaseでビルドされたpythonソースが、適切なセットアップですべてのプラットフォームをサポートする主要な方法として残っています。
+- **事前にコンパイルされたバイナリ**：Windows（`.exe`、`.msi`）、macOS（Apple Silicon用およびIntel用の`.dmg`）、Linux（`.deb`、`.rpm`、`.pkg.tar.zst`）向けのバイナリは[Ko-fi](https://ko-fi.com/izeno/shop)で入手できます。一覧は上記の「事前にコンパイルされたバイナリ」セクションを参照してください。
+- [GitHubのリリースページ](https://github.com/VoxDroid/KemonoDownloader/releases)には、各バージョンのリリースノートとソースコードがあります。
+- Briefcaseを使ったソースからのビルドは無料で、すべてのプラットフォームで利用できます。上記の「Briefcaseでのビルド（全プラットフォーム）」セクションを参照してください。
 
 ## サポート
 ヘルプを得る方法、問題を報告する方法、またはプロジェクトの開発をサポートする方法については、[サポートページ](SUPPORT.md)をご覧ください。

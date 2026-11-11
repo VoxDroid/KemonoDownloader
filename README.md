@@ -341,6 +341,11 @@ Support ongoing development and get access here: **[Ko-fi Binaries Page](https:/
    ```bash
    python -m pip install -r requirements.txt
    ```
+   - **Linux only**: Qt 6.5+ needs the `xcb-cursor` library, which some desktops (for example Linux Mint) don't install by default. If the app fails to start with `Could not load the Qt platform plugin "xcb"`, install it:
+     - **Debian/Ubuntu/Mint**: `sudo apt install libxcb-cursor0`
+     - **Fedora/RHEL**: `sudo dnf install xcb-util-cursor`
+     - **Arch**: `sudo pacman -S xcb-util-cursor`
+     - **openSUSE**: `sudo zypper install libxcb-cursor0`
 5. Build the application:
    - **Windows**: `briefcase build windows`
    - **macOS**: `briefcase build macos`
@@ -435,11 +440,9 @@ Here are previews of the main tabs in Kemono Downloader:
 </table>
 
 ## $\color{#546e7a}{\sf{\text{Releases}}}$ <a name="releases"></a>
-- **Windows**: Pre-compiled `.exe` available in the [Releases section](https://github.com/VoxDroid/KemonoDownloader/releases).
-- **macOS**: Pre-compiled universal `.dmg` (x86_64 and Apple Silicon) available in the [Releases section](https://github.com/VoxDroid/KemonoDownloader/releases).
-- **Linux**: Pre-compiled `.rpm` (for Fedora/Red Hat), `.deb` (for Debian/Ubuntu), or `.pkg.tar.tsz` (for Arch/Pacman) available in the [Releases page](https://github.com/VoxDroid/KemonoDownloader/releases).
-- Check release notes for details on new features, bug fixes, and version updates.
-- The Briefcase-built Python source remains the primary method, supporting all platforms with proper setup.
+- **Pre-compiled binaries** for Windows (`.exe`, `.msi`), macOS (`.dmg` for Apple Silicon and Intel) and Linux (`.deb`, `.rpm`, `.pkg.tar.zst`) are available on [Ko-fi](https://ko-fi.com/izeno/shop). See [Pre-Compiled Binaries](#installation) for the full list.
+- The [GitHub Releases page](https://github.com/VoxDroid/KemonoDownloader/releases) has the release notes and source code for every version.
+- Building from source with Briefcase is free and works on every platform; see [Building with Briefcase](#installation).
 
 ## $\color{#546e7a}{\sf{\text{Support}}}$ <a name="support"></a>
 For ways to get help, report issues, or support the project’s development, please see the [Support page](SUPPORT.md).
