@@ -150,8 +150,13 @@ class PreviewThread(QThread):
                 return
 
         try:
+            # Pawchive's file server rejects browser user agents (HTTP 403),
+            # so previews need the same identifiable agent as downloads.
             response = get_session(self.settings_tab).get(
-                self.url, headers=get_headers(), stream=True, timeout=(30, 30)
+                self.url,
+                headers=get_request_headers(get_headers(), self.url),
+                stream=True,
+                timeout=(30, 30),
             )
             response.raise_for_status()
             self.total_size = response_content_length(response)
@@ -2373,7 +2378,11 @@ class PostDownloaderTab(QWidget):
 
             if direct_response.status_code == 200:
                 content = direct_response.text.lower()
-                if "kemono" in content or "coomer" in content:
+                # Accept the page when it names its own site (e.g. "pawchive"
+                # for pawchive.<suffix>); a Pawchive page shouldn't have to
+                # mention Kemono or Coomer to count as valid.
+                site_name = get_domain_config(url)["domain"].split(".")[0].lower()
+                if any(name in content for name in (site_name, "kemono", "coomer")):
                     self.append_log_to_console(
                         translate("log_info", translate("url_validated_fallback", url)),
                         "INFO",
