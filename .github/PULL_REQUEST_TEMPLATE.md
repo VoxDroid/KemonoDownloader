@@ -36,7 +36,7 @@ Describe how you tested your changes, including:
 - \[ \] I have tested my changes thoroughly using Briefcase on at least one supported platform.
 - \[ \] I have updated the documentation (e.g., `README.md`, `SUPPORT.md`, in-app Help tab) if necessary.
 - \[ \] My changes do not introduce new dependencies without prior discussion.
-- \[ \] My changes respect the intellectual property rights and terms of service of Kemono.su and related platforms, as outlined in the README.
+- \[ \] My changes respect the intellectual property rights and terms of service of Kemono.cr, Coomer.st, Pawchive.pw and related platforms, as outlined in the README.
 - \[ \] I have not included unverified links or promotional content.
 - \[ \] For security-related changes, I have followed the Security Policy.
 

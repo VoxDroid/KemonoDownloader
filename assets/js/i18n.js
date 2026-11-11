@@ -41,7 +41,7 @@ const translations = {
   
       communityTitle: "Community Standards",
       communityText1:
-        'We are committed to fostering a welcoming and respectful community around KemonoDownloader. Please read our <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> to understand the standards we expect from all contributors and users. Key points include:',
+        'We are committed to fostering a welcoming and respectful community around KemonoDownloader. Please read our <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md" target="_blank">Code of Conduct</a> to understand the standards we expect from all contributors and users. Key points include:',
       communityList1: "Respecting the intellectual property rights of creators.",
       communityList2:
         "Refraining from using KemonoDownloader to engage in illegal activities, such as unauthorized distribution of copyrighted material.",
@@ -57,7 +57,7 @@ const translations = {
       featureFileTypeSupport: "File Type Support",
       featureFileTypeSupportDesc: "Handle images (JPG, PNG, GIF), videos (MP4), archives (ZIP, 7Z), PDFs, and more.",
       featureConcurrentDownloads: "Concurrent Downloads",
-      featureConcurrentDownloadsDesc: "Adjust the number of simultaneous downloads (1-10) for optimal performance.",
+      featureConcurrentDownloadsDesc: "Adjust the number of simultaneous downloads (1-20) for optimal performance.",
       featureFileDeduplication: "File Deduplication",
       featureFileDeduplicationDesc: "Prevent redundant downloads using URL hashes.",
       featureImagePreviews: "Image Previews",
@@ -92,11 +92,11 @@ const translations = {
   
       // Installation steps
       installStep1: "Ensure you have <strong>Python 3.9+</strong> installed on your system (Windows, macOS, Linux).",
-      installStep2: "Clone this repository:",
-      installStep3: "Install Briefcase and dependencies:",
-      installStep4: "Initialize the Briefcase project (if not already set up):",
-      installStep5: "Build the application:",
-      installStep6: "Run the application:",
+      installStep2: "Clone this repository:<br><pre><code class=\"language-bash\">git clone https://github.com/VoxDroid/KemonoDownloader.git\ncd KemonoDownloader</code></pre>",
+      installStep3: "Create and activate a virtual environment, then install the dependencies (Briefcase is included):<br><pre><code class=\"bash\">python -m venv .venv\n.venv\\Scripts\\activate        # Windows\nsource .venv/bin/activate     # macOS / Linux\npython -m pip install -r requirements.txt</code></pre>",
+      installStep4: "On Linux, Qt 6.5+ also needs the <code>xcb-cursor</code> library. If the app fails to start with <code>Could not load the Qt platform plugin \"xcb\"</code>, install it:<ul><li><strong>Debian/Ubuntu/Mint</strong>: <code>sudo apt install libxcb-cursor0</code></li><li><strong>Fedora/RHEL</strong>: <code>sudo dnf install xcb-util-cursor</code></li><li><strong>Arch</strong>: <code>sudo pacman -S xcb-util-cursor</code></li><li><strong>openSUSE</strong>: <code>sudo zypper install libxcb-cursor0</code></li></ul>",
+      installStep5: "Build the application:<ul><li><strong>Windows</strong>: <code>briefcase build windows</code></li><li><strong>macOS</strong>: <code>briefcase build macos</code></li><li><strong>Linux</strong>: <code>briefcase build linux</code></li></ul>",
+      installStep6: "Run the application:<ul><li><strong>From source</strong> (recommended): <code>briefcase dev</code></li><li><strong>Windows</strong>: <code>briefcase run windows</code></li><li><strong>macOS</strong>: <code>briefcase run macos</code></li><li><strong>Linux</strong>: <code>briefcase run linux</code></li></ul>",
       installNote: "Note",
       installNoteText: "An internet connection is required to fetch content from Kemono.cr, Coomer.st, and Pawchive.pw.",
   
@@ -148,23 +148,23 @@ const translations = {
   
       // Usage steps
       usageStep1:
-        "The application creates default directories (`Downloads`, `Cache`, `Other Files`) in the specified save location.",
+        "The application creates default directories (<code>Downloads</code>, <code>Cache</code>, <code>Other Files</code>) in the specified save location.",
       usageStep2: "Ensure an active internet connection to access Kemono.cr, Coomer.st, and Pawchive.pw content.",
       usageStep3: "Explore the Help tab for detailed instructions and troubleshooting tips.",
       postDownloaderStep1:
-        'Enter a post URL (e.g., `https://kemono.cr/patreon/user/123456789/post/123456789` or `https://coomer.st/onlyfans/user/123456789/post/123456789`) in the "Enter post URL" field.',
+        "Enter a post URL (e.g., <code>https://kemono.cr/patreon/user/123456789/post/123456789</code> or <code>https://coomer.st/onlyfans/user/123456789/post/123456789</code>) in the \"Enter post URL\" field.",
       postDownloaderStep2: 'Click "Add to Queue" to add it to the list.',
       postDownloaderStep3:
         "Click the eye icon to view files, filter by type (e.g., JPG, ZIP), and select files to download.",
       postDownloaderStep4: 'Click "Download" to start, and monitor progress with the progress bars and console.',
       creatorDownloaderStep1:
-        'Enter a creator URL (e.g., `https://kemono.cr/patreon/user/123456789` or `https://coomer.st/onlyfans/user/123456789`) in the "Enter creator URL" field.',
+        "Enter a creator URL (e.g., <code>https://kemono.cr/patreon/user/123456789</code> or <code>https://coomer.st/onlyfans/user/123456789</code>) in the \"Enter creator URL\" field.",
       creatorDownloaderStep2: 'Click "Add to Queue" to add it to the list.',
       creatorDownloaderStep3:
         "Click the eye icon to fetch posts, configure options (Main File, Attachments, Content Images), and select posts.",
       creatorDownloaderStep4: 'Click "Download" to begin, and track progress via the interface.',
       settingsStep1: "Set the folder name and save directory for downloads.",
-      settingsStep2: "Adjust simultaneous downloads (1-10) using the slider or spinbox.",
+      settingsStep2: "Adjust simultaneous downloads (1-20) using the slider or spinbox.",
       settingsStep3: 'Click "Apply Changes" to save.',
       helpTabDesc: "Navigate to the Help tab to read detailed guides, examples, and support information.",
   
@@ -178,31 +178,34 @@ const translations = {
   
       // Support
       supportDesc:
-        "For ways to get help, report issues, or support the project's development, please see the Support page.",
-      supportInApp: "In-App Help: The Help tab contains a comprehensive user manual.",
-      supportGitHub: "GitHub Discussions: Engage with the community on the Discussions tab.",
-      supportBugs: "Report Bugs: Open an issue on the Issues page.",
-      supportDevelopment: "Support Development: Buy me a coffee on Ko-fi.",
+        "For ways to get help, report issues, or support the project's development, please see the <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/SUPPORT.md\" target=\"_blank\">Support page</a>.",
+      supportInApp: "<strong>In-App Help</strong>: The Help tab contains a comprehensive user manual.",
+      supportGitHub: "<strong>GitHub Discussions</strong>: Engage with the community on the <a href=\"https://github.com/VoxDroid/KemonoDownloader/discussions\" target=\"_blank\">Discussions tab</a>.",
+      supportBugs: "<strong>Report Bugs</strong>: Open an issue on the <a href=\"https://github.com/VoxDroid/KemonoDownloader/issues\" target=\"_blank\">Issues page</a>.",
+      supportDevelopment: "<strong>Support Development</strong>: <a href=\"https://ko-fi.com/izeno\" target=\"_blank\">Buy me a coffee on Ko-fi</a>.",
   
       // Contributing
       contributingDesc:
-        "Kemono Downloader is open-source, and contributions are encouraged! Please read our Contributing Guidelines for details on how to get involved, submit pull requests, and suggest features. All contributors are expected to adhere to our Code of Conduct.",
-      contributingStep1: "Fork the repository on GitHub.",
+        "Kemono Downloader is open-source, and contributions are encouraged! Please read our <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CONTRIBUTING.md\" target=\"_blank\">Contributing Guidelines</a> for details on how to get involved, submit pull requests, and suggest features. All contributors are expected to adhere to our <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md\" target=\"_blank\">Code of Conduct</a>.",
+      contributingStep1: "Fork the repository on <a href=\"https://github.com/VoxDroid/KemonoDownloader\" target=\"_blank\">GitHub</a>.",
       contributingStep2: "Create a branch for your feature or fix.",
       contributingStep3: "Submit a pull request with a clear description of your changes.",
       contributingStep4: "Adhere to coding standards and test your changes thoroughly.",
   
       // License & Dependencies
       licenseDesc:
-        "This project is licensed under the MIT License. Use, modify, and distribute it freely per the license terms.",
+        "This project is licensed under the <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/LICENSE\" target=\"_blank\">MIT License</a>. Use, modify, and distribute it freely per the license terms.",
       dependenciesDesc: "To build from source, install the following Python packages:",
-      dependencyPyQt6: "PyQt6 (for the GUI)",
-      dependencyRequests: "requests (for HTTP requests)",
-      dependencyBS4: "beautifulsoup4 (for HTML parsing)",
-      dependencyQtAwesome: "qtawesome (for icons)",
-      dependencyBriefcase: "briefcase (for packaging the app)",
+      dependencyPyQt6: "<code>PyQt6</code> (for the GUI)",
+      dependencyRequests: "<code>requests</code> (for HTTP requests)",
+      dependencyBS4: "<code>beautifulsoup4</code> (for HTML parsing)",
+      dependencyQtAwesome: "<code>qtawesome</code> (for icons)",
+      dependencyBriefcase: "<code>briefcase</code> (for packaging the app)",
+      dependencyPySocks: "<code>PySocks</code> (for SOCKS and Tor proxies)",
+      dependencyFakeUserAgent: "<code>fake-useragent</code> (for browser user agents)",
+      dependencyPackaging: "<code>packaging</code> (for update checks)",
       dependenciesNote:
-        "Create a `requirements.txt` file with these dependencies and run `pip install -r requirements.txt`.",
+        "All of these are listed in <code>requirements.txt</code>; install them with <code>python -m pip install -r requirements.txt</code>.",
   
       // Contributors
       contributorsTitle: "Contributors",
@@ -259,7 +262,7 @@ const translations = {
   
       communityTitle: "コミュニティ基準",
       communityText1:
-        '私たちはケモノダウンローダーを中心に、歓迎的で敬意を持ったコミュニティを育成することに取り組んでいます。すべての貢献者とユーザーに期待する基準を理解するために、<a href="CODE_OF_CONDUCT.md">行動規範</a>をお読みください。主なポイントは次のとおりです：',
+        '私たちはケモノダウンローダーを中心に、歓迎的で敬意を持ったコミュニティを育成することに取り組んでいます。すべての貢献者とユーザーに期待する基準を理解するために、<a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md" target="_blank">行動規範</a>をお読みください。主なポイントは次のとおりです：',
       communityList1: "クリエイターの知的財産権を尊重すること。",
       communityList2:
         "ケモノダウンローダーを使用して、著作権で保護されたマテリアルの不正な配布などの違法行為に従事することを控えること。",
@@ -275,7 +278,7 @@ const translations = {
       featureFileTypeSupport: "ファイルタイプサポート",
       featureFileTypeSupportDesc: "画像（JPG、PNG、GIF）、動画（MP4）、アーカイブ（ZIP、7Z）、PDFなどを処理します。",
       featureConcurrentDownloads: "同時ダウンロード",
-      featureConcurrentDownloadsDesc: "最適なパフォーマンスのために同時ダウンロード数（1〜10）を調整します。",
+      featureConcurrentDownloadsDesc: "最適なパフォーマンスのために同時ダウンロード数（1〜20）を調整します。",
       featureFileDeduplication: "ファイル重複排除",
       featureFileDeduplicationDesc: "URLハッシュを使用して冗長なダウンロードを防止します。",
       featureImagePreviews: "画像プレビュー",
@@ -310,11 +313,11 @@ const translations = {
       // Installation steps
       installStep1:
         "<strong>Python 3.9+</strong>がシステム（Windows、macOS、Linux）にインストールされていることを確認してください。",
-      installStep2: "このリポジトリをクローンします：",
-      installStep3: "Briefcaseと依存関係をインストールします：",
-      installStep4: "Briefcaseプロジェクトを初期化します（まだ設定されていない場合）：",
-      installStep5: "アプリケーションをビルドします：",
-      installStep6: "アプリケーションを実行します：",
+      installStep2: "このリポジトリをクローンします：<br><pre><code class=\"language-bash\">git clone https://github.com/VoxDroid/KemonoDownloader.git\ncd KemonoDownloader</code></pre>",
+      installStep3: "仮想環境を作成して有効化し、依存関係をインストールします（Briefcaseも含まれます）：<br><pre><code class=\"bash\">python -m venv .venv\n.venv\\Scripts\\activate        # Windows\nsource .venv/bin/activate     # macOS / Linux\npython -m pip install -r requirements.txt</code></pre>",
+      installStep4: "Linuxでは、Qt 6.5以降に<code>xcb-cursor</code>ライブラリも必要です。起動時に<code>Could not load the Qt platform plugin \"xcb\"</code>と表示される場合は、インストールしてください：<ul><li><strong>Debian/Ubuntu/Mint</strong>：<code>sudo apt install libxcb-cursor0</code></li><li><strong>Fedora/RHEL</strong>：<code>sudo dnf install xcb-util-cursor</code></li><li><strong>Arch</strong>：<code>sudo pacman -S xcb-util-cursor</code></li><li><strong>openSUSE</strong>：<code>sudo zypper install libxcb-cursor0</code></li></ul>",
+      installStep5: "アプリケーションをビルドします：<ul><li><strong>Windows</strong>：<code>briefcase build windows</code></li><li><strong>macOS</strong>：<code>briefcase build macos</code></li><li><strong>Linux</strong>：<code>briefcase build linux</code></li></ul>",
+      installStep6: "アプリケーションを実行します：<ul><li><strong>ソースから直接</strong>（推奨）：<code>briefcase dev</code></li><li><strong>Windows</strong>：<code>briefcase run windows</code></li><li><strong>macOS</strong>：<code>briefcase run macos</code></li><li><strong>Linux</strong>：<code>briefcase run linux</code></li></ul>",
       installNote: "注意",
       installNoteText: "Kemono.cr、Coomer.st、Pawchive.pwからコンテンツを取得するにはインターネット接続が必要です。",
   
@@ -366,23 +369,23 @@ const translations = {
   
       // Usage steps
       usageStep1:
-        "アプリケーションは指定された保存場所にデフォルトのディレクトリ（`Downloads`、`Cache`、`Other Files`）を作成します。",
+        "アプリケーションは指定された保存場所にデフォルトのディレクトリ（<code>Downloads</code>、<code>Cache</code>、<code>Other Files</code>）を作成します。",
       usageStep2: "Kemono.cr、Coomer.st、Pawchive.pwのコンテンツにアクセスするには、アクティブなインターネット接続が必要です。",
       usageStep3: "詳細な説明やトラブルシューティングのヒントについては、ヘルプタブを参照してください。",
       postDownloaderStep1:
-        "「投稿URLを入力」フィールドに投稿URL（例：`https://kemono.cr/patreon/user/123456789/post/123456789`または`https://coomer.st/onlyfans/user/123456789/post/123456789`）を入力します。",
+        "「投稿URLを入力」フィールドに投稿URL（例：<code>https://kemono.cr/patreon/user/123456789/post/123456789</code>または<code>https://coomer.st/onlyfans/user/123456789/post/123456789</code>）を入力します。",
       postDownloaderStep2: "「キューに追加」をクリックしてリストに追加します。",
       postDownloaderStep3:
         "目のアイコンをクリックしてファイルを表示し、タイプ（JPG、ZIPなど）でフィルタリングし、ダウンロードするファイルを選択します。",
       postDownloaderStep4: "「ダウンロード」をクリックして開始し、プログレスバーとコンソールで進行状況を監視します。",
       creatorDownloaderStep1:
-        "「クリエイターURLを入力」フィールドにクリエイターURL（例：`https://kemono.cr/patreon/user/123456789`または`https://coomer.st/onlyfans/user/123456789`）を入力します。",
+        "「クリエイターURLを入力」フィールドにクリエイターURL（例：<code>https://kemono.cr/patreon/user/123456789</code>または<code>https://coomer.st/onlyfans/user/123456789</code>）を入力します。",
       creatorDownloaderStep2: "「キューに追加」をクリックしてリストに追加します。",
       creatorDownloaderStep3:
         "目のアイコンをクリックして投稿を取得し、オプション（メインファイル、添付ファイル、コンテンツ画像）を設定し、投稿を選択します。",
       creatorDownloaderStep4: "「ダウンロード」をクリックして開始し、インターフェースで進行状況を追跡します。",
       settingsStep1: "ダウンロードのフォルダ名と保存ディレクトリを設定します。",
-      settingsStep2: "スライダーまたはスピンボックスを使用して同時ダウンロード数（1〜10）を調整します。",
+      settingsStep2: "スライダーまたはスピンボックスを使用して同時ダウンロード数（1〜20）を調整します。",
       settingsStep3: "「変更を適用」をクリックして保存します。",
       helpTabDesc: "ヘルプタブに移動して、詳細なガイド、例、およびサポート情報を読みます。",
   
@@ -397,31 +400,34 @@ const translations = {
   
       // Support
       supportDesc:
-        "ヘルプの入手方法、問題の報告、またはプロジェクトの開発をサポートする方法については、サポートページを参照してください。",
-      supportInApp: "アプリ内ヘルプ：ヘルプタブには包括的なユーザーマニュアルが含まれています。",
-      supportGitHub: "GitHub Discussions：ディスカッションタブでコミュニティと交流します。",
-      supportBugs: "バグの報告：問題ページで問題を開きます。",
-      supportDevelopment: "開発のサポート：Ko-fiでコーヒーを買ってください。",
+        "ヘルプの入手方法、問題の報告、またはプロジェクトの開発をサポートする方法については、<a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/SUPPORT.md\" target=\"_blank\">サポートページ</a>を参照してください。",
+      supportInApp: "<strong>アプリ内ヘルプ</strong>：ヘルプタブには包括的なユーザーマニュアルが含まれています。",
+      supportGitHub: "<strong>GitHub Discussions</strong>：<a href=\"https://github.com/VoxDroid/KemonoDownloader/discussions\" target=\"_blank\">ディスカッションタブ</a>でコミュニティと交流します。",
+      supportBugs: "<strong>バグの報告</strong>：<a href=\"https://github.com/VoxDroid/KemonoDownloader/issues\" target=\"_blank\">問題ページ</a>で問題を開きます。",
+      supportDevelopment: "<strong>開発のサポート</strong>：<a href=\"https://ko-fi.com/izeno\" target=\"_blank\">Ko-fiでコーヒーを買ってください</a>。",
   
       // Contributing
       contributingDesc:
-        "ケモノダウンローダーはオープンソースであり、貢献を奨励しています！参加方法、プルリクエストの提出方法、機能の提案方法の詳細については、貢献ガイドラインをお読みください。すべての貢献者は行動規範に従うことが期待されています。",
-      contributingStep1: "GitHubでリポジトリをフォークします。",
+        "ケモノダウンローダーはオープンソースであり、貢献を奨励しています！参加方法、プルリクエストの提出方法、機能の提案方法の詳細については、<a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CONTRIBUTING.md\" target=\"_blank\">貢献ガイドライン</a>をお読みください。すべての貢献者は<a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md\" target=\"_blank\">行動規範</a>に従うことが期待されています。",
+      contributingStep1: "<a href=\"https://github.com/VoxDroid/KemonoDownloader\" target=\"_blank\">GitHub</a>でリポジトリをフォークします。",
       contributingStep2: "機能または修正のためのブランチを作成します。",
       contributingStep3: "変更の明確な説明を含むプルリクエストを提出します。",
       contributingStep4: "コーディング標準に従い、変更を徹底的にテストします。",
   
       // License & Dependencies
       licenseDesc:
-        "このプロジェクトはMITライセンスの下でライセンスされています。ライセンス条項に従って自由に使用、変更、配布してください。",
+        "このプロジェクトは<a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/LICENSE\" target=\"_blank\">MITライセンス</a>の下でライセンスされています。ライセンス条項に従って自由に使用、変更、配布してください。",
       dependenciesDesc: "ソースからビルドするには、次のPythonパッケージをインストールしてください：",
-      dependencyPyQt6: "PyQt6（GUIのため）",
-      dependencyRequests: "requests（HTTPリクエストのため）",
-      dependencyBS4: "beautifulsoup4（HTML解析のため）",
-      dependencyQtAwesome: "qtawesome（アイコンのため）",
-      dependencyBriefcase: "briefcase（アプリのパッケージングのため）",
+      dependencyPyQt6: "<code>PyQt6</code>（GUIのため）",
+      dependencyRequests: "<code>requests</code>（HTTPリクエストのため）",
+      dependencyBS4: "<code>beautifulsoup4</code>（HTML解析のため）",
+      dependencyQtAwesome: "<code>qtawesome</code>（アイコンのため）",
+      dependencyBriefcase: "<code>briefcase</code>（アプリのパッケージングのため）",
+      dependencyPySocks: "<code>PySocks</code>（SOCKSおよびTorプロキシのため）",
+      dependencyFakeUserAgent: "<code>fake-useragent</code>（ブラウザーのユーザーエージェントのため）",
+      dependencyPackaging: "<code>packaging</code>（更新の確認のため）",
       dependenciesNote:
-        "これらの依存関係を含む`requirements.txt`ファイルを作成し、`pip install -r requirements.txt`を実行します。",
+        "これらはすべて<code>requirements.txt</code>に記載されています。<code>python -m pip install -r requirements.txt</code>でインストールしてください。",
 
       // Contributors
       contributorsTitle: "貢献者",
@@ -475,7 +481,7 @@ const translations = {
   
       communityTitle: "커뮤니티 표준",
       communityText1:
-        '우리는 케모노 다운로더를 중심으로 환영하고 존중하는 커뮤니티를 조성하기 위해 노력하고 있습니다. 모든 기여자와 사용자에게 기대하는 표준을 이해하기 위해 <a href="CODE_OF_CONDUCT.md">행동 강령</a>을 읽어보세요. 주요 내용은 다음과 같습니다:',
+        '우리는 케모노 다운로더를 중심으로 환영하고 존중하는 커뮤니티를 조성하기 위해 노력하고 있습니다. 모든 기여자와 사용자에게 기대하는 표준을 이해하기 위해 <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md" target="_blank">행동 강령</a>을 읽어보세요. 주요 내용은 다음과 같습니다:',
       communityList1: "크리에이터의 지적 재산권을 존중하세요.",
       communityList2: "케모노 다운로더를 사용하여 저작권이 있는 자료의 무단 배포와 같은 불법 활동에 참여하지 마세요.",
       communityList3:
@@ -490,7 +496,7 @@ const translations = {
       featureFileTypeSupport: "파일 유형 지원",
       featureFileTypeSupportDesc: "이미지(JPG, PNG, GIF), 비디오(MP4), 아카이브(ZIP, 7Z), PDF 등을 처리합니다.",
       featureConcurrentDownloads: "동시 다운로드",
-      featureConcurrentDownloadsDesc: "최적의 성능을 위해 동시 다운로드 수(1-10)를 조정합니다.",
+      featureConcurrentDownloadsDesc: "최적의 성능을 위해 동시 다운로드 수(1-20)를 조정합니다.",
       featureFileDeduplication: "파일 중복 제거",
       featureFileDeduplicationDesc: "URL 해시를 사용하여 중복 다운로드를 방지합니다.",
       featureImagePreviews: "이미지 미리보기",
@@ -524,11 +530,11 @@ const translations = {
   
       // Installation steps
       installStep1: "시스템(Windows, macOS, Linux)에 <strong>Python 3.9+</strong>가 설치되어 있는지 확인하세요.",
-      installStep2: "이 저장소를 복제합니다:",
-      installStep3: "Briefcase와 의존성을 설치합니다:",
-      installStep4: "Briefcase 프로젝트를 초기화합니다(아직 설정되지 않은 경우):",
-      installStep5: "애플리케이션을 빌드합니다:",
-      installStep6: "애플리케이션을 실행합니다:",
+      installStep2: "이 저장소를 복제합니다:<br><pre><code class=\"language-bash\">git clone https://github.com/VoxDroid/KemonoDownloader.git\ncd KemonoDownloader</code></pre>",
+      installStep3: "가상 환경을 만들어 활성화한 다음 의존성을 설치합니다(Briefcase 포함):<br><pre><code class=\"bash\">python -m venv .venv\n.venv\\Scripts\\activate        # Windows\nsource .venv/bin/activate     # macOS / Linux\npython -m pip install -r requirements.txt</code></pre>",
+      installStep4: "Linux에서는 Qt 6.5 이상에 <code>xcb-cursor</code> 라이브러리도 필요합니다. 실행 시 <code>Could not load the Qt platform plugin \"xcb\"</code> 오류가 나타나면 설치하세요:<ul><li><strong>Debian/Ubuntu/Mint</strong>: <code>sudo apt install libxcb-cursor0</code></li><li><strong>Fedora/RHEL</strong>: <code>sudo dnf install xcb-util-cursor</code></li><li><strong>Arch</strong>: <code>sudo pacman -S xcb-util-cursor</code></li><li><strong>openSUSE</strong>: <code>sudo zypper install libxcb-cursor0</code></li></ul>",
+      installStep5: "애플리케이션을 빌드합니다:<ul><li><strong>Windows</strong>: <code>briefcase build windows</code></li><li><strong>macOS</strong>: <code>briefcase build macos</code></li><li><strong>Linux</strong>: <code>briefcase build linux</code></li></ul>",
+      installStep6: "애플리케이션을 실행합니다:<ul><li><strong>소스에서 바로 실행</strong>(권장): <code>briefcase dev</code></li><li><strong>Windows</strong>: <code>briefcase run windows</code></li><li><strong>macOS</strong>: <code>briefcase run macos</code></li><li><strong>Linux</strong>: <code>briefcase run linux</code></li></ul>",
       installNote: "참고",
       installNoteText: "Kemono.cr, Coomer.st, Pawchive.pw에서 콘텐츠를 가져오려면 인터넷 연결이 필요합니다.",
   
@@ -579,23 +585,23 @@ const translations = {
       languageSelector: "언어",
   
       // Usage steps
-      usageStep1: "애플리케이션은 지정된 저장 위치에 기본 디렉토리(`Downloads`, `Cache`, `Other Files`)를 생성합니다.",
+      usageStep1: "애플리케이션은 지정된 저장 위치에 기본 디렉토리(<code>Downloads</code>, <code>Cache</code>, <code>Other Files</code>)를 생성합니다.",
       usageStep2: "Kemono.cr, Coomer.st, Pawchive.pw 콘텐츠에 접근하려면 활성 인터넷 연결이 필요합니다.",
       usageStep3: "자세한 지침과 문제 해결 팁은 도움말 탭을 참조하세요.",
       postDownloaderStep1:
-        '"게시물 URL 입력" 필드에 게시물 URL(예: `https://kemono.cr/patreon/user/123456789/post/123456789` 또는 `https://coomer.st/onlyfans/user/123456789/post/123456789`)을 입력합니다.',
+        "\"게시물 URL 입력\" 필드에 게시물 URL(예: <code>https://kemono.cr/patreon/user/123456789/post/123456789</code> 또는 <code>https://coomer.st/onlyfans/user/123456789/post/123456789</code>)을 입력합니다.",
       postDownloaderStep2: '"대기열에 추가"를 클릭하여 목록에 추가합니다.',
       postDownloaderStep3:
         "눈 아이콘을 클릭하여 파일을 보고, 유형(예: JPG, ZIP)으로 필터링하고, 다운로드할 파일을 선택합니다.",
       postDownloaderStep4: '"다운로드"를 클릭하여 시작하고, 진행 표시줄과 콘솔로 진행 상황을 모니터링합니다.',
       creatorDownloaderStep1:
-        '"크리에이터 URL 입력" 필드에 크리에이터 URL(예: `https://kemono.cr/patreon/user/123456789` 또는 `https://coomer.st/onlyfans/user/123456789`)을 입력합니다.',
+        "\"크리에이터 URL 입력\" 필드에 크리에이터 URL(예: <code>https://kemono.cr/patreon/user/123456789</code> 또는 <code>https://coomer.st/onlyfans/user/123456789</code>)을 입력합니다.",
       creatorDownloaderStep2: '"대기열에 추가"를 클릭하여 목록에 추가합니다.',
       creatorDownloaderStep3:
         "눈 아이콘을 클릭하여 게시물을 가져오고, 옵션(메인 파일, 첨부 파일, 콘텐츠 이미지)을 구성하고, 게시물을 선택합니다.",
       creatorDownloaderStep4: '"다운로드"를 클릭하여 시작하고, 인터페이스를 통해 진행 상황을 추적합니다.',
       settingsStep1: "다운로드를 위한 폴더 이름과 저장 디렉토리를 설정합니다.",
-      settingsStep2: "슬라이더 또는 스핀박스를 사용하여 동시 다운로드 수(1-10)를 조정합니다.",
+      settingsStep2: "슬라이더 또는 스핀박스를 사용하여 동시 다운로드 수(1-20)를 조정합니다.",
       settingsStep3: '"변경 사항 적용"을 클릭하여 저장합니다.',
       helpTabDesc: "도움말 탭으로 이동하여 자세한 가이드, 예제 및 지원 정보를 읽습니다.",
   
@@ -609,31 +615,34 @@ const translations = {
         "<a href=\"https://github.com/VoxDroid/KemonoDownloader/releases\" target=\"_blank\">GitHub 릴리스 페이지</a>에는 각 버전의 릴리스 노트와 소스 코드가 있습니다. Briefcase로 소스에서 빌드하는 것은 무료이며 모든 플랫폼에서 작동합니다.",
   
       // Support
-      supportDesc: "도움을 받는 방법, 문제 보고 또는 프로젝트 개발 지원에 대한 자세한 내용은 지원 페이지를 참조하세요.",
-      supportInApp: "앱 내 도움말: 도움말 탭에는 포괄적인 사용자 매뉴얼이 포함되어 있습니다.",
-      supportGitHub: "GitHub 토론: 토론 탭에서 커뮤니티와 교류하세요.",
-      supportBugs: "버그 신고: 이슈 페이지에서 이슈를 열어주세요.",
-      supportDevelopment: "개발 지원: Ko-fi에서 커피를 사주세요.",
+      supportDesc: "도움을 받는 방법, 문제 보고 또는 프로젝트 개발 지원에 대한 자세한 내용은 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/SUPPORT.md\" target=\"_blank\">지원 페이지</a>를 참조하세요.",
+      supportInApp: "<strong>앱 내 도움말</strong>: 도움말 탭에는 포괄적인 사용자 매뉴얼이 포함되어 있습니다.",
+      supportGitHub: "<strong>GitHub 토론</strong>: <a href=\"https://github.com/VoxDroid/KemonoDownloader/discussions\" target=\"_blank\">토론 탭</a>에서 커뮤니티와 교류하세요.",
+      supportBugs: "<strong>버그 신고</strong>: <a href=\"https://github.com/VoxDroid/KemonoDownloader/issues\" target=\"_blank\">이슈 페이지</a>에서 이슈를 열어주세요.",
+      supportDevelopment: "<strong>개발 지원</strong>: <a href=\"https://ko-fi.com/izeno\" target=\"_blank\">Ko-fi에서 커피를 사주세요</a>.",
   
       // Contributing
       contributingDesc:
-        "케모노 다운로더는 오픈 소스이며, 기여를 권장합니다! 참여 방법, 풀 리퀘스트 제출 및 기능 제안에 대한 자세한 내용은 기여 가이드라인을 읽어보세요. 모든 기여자는 행동 강령을 준수해야 합니다.",
-      contributingStep1: "GitHub에서 저장소를 포크합니다.",
+        "케모노 다운로더는 오픈 소스이며, 기여를 권장합니다! 참여 방법, 풀 리퀘스트 제출 및 기능 제안에 대한 자세한 내용은 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CONTRIBUTING.md\" target=\"_blank\">기여 가이드라인</a>을 읽어보세요. 모든 기여자는 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md\" target=\"_blank\">행동 강령</a>을 준수해야 합니다.",
+      contributingStep1: "<a href=\"https://github.com/VoxDroid/KemonoDownloader\" target=\"_blank\">GitHub</a>에서 저장소를 포크합니다.",
       contributingStep2: "기능 또는 수정을 위한 브랜치를 만듭니다.",
       contributingStep3: "변경 사항에 대한 명확한 설명과 함께 풀 리퀘스트를 제출합니다.",
       contributingStep4: "코딩 표준을 준수하고 변경 사항을 철저히 테스트합니다.",
   
       // License & Dependencies
       licenseDesc:
-        "이 프로젝트는 MIT 라이선스에 따라 라이선스가 부여됩니다. 라이선스 조건에 따라 자유롭게 사용, 수정 및 배포하세요.",
+        "이 프로젝트는 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/LICENSE\" target=\"_blank\">MIT 라이선스</a>에 따라 라이선스가 부여됩니다. 라이선스 조건에 따라 자유롭게 사용, 수정 및 배포하세요.",
       dependenciesDesc: "소스에서 빌드하려면 다음 Python 패키지를 설치하세요:",
-      dependencyPyQt6: "PyQt6(GUI용)",
-      dependencyRequests: "requests(HTTP 요청용)",
-      dependencyBS4: "beautifulsoup4(HTML 파싱용)",
-      dependencyQtAwesome: "qtawesome(아이콘용)",
-      dependencyBriefcase: "briefcase(앱 패키징용)",
+      dependencyPyQt6: "<code>PyQt6</code>(GUI용)",
+      dependencyRequests: "<code>requests</code>(HTTP 요청용)",
+      dependencyBS4: "<code>beautifulsoup4</code>(HTML 파싱용)",
+      dependencyQtAwesome: "<code>qtawesome</code>(아이콘용)",
+      dependencyBriefcase: "<code>briefcase</code>(앱 패키징용)",
+      dependencyPySocks: "<code>PySocks</code>(SOCKS 및 Tor 프록시용)",
+      dependencyFakeUserAgent: "<code>fake-useragent</code>(브라우저 사용자 에이전트용)",
+      dependencyPackaging: "<code>packaging</code>(업데이트 확인용)",
       dependenciesNote:
-        "이러한 종속성이 포함된 `requirements.txt` 파일을 만들고 `pip install -r requirements.txt`를 실행하세요.",
+        "이 패키지는 모두 <code>requirements.txt</code>에 포함되어 있습니다. <code>python -m pip install -r requirements.txt</code>로 설치하세요.",
 
       // Contributors
       contributorsTitle: "기여자",
@@ -687,7 +696,7 @@ const translations = {
   
       communityTitle: "社区标准",
       communityText1:
-        '我们致力于为 KemonoDownloader 建立一个欢迎和尊重的社区。请阅读我们的 <a href="CODE_OF_CONDUCT.md">行为准则</a> 以了解我们对所有贡献者和用户的期望标准。关键点包括：',
+        '我们致力于为 KemonoDownloader 建立一个欢迎和尊重的社区。请阅读我们的 <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md" target="_blank">行为准则</a> 以了解我们对所有贡献者和用户的期望标准。关键点包括：',
       communityList1: "尊重创作者的知识产权。",
       communityList2:
         "避免使用 KemonoDownloader 从事非法活动，如未经授权分发受版权保护的材料。",
@@ -703,7 +712,7 @@ const translations = {
       featureFileTypeSupport: "文件类型支持",
       featureFileTypeSupportDesc: "处理图像（JPG、PNG、GIF）、视频（MP4）、归档（ZIP、7Z）、PDF 等。",
       featureConcurrentDownloads: "并发下载",
-      featureConcurrentDownloadsDesc: "调整同时下载的数量（1-10）以获得最佳性能。",
+      featureConcurrentDownloadsDesc: "调整同时下载的数量（1-20）以获得最佳性能。",
       featureFileDeduplication: "文件去重",
       featureFileDeduplicationDesc: "使用 URL 哈希防止冗余下载。",
       featureImagePreviews: "图像预览",
@@ -734,10 +743,10 @@ const translations = {
       preCompiledBinaries: "预编译二进制文件",
       installStep1: "确保您的系统上安装了 <strong>Python 3.9+</strong>（Windows、macOS、Linux）。",
       installStep2: "克隆此仓库：<br><pre><code class=\"language-bash\">git clone https://github.com/VoxDroid/KemonoDownloader.git\ncd KemonoDownloader</code></pre>",
-      installStep3: "安装 Briefcase 和依赖项：<br><pre><code class=\"bash\">pip install briefcase\npip install -r requirements.txt</code></pre>",
-      installStep4: "初始化 Briefcase 项目（如果尚未设置）：<br><pre><code class=\"bash\">briefcase create</code></pre>",
+      installStep3: "创建并激活虚拟环境，然后安装依赖项（已包含 Briefcase）：<br><pre><code class=\"bash\">python -m venv .venv\n.venv\\Scripts\\activate        # Windows\nsource .venv/bin/activate     # macOS / Linux\npython -m pip install -r requirements.txt</code></pre>",
+      installStep4: "在 Linux 上，Qt 6.5+ 还需要 <code>xcb-cursor</code> 库。如果启动时出现 <code>Could not load the Qt platform plugin \"xcb\"</code> 错误，请安装它：<ul><li><strong>Debian/Ubuntu/Mint</strong>：<code>sudo apt install libxcb-cursor0</code></li><li><strong>Fedora/RHEL</strong>：<code>sudo dnf install xcb-util-cursor</code></li><li><strong>Arch</strong>：<code>sudo pacman -S xcb-util-cursor</code></li><li><strong>openSUSE</strong>：<code>sudo zypper install libxcb-cursor0</code></li></ul>",
       installStep5: "构建应用程序：<br><ul><li><strong>Windows</strong>： <code>briefcase build windows</code></li><li><strong>macOS</strong>： <code>briefcase build macos</code></li><li><strong>Linux</strong>： <code>briefcase build linux</code></li></ul>",
-      installStep6: "运行应用程序：<br><ul><li><strong>Windows</strong>： <code>briefcase run windows</code></li><li><strong>macOS</strong>： <code>briefcase run macos</code></li><li><strong>Linux</strong>： <code>briefcase run linux</code></li></ul>",
+      installStep6: "运行应用程序：<br><ul><li><strong>直接从源代码运行</strong>（推荐）：<code>briefcase dev</code></li><li><strong>Windows</strong>： <code>briefcase run windows</code></li><li><strong>macOS</strong>： <code>briefcase run macos</code></li><li><strong>Linux</strong>： <code>briefcase run linux</code></li></ul>",
       installNote: "注意",
       installNoteText: "需要互联网连接来从 Kemono.cr、Coomer.st 和 Pawchive.pw 获取内容。",
       installWindows: "<strong>Windows</strong>：从 <a href=\"https://ko-fi.com/izeno/shop\" target=\"_blank\">Ko-fi 商店</a> 下载便携版 <code>.exe</code> 或 <code>.msi</code> 安装程序。运行 msi 安装程序或使用便携版进行无设置运行。",
@@ -763,7 +772,7 @@ const translations = {
       creatorDownloaderStep4: "点击 \"Download\" 开始，并通过界面跟踪进度。",
       settingsTab: "Settings 选项卡",
       settingsStep1: "设置下载的文件夹名称和保存目录。",
-      settingsStep2: "使用滑块或 spinbox 调整同时下载（1-10）。",
+      settingsStep2: "使用滑块或 spinbox 调整同时下载（1-20）。",
       settingsStep3: "点击 \"Apply Changes\" 保存。",
       helpTab: "Help 选项卡",
       helpTabDesc: "导航到 Help 选项卡阅读详细指南、示例和支持信息。",
@@ -784,13 +793,13 @@ const translations = {
   
       // Support & Contributing
       supportTitle: "支持",
-      supportDesc: "有关获取帮助、报告问题或支持项目开发的途径，请参阅 <a href=\"SUPPORT.md\">Support 页面</a>。",
+      supportDesc: "有关获取帮助、报告问题或支持项目开发的途径，请参阅 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/SUPPORT.md\" target=\"_blank\">Support 页面</a>。",
       supportInApp: "<strong>应用程序内帮助</strong>：Help 选项卡包含全面的用户手册。",
       supportGitHub: "<strong>GitHub 讨论</strong>：在 <a href=\"https://github.com/VoxDroid/KemonoDownloader/discussions\" target=\"_blank\">Discussions 选项卡</a> 与社区互动。",
       supportBugs: "<strong>报告错误</strong>：在 <a href=\"https://github.com/VoxDroid/KemonoDownloader/issues\" target=\"_blank\">Issues 页面</a> 打开问题。",
       supportDevelopment: "<strong>支持开发</strong>：<a href=\"https://ko-fi.com/izeno\" target=\"_blank\">在 Ko-fi 上给我买杯咖啡</a>。",
       contributingTitle: "贡献",
-      contributingDesc: "Kemono Downloader 是开源的，欢迎贡献！请阅读我们的 <a href=\"CONTRIBUTING.md\">Contributing Guidelines</a> 以获取详细信息，了解如何参与、提交拉取请求和建议功能。所有贡献者都必须遵守我们的 <a href=\"CODE_OF_CONDUCT.md\">Code of Conduct</a>。",
+      contributingDesc: "Kemono Downloader 是开源的，欢迎贡献！请阅读我们的 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CONTRIBUTING.md\" target=\"_blank\">Contributing Guidelines</a> 以获取详细信息，了解如何参与、提交拉取请求和建议功能。所有贡献者都必须遵守我们的 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md\" target=\"_blank\">Code of Conduct</a>。",
       contributingStep1: "在 <a href=\"https://github.com/VoxDroid/KemonoDownloader\" target=\"_blank\">GitHub</a> 上分叉仓库。",
       contributingStep2: "为您的功能或修复创建分支。",
       contributingStep3: "提交包含您的更改清晰描述的拉取请求。",
@@ -798,7 +807,7 @@ const translations = {
   
       // License & Dependencies
       licenseTitle: "许可证",
-      licenseDesc: "此项目根据 <a href=\"LICENSE\">MIT License</a> 获得许可。自由使用、修改和分发它根据许可证条款。",
+      licenseDesc: "此项目根据 <a href=\"https://github.com/VoxDroid/KemonoDownloader/blob/main/LICENSE\" target=\"_blank\">MIT License</a> 获得许可。自由使用、修改和分发它根据许可证条款。",
       dependenciesTitle: "依赖项",
       dependenciesDesc: "要从源代码构建，请安装以下 Python 包：",
       dependencyPyQt6: "<code>PyQt6</code>（用于 GUI）",
@@ -806,7 +815,10 @@ const translations = {
       dependencyBS4: "<code>beautifulsoup4</code>（用于 HTML 解析）",
       dependencyQtAwesome: "<code>qtawesome</code>（用于图标）",
       dependencyBriefcase: "<code>briefcase</code>（用于应用程序打包）",
-      dependenciesNote: "使用这些依赖项创建 <code>requirements.txt</code> 文件并运行 <code>pip install -r requirements.txt</code>。",
+      dependencyPySocks: "<code>PySocks</code>（用于 SOCKS 和 Tor 代理）",
+      dependencyFakeUserAgent: "<code>fake-useragent</code>（用于浏览器用户代理）",
+      dependencyPackaging: "<code>packaging</code>（用于检查更新）",
+      dependenciesNote: "这些依赖项都已列在 <code>requirements.txt</code> 中，使用 <code>python -m pip install -r requirements.txt</code> 安装即可。",
   
       // Footer
       developedBy: "由",

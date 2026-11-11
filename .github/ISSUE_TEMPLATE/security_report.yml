@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Please follow our [Contributing Guidelines](https://github.com/VoxDroid/KemonoDownloader/blob/main/CONTRIBUTING.md). Do not post unverified links or promotional content, as they will be considered spam and may lead to restrictions.
-        **Note**: For security issues, please consider emailing izeno.contact@gmail.com directly to avoid public disclosure. Use this template only if you are comfortable sharing details publicly.
+        **Note**: Issues are public. For anything that could put users at risk, email izeno.contact@gmail.com or send a private report from the repository's Security tab ("Report a vulnerability") instead. Use this template only for details that are safe to share publicly.
   - type: checkboxes
     id: guidelines
     attributes:

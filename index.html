@@ -245,7 +245,7 @@
         
         <div class="notice-box" data-aos="fade-up" data-aos-delay="400">
             <h4><i class="fas fa-users"></i> <span data-i18n="communityTitle">Community Standards</span></h4>
-            <p data-i18n="communityText1">We are committed to fostering a welcoming and respectful community around KemonoDownloader. Please read our <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> to understand the standards we expect from all contributors and users. Key points include:</p>
+            <p data-i18n="communityText1">We are committed to fostering a welcoming and respectful community around KemonoDownloader. Please read our <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md" target="_blank">Code of Conduct</a> to understand the standards we expect from all contributors and users. Key points include:</p>
             <ul>
                 <li data-i18n="communityList1">Respecting the intellectual property rights of creators.</li>
                 <li data-i18n="communityList2">Refraining from using KemonoDownloader to engage in illegal activities, such as unauthorized distribution of copyrighted material.</li>
@@ -305,7 +305,7 @@
                     </div>
                     <div class="card-body">
                         <h5 class="card-title" data-i18n="featureConcurrentDownloads">Concurrent Downloads</h5>
-                        <p class="card-text" data-i18n="featureConcurrentDownloadsDesc">Adjust the number of simultaneous downloads (1-10) for optimal performance.</p>
+                        <p class="card-text" data-i18n="featureConcurrentDownloadsDesc">Adjust the number of simultaneous downloads (1-20) for optimal performance.</p>
                     </div>
                 </div>
             </div>
@@ -462,23 +462,13 @@
                             <li data-i18n="installStep1">Ensure you have <strong>Python 3.9+</strong> installed on your system (Windows, macOS, Linux).</li>
                             <li data-i18n="installStep2">Clone this repository:<br><pre><code class="language-bash">git clone https://github.com/VoxDroid/KemonoDownloader.git
 cd KemonoDownloader</code></pre></li>
-                            <li data-i18n="installStep3">Install Briefcase and dependencies:<br><pre><code class="bash">pip install briefcase
-pip install -r requirements.txt</code></pre></li>
-                            <li data-i18n="installStep4">Initialize the Briefcase project (if not already set up):<br><pre><code class="bash">briefcase create</code></pre></li>
-                            <li data-i18n="installStep5">Build the application:
-                                <ul>
-                                    <li><strong>Windows</strong>: <code>briefcase build windows</code></li>
-                                    <li><strong>macOS</strong>: <code>briefcase build macos</code></li>
-                                    <li><strong>Linux</strong>: <code>briefcase build linux</code></li>
-                                </ul>
-                            </li>
-                            <li data-i18n="installStep6">Run the application:
-                                <ul>
-                                    <li><strong>Windows</strong>: <code>briefcase run windows</code></li>
-                                    <li><strong>macOS</strong>: <code>briefcase run macos</code></li>
-                                    <li><strong>Linux</strong>: <code>briefcase run linux</code></li>
-                                </ul>
-                            </li>
+                            <li data-i18n="installStep3">Create and activate a virtual environment, then install the dependencies (Briefcase is included):<br><pre><code class="bash">python -m venv .venv
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # macOS / Linux
+python -m pip install -r requirements.txt</code></pre></li>
+                            <li data-i18n="installStep4">On Linux, Qt 6.5+ also needs the <code>xcb-cursor</code> library. If the app fails to start with <code>Could not load the Qt platform plugin "xcb"</code>, install it:<ul><li><strong>Debian/Ubuntu/Mint</strong>: <code>sudo apt install libxcb-cursor0</code></li><li><strong>Fedora/RHEL</strong>: <code>sudo dnf install xcb-util-cursor</code></li><li><strong>Arch</strong>: <code>sudo pacman -S xcb-util-cursor</code></li><li><strong>openSUSE</strong>: <code>sudo zypper install libxcb-cursor0</code></li></ul></li>
+                            <li data-i18n="installStep5">Build the application:<ul><li><strong>Windows</strong>: <code>briefcase build windows</code></li><li><strong>macOS</strong>: <code>briefcase build macos</code></li><li><strong>Linux</strong>: <code>briefcase build linux</code></li></ul></li>
+                            <li data-i18n="installStep6">Run the application:<ul><li><strong>From source</strong> (recommended): <code>briefcase dev</code></li><li><strong>Windows</strong>: <code>briefcase run windows</code></li><li><strong>macOS</strong>: <code>briefcase run macos</code></li><li><strong>Linux</strong>: <code>briefcase run linux</code></li></ul></li>
                             <p><em data-i18n="installNote">Note</em>: <span data-i18n="installNoteText">An internet connection is required to fetch content from Kemono.cr, Coomer.st, and Pawchive.pw.</span></p>
                         </ol>
                     </div>
@@ -557,7 +547,7 @@ pip install -r requirements.txt</code></pre></li>
                     <div class="usage-card-content">
                         <ol>
                             <li data-i18n="settingsStep1">Set the folder name and save directory for downloads.</li>
-                            <li data-i18n="settingsStep2">Adjust simultaneous downloads (1-10) using the slider or spinbox.</li>
+                            <li data-i18n="settingsStep2">Adjust simultaneous downloads (1-20) using the slider or spinbox.</li>
                             <li data-i18n="settingsStep3">Click "Apply Changes" to save.</li>
                         </ol>
                     </div>
@@ -683,7 +673,7 @@ pip install -r requirements.txt</code></pre></li>
         <div class="row">
             <div class="col-md-6" data-aos="fade-right" data-aos-delay="100">
                 <h2 class="text-center" data-i18n="supportTitle">Support</h2>
-                <p data-i18n="supportDesc">For ways to get help, report issues, or support the project's development, please see the <a href="SUPPORT.md">Support page</a>.</p>
+                <p data-i18n="supportDesc">For ways to get help, report issues, or support the project's development, please see the <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/SUPPORT.md" target="_blank">Support page</a>.</p>
                 <ul>
                     <li data-i18n="supportInApp"><strong>In-App Help</strong>: The Help tab contains a comprehensive user manual.</li>
                     <li data-i18n="supportGitHub"><strong>GitHub Discussions</strong>: Engage with the community on the <a href="https://github.com/VoxDroid/KemonoDownloader/discussions" target="_blank">Discussions tab</a>.</li>
@@ -693,7 +683,7 @@ pip install -r requirements.txt</code></pre></li>
             </div>
             <div class="col-md-6" data-aos="fade-left" data-aos-delay="100">
                 <h2 class="text-center" data-i18n="contributingTitle">Contributing</h2>
-                <p data-i18n="contributingDesc">Kemono Downloader is open-source, and contributions are encouraged! Please read our <a href="CONTRIBUTING.md">Contributing Guidelines</a> for details on how to get involved, submit pull requests, and suggest features. All contributors are expected to adhere to our <a href="CODE_OF_CONDUCT.md">Code of Conduct</a>.</p>
+                <p data-i18n="contributingDesc">Kemono Downloader is open-source, and contributions are encouraged! Please read our <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/CONTRIBUTING.md" target="_blank">Contributing Guidelines</a> for details on how to get involved, submit pull requests, and suggest features. All contributors are expected to adhere to our <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/CODE_OF_CONDUCT.md" target="_blank">Code of Conduct</a>.</p>
                 <ol>
                     <li data-i18n="contributingStep1">Fork the repository on <a href="https://github.com/VoxDroid/KemonoDownloader" target="_blank">GitHub</a>.</li>
                     <li data-i18n="contributingStep2">Create a branch for your feature or fix.</li>
@@ -714,7 +704,7 @@ pip install -r requirements.txt</code></pre></li>
         <div class="row">
             <div class="col-md-6" data-aos="fade-right" data-aos-delay="100">
                 <h2 class="text-center" data-i18n="licenseTitle">License</h2>
-                <p data-i18n="licenseDesc">This project is licensed under the <a href="LICENSE">MIT License</a>. Use, modify, and distribute it freely per the license terms.</p>
+                <p data-i18n="licenseDesc">This project is licensed under the <a href="https://github.com/VoxDroid/KemonoDownloader/blob/main/LICENSE" target="_blank">MIT License</a>. Use, modify, and distribute it freely per the license terms.</p>
             </div>
             <div class="col-md-6" data-aos="fade-left" data-aos-delay="100">
                 <h2 class="text-center" data-i18n="dependenciesTitle">Dependencies</h2>
@@ -725,8 +715,11 @@ pip install -r requirements.txt</code></pre></li>
                     <li data-i18n="dependencyBS4"><code>beautifulsoup4</code> (for HTML parsing)</li>
                     <li data-i18n="dependencyQtAwesome"><code>qtawesome</code> (for icons)</li>
                     <li data-i18n="dependencyBriefcase"><code>briefcase</code> (for packaging the app)</li>
+                    <li data-i18n="dependencyPackaging"><code>packaging</code> (for update checks)</li>
+                    <li data-i18n="dependencyFakeUserAgent"><code>fake-useragent</code> (for browser user agents)</li>
+                    <li data-i18n="dependencyPySocks"><code>PySocks</code> (for SOCKS and Tor proxies)</li>
                 </ul>
-                <p data-i18n="dependenciesNote">Create a <code>requirements.txt</code> file with these dependencies and run <code>pip install -r requirements.txt</code>.</p>
+                <p data-i18n="dependenciesNote">All of these are listed in <code>requirements.txt</code>; install them with <code>python -m pip install -r requirements.txt</code>.</p>
             </div>
         </div>
     </div>
