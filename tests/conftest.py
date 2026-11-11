@@ -114,6 +114,14 @@ def isolated_hash_dir(tmp_path):
 
 
 @pytest.fixture(autouse=True)
+def restore_excepthook():
+    """Undo sys.excepthook changes, e.g. from tests that run app.main()."""
+    original = sys.excepthook
+    yield
+    sys.excepthook = original
+
+
+@pytest.fixture(autouse=True)
 def cleanup_qt_threads_after_test():
     """Best-effort cleanup for leaked QThreads.
 

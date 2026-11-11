@@ -1603,7 +1603,7 @@ class ThumbnailDownloaderTab(QWidget):
             QMessageBox.information(
                 self,
                 translate("information"),
-                "Please select an item from the list to preview.",
+                translate("select_item_to_preview"),
             )
             return
 

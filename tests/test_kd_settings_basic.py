@@ -100,12 +100,12 @@ def test_proxy_type_and_get_proxy_settings(tmp_path, monkeypatch):
     proxies = tab.get_proxy_settings()
     assert proxies["http"].startswith("http")
 
-    # tor proxy when tor not running -> returns None
+    # tor proxy when tor not running -> still Tor's port (fails closed)
     tab.temp_settings["proxy_type"] = "tor"
     tab.tor_process = None
-    assert tab.get_proxy_settings() is None
+    assert tab.get_proxy_settings()["https"].startswith("socks5h://")
 
-    # simulate tor process running but no socks package -> fallback to http
+    # tor process running but no socks package -> still Tor's SOCKS URL
     class FakeProc:
         def state(self):
             return ks.QProcess.ProcessState.Running
@@ -113,7 +113,7 @@ def test_proxy_type_and_get_proxy_settings(tmp_path, monkeypatch):
     tab.tor_process = FakeProc()
     monkeypatch.setattr("importlib.util.find_spec", lambda name: None)
     proxies = tab.get_proxy_settings()
-    assert "http" in proxies
+    assert proxies["http"].startswith("socks5h://")
 
 
 def test_browse_and_open_directory(tmp_path, monkeypatch):

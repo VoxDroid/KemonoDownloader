@@ -26,6 +26,50 @@ from PyQt6.QtWidgets import (
 
 from kemonodownloader.kd_language import language_manager, translate
 
+# The SOCKS port configured for the Tor process this app starts (and Tor's
+# default). socks5h makes Tor resolve host names too, so DNS doesn't leak.
+TOR_SOCKS_PROXY = "socks5h://127.0.0.1:9050"
+
+# Tor Expert Bundle fetched by "Download Tor", and the SHA-256 of each archive.
+# The hashes are copied from the release's sha256sums-signed-build.txt after
+# checking its signature against the Tor Browser Developers signing key
+# (EF6E 286D DA85 EA2A 4BA7 DE68 4E2C 6E87 9329 8290). To update, change the
+# version and copy the new hashes the same way; a download whose hash doesn't
+# match is refused.
+TOR_BUNDLE_VERSION = "16.0.1"
+TOR_BUNDLE_SHA256 = {
+    "windows-x86_64": "9eed3c3ff1fe43df034ce360196c9ec95472560d77ff55614d0cd5120edea27b",
+    "macos-aarch64": "0b7d022017c31e3f972d06465bcd7ac50feb66ac825547419a934914fe4bb156",
+    "macos-x86_64": "15464d99adc3bb4de1308260d79878336b04a1ac1aeff83e10f192de7d235946",
+    "linux-x86_64": "7039cb16060ab22e669852e55774d894b55f25ea8bd0ab7194d3478429a58725",
+    "linux-aarch64": "67040520d44c87ccaaf5aa7df0dc1ff122eb938dbb600ae7722e8b6b75282a4b",
+}
+TOR_ARCHIVE_URL = "https://archive.torproject.org/tor-package-archive/torbrowser"
+
+
+def tor_bundle_platform(sys_platform=None, machine=None):
+    """Return the expert-bundle platform name for this computer, or None."""
+    import platform
+
+    sys_platform = sys.platform if sys_platform is None else sys_platform
+    machine = (platform.machine() if machine is None else machine).lower()
+    if machine in ("amd64", "x86_64", "x64"):
+        arch = "x86_64"
+    elif machine in ("arm64", "aarch64"):
+        arch = "aarch64"
+    else:
+        return None
+    if sys_platform == "win32":
+        # There is no Windows Arm build; Windows 11 on Arm runs x64 programs.
+        name = "windows-x86_64"
+    elif sys_platform == "darwin":
+        name = f"macos-{arch}"
+    elif sys_platform.startswith("linux"):
+        name = f"linux-{arch}"
+    else:
+        return None
+    return name if name in TOR_BUNDLE_SHA256 else None
+
 
 class SettingsTab(QWidget):
     settings_applied = pyqtSignal()
@@ -559,7 +603,7 @@ class SettingsTab(QWidget):
         proxy_type_layout.addWidget(self.proxy_type_label)
 
         self.proxy_type_combo = QComboBox()
-        self.proxy_type_combo.addItem("Custom Proxy", "custom")
+        self.proxy_type_combo.addItem(translate("custom_proxy"), "custom")
         self.proxy_type_combo.addItem("Tor", "tor")
         self.proxy_type_combo.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.proxy_type_combo.currentIndexChanged.connect(self.on_proxy_type_changed)
@@ -663,7 +707,7 @@ class SettingsTab(QWidget):
         self.test_tor_button.clicked.connect(self.test_tor)
         tor_path_layout.addWidget(self.test_tor_button)
 
-        self.help_tor_button = QPushButton("Help")
+        self.help_tor_button = QPushButton(translate("help_button"))
         self.help_tor_button.setStyleSheet(
             "background: #5A6B8A; padding: 5px; border-radius: 5px;"
         )
@@ -814,7 +858,9 @@ class SettingsTab(QWidget):
                 os.makedirs(directory, exist_ok=True)
             except OSError:
                 QMessageBox.warning(
-                    self, translate("error"), f"Could not create directory: {directory}"
+                    self,
+                    translate("error"),
+                    translate("could_not_create_directory", directory),
                 )
                 return
 
@@ -827,7 +873,7 @@ class SettingsTab(QWidget):
                 subprocess.call(["xdg-open", directory])
         except Exception as e:
             QMessageBox.warning(
-                self, translate("error"), f"Could not open directory: {str(e)}"
+                self, translate("error"), translate("could_not_open_directory", str(e))
             )
 
     def browse_tor_executable(self):
@@ -1412,8 +1458,20 @@ class SettingsTab(QWidget):
         self.stop_tor_button.setText(translate("stop_tor"))
         self.download_tor_button.setText(translate("download_tor"))
         self.test_tor_button.setText(translate("test_tor"))
+        self.help_tor_button.setText(translate("help_button"))
+        custom_index = self.proxy_type_combo.findData("custom")
+        if custom_index >= 0:
+            self.proxy_type_combo.setItemText(custom_index, translate("custom_proxy"))
         self.tor_output_label.setText(translate("tor_output"))
-        self.tor_status_label.setText(translate("tor_status_stopped"))
+        # Keep the status true to the process: changing the language while Tor
+        # runs used to show "Stopped".
+        tor_running = (
+            self.tor_process is not None
+            and self.tor_process.state() == QProcess.ProcessState.Running
+        )
+        self.tor_status_label.setText(
+            translate("tor_status_running" if tor_running else "tor_status_stopped")
+        )
 
         self.apply_button.setText(translate("apply_changes"))
         self.reset_button.setText(translate("reset_to_defaults"))
@@ -1637,10 +1695,7 @@ class SettingsTab(QWidget):
             import requests
 
             # Test SOCKS5 proxy connection
-            proxies = {
-                "http": "socks5h://127.0.0.1:9050",
-                "https": "socks5h://127.0.0.1:9050",
-            }
+            proxies = {"http": TOR_SOCKS_PROXY, "https": TOR_SOCKS_PROXY}
 
             # Try to connect to a test service that works with Tor
             response = requests.get(
@@ -1732,14 +1787,10 @@ GeoIPExcludeUnknown 1
         self.tor_process.start()
 
         # Update UI
-        self.tor_status_label.setText(translate("tor_status_starting"))
-        self.tor_status_label.setStyleSheet(
-            "color: #FFA500; font-weight: bold; margin-left: 10px;"
-        )
         self.start_tor_button.setEnabled(False)
         self.stop_tor_button.setEnabled(True)
         self.test_tor_button.setEnabled(True)
-        self.tor_status_label.setText("Tor Status: Starting...")
+        self.tor_status_label.setText(translate("tor_status_starting"))
         self.tor_status_label.setStyleSheet(
             "color: #FFD93D; font-weight: bold; margin-left: 10px;"
         )
@@ -1786,37 +1837,22 @@ GeoIPExcludeUnknown 1
 
     def show_tor_help(self):
         """Show help modal with Tor setup instructions."""
-        help_text = """<b>How to set up Tor for downloading:</b><br><br>
-1. First Click <b>Download Tor</b> to download the Tor browser<br>
-2. Wait for the download to complete<br>
-3. Click <b>Start Tor</b> to start the Tor process<br>
-4. Click <b>Test Tor</b> to verify Tor is working<br>
-5. You can start downloading now with Tor proxy enabled<br><br>
-<b>Note:</b> Tor provides anonymity but may be slower than direct connections."""
-
-        QMessageBox.information(self, "Tor Setup Help", help_text)
+        QMessageBox.information(
+            self, translate("tor_help_title"), translate("tor_help_text")
+        )
 
     def download_tor(self):
         try:
-            # Determine the Tor download URL based on platform
-            if sys.platform == "win32":
-                # Tor expert bundle for Windows
-                tor_url = "https://archive.torproject.org/tor-package-archive/torbrowser/15.0.3/tor-expert-bundle-windows-x86_64-15.0.3.tar.gz"
-                tor_extract_dir = "tor-expert-bundle-windows-x86_64-15.0.3"
-            elif sys.platform == "darwin":
-                # Check for Apple Silicon vs Intel
-                import platform
-
-                machine = platform.machine().lower()
-                if machine == "arm64":
-                    tor_url = "https://archive.torproject.org/tor-package-archive/torbrowser/15.0.3/tor-expert-bundle-macos-aarch64-15.0.3.tar.gz"
-                    tor_extract_dir = "tor-expert-bundle-macos-aarch64-15.0.3"
-                else:
-                    tor_url = "https://archive.torproject.org/tor-package-archive/torbrowser/15.0.3/tor-expert-bundle-macos-x86_64-15.0.3.tar.gz"
-                    tor_extract_dir = "tor-expert-bundle-macos-x86_64-15.0.3"
-            else:  # Linux
-                tor_url = "https://archive.torproject.org/tor-package-archive/torbrowser/15.0.3/tor-expert-bundle-linux-x86_64-15.0.3.tar.gz"
-                tor_extract_dir = "tor-expert-bundle-linux-x86_64-15.0.3"
+            # Pick the expert bundle for this OS and CPU
+            bundle = tor_bundle_platform()
+            if bundle is None:
+                QMessageBox.warning(
+                    self, translate("error"), translate("tor_unsupported_platform")
+                )
+                return
+            tor_extract_dir = f"tor-expert-bundle-{bundle}-{TOR_BUNDLE_VERSION}"
+            tor_url = f"{TOR_ARCHIVE_URL}/{TOR_BUNDLE_VERSION}/{tor_extract_dir}.tar.gz"
+            expected_sha256 = TOR_BUNDLE_SHA256[bundle]
 
             # Create tor directory in app data
             tor_path = os.path.join(
@@ -1838,7 +1874,9 @@ GeoIPExcludeUnknown 1
             )
 
             # Start download thread
-            self.download_thread = DownloadTorThread(tor_url, tor_extract_dir, tor_path)
+            self.download_thread = DownloadTorThread(
+                tor_url, tor_extract_dir, tor_path, expected_sha256
+            )
             self.download_thread.progress.connect(self.tor_progress_bar.setValue)
             self.download_thread.finished_success.connect(self.on_tor_download_success)
             self.download_thread.finished_error.connect(self.on_tor_download_error)
@@ -1993,32 +2031,14 @@ GeoIPExcludeUnknown 1
             if proxy_url:
                 return {"http": proxy_url, "https": proxy_url}
         elif settings_to_check["proxy_type"] == "tor":
-            # Check if Tor is actually running
-            if (
-                not self.tor_process
-                or self.tor_process.state() != QProcess.ProcessState.Running
-            ):
-                print("Tor proxy requested but Tor is not running")
-                return None
-
-            # For Tor, we need to use SOCKS5h proxy (resolves DNS through Tor)
-            # Note: This requires requests[socks] or PySocks to be installed
-            import importlib.util
-
-            if importlib.util.find_spec("socks") is not None:
-                proxies = {
-                    "http": "socks5h://127.0.0.1:9050",
-                    "https": "socks5h://127.0.0.1:9050",
-                }
-                print(f"Returning Tor proxy settings: {proxies}")
-                return proxies
-            else:
-                print("PySocks not available, falling back to HTTP proxy")
-                # Fallback to HTTP proxy if socks not available
-                return {
-                    "http": "http://127.0.0.1:8118",  # Privoxy default
-                    "https": "http://127.0.0.1:8118",
-                }
+            # Always route through Tor's SOCKS port, even when the Tor process
+            # started from this tab isn't running. Falling back to a direct
+            # connection would silently expose the user's IP address; without
+            # a Tor listener the request fails instead. This also covers a Tor
+            # service the user runs on the default port. socks5h resolves host
+            # names through Tor as well. Without PySocks, requests refuses a
+            # SOCKS proxy URL rather than connecting directly.
+            return {"http": TOR_SOCKS_PROXY, "https": TOR_SOCKS_PROXY}
         return None
 
 
@@ -2027,13 +2047,16 @@ class DownloadTorThread(QThread):
     finished_success = pyqtSignal(str)
     finished_error = pyqtSignal(str)
 
-    def __init__(self, tor_url, tor_extract_dir, tor_path):
+    def __init__(self, tor_url, tor_extract_dir, tor_path, expected_sha256=None):
         super().__init__()
         self.tor_url = tor_url
         self.tor_extract_dir = tor_extract_dir
         self.tor_path = tor_path
+        # SHA-256 the archive must have; checked before anything is extracted.
+        self.expected_sha256 = expected_sha256
 
     def run(self):
+        import hashlib
         import tarfile
         import tempfile
 
@@ -2048,6 +2071,7 @@ class DownloadTorThread(QThread):
 
             total_size = int(response.headers.get("content-length", 0))
             downloaded_size = 0
+            hasher = hashlib.sha256()
 
             with tempfile.NamedTemporaryFile(
                 delete=False, suffix=".tar.gz"
@@ -2056,10 +2080,18 @@ class DownloadTorThread(QThread):
                 for chunk in response.iter_content(chunk_size=8192):
                     if chunk:
                         tmp_file.write(chunk)
+                        hasher.update(chunk)
                         downloaded_size += len(chunk)
                         if total_size > 0:
                             progress = int((downloaded_size / total_size) * 100)
                             self.progress.emit(progress)
+
+            # Refuse a corrupted or tampered archive before extracting it.
+            if (
+                self.expected_sha256
+                and hasher.hexdigest().lower() != self.expected_sha256.lower()
+            ):
+                raise ValueError(translate("tor_checksum_mismatch"))
 
             # Extract Tor
             self.progress.emit(100)

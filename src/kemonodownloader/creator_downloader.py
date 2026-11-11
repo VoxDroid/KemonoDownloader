@@ -2194,12 +2194,12 @@ class LogsWindow(QDialog):
                     f.write(logs_content)
                 if self._parent and hasattr(self._parent, "append_log_to_console"):
                     self._parent.append_log_to_console(
-                        f"Logs saved to: {file_path}", "INFO"
+                        translate("logs_saved_to", file_path), "INFO"
                     )
             except Exception as e:
                 if self._parent and hasattr(self._parent, "append_log_to_console"):
                     self._parent.append_log_to_console(
-                        f"Failed to save logs: {str(e)}", "ERROR"
+                        translate("failed_to_save_logs", str(e)), "ERROR"
                     )
 
 
@@ -2494,7 +2494,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_expand_logs_btn.setStyleSheet(
             "background: #4A5B7A; padding: 8px; border-radius: 5px;"
         )
-        self.creator_expand_logs_btn.setToolTip("Expand Logs")
+        self.creator_expand_logs_btn.setToolTip(translate("expand_logs"))
         creator_btn_layout.addWidget(self.creator_expand_logs_btn)
 
         left_layout.addLayout(creator_btn_layout)
@@ -2677,6 +2677,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_download_btn.setText(translate("download"))
         self.creator_cancel_btn.setText(translate("cancel"))
         self.creator_expand_logs_btn.setText(translate("expand_logs"))
+        self.creator_expand_logs_btn.setToolTip(translate("expand_logs"))
 
         self.creator_search_input.setPlaceholderText(translate("search_posts"))
 

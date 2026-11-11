@@ -81,12 +81,12 @@ def test_get_proxy_settings_tor_fallback(tmp_path, monkeypatch):
 
     tab.tor_process = FakeProc()
 
-    # Simulate missing socks package so code falls back to HTTP proxy
+    # Missing socks package: no HTTP fallback, still Tor's SOCKS URL
     monkeypatch.setattr(importlib.util, "find_spec", lambda name: None)
 
     proxies = tab.get_proxy_settings()
     assert proxies is not None
-    assert proxies.get("http").startswith("http")
+    assert proxies.get("http").startswith("socks5h://")
 
 
 def test_auto_detect_tor_returns_none_when_not_found(tmp_path):

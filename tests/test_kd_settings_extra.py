@@ -137,10 +137,10 @@ def test_get_proxy_settings_custom_and_tor(qapp, monkeypatch):
         "https": "127.0.0.1:8080",
     }
 
-    # Tor proxy when Tor not running -> None
+    # Tor proxy when Tor not running -> still Tor's port (fails closed)
     st.settings["proxy_type"] = "tor"
     st.tor_process = None
-    assert st.get_proxy_settings() is None
+    assert st.get_proxy_settings()["http"].startswith("socks5h://")
 
     # Tor running and socks available
     class FakeProcess:
