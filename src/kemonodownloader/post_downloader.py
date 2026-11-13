@@ -49,6 +49,7 @@ from kemonodownloader.download_policy import (
 from kemonodownloader.download_utils import (
     ALLOWED_EXTENSIONS,
     DOWNLOAD_CHUNK_SIZE,
+    IncompleteDownloadError,
     PreviewOnlyFile,
     ProgressTracker,
     ThreadSettings,
@@ -1463,8 +1464,8 @@ class DownloadThread(QThread):
                                 ),
                                 "ERROR",
                             )
-                    # Raise exception to trigger retry
-                    raise Exception(
+                    # Raise a network error so the download is retried.
+                    raise IncompleteDownloadError(
                         f"Size mismatch: downloaded {downloaded_size} bytes, expected {file_size} bytes"
                     )
 

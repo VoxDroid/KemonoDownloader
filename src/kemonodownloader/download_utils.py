@@ -24,6 +24,7 @@ from typing import (
 )
 from urllib.parse import urlparse
 
+import requests
 from bs4 import BeautifulSoup
 
 from kemonodownloader.domain_config import clean_file_url
@@ -252,6 +253,13 @@ def extension_allowed(extension: str, allowed_extensions: Any) -> bool:
     if ".jpg" in allowed_extensions and extension in (".jpg", ".jpeg"):
         return True
     return extension in allowed_extensions
+
+
+class IncompleteDownloadError(requests.RequestException):
+    """The body ended before the size the server announced.
+
+    Usually a dropped connection, so it is retried like any other network
+    error (it subclasses RequestException for that reason)."""
 
 
 # HTTP statuses meaning the media server doesn't have the file at all, so

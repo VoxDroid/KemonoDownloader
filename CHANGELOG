@@ -9,6 +9,9 @@
 - Save previews, show missing files, and use fewer requests.
   A new setting, "Save the preview image when the site only has a preview of a file" (off by default), saves the preview of such images instead, named like `00501_preview.png`. At the end of a download, a window lists any files the media server didn't have, on every site. The History tab's files column explains how many files were only previews or missing, and the CSV export includes both counts. Pawchive files are requested straight from the server the site names, one request less per file, falling back to the usual address if that server fails; already-downloaded files are still recognised. The Post tab's file-type filters now apply while files are prepared (they were read incorrectly and only applied later), and the in-app Help gives the right download range (1-20, default 5) and explains preview-only and missing files.
 
+- Retry incomplete downloads in the Creator tab.
+  When a file arrived shorter than the server announced (usually a dropped connection), the Creator tab deleted it and gave up after one attempt, although its retry setting allowed more; the Post tab already retried. Both tabs now treat it as a network error and retry it.
+
 - Keep the app running after an unexpected error.
   An error that nothing else caught used to make PyQt abort the whole app without a message (on Windows, exit code 0xC0000409). The app now prints the error, shows a dialog with the details to include in a bug report, and keeps running.
 
