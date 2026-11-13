@@ -1,4 +1,4 @@
-"""Warning window about files the site only keeps previews of.
+"""Warning windows about files that can't be downloaded.
 
 Some sites (Pawchive) list files whose full copy is gone and only the preview
 image remains. Downloading them fails with HTTP 404, which looks like a broken
@@ -10,7 +10,7 @@ from typing import Dict, Iterable, Optional
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QMessageBox, QWidget
 
-from kemonodownloader.download_utils import PreviewOnlyFile
+from kemonodownloader.download_utils import PreviewOnlyFile, filename_from_url
 from kemonodownloader.kd_language import translate
 
 # Lines shown under "Show Details"; a creator can have thousands of these.
@@ -70,7 +70,10 @@ class PreviewOnlyNotice:
             self._box = box
         box.setWindowTitle(translate("preview_only_title"))
         box.setText(translate("preview_only_text", self.count))
-        box.setInformativeText(translate("preview_only_info"))
+        saved = any(f.preview_saved for f in self._files.values())
+        box.setInformativeText(
+            translate("preview_only_info_saved" if saved else "preview_only_info")
+        )
         box.setDetailedText(self._details())
         box.show()
         box.raise_()
@@ -87,3 +90,40 @@ class PreviewOnlyNotice:
         if extra > 0:
             lines.append(translate("preview_only_more", extra))
         return "\n".join(lines)
+
+
+class MissingFilesNotice:
+    """Tell the user, at the end of a run, which files the server didn't have.
+
+    Kemono and Coomer don't mark files that are gone, so these are only found
+    when a download answers HTTP 404 or 410. Shown once per run, non-blocking.
+    """
+
+    def __init__(self, parent: Optional[QWidget] = None):
+        self._parent = parent
+        self._box: Optional[QMessageBox] = None
+
+    def show(self, urls: Iterable[str]) -> None:
+        urls = sorted(set(urls))
+        if not urls:
+            return
+        box = self._box
+        if box is None:
+            box = QMessageBox(self._parent)
+            box.setIcon(QMessageBox.Icon.Warning)
+            box.setStandardButtons(QMessageBox.StandardButton.Ok)
+            box.setWindowModality(Qt.WindowModality.NonModal)
+            self._box = box
+        box.setWindowTitle(translate("missing_files_title"))
+        box.setText(translate("missing_files_text", len(urls)))
+        box.setInformativeText(translate("missing_files_info"))
+        lines = [f"{filename_from_url(url)}  ({url})" for url in urls[:DETAIL_LIMIT]]
+        if len(urls) > DETAIL_LIMIT:
+            lines.append(translate("preview_only_more", len(urls) - DETAIL_LIMIT))
+        box.setDetailedText("\n".join(lines))
+        box.show()
+        box.raise_()
+
+    def close(self) -> None:
+        if self._box is not None:
+            self._box.close()

@@ -227,6 +227,16 @@ class HistoryModel(QAbstractTableModel):
                 return "\n".join(entry.links)
             if column == self.TITLE:
                 return entry.title
+            if column == self.FILES and (
+                entry.files_preview_only or entry.files_missing
+            ):
+                return translate(
+                    "history_files_tooltip",
+                    entry.files_done,
+                    entry.files_total,
+                    entry.files_preview_only,
+                    entry.files_missing,
+                )
         if role == Qt.ItemDataRole.ForegroundRole:
             if column == self.STATUS:
                 return QColor(_STATUS_COLORS.get(entry.status, "white"))
@@ -1052,6 +1062,8 @@ class HistoryTab(QWidget):
                         "files_done",
                         "files_total",
                         "files_failed",
+                        "files_preview_only",
+                        "files_missing",
                         "posts_done",
                         "posts_total",
                         "size_bytes",
@@ -1072,6 +1084,8 @@ class HistoryTab(QWidget):
                             e.files_done,
                             e.files_total,
                             e.files_failed,
+                            e.files_preview_only,
+                            e.files_missing,
                             e.posts_done,
                             e.posts_total,
                             "" if e.size_bytes is None else e.size_bytes,

@@ -87,6 +87,10 @@ class HistoryEntry:
     size_bytes: Optional[int] = None
     extra_urls: List[str] = field(default_factory=list)
     id: Optional[int] = None
+    # Files the site only had previews of (skipped), and files its media
+    # server didn't have (HTTP 404/410, part of files_failed).
+    files_preview_only: int = 0
+    files_missing: int = 0
 
     @property
     def duration(self) -> Optional[float]:
@@ -113,7 +117,7 @@ class Favorite:
 _HISTORY_COLUMNS = (
     "kind, url, title, service, creator, folder, files_total, files_done, "
     "files_failed, posts_total, posts_done, status, started_at, finished_at, "
-    "size_bytes, extra_urls"
+    "size_bytes, extra_urls, files_preview_only, files_missing"
 )
 
 _SCHEMA = """
@@ -134,7 +138,9 @@ CREATE TABLE IF NOT EXISTS history (
     started_at   REAL,
     finished_at  REAL    NOT NULL,
     size_bytes   INTEGER,
-    extra_urls   TEXT    NOT NULL DEFAULT '[]'
+    extra_urls   TEXT    NOT NULL DEFAULT '[]',
+    files_preview_only INTEGER NOT NULL DEFAULT 0,
+    files_missing      INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS history_finished ON history (finished_at);
 CREATE INDEX IF NOT EXISTS history_url ON history (url);
@@ -152,7 +158,14 @@ CREATE TABLE IF NOT EXISTS meta (
 );
 """
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+
+# Columns added after version 1; older databases get them on open. Older
+# app versions name their columns explicitly, so they keep working.
+_ADDED_COLUMNS = (
+    ("files_preview_only", "INTEGER NOT NULL DEFAULT 0"),
+    ("files_missing", "INTEGER NOT NULL DEFAULT 0"),
+)
 
 
 class HistoryStore:
@@ -194,6 +207,10 @@ class HistoryStore:
                 conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA synchronous=NORMAL")
             conn.executescript(_SCHEMA)
+            existing = {row[1] for row in conn.execute("PRAGMA table_info(history)")}
+            for name, definition in _ADDED_COLUMNS:
+                if name not in existing:
+                    conn.execute(f"ALTER TABLE history ADD COLUMN {name} {definition}")
             version = conn.execute("PRAGMA user_version").fetchone()[0]
             if version < SCHEMA_VERSION:
                 conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
@@ -260,7 +277,7 @@ class HistoryStore:
             try:
                 cursor = self._conn.execute(
                     f"INSERT INTO history ({_HISTORY_COLUMNS}) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         entry.kind,
                         entry.url,
@@ -278,6 +295,8 @@ class HistoryStore:
                         entry.finished_at,
                         entry.size_bytes,
                         json.dumps(entry.extra_urls),
+                        entry.files_preview_only,
+                        entry.files_missing,
                     ),
                 )
                 self._conn.commit()
@@ -325,6 +344,8 @@ class HistoryStore:
                     finished_at=row[14],
                     size_bytes=row[15],
                     extra_urls=extra if isinstance(extra, list) else [],
+                    files_preview_only=row[17] or 0,
+                    files_missing=row[18] or 0,
                 )
             )
         return entries

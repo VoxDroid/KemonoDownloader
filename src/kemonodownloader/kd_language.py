@@ -2678,8 +2678,10 @@ class KDLanguage:
                 "  - Click the 'Browse' button next to the text field to open a file dialog and select a new directory.<br>"
                 "  - Example: Change it to 'D:/Kemono Downloads' to save files there instead.<br>"
                 "- <b>Max Simultaneous Downloads</b>: Control how many files are downloaded at once.<br>"
-                "  - Default: 10.<br>"
-                "  - Use the spin box to adjust between 1 and 10. Lower values reduce bandwidth usage but slow down the process; higher values speed it up but may strain your connection.<br><br>"
+                "  - Default: 5.<br>"
+                "  - Use the spin box to adjust between 1 and 20. Lower values reduce bandwidth usage but slow down the process; higher values speed it up but may strain your connection.<br><br>"
+                "- <b>Save the preview image when the site only has a preview of a file</b>: Some sites list files whose full copy is gone and only the preview image remains (shown as 'preview only'). Those files are always skipped; with this option on, their preview image is saved instead, named like 00501_preview.png.<br>"
+                "  - Default: off.<br><br>"
                 "<b>4.2 Saving Changes</b><br>"
                 "- Changes to settings like 'Save Directory', 'Max Simultaneous Downloads', and 'Language' are saved automatically when adjusted.<br>"
                 "- Actions like 'Clear Cache' and 'Reset File Hashes' require manual confirmation via their respective buttons.<br>"
@@ -2695,8 +2697,10 @@ class KDLanguage:
                 "  - テキストフィールド横の「参照」ボタンをクリックしてファイルダイアログを開き、新しいディレクトリを選択します。<br>"
                 "  - 例：「D:/Kemono Downloads」に変更すると、そこにファイルが保存されます。<br>"
                 "- <b>最大同時ダウンロード数</b>：一度にダウンロードするファイル数を制御します。<br>"
-                "  - デフォルト：10。<br>"
-                "  - スピンボックスを使用して1から10の間で調整します。低い値は帯域幅使用量を減らしますが処理が遅くなり、高い値は速度を上げますが接続に負担をかける可能性があります。<br><br>"
+                "  - デフォルト：5。<br>"
+                "  - スピンボックスを使用して1から20の間で調整します。低い値は帯域幅使用量を減らしますが処理が遅くなり、高い値は速度を上げますが接続に負担をかける可能性があります。<br><br>"
+                "- <b>サイトにプレビューしかないファイルは、プレビュー画像を保存する</b>：サイトによっては、元のファイルがなくプレビュー画像だけが残っているファイル（「プレビューのみ」と表示）を掲載しています。このようなファイルは常にスキップされます。オンにすると、代わりに00501_preview.pngのような名前でプレビュー画像を保存します。<br>"
+                "  - デフォルト：オフ。<br><br>"
                 "<b>4.2 変更の保存</b><br>"
                 "- 「保存ディレクトリ」、「最大同時ダウンロード数」、「言語」の設定変更は調整時に自動的に保存されます。<br>"
                 "- 「キャッシュのクリア」や「ファイルハッシュのリセット」などのアクションは、それぞれのボタンを介して手動で確認が必要です。<br>"
@@ -2712,8 +2716,10 @@ class KDLanguage:
                 "  - 텍스트 필드 옆의 '찾아보기' 버튼을 클릭하여 파일 대화 상자를 열고 새 디렉토리를 선택합니다.<br>"
                 "  - 예: 'D:/Kemono Downloads'로 변경하면 파일이 그곳에 저장됩니다.<br>"
                 "- <b>최대 동시 다운로드 수</b>: 한 번에 다운로드되는 파일 수를 제어합니다.<br>"
-                "  - 기본값: 10.<br>"
-                "  - 스핀 박스를 사용하여 1에서 10 사이로 조정합니다. 낮은 값은 대역폭 사용을 줄이지만 프로세스가 느려지고, 높은 값은 속도를 높이지만 연결에 부담을 줄 수 있습니다.<br><br>"
+                "  - 기본값: 5.<br>"
+                "  - 스핀 박스를 사용하여 1에서 20 사이로 조정합니다. 낮은 값은 대역폭 사용을 줄이지만 프로세스가 느려지고, 높은 값은 속도를 높이지만 연결에 부담을 줄 수 있습니다.<br><br>"
+                "- <b>사이트에 미리보기만 있는 파일은 미리보기 이미지를 저장</b>: 일부 사이트에는 원본 파일이 없고 미리보기 이미지만 남은 파일('미리보기만'으로 표시)이 올라와 있습니다. 이런 파일은 항상 건너뜁니다. 켜면 대신 00501_preview.png 같은 이름으로 미리보기 이미지를 저장합니다.<br>"
+                "  - 기본값: 꺼짐.<br><br>"
                 "<b>4.2 변경 사항 저장</b><br>"
                 "- '저장 디렉토리', '최대 동시 다운로드 수', '언어'와 같은 설정 변경은 조정 시 자동으로 저장됩니다.<br>"
                 "- '캐시 지우기'와 '파일 해시 초기화'와 같은 작업은 해당 버튼을 통해 수동으로 확인해야 합니다.<br>"
@@ -2729,8 +2735,10 @@ class KDLanguage:
                 "  - 点击文本字段旁边的“浏览”按钮，打开文件对话框并选择新目录。<br>"
                 "  - 示例：将其更改为“D:/Kemono Downloads”，文件将保存到该目录。<br>"
                 "- <b>最大同时下载数</b>：控制一次下载的文件数量。<br>"
-                "  - 默认：10。<br>"
-                "  - 使用旋转框在 1 到 10 之间调整。较低的值会减少带宽使用但会减慢进程；较高的值会加快速度但可能对网络连接造成压力。<br><br>"
+                "  - 默认：5。<br>"
+                "  - 使用旋转框在 1 到 20 之间调整。较低的值会减少带宽使用但会减慢进程；较高的值会加快速度但可能对网络连接造成压力。<br><br>"
+                "- <b>网站上只有预览图的文件，保存其预览图</b>：有些网站会列出原始文件已不存在、只剩预览图的文件（标为“仅预览”）。这类文件总会被跳过；开启此选项后，会改为以 00501_preview.png 这样的名称保存其预览图。<br>"
+                "  - 默认：关闭。<br><br>"
                 "<b>4.2 保存更改</b><br>"
                 "- 对“保存目录”、“最大同时下载数”和“语言”等设置的更改在调整时会自动保存。<br>"
                 "- “清除缓存”和“重置文件哈希”等操作需要通过相应按钮手动确认。<br>"
@@ -2860,7 +2868,10 @@ class KDLanguage:
                 "- <b>Solution</b>: Restart the application. Reduce 'Max Simultaneous Downloads' to lessen the load. Check the console logs for error messages and report them via the GitHub link in the 'Contact and Support' section.<br><br>"
                 "<b>6.7 Language Doesn’t Change</b><br>"
                 "- <b>Cause</b>: UI refresh issue.<br>"
-                "- <b>Solution</b>: After selecting a new language in the Settings tab, restart the application if the change doesn’t take effect immediately.",
+                "- <b>Solution</b>: After selecting a new language in the Settings tab, restart the application if the change doesn’t take effect immediately."
+                "<br><br><b>6.8 Files Marked 'Preview Only' or 'Not Available on the Server'</b><br>"
+                "- <b>Cause</b>: The site lists the file, but its media server doesn’t have it (sometimes only the preview image remains). This is not a problem with the app.<br>"
+                "- <b>Solution</b>: Retrying won’t help. To keep the previews, turn on 'Save the preview image when the site only has a preview of a file' in the Settings tab, or use the Thumbnail Downloader tab. Each download ends with a summary of how many files were downloaded, skipped or missing.",
                 "japanese": "このセクションでは、ケモノダウンローダーの使用中に遭遇する可能性のある一般的な問題とその解決策を扱います。ここに記載されていない問題が発生した場合は、「連絡とサポート」セクションを参照してさらなる支援を受けてください。<br><br>"
                 "<b>6.1 「接続エラー」でダウンロードが失敗する</b><br>"
                 "- <b>原因</b>：インターネット接続がないか、Kemono.suが一時的に利用できない。<br>"
@@ -2882,7 +2893,10 @@ class KDLanguage:
                 "- <b>解決策</b>：アプリケーションを再起動してください。「最大同時ダウンロード数」を減らして負荷を軽減してください。コンソールログでエラーメッセージを確認し、「連絡とサポート」セクションのGitHubリンクを介して報告してください。<br><br>"
                 "<b>6.7 言語が変更されない</b><br>"
                 "- <b>原因</b>：UIのリフレッシュ問題。<br>"
-                "- <b>解決策</b>：設定タブで新しい言語を選択した後、変更が即座に反映されない場合はアプリケーションを再起動してください。",
+                "- <b>解決策</b>：設定タブで新しい言語を選択した後、変更が即座に反映されない場合はアプリケーションを再起動してください。"
+                "<br><br><b>6.8 「プレビューのみ」や「サーバー上にありません」と表示されるファイル</b><br>"
+                "- <b>原因</b>：サイトにはファイルが掲載されていますが、メディアサーバーにはありません（プレビュー画像だけが残っている場合もあります）。アプリの不具合ではありません。<br>"
+                "- <b>解決策</b>：再試行しても解決しません。プレビューを残したい場合は、設定タブで「サイトにプレビューしかないファイルは、プレビュー画像を保存する」をオンにするか、サムネイルダウンローダータブを使用してください。各ダウンロードの最後に、ダウンロード済み・スキップ・サーバー上になしのファイル数の概要が表示されます。",
                 "korean": "이 섹션에서는 케모노 다운로더 사용 중 발생할 수 있는 일반적인 문제와 해결 방법을 다룹니다. 여기에 나열되지 않은 문제가 발생하면 '연락 및 지원' 섹션을 참조하여 추가 지원을 받으세요.<br><br>"
                 "<b>6.1 '연결 오류'로 다운로드 실패</b><br>"
                 "- <b>원인</b>: 인터넷 연결이 없거나 Kemono.su가 일시적으로 사용 불가능.<br>"
@@ -2904,7 +2918,10 @@ class KDLanguage:
                 "- <b>해결책</b>: 애플리케이션을 재시작하세요. '최대 동시 다운로드 수'를 줄여 부하를 줄이세요. 콘솔 로그에서 오류 메시지를 확인하고 '연락 및 지원' 섹션의 GitHub 링크를 통해 보고하세요.<br><br>"
                 "<b>6.7 언어가 변경되지 않음</b><br>"
                 "- <b>원인</b>: UI 새로고침 문제.<br>"
-                "- <b>해결책</b>: 설정 탭에서 새 언어를 선택한 후 변경이 즉시 적용되지 않으면 애플리케이션을 재시작하세요.",
+                "- <b>해결책</b>: 설정 탭에서 새 언어를 선택한 후 변경이 즉시 적용되지 않으면 애플리케이션을 재시작하세요."
+                "<br><br><b>6.8 '미리보기만' 또는 '서버에 없음'으로 표시되는 파일</b><br>"
+                "- <b>원인</b>: 사이트에 파일이 올라와 있지만 미디어 서버에는 없습니다(미리보기 이미지만 남아 있는 경우도 있습니다). 앱의 문제가 아닙니다.<br>"
+                "- <b>해결책</b>: 다시 시도해도 해결되지 않습니다. 미리보기를 남기려면 설정 탭에서 '사이트에 미리보기만 있는 파일은 미리보기 이미지를 저장'을 켜거나 썸네일 다운로더 탭을 사용하세요. 각 다운로드가 끝나면 다운로드됨, 건너뜀, 서버에 없음 파일 수가 요약됩니다.",
                 "chinese-simplified": "本节解决您在使用 Kemono 下载器时可能遇到的常见问题，并提供相应的解决方案。如果您的问题未在此列出，请参阅“联系与支持”部分以获取进一步帮助。<br><br>"
                 "<b>6.1 下载失败并显示“连接错误”</b><br>"
                 "- <b>原因</b>：无互联网连接或 Kemono.cr 暂时不可用。<br>"
@@ -2926,7 +2943,10 @@ class KDLanguage:
                 "- <b>解决方案</b>：重新启动应用程序。减少“最大同时下载数”以减轻负载。检查控制台日志中的错误消息，并通过“联系与支持”部分中的 GitHub 链接报告问题。<br><br>"
                 "<b>6.7 语言未更改</b><br>"
                 "- <b>原因</b>：界面刷新问题。<br>"
-                "- <b>解决方案</b>：在设置选项卡中选择新语言后，如果更改未立即生效，请重新启动应用程序。",
+                "- <b>解决方案</b>：在设置选项卡中选择新语言后，如果更改未立即生效，请重新启动应用程序。"
+                "<br><br><b>6.8 标为“仅预览”或“服务器上没有此文件”的文件</b><br>"
+                "- <b>原因</b>：网站列出了该文件，但其媒体服务器上没有（有时只剩预览图）。这不是应用的问题。<br>"
+                "- <b>解决方案</b>：重试无济于事。如需保留预览图，请在设置选项卡中开启“网站上只有预览图的文件，保存其预览图”，或使用缩略图下载器选项卡。每次下载结束时都会显示已下载、已跳过和服务器上不存在的文件数量摘要。",
             },
             "help_support_title": {
                 "english": "8. Contact and Support",
@@ -4382,6 +4402,54 @@ class KDLanguage:
                 "japanese": "概要：ダウンロード済み {0}件、プレビューのみ（スキップ）{1}件、サーバー上になし {2}件、失敗 {3}件",
                 "korean": "요약: 다운로드 {0}개, 미리보기만 있음(건너뜀) {1}개, 서버에 없음 {2}개, 실패 {3}개",
                 "chinese-simplified": "摘要：已下载 {0} 个，仅有预览图（已跳过）{1} 个，服务器上不存在 {2} 个，失败 {3} 个",
+            },
+            "save_preview_images": {
+                "english": "Save the preview image when the site only has a preview of a file",
+                "japanese": "サイトにプレビューしかないファイルは、プレビュー画像を保存する",
+                "korean": "사이트에 미리보기만 있는 파일은 미리보기 이미지를 저장",
+                "chinese-simplified": "网站上只有预览图的文件，保存其预览图",
+            },
+            "save_preview_images_tooltip": {
+                "english": 'Some files are listed by the site but only their preview image remains. When this is on, that preview is downloaded next to the other files, named like "00501_preview.png". Only images have previews.',
+                "japanese": "サイトに掲載されていても、プレビュー画像しか残っていないファイルがあります。オンにすると、そのプレビューを「00501_preview.png」のような名前で他のファイルと一緒にダウンロードします。プレビューがあるのは画像のみです。",
+                "korean": '사이트에 올라와 있지만 미리보기 이미지만 남아 있는 파일이 있습니다. 켜면 그 미리보기를 "00501_preview.png" 같은 이름으로 다른 파일과 함께 다운로드합니다. 미리보기는 이미지에만 있습니다.',
+                "chinese-simplified": "有些文件虽在网站上列出，但只剩下预览图。开启后，会将该预览图以“00501_preview.png”这样的名称，与其他文件一起下载。只有图片才有预览图。",
+            },
+            "preview_only_info_saved": {
+                "english": 'The site lists these files, but its media servers only kept their thumbnails, not the full files. This is not a problem with Kemono Downloader. Their preview images are saved instead, named like "00501_preview.png", and the other files download normally. Click "Show Details..." to see the list.',
+                "japanese": "サイトにはこれらのファイルが掲載されていますが、メディアサーバーにはサムネイルしか残っておらず、元のファイルはありません。Kemono Downloaderの不具合ではありません。代わりにプレビュー画像を「00501_preview.png」のような名前で保存し、他のファイルは通常どおりダウンロードします。一覧は「Show Details...」をクリックすると表示されます。",
+                "korean": '사이트에 이 파일들이 올라와 있지만 미디어 서버에는 원본 파일이 없고 썸네일만 남아 있습니다. Kemono Downloader의 문제가 아닙니다. 대신 미리보기 이미지를 "00501_preview.png" 같은 이름으로 저장하고, 다른 파일은 정상적으로 다운로드합니다. 목록은 "Show Details..."를 클릭하면 볼 수 있습니다.',
+                "chinese-simplified": "网站列出了这些文件，但其媒体服务器只保留了缩略图，没有完整文件。这不是 Kemono Downloader 的问题。将改为以“00501_preview.png”这样的名称保存其预览图，其他文件照常下载。点击“Show Details...”可查看列表。",
+            },
+            "preview_only_tooltip_saved": {
+                "english": 'The site only has a preview of this file, so it can\'t be downloaded. Its preview image will be saved instead (the "save preview images" setting is on).',
+                "japanese": "サイトにはこのファイルのプレビューしかないため、ダウンロードできません。代わりにプレビュー画像が保存されます（「プレビュー画像を保存」の設定がオンです）。",
+                "korean": '사이트에 이 파일의 미리보기만 있어서 다운로드할 수 없습니다. 대신 미리보기 이미지가 저장됩니다("미리보기 이미지 저장" 설정이 켜져 있음).',
+                "chinese-simplified": "网站上只有此文件的预览图，因此无法下载。将改为保存其预览图（“保存预览图”设置已开启）。",
+            },
+            "missing_files_title": {
+                "english": "Some Files Aren't on the Server",
+                "japanese": "サーバー上にないファイルがあります",
+                "korean": "서버에 없는 파일이 있습니다",
+                "chinese-simplified": "部分文件不在服务器上",
+            },
+            "missing_files_text": {
+                "english": "{0} file(s) couldn't be downloaded because the site's media server doesn't have them.",
+                "japanese": "{0}件のファイルは、サイトのメディアサーバーにないためダウンロードできませんでした。",
+                "korean": "{0}개의 파일은 사이트의 미디어 서버에 없어서 다운로드할 수 없었습니다.",
+                "chinese-simplified": "{0} 个文件无法下载，因为网站的媒体服务器上没有它们。",
+            },
+            "missing_files_info": {
+                "english": "The site still lists these files, but its media server answered that they don't exist (HTTP 404). This is not a problem with Kemono Downloader, and trying again won't help. Click \"Show Details...\" to see the list.",
+                "japanese": "サイトにはまだこれらのファイルが掲載されていますが、メディアサーバーは存在しないと応答しました（HTTP 404）。Kemono Downloaderの不具合ではなく、再試行しても解決しません。一覧は「Show Details...」をクリックすると表示されます。",
+                "korean": '사이트에는 아직 이 파일들이 올라와 있지만, 미디어 서버는 파일이 없다고 응답했습니다(HTTP 404). Kemono Downloader의 문제가 아니며, 다시 시도해도 해결되지 않습니다. 목록은 "Show Details..."를 클릭하면 볼 수 있습니다.',
+                "chinese-simplified": "网站仍列出这些文件，但其媒体服务器回应文件不存在（HTTP 404）。这不是 Kemono Downloader 的问题，重试也无济于事。点击“Show Details...”可查看列表。",
+            },
+            "history_files_tooltip": {
+                "english": "{0} of {1} files downloaded.\n{2} only had a preview on the site (skipped).\n{3} weren't on the media server.",
+                "japanese": "{1}件中{0}件のファイルをダウンロードしました。\n{2}件はサイトにプレビューしかありませんでした（スキップ）。\n{3}件はメディアサーバーにありませんでした。",
+                "korean": "{1}개 중 {0}개 파일을 다운로드했습니다.\n{2}개는 사이트에 미리보기만 있었습니다(건너뜀).\n{3}개는 미디어 서버에 없었습니다.",
+                "chinese-simplified": "已下载 {1} 个文件中的 {0} 个。\n{2} 个在网站上只有预览图（已跳过）。\n{3} 个不在媒体服务器上。",
             },
         }
 

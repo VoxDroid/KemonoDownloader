@@ -222,6 +222,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | Post Data Max Retries | Retries for post data | 7 | 1-100 |
 | File Download Max Retries | Retries for files | 50 | 1-200 |
 | API Request Max Retries | Retries for API calls | 3 | 1-50 |
+| Save Preview Images | When the site only has a file's preview image, save that preview instead (named like `00501_preview.png`) | Off | On/Off |
 
 #### $\color{#90a4ae}{\sf{\text{Folder Settings}}}$
 - **Base Directory**: Custom root path for downloads

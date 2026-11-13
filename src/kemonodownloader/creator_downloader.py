@@ -50,14 +50,21 @@ from kemonodownloader.download_utils import (
     ProgressTracker,
     ThreadSettings,
     abbreviate,
+    checked_extensions,
     create_connection_guard,
+    direct_download_url,
+    direct_url_for,
     extension_allowed,
     filename_from_url,
+    forget_direct_url,
     is_missing_file_error,
     iter_post_file_entries,
     md5_file,
+    preview_image_url,
+    remember_direct_url,
     response_content_length,
     sanitize_filename,
+    save_preview_images_enabled,
     wait_for_workers,
 )
 from kemonodownloader.hash_db import HashDB
@@ -83,7 +90,7 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
-from kemonodownloader.kd_preview_notice import PreviewOnlyNotice
+from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
 
 # get_domain_config is imported from domain_config; re-exported for
 # any callers that import it directly from this module.
@@ -828,6 +835,9 @@ class FilePreparationThread(QThread):
         self.settings = settings
         self.max_concurrent = max_concurrent
         self.is_running = True
+        # Read the type filters here, on the GUI thread, not from the workers.
+        self.allowed_extensions = checked_extensions(creator_ext_checks)
+        self._save_previews = getattr(settings, "save_preview_images", False) is True
         # Files the site only has previews of; left out of the download and
         # shown to the user when this thread finishes.
         self.preview_only_files = []
@@ -836,9 +846,13 @@ class FilePreparationThread(QThread):
     def stop(self):
         self.is_running = False
 
-    def _skip_preview_only(self, post, entry):
+    def _skip_preview_only(self, post, entry, preview_saved=False):
         record = PreviewOnlyFile(
-            str(post.get("id", "")), post.get("title") or "", entry.name, entry.url
+            str(post.get("id", "")),
+            post.get("title") or "",
+            entry.name,
+            entry.url,
+            preview_saved,
         )
         with self._preview_only_lock:
             if all(r.url != entry.url for r in self.preview_only_files):
@@ -876,8 +890,20 @@ class FilePreparationThread(QThread):
             )
             if extension_allowed(ext, allowed_extensions):
                 if entry.preview_only:
-                    self._skip_preview_only(post, entry)
+                    preview_url = (
+                        preview_image_url(entry, domain_config)
+                        if self._save_previews
+                        else None
+                    )
+                    self._skip_preview_only(post, entry, preview_url is not None)
+                    if preview_url:
+                        files_to_download.append(
+                            (filename_from_url(preview_url), preview_url)
+                        )
                     continue
+                direct_url = direct_download_url(entry, domain_config)
+                if direct_url:
+                    remember_direct_url(url, direct_url)
                 self.log.emit(
                     translate("log_debug", translate(added_key, name)), "INFO"
                 )
@@ -954,13 +980,8 @@ class FilePreparationThread(QThread):
                     if isinstance(post_data, dict) and "post" not in post_data
                     else post_data.get("post", {})
                 )
-                allowed_extensions = [
-                    ext.lower()
-                    for ext, checkbox in self.creator_ext_checks.items()
-                    if checkbox.isChecked()
-                ]
                 detected_files = self.detect_files(
-                    post, allowed_extensions, domain_config
+                    post, self.allowed_extensions, domain_config
                 )
                 files_to_download = [
                     (file_name, file_url) for file_name, file_url in detected_files
@@ -1003,11 +1024,7 @@ class FilePreparationThread(QThread):
             return
         files_to_download = []
         files_to_posts_map = {}
-        allowed_extensions = [
-            ext.lower()
-            for ext, checkbox in self.creator_ext_checks.items()
-            if checkbox.isChecked()
-        ]
+        allowed_extensions = self.allowed_extensions
         self.log.emit(
             translate(
                 "log_debug",
@@ -1569,12 +1586,17 @@ class CreatorDownloadThread(QThread):
             "INFO",
         )
 
-        max_retries = self.settings.file_download_max_retries
-        for attempt in range(1, max_retries + 1):
+        max_retries = int(self.settings.file_download_max_retries)
+        attempt = 0
+        while attempt < max_retries:
+            attempt += 1
+            # The media server the API named, when known (saves a redirect);
+            # file_url stays the file's identity everywhere else.
+            request_url = direct_url_for(file_url) or file_url
             try:
                 headers = get_headers().copy()
                 headers["Referer"] = self.domain_config["referer"]
-                headers = get_request_headers(headers, file_url)
+                headers = get_request_headers(headers, request_url)
 
                 # Use requests instead of aiohttp for better proxy support
                 def download_with_requests():
@@ -1588,7 +1610,7 @@ class CreatorDownloadThread(QThread):
                             if not self.is_running:
                                 raise Exception("Download cancelled before connection")
                             response = session.get(
-                                file_url,
+                                request_url,
                                 headers=headers,
                                 stream=True,
                                 timeout=(30, 30),
@@ -1690,6 +1712,21 @@ class CreatorDownloadThread(QThread):
                 return
 
             except requests.RequestException as e:
+                if request_url != file_url:
+                    # The direct server failed: use the usual URL from now on.
+                    # Not counted as an attempt, and not a reason to give up.
+                    forget_direct_url(file_url)
+                    self._safe_emit(
+                        self.log,
+                        translate(
+                            "log_debug",
+                            f"Direct server failed for {file_url} ({e}); "
+                            "using the main file server",
+                        ),
+                        "INFO",
+                    )
+                    attempt -= 1
+                    continue
                 if is_missing_file_error(e):
                     # The media server doesn't have this file; retrying can't
                     # help, and every retry is another request to the site.
@@ -2298,6 +2335,7 @@ class CreatorDownloaderTab(QWidget):
         # Files downloaded across the run (completed_files is per creator).
         self._run_downloaded = 0
         self.preview_only_notice = PreviewOnlyNotice(self)
+        self.missing_files_notice = MissingFilesNotice(self)
         # Locks for thread-safe access to shared data structures
         self.completed_files_lock = threading.Lock()
         self.failed_files_lock = threading.Lock()
@@ -2340,6 +2378,7 @@ class CreatorDownloaderTab(QWidget):
             api_request_max_retries=self._parent.settings_tab.get_api_request_max_retries(),
             simultaneous_downloads=self._parent.settings_tab.get_simultaneous_downloads(),
             settings_tab=self._parent.settings_tab,
+            save_preview_images=save_preview_images_enabled(self._parent.settings_tab),
         )
 
     def setup_ui(self):
@@ -2907,6 +2946,10 @@ class CreatorDownloaderTab(QWidget):
                 files_total=total,
                 files_done=done,
                 files_failed=len(thread.failed_files),
+                files_preview_only=len(
+                    getattr(thread, "preview_only_files", None) or ()
+                ),
+                files_missing=len(getattr(thread, "unavailable_files", None) or ()),
                 posts_total=len(thread.selected_posts),
                 posts_done=posts_done,
                 status=download_status(total, done, cancelled or not thread.is_running),
@@ -3649,6 +3692,7 @@ class CreatorDownloaderTab(QWidget):
         self.unavailable_files.clear()
         self._run_downloaded = 0
         self.preview_only_notice.reset()
+        self.missing_files_notice.close()
         self.total_files_to_download = 0
         self.creator_overall_progress_label.setText(
             translate("overall_progress", 0, 0, 0, self.total_posts_to_download)
@@ -3767,7 +3811,7 @@ class CreatorDownloaderTab(QWidget):
 
     def on_file_preparation_finished(self, urls, files_to_download, files_to_posts_map):
         # Preview-only files were already left out of files_to_download.
-        self._report_preview_only(
+        skipped = list(
             getattr(
                 getattr(self, "file_preparation_thread", None),
                 "preview_only_files",
@@ -3775,6 +3819,7 @@ class CreatorDownloaderTab(QWidget):
             )
             or []
         )
+        self._report_preview_only(skipped)
         self.total_files_to_download = len(files_to_download)
         self.append_log_to_console(
             translate(
@@ -3842,6 +3887,10 @@ class CreatorDownloaderTab(QWidget):
         )
         thread.source_url = url
         thread.started_at = time.time()
+        # For History: files of this creator the site only had previews of.
+        thread.preview_only_files = [
+            f for f in skipped if isinstance(f, PreviewOnlyFile)
+        ]
         thread.file_progress.connect(self.update_creator_file_progress)
         thread.file_completed.connect(self.update_file_completion)
         thread.post_completed.connect(self.update_post_completion)
@@ -4366,6 +4415,7 @@ class CreatorDownloaderTab(QWidget):
             translate("log_info", translate("download_process_completed")), "INFO"
         )
         self._log_download_summary()
+        self.missing_files_notice.show(self.unavailable_files & set(self.failed_files))
 
         # Always show Downloads Complete, even if some files failed
         self.creator_file_progress.setStyleSheet(
