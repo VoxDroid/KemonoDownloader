@@ -94,6 +94,7 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
+from kemonodownloader.kd_notes import retranslate_notes, with_note
 from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
 from kemonodownloader.kd_theme import set_progress_state, set_role
 
@@ -1867,7 +1868,7 @@ class PostDownloaderTab(QWidget):
         self.post_queue_list = QListWidget()
         self.post_queue_list.setFixedHeight(100)
         post_queue_layout.addWidget(self.post_queue_list)
-        self.post_queue_group.setLayout(post_queue_layout)
+        self.post_queue_group.setLayout(with_note(post_queue_layout, "note_post_queue"))
         left_layout.addWidget(self.post_queue_group)
 
         # Progress layout
@@ -2031,7 +2032,7 @@ class PostDownloaderTab(QWidget):
         bottom_layout.addStretch()
         bottom_layout.addWidget(self.post_view_button)
         file_list_layout.addLayout(bottom_layout)
-        self.file_list_group.setLayout(file_list_layout)
+        self.file_list_group.setLayout(with_note(file_list_layout, "note_post_files"))
         right_layout.addWidget(self.file_list_group)
 
         # Background task indicators
@@ -2049,6 +2050,7 @@ class PostDownloaderTab(QWidget):
         self.update_ui_text()
 
     def update_ui_text(self):
+        retranslate_notes(self)
         self.post_url_input.setPlaceholderText(translate("enter_post_url"))
         self.post_add_to_queue_btn.setText(translate("add_to_queue"))
         self.post_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))

@@ -57,6 +57,7 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_notes import add_note, retranslate_notes
 from kemonodownloader.kd_theme import set_role, set_tone
 
 SORT_ROLE = Qt.ItemDataRole.UserRole + 1
@@ -496,6 +497,7 @@ class HistoryTab(QWidget):
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(0, 10, 0, 0)
+        add_note(layout, "note_history")
 
         toolbar = QHBoxLayout()
         self.history_search = QLineEdit()
@@ -576,6 +578,7 @@ class HistoryTab(QWidget):
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(0, 10, 0, 0)
+        add_note(layout, "note_favorites")
 
         add_row = QHBoxLayout()
         self.favorite_input = QLineEdit()
@@ -681,6 +684,7 @@ class HistoryTab(QWidget):
     # ------------------------------------------------------------------
 
     def update_ui_text(self) -> None:
+        retranslate_notes(self)
         self.views.setTabText(0, translate("history_downloads_view"))
         self.views.setTabText(1, translate("favorites_view"))
         self.history_search.setPlaceholderText(translate("history_search_placeholder"))

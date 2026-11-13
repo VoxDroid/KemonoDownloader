@@ -30,6 +30,15 @@
 - Give the whole app one consistent look, and stop buttons from deforming.
   Each tab styled its own buttons, fields, lists and progress bars, with slightly different colours, padding and corners. One theme now styles every tab and window: the same buttons everywhere (main actions such as Download, Detect Thumbnails and Apply Changes stand out, and Cancel, Stop Tor, Reset and Clear Logs are red), matching text fields, drop-downs, check boxes with check marks, lists, progress bars (amber when paused, green when done), tabs, scroll bars, tooltips and message boxes, and links in the same blue. The font chosen in Settings applies everywhere, logs included. The Download, Cancel and Expand Logs buttons used to grow and shrink on hover, which fought the layout and left them misshapen; hovering now changes colours only, so no button changes shape, and the small icon buttons are evenly square.
 
+- Explain every section of the app, and rewrite the Help guide.
+  Each section of the downloader tabs, History and Settings now starts with a short note on what it's for. The Help tab is a new guide with a topic list, search with highlighted matches, and Previous/Next buttons, covering getting started, each tab, settings, proxy and Tor, logs and reports, troubleshooting, and support. The old manual described four tabs, settings that don't exist ("Clear Cache", "Enable Logging") and no update check; the new guide matches the app in all four languages.
+
+- Redesign the Browser Extension tab and fix its installation steps.
+  The tab now shows what the extension does, then numbered steps with copyable commands, how to use it, and fixes for common problems. The old steps skipped choosing the browser's manifest, so loading the folder as described loaded a placeholder that doesn't work.
+
+- Keep the window on smaller screens.
+  Switching from the intro to the main screen could make the window taller than it needed to be, past the bottom of smaller screens; it now keeps its size. The Thumbnail tab's left panel scrolls like the Post and Creator tabs, so the window's minimum height dropped from 868 to about 700 pixels.
+
 - Rework the proxy settings.
   The Use Proxy switch and a short explanation now sit inside the Proxy Settings group, and only the chosen proxy type's options take up room. Custom proxies show a valid example address and the formats they accept (`host:port`, `http://`, `socks5h://`, with an optional login). Tor's controls are grouped: path with Browse and Download Tor, then Start, Stop and Test with Help, a status badge, and a note that downloads fail rather than bypass Tor when it isn't running.
 
@@ -43,7 +52,7 @@
   Previews now send the identifiable user agent Pawchive requires (they failed with HTTP 403), the Pawchive request policy covers every `pawchive.<suffix>` domain, and post links are accepted by the site's own name.
 
 - Finish the translations and tidy the interface.
-  The remaining English-only text is translated (the Tor status and help, "Custom Proxy", Settings folder errors, log saving messages, the Expand Logs tooltip and the Thumbnail tab's preview hint), and changing the language while Tor runs no longer shows it as stopped. The Post tab has one "JPG/JPEG" option like the Creator tab, and its file-type filters now apply while files are prepared. Twenty unused translations were removed.
+  The remaining English-only text is translated (the Tor status and help, "Custom Proxy", Settings folder errors, log saving messages, the Expand Logs tooltip and the Thumbnail tab's preview hint), and changing the language while Tor runs no longer shows it as stopped. The Post tab has one "JPG/JPEG" option like the Creator tab, and its file-type filters now apply while files are prepared. Twenty unused translations were removed, and four Korean labels in the Thumbnail tab that were partly in Japanese are fixed.
 
 - Improve the Linux packages and dependencies.
   The `.deb`, `.rpm`, openSUSE and Arch packages declare the X11 libraries Qt needs, including `xcb-cursor`, whose absence made the app close at launch. Flatpak builds use the KDE 6.11 runtime, the unused Pillow dependency was removed, and the package description mentions Pawchive.

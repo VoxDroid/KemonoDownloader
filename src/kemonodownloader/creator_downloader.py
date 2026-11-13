@@ -91,6 +91,7 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
+from kemonodownloader.kd_notes import retranslate_notes, with_note
 from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
 from kemonodownloader.kd_theme import set_progress_state, set_role
 
@@ -2368,7 +2369,9 @@ class CreatorDownloaderTab(QWidget):
         self.creator_queue_list = QListWidget()
         self.creator_queue_list.setFixedHeight(100)
         creator_queue_layout.addWidget(self.creator_queue_list)
-        self.creator_queue_group.setLayout(creator_queue_layout)
+        self.creator_queue_group.setLayout(
+            with_note(creator_queue_layout, "note_creator_queue")
+        )
         left_layout.addWidget(self.creator_queue_group)
 
         # Download Options Group
@@ -2449,7 +2452,9 @@ class CreatorDownloaderTab(QWidget):
             creator_ext_layout.addWidget(check, i // 5, i % 5)
         self.creator_ext_group.setLayout(creator_ext_layout)
         creator_options_layout.addWidget(self.creator_ext_group)
-        self.creator_options_group.setLayout(creator_options_layout)
+        self.creator_options_group.setLayout(
+            with_note(creator_options_layout, "note_creator_options")
+        )
         left_layout.addWidget(self.creator_options_group)
 
         # Progress layout
@@ -2577,7 +2582,9 @@ class CreatorDownloaderTab(QWidget):
         bottom_layout.addWidget(self.creator_view_button)
 
         post_list_layout.addLayout(bottom_layout)
-        self.post_list_group.setLayout(post_list_layout)
+        self.post_list_group.setLayout(
+            with_note(post_list_layout, "note_creator_posts")
+        )
         right_layout.addWidget(self.post_list_group)
 
         # Background task indicators
@@ -2596,6 +2603,7 @@ class CreatorDownloaderTab(QWidget):
         self.update_ui_text()
 
     def update_ui_text(self):
+        retranslate_notes(self)
         self.creator_url_input.setPlaceholderText(translate("enter_creator_url"))
         self.creator_add_to_queue_btn.setText(translate("add_to_queue"))
         self.creator_add_from_file_btn.setToolTip(translate("add_links_from_file"))

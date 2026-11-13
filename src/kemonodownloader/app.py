@@ -582,9 +582,24 @@ class KemonoDownloader(QMainWindow):
 
     def _finish_intro_transition(self):
         """Complete the intro-to-main transition and release the intro screen."""
+        size = self.size()
         self.setCentralWidget(self.main_widget)
         self.main_widget.show()
         self.intro_screen = None
+        # While its word-wrapped labels are still unmeasured, the new screen
+        # asks for more height than it needs, and Qt grows the window to fit
+        # (past the bottom of smaller screens). Put the size back once the
+        # layout has settled.
+        QTimer.singleShot(0, lambda: self._restore_size(size))
+
+    def _restore_size(self, size):
+        """Return to *size*, or the smallest size the window can take."""
+        if self.isMaximized() or self.isFullScreen():
+            return
+        minimum = self.minimumSizeHint()
+        self.resize(
+            max(size.width(), minimum.width()), max(size.height(), minimum.height())
+        )
 
     def check_for_updates(self):
         self.version_checker = VersionChecker()

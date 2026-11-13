@@ -3,7 +3,7 @@
 import re
 from pathlib import Path
 
-from kemonodownloader import kd_help, kd_history
+from kemonodownloader import kd_extension, kd_help, kd_history
 from kemonodownloader.kd_language import language_manager
 
 SOURCE = Path(__file__).parent.parent / "src" / "kemonodownloader"
@@ -21,6 +21,13 @@ def used_keys():
     keys |= set(kd_history.FavoritesModel.COLUMNS)
     keys |= set(kd_history._KIND_KEYS.values()) | set(kd_history._STATUS_KEYS.values())
     keys |= {key for pair in kd_help.HELP_SECTIONS for key in pair}
+    keys |= {key for feature in kd_extension.FEATURES for key in feature[:2]}
+    for path in SOURCE.glob("*.py"):
+        # Section notes take their key as a plain argument.
+        text = path.read_text(encoding="utf-8")
+        keys |= set(
+            re.findall(r'(?:section_note|add_note|with_note)\([^"]*"([a-z_]+)"\)', text)
+        )
     history_source = (SOURCE / "kd_history.py").read_text(encoding="utf-8")
     keys |= set(re.findall(r'_btn, "([a-z_]+)"\)', history_source))
     keys |= set(re.findall(r'\("([a-z_]+)", "fa5s\.', history_source))

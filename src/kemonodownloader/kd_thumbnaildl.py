@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QSpinBox,
     QTextEdit,
     QVBoxLayout,
@@ -53,6 +54,7 @@ from kemonodownloader.history_store import (
 from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import get_session
+from kemonodownloader.kd_notes import add_note, retranslate_notes, section_note
 from kemonodownloader.kd_theme import set_role
 from kemonodownloader.post_downloader import MediaPreviewModal
 
@@ -830,7 +832,10 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Mode Selection Group
         self.mode_group = QGroupBox(translate("download_mode"))
-        mode_layout = QHBoxLayout(self.mode_group)
+        mode_column = QVBoxLayout(self.mode_group)
+        mode_column.addWidget(section_note("note_thumb_mode"))
+        mode_layout = QHBoxLayout()
+        mode_column.addLayout(mode_layout)
         self.mode_label = QLabel(translate("download_mode"))
         self.mode_combo = QComboBox()
         self.mode_combo.addItems([translate("post_mode"), translate("creator_mode")])
@@ -842,6 +847,7 @@ class ThumbnailDownloaderTab(QWidget):
         # URL Input & Queue controls
         self.queue_group = QGroupBox(translate("thumbnail_downloader_tab"))
         queue_layout = QVBoxLayout(self.queue_group)
+        add_note(queue_layout, "note_thumb_queue")
         queue_layout.setSpacing(8)
 
         input_row = QHBoxLayout()
@@ -906,6 +912,7 @@ class ThumbnailDownloaderTab(QWidget):
         # Settings Options Group
         self.options_group = QGroupBox(translate("download_options"))
         options_layout = QVBoxLayout(self.options_group)
+        add_note(options_layout, "note_thumb_options")
 
         sim_row = QHBoxLayout()
         sim_label = QLabel(translate("simultaneous_downloads"))
@@ -977,6 +984,8 @@ class ThumbnailDownloaderTab(QWidget):
 
         self.status_label = QLabel(translate("idle"))
         left_layout.addWidget(self.status_label)
+        # Spare height goes below the controls, not between them.
+        left_layout.addStretch()
 
         # ==========================================
         # RIGHT PANEL: Detected Thumbnails & Log Output
@@ -989,6 +998,7 @@ class ThumbnailDownloaderTab(QWidget):
         # Group Box for Thumbnails List
         self.thumbnails_group = QGroupBox(translate("thumbnails_to_download"))
         thumbnails_group_layout = QVBoxLayout(self.thumbnails_group)
+        add_note(thumbnails_group_layout, "note_thumb_list")
         thumbnails_group_layout.setSpacing(8)
 
         # Filter & Selection Header
@@ -1049,7 +1059,14 @@ class ThumbnailDownloaderTab(QWidget):
         set_role(self.log_console, "console")
         right_layout.addWidget(self.log_console, stretch=1)
 
-        main_layout.addWidget(left_panel, stretch=2)
+        # Scrollable, like the Post and Creator tabs, so the window fits
+        # smaller screens instead of growing to this panel's full height.
+        left_scroll = QScrollArea()
+        left_scroll.setWidget(left_panel)
+        left_scroll.setWidgetResizable(True)
+        left_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        main_layout.addWidget(left_scroll, stretch=2)
         main_layout.addWidget(right_panel, stretch=3)
 
     def refresh_ui(self):
@@ -1057,6 +1074,7 @@ class ThumbnailDownloaderTab(QWidget):
         self.update_ui_text()
 
     def update_ui_text(self):
+        retranslate_notes(self)
         self.mode_group.setTitle(translate("download_mode"))
         self.mode_label.setText(translate("download_mode"))
 

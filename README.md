@@ -205,6 +205,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Media Playback** | Built-in video and GIF preview with play/pause/seek/volume controls. |
 | **Real-time Logging** | In-app console with progress bars and detailed status updates, plus a full logs window with search, Copy All and Save that keeps your place while new lines arrive. |
 | **Consistent Design** | One theme styles every tab and window: the same buttons, fields, lists, progress bars and tabs everywhere, with the main action of each screen highlighted. |
+| **Built-in Guide** | A searchable Help guide covering every tab and setting, and a short note at the top of every section explaining what it's for. |
 | **Smooth Interface** | Tabs are prepared while the intro is showing so Launch is instant; crossfades between screens and tabs, gliding mouse-wheel scrolling, and progress bars that ease to new values. |
 
 ### $\color{#90a4ae}{\sf{\text{Advanced Features}}}$

@@ -7,7 +7,8 @@ the palette below, and widgets only say what they are:
 
 * buttons: ``set_role(button, "primary" | "danger" | "icon")`` (plain buttons
   need nothing),
-* labels: ``set_role(label, "title" | "heading" | "muted" | "pill")`` and
+* labels: ``set_role(label, "title" | "heading" | "muted" | "note" | "pill")``
+  (section notes come from ``kd_notes``) and
   ``set_tone(label, "success" | "warning" | "error" | "info")``,
 * text views: ``set_role(view, "console")`` for log output,
 * progress bars: ``set_progress_state(bar, "paused" | "done")``.
@@ -61,6 +62,7 @@ PROGRESS = ACCENT_HOVER
 PROGRESS_PAUSED = "#D4A017"
 PROGRESS_DONE = "#4CAF50"
 SELECTION = ACCENT
+NOTE_BG = "#22334F"
 
 RADIUS = 6
 
@@ -189,6 +191,10 @@ QLabel[kdRole="empty"] {{
 }}
 QLabel[kdRole="notice"] {{
     color: #E8C468; background: #3A3524; border-radius: {RADIUS}px; padding: 8px;
+}}
+QLabel[kdRole="note"] {{
+    color: {TEXT_SOFT}; background: {NOTE_BG}; border-left: 3px solid {ACCENT_HOVER};
+    border-radius: 4px; padding: 6px 10px;
 }}
 QLabel[kdRole="pill"] {{
     background: {SURFACE_ALT}; border: 1px solid {BORDER}; border-radius: 11px;

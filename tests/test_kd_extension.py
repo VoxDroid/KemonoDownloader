@@ -35,8 +35,8 @@ def test_extension_tab_renders_and_download_button(qapp, monkeypatch):
         assert any("tr:extension_title" in lbl.text() for lbl in labels)
 
         buttons = tab.findChildren(QPushButton)
-        download_buttons = [b for b in buttons if "tr:download" in b.text()]
-        assert download_buttons, "download button not found"
+        download_buttons = [b for b in buttons if "tr:ext_open_releases" in b.text()]
+        assert download_buttons, "release page button not found"
 
         # Click the download button and ensure openUrl was called
         btn = download_buttons[0]

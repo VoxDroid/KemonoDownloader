@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import language_manager, translate
+from kemonodownloader.kd_notes import retranslate_notes, with_note
 from kemonodownloader.kd_theme import set_role, set_tone
 
 # The SOCKS port configured for the Tor process this app starts (and Tor's
@@ -287,7 +288,7 @@ class SettingsTab(QWidget):
         self.open_directory_button.clicked.connect(self.open_app_directory)
         folder_layout.addWidget(self.open_directory_button, 1, 3)
 
-        self.folder_group.setLayout(folder_layout)
+        self.folder_group.setLayout(with_note(folder_layout, "note_folder_settings"))
         layout.addWidget(self.folder_group)
 
         # Download Settings Group
@@ -326,7 +327,9 @@ class SettingsTab(QWidget):
         )
         download_layout.addWidget(self.save_previews_checkbox, 1, 0, 1, 4)
 
-        self.download_group.setLayout(download_layout)
+        self.download_group.setLayout(
+            with_note(download_layout, "note_download_settings")
+        )
         layout.addWidget(self.download_group)
 
         # Retry Settings Group
@@ -381,7 +384,7 @@ class SettingsTab(QWidget):
         )
         retry_layout.addWidget(self.api_request_max_retries_spinbox, 3, 1)
 
-        self.retry_group.setLayout(retry_layout)
+        self.retry_group.setLayout(with_note(retry_layout, "note_retry_settings"))
         layout.addWidget(self.retry_group)
 
         # Creator downloader customization group
@@ -476,7 +479,9 @@ class SettingsTab(QWidget):
         )
         creator_custom_layout.addWidget(self.creator_folder_strategy_combo, 1, 1)
 
-        self.creator_custom_group.setLayout(creator_custom_layout)
+        self.creator_custom_group.setLayout(
+            with_note(creator_custom_layout, "note_creator_settings")
+        )
         layout.addWidget(self.creator_custom_group)
 
         # Update Settings Group
@@ -494,7 +499,7 @@ class SettingsTab(QWidget):
         )
         update_layout.addWidget(self.auto_update_checkbox, 0, 1)
 
-        self.update_group.setLayout(update_layout)
+        self.update_group.setLayout(with_note(update_layout, "note_update_settings"))
         layout.addWidget(self.update_group)
 
         # Language Settings Group
@@ -510,7 +515,9 @@ class SettingsTab(QWidget):
         self.language_combo.currentIndexChanged.connect(self.update_language)
         language_layout.addWidget(self.language_combo, 0, 1)
 
-        self.language_group.setLayout(language_layout)
+        self.language_group.setLayout(
+            with_note(language_layout, "note_language_settings")
+        )
         layout.addWidget(self.language_group)
 
         # Font Settings Group
@@ -537,7 +544,7 @@ class SettingsTab(QWidget):
         self.font_combo.currentIndexChanged.connect(self.update_font)
         font_layout.addWidget(self.font_combo, 0, 1)
 
-        self.font_group.setLayout(font_layout)
+        self.font_group.setLayout(with_note(font_layout, "note_font_settings"))
         layout.addWidget(self.font_group)
 
         # Proxy Settings Group. The switch and a short explanation are always
@@ -552,7 +559,7 @@ class SettingsTab(QWidget):
         network_layout.addWidget(self.use_proxy_checkbox)
 
         self.proxy_intro_label = QLabel()
-        set_role(self.proxy_intro_label, "muted")
+        set_role(self.proxy_intro_label, "note")
         self.proxy_intro_label.setWordWrap(True)
         network_layout.addWidget(self.proxy_intro_label)
 
@@ -1292,6 +1299,7 @@ class SettingsTab(QWidget):
         )
 
     def update_ui_text(self):
+        retranslate_notes(self)
         self.folder_group.setTitle(translate("folder_settings"))
         self.folder_name_label.setText(translate("folder_name"))
         self.directory_label.setText(translate("save_directory"))
