@@ -883,6 +883,7 @@ class ThumbnailDownloaderTab(QWidget):
         self.queue_list.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection
         )
+        set_role(self.queue_list, "roomy")
         queue_layout.addWidget(self.queue_list)
 
         queue_btn_row = QHBoxLayout()
@@ -1025,6 +1026,7 @@ class ThumbnailDownloaderTab(QWidget):
         # Detected Items List
         self.detected_list = QListWidget()
         self.detected_list.itemChanged.connect(self.update_selected_count)
+        set_role(self.detected_list, "roomy")
         thumbnails_group_layout.addWidget(self.detected_list, stretch=2)
 
         # Item actions (Preview button)

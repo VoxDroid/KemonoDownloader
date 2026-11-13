@@ -229,7 +229,11 @@ QListWidget, QListView, QTreeView, QTableView {{
     background: {SURFACE}; border: 1px solid {BORDER}; border-radius: {RADIUS}px;
     outline: none; selection-background-color: {SELECTION}; selection-color: {TEXT};
 }}
-QListWidget::item, QListView::item {{ padding: 3px 4px; border-radius: 4px; }}
+/* No padding: it would shrink the widgets that queue and file rows are
+   made of and cut off their buttons and check boxes. Lists of plain text
+   rows opt in to padding with the "roomy" role. */
+QListWidget::item, QListView::item {{ border-radius: 4px; }}
+QListWidget[kdRole="roomy"]::item {{ padding: 4px 6px; }}
 QListWidget::item:hover, QListView::item:hover {{ background: {SURFACE_ALT}; }}
 QListWidget::item:selected, QListView::item:selected {{ background: {SELECTION}; }}
 QTableView {{ alternate-background-color: {SURFACE_ALT}; gridline-color: transparent; }}

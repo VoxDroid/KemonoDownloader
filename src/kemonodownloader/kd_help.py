@@ -118,6 +118,7 @@ class HelpTab(QWidget):
         self.nav_list = QListWidget()
         self.nav_list.setFixedWidth(NAV_WIDTH)
         self.nav_list.setSpacing(2)
+        set_role(self.nav_list, "roomy")
         for title_key, _body_key in HELP_SECTIONS:
             item = QListWidgetItem(qta.icon(HELP_ICONS[title_key], color="white"), "")
             item.setData(Qt.ItemDataRole.UserRole, title_key)

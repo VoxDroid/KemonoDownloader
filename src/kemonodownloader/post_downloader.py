@@ -3508,7 +3508,7 @@ class PostDownloaderTab(QWidget):
         item.setData(Qt.UserRole, url)
         widget = QWidget()
         layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(6, 3, 6, 3)
         layout.setSpacing(5)
         check_box = QCheckBox()
         initial_state = self.checked_urls.get(url, True)

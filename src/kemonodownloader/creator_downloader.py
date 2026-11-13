@@ -4537,7 +4537,7 @@ class CreatorDownloaderTab(QWidget):
         item.setData(Qt.UserRole + 1, post_id)
         widget = QWidget()
         layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(6, 3, 6, 3)
         layout.setSpacing(5)
 
         check_box = QCheckBox()

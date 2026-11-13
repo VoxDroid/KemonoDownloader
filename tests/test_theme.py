@@ -173,3 +173,40 @@ def test_theme_leaves_fonts_to_the_settings():
     # The font picked in Settings is set on every widget; a font-family in the
     # sheet would override it.
     assert "font-family" not in stylesheet()
+
+
+def test_list_rows_made_of_widgets_get_their_full_row(qapp):
+    """Item padding would shrink row widgets and cut off their buttons."""
+    from PyQt6.QtWidgets import QListWidget, QListWidgetItem
+
+    host = QWidget()
+    host.setStyleSheet(stylesheet())
+    layout = QHBoxLayout(host)
+    view = QListWidget()
+    layout.addWidget(view)
+    row = QWidget()
+    row_layout = QHBoxLayout(row)
+    row_layout.setContentsMargins(0, 0, 0, 0)
+    button = QPushButton()
+    set_role(button, "icon")
+    button.setFixedSize(30, 30)
+    row_layout.addWidget(button)
+    item = QListWidgetItem()
+    item.setSizeHint(row.sizeHint())
+    view.addItem(item)
+    view.setItemWidget(item, row)
+    host.resize(400, 200)
+    host.show()
+    qapp.processEvents()
+    try:
+        assert row.geometry() == view.visualItemRect(item)
+        assert button.height() == 30
+    finally:
+        host.deleteLater()
+
+
+def test_only_plain_text_lists_pad_their_rows():
+    sheet = stylesheet()
+    assert 'QListWidget[kdRole="roomy"]::item' in sheet
+    general_rule = sheet.split("QListWidget::item, QListView::item {", 1)[1]
+    assert "padding" not in general_rule.split("}", 1)[0]
