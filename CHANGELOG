@@ -30,6 +30,9 @@
 - Give the whole app one consistent look, and stop buttons from deforming.
   Each tab styled its own buttons, fields, lists and progress bars, with slightly different colours, padding and corners. One theme now styles every tab and window: the same buttons everywhere (main actions such as Download, Detect Thumbnails and Apply Changes stand out, and Cancel, Stop Tor, Reset and Clear Logs are red), matching text fields, drop-downs, check boxes with check marks, lists, progress bars (amber when paused, green when done), tabs, scroll bars, tooltips and message boxes, and links in the same blue. The font chosen in Settings applies everywhere, logs included. The Download, Cancel and Expand Logs buttons used to grow and shrink on hover, which fought the layout and left them misshapen; hovering now changes colours only, so no button changes shape, and the small icon buttons are evenly square.
 
+- Choose a colour theme, and hover over controls for help.
+  Settings has a new Appearance section with five dark themes: Midnight (the original), Graphite, Plum, Forest and Ember. A theme applies straight away, everywhere, including the guide and list rows. Buttons, fields, check boxes and settings across the app now show a short explanation when you hover over them, in all four languages.
+
 - Choose which log messages to show.
   A new Log Settings section in Settings picks what the consoles and the full logs show: debug details (off by default), progress and info, warnings, and errors. Debug details get their own grey-blue colour, and about 60 debug messages that were sent as ordinary info are now marked as debug, so they no longer crowd the console.
 

@@ -99,9 +99,9 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
-from kemonodownloader.kd_notes import retranslate_notes, with_note
+from kemonodownloader.kd_notes import retranslate_notes, tip, tips, with_note
 from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
-from kemonodownloader.kd_theme import set_progress_state, set_role
+from kemonodownloader.kd_theme import color, set_progress_state, set_role, style_row
 
 # Resolve translations dynamically at call time so tests can monkeypatch
 # the runtime translation function in `kemonodownloader.kd_language`.
@@ -2052,6 +2052,21 @@ class PostDownloaderTab(QWidget):
         right_layout.addStretch()
         layout.addWidget(right_widget, stretch=1)
 
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.post_url_input, "tip_post_url")
+        tip(self.post_add_to_queue_btn, "tip_add_to_queue")
+        tip(self.multi_url_input, "tip_multi_url")
+        tip(self.multi_url_add_btn, "tip_add_all_to_queue")
+        tip(self.post_search_input, "tip_search_files")
+        tip(self.post_check_all, "tip_check_all_page")
+        tip(self.download_all_links, "tip_download_all_links")
+        tips(self.post_filter_checks.values(), "tip_filter_type")
+        tip(self.post_view_button, "tip_preview_selected")
+        tip(self.fast_mode_check, "tip_fast_mode")
+        tip(self.auto_rename_checkbox, "tip_auto_rename")
+        tip(self.post_download_text_check, "tip_download_text")
+        tip(self.post_download_btn, "tip_download_start")
+        tip(self.post_cancel_btn, "tip_cancel")
         self.update_ui_text()
 
     def update_ui_text(self):
@@ -2413,6 +2428,7 @@ class PostDownloaderTab(QWidget):
             set_role(view_button, "icon")
             view_button.setFixedSize(30, 30)
             view_button.clicked.connect(self.create_view_handler(url, checked))
+            tip(view_button, "tip_queue_view")
             layout.addWidget(view_button)
             label = QLabel(url)
             label.setAlignment(
@@ -2423,6 +2439,7 @@ class PostDownloaderTab(QWidget):
             set_role(remove_button, "icon")
             remove_button.setFixedSize(30, 30)
             remove_button.clicked.connect(self.create_remove_handler(url))
+            tip(remove_button, "tip_queue_remove")
             layout.addWidget(remove_button)
             widget.setLayout(layout)
             item.setSizeHint(widget.sizeHint())
@@ -3530,7 +3547,7 @@ class PostDownloaderTab(QWidget):
             check_box.setChecked(False)
             check_box.setEnabled(False)
             label.setText(f"{text}  ({translate('preview_only_label')})")
-            label.setStyleSheet("color: #8A94A6;")
+            label.setStyleSheet(f"color: {color('TEXT_DISABLED')};")
             widget.setToolTip(
                 translate(
                     "preview_only_tooltip_saved"
@@ -3546,7 +3563,7 @@ class PostDownloaderTab(QWidget):
         self.post_file_list.setItemWidget(item, widget)
         widget.check_box = check_box
         widget.label = label
-        widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+        style_row(widget)
 
     def _is_preview_only(self, url):
         return url in (getattr(self, "preview_only_urls", None) or ())
@@ -3704,7 +3721,7 @@ class PostDownloaderTab(QWidget):
         if hasattr(self, "previous_selected_widgets"):
             for w in self.previous_selected_widgets:
                 try:
-                    w.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+                    style_row(w)
                 except RuntimeError:
                     pass
 
@@ -3713,7 +3730,7 @@ class PostDownloaderTab(QWidget):
         for item in selected_items:
             widget = self.post_file_list.itemWidget(item)
             if widget:
-                widget.setStyleSheet("background-color: #4A5B7A; border-radius: 5px;")
+                style_row(widget, selected=True)
                 self.previous_selected_widgets.append(widget)
 
     def expand_logs(self):

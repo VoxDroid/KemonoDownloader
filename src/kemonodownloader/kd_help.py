@@ -20,7 +20,8 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import translate
-from kemonodownloader.kd_theme import INFO, TEXT, TEXT_MUTED, TEXT_SOFT, set_role
+from kemonodownloader.kd_notes import retranslate_notes, tip
+from kemonodownloader.kd_theme import color, set_role
 
 # (title key, body key) for each topic of the guide, in order.
 HELP_SECTIONS = [
@@ -53,11 +54,14 @@ HELP_ICONS = {
 NAV_WIDTH = 250
 MAX_HIGHLIGHTS = 500
 
-_DOCUMENT_STYLE = f"""
-p, li {{ color: {TEXT_SOFT}; }}
-b {{ color: {TEXT}; }}
-h3 {{ color: {TEXT}; margin-top: 16px; margin-bottom: 4px; }}
-a {{ color: {INFO}; text-decoration: none; }}
+
+def _document_style() -> str:
+    """Styles for a topic's document, in the current theme."""
+    return f"""
+p, li {{ color: {color("TEXT_SOFT")}; }}
+b {{ color: {color("TEXT")}; }}
+h3 {{ color: {color("TEXT")}; margin-top: 16px; margin-bottom: 4px; }}
+a {{ color: {color("INFO")}; text-decoration: none; }}
 li {{ margin-bottom: 4px; }}
 """
 
@@ -108,8 +112,8 @@ class HelpTab(QWidget):
         self.search_input = QLineEdit()
         self.search_input.setFixedWidth(NAV_WIDTH)
         self.search_input.setClearButtonEnabled(True)
-        self.search_input.addAction(
-            qta.icon("fa5s.search", color=TEXT_MUTED),
+        self.search_action = self.search_input.addAction(
+            qta.icon("fa5s.search", color=color("TEXT_MUTED")),
             QLineEdit.ActionPosition.LeadingPosition,
         )
         self.search_input.textChanged.connect(self._on_search_changed)
@@ -159,7 +163,7 @@ class HelpTab(QWidget):
         self.manual = QTextBrowser()
         self.manual.setOpenExternalLinks(True)
         self.manual.setFrameShape(QFrame.Shape.NoFrame)
-        self.manual.document().setDefaultStyleSheet(_DOCUMENT_STYLE)
+        self.manual.document().setDefaultStyleSheet(_document_style())
         set_role(self.manual, "plain")
         panel_layout.addWidget(self.manual, stretch=1)
 
@@ -183,6 +187,8 @@ class HelpTab(QWidget):
 
         self.nav_list.currentRowChanged.connect(self._show_section)
         self.nav_list.setCurrentRow(0)
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.search_input, "tip_help_search")
         self.update_ui_text()
         self.setMinimumSize(300, 400)
 
@@ -192,7 +198,7 @@ class HelpTab(QWidget):
             return
         title_key, body_key = HELP_SECTIONS[row]
         self.section_icon.setPixmap(
-            qta.icon(HELP_ICONS[title_key], color=INFO).pixmap(22, 22)
+            qta.icon(HELP_ICONS[title_key], color=color("INFO")).pixmap(22, 22)
         )
         self.section_title.setText(translate(title_key))
         self.section_position.setText(f"{row + 1} / {len(HELP_SECTIONS)}")
@@ -259,7 +265,7 @@ class HelpTab(QWidget):
             document = self.manual.document()
             fmt = QTextCharFormat()
             fmt.setBackground(QColor("#6B5A1E"))
-            fmt.setForeground(QColor(TEXT))
+            fmt.setForeground(QColor(color("TEXT")))
             cursor = document.find(needle)
             first = None
             while not cursor.isNull() and len(selections) < MAX_HIGHLIGHTS:
@@ -278,6 +284,7 @@ class HelpTab(QWidget):
 
     # ---------------------------------------------------------- language --
     def update_ui_text(self):
+        retranslate_notes(self)
         family = self._get_font_family()
         self.title_label.setText(translate("help_title"))
         self.subtitle_label.setText(translate("help_subtitle"))
@@ -289,6 +296,12 @@ class HelpTab(QWidget):
             self.nav_list.item(row).setText(translate(title_key))
 
         self.manual.document().setDefaultFont(QFont(family, 11))
+        # Theme colours, read now so a theme change reaches the guide.
+        self.manual.document().setDefaultStyleSheet(_document_style())
+        if self.search_action is not None:
+            self.search_action.setIcon(
+                qta.icon("fa5s.search", color=color("TEXT_MUTED"))
+            )
         current = self.nav_list.currentRow()
         if current >= 0:
             self._show_section(current)

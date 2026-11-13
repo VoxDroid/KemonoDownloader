@@ -1,9 +1,9 @@
-"""Short guide notes shown at the top of each section of the interface.
+"""Guidance in the interface: section notes and tooltips.
 
 A note is a muted, word-wrapped label that says what a section is for, like
-the explanation under Use Proxy in Settings. It remembers its translation
-key, so ``retranslate_notes`` can update every note under a widget when the
-language changes.
+the explanation under Use Proxy in Settings. A tooltip explains a single
+control. Both remember their translation key, so ``retranslate_notes`` can
+update every note and tooltip under a widget when the language changes.
 """
 
 from __future__ import annotations
@@ -24,6 +24,7 @@ from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_theme import set_role
 
 NOTE_KEY_PROPERTY = "kdNoteKey"
+TIP_KEY_PROPERTY = "kdTipKey"
 
 
 class NoteLabel(QLabel):
@@ -85,9 +86,25 @@ def with_note(layout: QLayout, key: str) -> QVBoxLayout:
     return column
 
 
+def tip(widget: QWidget, key: str) -> QWidget:
+    """Give *widget* the tooltip translated from *key*."""
+    widget.setProperty(TIP_KEY_PROPERTY, key)
+    widget.setToolTip(translate(key))
+    return widget
+
+
+def tips(widgets, key: str) -> None:
+    """Give each of *widgets* the same tooltip."""
+    for widget in widgets:
+        tip(widget, key)
+
+
 def retranslate_notes(root: QWidget) -> None:
-    """Show every note under *root* in the current language."""
-    for note in root.findChildren(QLabel):
-        key = note.property(NOTE_KEY_PROPERTY)
-        if key:
-            note.setText(translate(key))
+    """Show every note and tooltip under *root* in the current language."""
+    for widget in [root, *root.findChildren(QWidget)]:
+        key = widget.property(NOTE_KEY_PROPERTY)
+        if key and isinstance(widget, QLabel):
+            widget.setText(translate(key))
+        tip_key = widget.property(TIP_KEY_PROPERTY)
+        if tip_key:
+            widget.setToolTip(translate(tip_key))

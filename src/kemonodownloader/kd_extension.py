@@ -17,7 +17,8 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import translate
-from kemonodownloader.kd_theme import INFO, set_role
+from kemonodownloader.kd_notes import retranslate_notes, tip, tips
+from kemonodownloader.kd_theme import color, set_role
 
 RELEASES_URL = "https://github.com/VoxDroid/KemonoDownloader/releases"
 EXTENSION_FOLDER_URL = (
@@ -108,6 +109,10 @@ class ExtensionTab(QWidget):
         self._copied_timer.setInterval(COPIED_FLASH_MS)
         self._copied_timer.timeout.connect(self._reset_copy_buttons)
 
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.releases_button, "tip_open_releases")
+        tip(self.folder_button, "tip_open_extension_folder")
+        tips(self.copy_buttons, "tip_copy_command")
         self.update_ui_text()
         self.setMinimumSize(300, 400)
 
@@ -117,7 +122,7 @@ class ExtensionTab(QWidget):
         layout.setContentsMargins(18, 16, 18, 16)
         layout.setSpacing(14)
         icon = QLabel()
-        icon.setPixmap(qta.icon("fa5s.puzzle-piece", color=INFO).pixmap(40, 40))
+        self.theme_icons = [(icon, "fa5s.puzzle-piece", 40)]
         icon.setAlignment(Qt.AlignmentFlag.AlignTop)
         layout.addWidget(icon)
 
@@ -158,7 +163,7 @@ class ExtensionTab(QWidget):
             layout.setContentsMargins(14, 12, 14, 12)
             layout.setSpacing(12)
             icon = QLabel()
-            icon.setPixmap(qta.icon(icon_name, color=INFO).pixmap(24, 24))
+            self.theme_icons.append((icon, icon_name, 24))
             icon.setAlignment(Qt.AlignmentFlag.AlignTop)
             layout.addWidget(icon)
             column = QVBoxLayout()
@@ -253,6 +258,10 @@ class ExtensionTab(QWidget):
 
     # ---------------------------------------------------------- language --
     def update_ui_text(self):
+        retranslate_notes(self)
+        # Icons in the theme's accent colour, redrawn when the theme changes.
+        for label, icon_name, size in self.theme_icons:
+            label.setPixmap(qta.icon(icon_name, color=color("INFO")).pixmap(size, size))
         self.title_label.setText(translate("extension_title"))
         self.subtitle_label.setText(translate("ext_subtitle"))
         self.releases_button.setText(translate("ext_open_releases"))

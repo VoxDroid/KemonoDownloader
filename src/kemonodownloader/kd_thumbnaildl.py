@@ -55,7 +55,7 @@ from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_logs import log_level_shown, message_level
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import get_session
-from kemonodownloader.kd_notes import add_note, retranslate_notes, section_note
+from kemonodownloader.kd_notes import add_note, retranslate_notes, section_note, tip
 from kemonodownloader.kd_theme import set_role
 from kemonodownloader.post_downloader import MediaPreviewModal
 
@@ -857,7 +857,6 @@ class ThumbnailDownloaderTab(QWidget):
         self.url_input.returnPressed.connect(self.add_url_to_queue)
 
         self.add_url_button = QPushButton(qta.icon("fa5s.plus", color="white"), "")
-        self.add_url_button.setToolTip(translate("added_to_queue"))
         self.add_url_button.clicked.connect(self.add_url_to_queue)
 
         self.import_file_button = QPushButton(
@@ -1071,6 +1070,21 @@ class ThumbnailDownloaderTab(QWidget):
         left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         main_layout.addWidget(left_scroll, stretch=2)
         main_layout.addWidget(right_panel, stretch=3)
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.mode_combo, "tip_thumb_mode")
+        tip(self.url_input, "tip_thumb_url")
+        tip(self.add_url_button, "tip_add_to_queue")
+        tip(self.remove_queue_btn, "tip_remove_selected")
+        tip(self.clear_queue_btn, "tip_clear_queue")
+        tip(self.detect_button, "tip_detect_thumbnails")
+        tip(self.threads_spin, "tip_thumb_threads")
+        tip(self.skip_existing_check, "tip_skip_existing")
+        tip(self.auto_rename_check, "tip_auto_rename")
+        tip(self.download_text_check, "tip_download_text")
+        tip(self.download_button, "tip_download_start")
+        tip(self.cancel_button, "tip_cancel")
+        tip(self.filter_input, "tip_filter_thumbnails")
+        tip(self.check_all_cb, "tip_check_all_page")
 
     def refresh_ui(self):
         """Update translation texts across controls."""

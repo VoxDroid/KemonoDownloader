@@ -96,9 +96,9 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
-from kemonodownloader.kd_notes import retranslate_notes, with_note
+from kemonodownloader.kd_notes import retranslate_notes, tip, tips, with_note
 from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
-from kemonodownloader.kd_theme import set_progress_state, set_role
+from kemonodownloader.kd_theme import set_progress_state, set_role, style_row
 
 # get_domain_config is imported from domain_config; re-exported for
 # any callers that import it directly from this module.
@@ -2605,6 +2605,26 @@ class CreatorDownloaderTab(QWidget):
         layout.addWidget(right_widget, stretch=1)
 
         # Initial text update
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.creator_url_input, "tip_creator_url")
+        tip(self.creator_add_to_queue_btn, "tip_add_to_queue")
+        tip(self.creator_multi_url_input, "tip_multi_url")
+        tip(self.creator_multi_url_add_btn, "tip_add_all_to_queue")
+        tip(self.creator_main_check, "tip_main_file")
+        tip(self.creator_attachments_check, "tip_attachments")
+        tip(self.creator_content_check, "tip_content_images")
+        tip(self.creator_fast_mode_check, "tip_fast_mode")
+        tip(self.creator_auto_rename_check, "tip_auto_rename")
+        tip(self.creator_download_text_check, "tip_download_text")
+        tips(self.creator_ext_checks.values(), "tip_file_extension")
+        tip(self.creator_search_input, "tip_search_posts")
+        tip(self.creator_check_all, "tip_check_all_page")
+        tip(self.creator_check_all_all, "tip_check_all_all")
+        tip(self.prev_page_btn, "tip_prev_page")
+        tip(self.next_page_btn, "tip_next_page")
+        tip(self.creator_view_button, "tip_preview_post")
+        tip(self.creator_download_btn, "tip_download_start")
+        tip(self.creator_cancel_btn, "tip_cancel")
         self.update_ui_text()
 
     def update_ui_text(self):
@@ -2978,6 +2998,7 @@ class CreatorDownloaderTab(QWidget):
             set_role(view_button, "icon")
             view_button.setFixedSize(30, 30)
             view_button.clicked.connect(self.create_view_handler(url, checked))
+            tip(view_button, "tip_queue_view")
             layout.addWidget(view_button)
 
             label = QLabel(url)
@@ -2990,6 +3011,7 @@ class CreatorDownloaderTab(QWidget):
             set_role(remove_button, "icon")
             remove_button.setFixedSize(30, 30)
             remove_button.clicked.connect(self.create_remove_handler(url))
+            tip(remove_button, "tip_queue_remove")
             layout.addWidget(remove_button)
 
             widget.setLayout(layout)
@@ -4560,7 +4582,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_post_list.setItemWidget(item, widget)
         widget.check_box = check_box
         widget.label = label
-        widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+        style_row(widget)
 
         # Cache the widget for O(1) lookups
         self.post_widget_cache[text] = (item, widget)
@@ -4705,7 +4727,7 @@ class CreatorDownloaderTab(QWidget):
         if hasattr(self, "previous_selected_widgets"):
             for w in self.previous_selected_widgets:
                 try:
-                    w.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+                    style_row(w)
                 except RuntimeError:
                     pass
 
@@ -4714,7 +4736,7 @@ class CreatorDownloaderTab(QWidget):
         for item in selected_items:
             widget = self.creator_post_list.itemWidget(item)
             if widget:
-                widget.setStyleSheet("background-color: #4A5B7A; border-radius: 5px;")
+                style_row(widget, selected=True)
                 self.previous_selected_widgets.append(widget)
 
     def append_log_to_console(self, message, level="INFO"):

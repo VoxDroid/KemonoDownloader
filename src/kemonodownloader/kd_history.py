@@ -57,7 +57,7 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
-from kemonodownloader.kd_notes import add_note, retranslate_notes
+from kemonodownloader.kd_notes import add_note, retranslate_notes, tip, tips
 from kemonodownloader.kd_theme import set_role, set_tone
 
 SORT_ROLE = Qt.ItemDataRole.UserRole + 1
@@ -448,6 +448,23 @@ class HistoryTab(QWidget):
         self._status_clear.setInterval(5000)
 
         self.setup_ui()
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.history_search, "tip_history_search")
+        tip(self.kind_filter, "tip_history_kind")
+        tip(self.record_check, "tip_history_record")
+        tip(self.open_folder_btn, "tip_history_open_folder")
+        tips((self.copy_history_btn, self.copy_favorite_btn), "tip_history_copy")
+        tips((self.queue_history_btn, self.queue_favorite_btn), "tip_history_queue")
+        tip(self.favorite_history_btn, "tip_history_favorite")
+        tip(self.export_history_btn, "tip_history_export")
+        tips((self.remove_history_btn, self.remove_favorite_btn), "tip_history_remove")
+        tip(self.clear_history_btn, "tip_history_clear")
+        tip(self.favorite_input, "tip_favorite_input")
+        tip(self.favorite_add_btn, "tip_favorite_save")
+        tip(self.favorites_search, "tip_favorites_search")
+        tip(self.browser_favorite_btn, "tip_favorites_open")
+        tip(self.import_favorites_btn, "tip_favorites_import")
+        tip(self.export_favorites_btn, "tip_favorites_export")
         self.update_ui_text()
 
     # ------------------------------------------------------------------

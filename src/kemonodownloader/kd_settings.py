@@ -25,8 +25,14 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import language_manager, translate
-from kemonodownloader.kd_notes import retranslate_notes, with_note
-from kemonodownloader.kd_theme import set_role, set_tone
+from kemonodownloader.kd_notes import retranslate_notes, tip, tips, with_note
+from kemonodownloader.kd_theme import (
+    DEFAULT_THEME,
+    THEMES,
+    set_role,
+    set_tone,
+    theme_name,
+)
 
 # The SOCKS port configured for the Tor process this app starts (and Tor's
 # default). socks5h makes Tor resolve host names too, so DNS doesn't leak.
@@ -86,6 +92,7 @@ class SettingsTab(QWidget):
     settings_applied = pyqtSignal()
     language_changed = pyqtSignal()
     font_changed = pyqtSignal(str)
+    theme_changed = pyqtSignal(str)
     download_started = pyqtSignal()
     download_finished = pyqtSignal()
 
@@ -115,6 +122,7 @@ class SettingsTab(QWidget):
             "creator_folder_strategy": "per_post",  # per_post|single_folder|by_file_type
             # Font setting
             "font": "JetBrains Mono",  # "JetBrains Mono", "Poppins"
+            "theme": DEFAULT_THEME,  # a key of kd_theme.THEMES
         }
         self.settings = self.load_settings()
         self.temp_settings = self.settings.copy()
@@ -221,6 +229,9 @@ class SettingsTab(QWidget):
         settings_dict["font"] = self.qsettings.value(
             "font", self.default_settings.get("font", "JetBrains Mono"), type=str
         )
+        settings_dict["theme"] = theme_name(
+            self.qsettings.value("theme", DEFAULT_THEME, type=str)
+        )
         return settings_dict
 
     def save_settings(self):
@@ -267,6 +278,7 @@ class SettingsTab(QWidget):
             "font",
             self.settings.get("font", "JetBrains Mono"),
         )
+        self.qsettings.setValue("theme", self.settings.get("theme", DEFAULT_THEME))
         self.qsettings.sync()
 
     def setup_ui(self):
@@ -583,6 +595,25 @@ class SettingsTab(QWidget):
         self.font_group.setLayout(with_note(font_layout, "note_font_settings"))
         layout.addWidget(self.font_group)
 
+        # Appearance Group: the colour theme. Applied and saved straight away,
+        # so each theme can be tried on the spot.
+        self.appearance_group = QGroupBox()
+        appearance_layout = QGridLayout()
+        self.theme_label = QLabel()
+        appearance_layout.addWidget(self.theme_label, 0, 0)
+        self.theme_combo = QComboBox()
+        for name in THEMES:
+            self.theme_combo.addItem(translate(f"theme_{name}"), name)
+        self.theme_combo.setCurrentIndex(
+            max(0, self.theme_combo.findData(self.temp_settings.get("theme")))
+        )
+        self.theme_combo.currentIndexChanged.connect(self.update_theme)
+        appearance_layout.addWidget(self.theme_combo, 0, 1)
+        self.appearance_group.setLayout(
+            with_note(appearance_layout, "note_appearance_settings")
+        )
+        layout.addWidget(self.appearance_group)
+
         # Proxy Settings Group. The switch and a short explanation are always
         # visible; the options below them only while the switch is on.
         self.network_group = QGroupBox()
@@ -790,6 +821,44 @@ class SettingsTab(QWidget):
         main_layout.addWidget(self.scroll_area)
         self.setLayout(main_layout)
 
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.folder_name_input, "tip_folder_name")
+        tip(self.directory_input, "tip_save_directory")
+        tip(self.browse_button, "tip_browse_directory")
+        tip(self.open_directory_button, "tip_open_directory")
+        tips(
+            (self.download_slider, self.download_spinbox), "tip_simultaneous_downloads"
+        )
+        tip(self.creator_posts_max_attempts_spinbox, "tip_creator_posts_attempts")
+        tip(self.post_data_max_retries_spinbox, "tip_post_data_retries")
+        tip(self.file_download_max_retries_spinbox, "tip_file_retries")
+        tip(self.api_request_max_retries_spinbox, "tip_api_retries")
+        tip(self.creator_filename_combo, "tip_filename_template")
+        tip(self.creator_folder_strategy_combo, "tip_folder_strategy")
+        tip(self.auto_update_checkbox, "tip_auto_update")
+        for level, key in (
+            ("DEBUG", "tip_log_debug"),
+            ("INFO", "tip_log_info"),
+            ("WARNING", "tip_log_warning"),
+            ("ERROR", "tip_log_error"),
+        ):
+            tip(self.log_level_checkboxes[level], key)
+        tip(self.language_combo, "tip_language")
+        tip(self.font_combo, "tip_font")
+        tip(self.theme_combo, "tip_theme")
+        tip(self.use_proxy_checkbox, "tip_use_proxy")
+        tip(self.proxy_type_combo, "tip_proxy_type")
+        tip(self.custom_proxy_input, "tip_custom_proxy")
+        tip(self.test_custom_proxy_button, "tip_test_proxy")
+        tip(self.tor_path_input, "tip_tor_path")
+        tip(self.browse_tor_button, "tip_browse_tor")
+        tip(self.download_tor_button, "tip_download_tor")
+        tip(self.start_tor_button, "tip_start_tor")
+        tip(self.stop_tor_button, "tip_stop_tor")
+        tip(self.test_tor_button, "tip_test_tor")
+        tip(self.help_tor_button, "tip_tor_help")
+        tip(self.apply_button, "tip_apply_changes")
+        tip(self.reset_button, "tip_reset_defaults")
         self.update_ui_text()
 
         # Initialize Tor button states
@@ -1334,6 +1403,11 @@ class SettingsTab(QWidget):
                 break
         self.font_combo.blockSignals(False)
 
+        # The theme switches (and saves) on the spot, like choosing it does.
+        self.theme_combo.setCurrentIndex(
+            max(0, self.theme_combo.findData(self.temp_settings.get("theme")))
+        )
+
         QMessageBox.information(
             self, translate("reset_to_defaults"), translate("settings_reset_message")
         )
@@ -1457,6 +1531,11 @@ class SettingsTab(QWidget):
 
         self.font_group.setTitle(translate("font_settings"))
         self.font_label.setText(translate("font"))
+        self.appearance_group.setTitle(translate("appearance_settings"))
+        self.theme_label.setText(translate("theme_label"))
+        for index in range(self.theme_combo.count()):
+            name = self.theme_combo.itemData(index)
+            self.theme_combo.setItemText(index, translate(f"theme_{name}"))
 
         self.network_group.setTitle(translate("proxy_settings"))
         self.proxy_intro_label.setText(translate("proxy_intro"))
@@ -1533,6 +1612,18 @@ class SettingsTab(QWidget):
 
     def get_font(self):
         return self.settings.get("font", "JetBrains Mono")
+
+    def get_theme(self):
+        """The colour theme (a key of kd_theme.THEMES)."""
+        return theme_name(self.settings.get("theme"))
+
+    def update_theme(self, index):
+        """Switch to the chosen theme and save it straight away."""
+        theme = theme_name(self.theme_combo.itemData(index))
+        self.temp_settings["theme"] = theme
+        self.settings["theme"] = theme
+        self.save_settings()
+        self.theme_changed.emit(theme)
 
     def get_proxy_type_index(self, proxy_type):
         type_map = {"custom": 0, "tor": 1}

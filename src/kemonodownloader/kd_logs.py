@@ -30,6 +30,7 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import language_manager, translate
+from kemonodownloader.kd_notes import tip
 from kemonodownloader.kd_theme import set_role, set_tone
 
 # Bright enough to read on the consoles' navy backgrounds.
@@ -234,6 +235,11 @@ class LogsWindowBase(QDialog):
             lambda: self.find_in_logs(backward=True),
         )
 
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.search_input, "tip_logs_search")
+        tip(self.copy_logs_btn, "tip_copy_logs")
+        tip(self.download_logs_btn, "tip_save_logs")
+        tip(self.clear_logs_btn, "tip_clear_logs")
         self.update_ui_text()
 
     def _text_button(self, icon_name: str, role: Optional[str] = None) -> QPushButton:

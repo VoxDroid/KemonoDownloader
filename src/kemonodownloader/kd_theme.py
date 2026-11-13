@@ -30,66 +30,234 @@ from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import QApplication, QWidget
 
 # ---------------------------------------------------------------- palette --
-BG = "#1A2A44"
-SURFACE = "#2A3B5A"
-SURFACE_ALT = "#2F4163"
-CONSOLE = "#15233C"
-BORDER = "#3A4B6A"
-BORDER_STRONG = "#4A5B7A"
-
-CONTROL = "#4A5B7A"
-CONTROL_HOVER = "#5A6E94"
-CONTROL_PRESSED = "#3A4B6A"
-ACCENT = "#4A6B9A"
-ACCENT_HOVER = "#5A7BA9"
-ACCENT_PRESSED = "#3A5B7A"
-DANGER = "#A94A4A"
-DANGER_HOVER = "#BC5959"
-DANGER_PRESSED = "#8A3A3A"
-FOCUS = "#7F9FD9"
-DISABLED_BG = "#34435F"
-
-TEXT = "#FFFFFF"
-TEXT_SOFT = "#D0D0D0"
-TEXT_MUTED = "#A9B6CC"
-TEXT_DISABLED = "#8A93A6"
-INFO = "#A0C0FF"
-SUCCESS = "#6BCF7F"
-WARNING = "#FFD93D"
-ERROR = "#FF6B6B"
-
-PROGRESS = ACCENT_HOVER
-PROGRESS_PAUSED = "#D4A017"
-PROGRESS_DONE = "#4CAF50"
-SELECTION = ACCENT
-NOTE_BG = "#22334F"
-
-RADIUS = 6
-
-# Glyphs drawn into the style sheet (check marks and arrows).
-_GLYPHS = {
-    "check": ("fa5s.check", TEXT, 12),
-    "arrow-down": ("fa5s.chevron-down", TEXT_MUTED, 10),
-    "arrow-up": ("fa5s.chevron-up", TEXT_MUTED, 10),
-    "arrow-down-disabled": ("fa5s.chevron-down", TEXT_DISABLED, 10),
-    "arrow-up-disabled": ("fa5s.chevron-up", TEXT_DISABLED, 10),
+# Colours that stay the same in every theme: log and status colours, and
+# the progress states, chosen to read well on any of the dark backgrounds.
+_SHARED = {
+    "SUCCESS": "#6BCF7F",
+    "WARNING": "#FFD93D",
+    "ERROR": "#FF6B6B",
+    "PROGRESS_PAUSED": "#D4A017",
+    "PROGRESS_DONE": "#4CAF50",
 }
 
 
-def _render_glyphs(directory: str) -> Dict[str, str]:
+def _theme(**colors: str) -> Dict[str, str]:
+    palette = dict(_SHARED)
+    palette.update(colors)
+    palette.setdefault("PROGRESS", palette["ACCENT_HOVER"])
+    palette.setdefault("SELECTION", palette["ACCENT"])
+    return palette
+
+
+# Every theme is dark: icons across the app are drawn in white, which a light
+# background would hide. Each theme names the same colour roles.
+THEMES: Dict[str, Dict[str, str]] = {
+    "midnight": _theme(
+        BG="#1A2A44",
+        SURFACE="#2A3B5A",
+        SURFACE_ALT="#2F4163",
+        CONSOLE="#15233C",
+        BORDER="#3A4B6A",
+        BORDER_STRONG="#4A5B7A",
+        CONTROL="#4A5B7A",
+        CONTROL_HOVER="#5A6E94",
+        CONTROL_PRESSED="#3A4B6A",
+        ACCENT="#4A6B9A",
+        ACCENT_HOVER="#5A7BA9",
+        ACCENT_PRESSED="#3A5B7A",
+        DANGER="#A94A4A",
+        DANGER_HOVER="#BC5959",
+        DANGER_PRESSED="#8A3A3A",
+        FOCUS="#7F9FD9",
+        DISABLED_BG="#34435F",
+        NOTE_BG="#22334F",
+        TEXT="#FFFFFF",
+        TEXT_SOFT="#D0D0D0",
+        TEXT_MUTED="#A9B6CC",
+        TEXT_DISABLED="#8A93A6",
+        INFO="#A0C0FF",
+    ),
+    "graphite": _theme(
+        BG="#1E1F22",
+        SURFACE="#2B2D31",
+        SURFACE_ALT="#313338",
+        CONSOLE="#18191C",
+        BORDER="#3A3C42",
+        BORDER_STRONG="#4A4D55",
+        CONTROL="#45484F",
+        CONTROL_HOVER="#555861",
+        CONTROL_PRESSED="#3A3C42",
+        ACCENT="#4863B8",
+        ACCENT_HOVER="#5A76C9",
+        ACCENT_PRESSED="#3D55A0",
+        DANGER="#B5474B",
+        DANGER_HOVER="#C75A5E",
+        DANGER_PRESSED="#943A3D",
+        FOCUS="#8AA4F0",
+        DISABLED_BG="#323439",
+        NOTE_BG="#26282C",
+        TEXT="#F2F3F5",
+        TEXT_SOFT="#D4D6DA",
+        TEXT_MUTED="#A3A6AD",
+        TEXT_DISABLED="#7C7F87",
+        INFO="#9DB8FF",
+    ),
+    "plum": _theme(
+        BG="#221A2E",
+        SURFACE="#2F2540",
+        SURFACE_ALT="#362B4A",
+        CONSOLE="#1B1525",
+        BORDER="#43365A",
+        BORDER_STRONG="#554670",
+        CONTROL="#554670",
+        CONTROL_HOVER="#66578A",
+        CONTROL_PRESSED="#43365A",
+        ACCENT="#7E52BA",
+        ACCENT_HOVER="#9066CC",
+        ACCENT_PRESSED="#6A43A0",
+        DANGER="#B0455C",
+        DANGER_HOVER="#C2586F",
+        DANGER_PRESSED="#91384B",
+        FOCUS="#B696F0",
+        DISABLED_BG="#382E48",
+        NOTE_BG="#2A2139",
+        TEXT="#FFFFFF",
+        TEXT_SOFT="#DCD3E8",
+        TEXT_MUTED="#B3A6C7",
+        TEXT_DISABLED="#8B7FA0",
+        INFO="#C9A8FF",
+    ),
+    "forest": _theme(
+        BG="#17241F",
+        SURFACE="#20332B",
+        SURFACE_ALT="#263C33",
+        CONSOLE="#121D19",
+        BORDER="#2F4A3F",
+        BORDER_STRONG="#3D5E50",
+        CONTROL="#3D5E50",
+        CONTROL_HOVER="#4B7363",
+        CONTROL_PRESSED="#2F4A3F",
+        ACCENT="#357D5D",
+        ACCENT_HOVER="#43926F",
+        ACCENT_PRESSED="#2B674C",
+        DANGER="#A94848",
+        DANGER_HOVER="#BC5A5A",
+        DANGER_PRESSED="#8A3A3A",
+        FOCUS="#7FD1AA",
+        DISABLED_BG="#283A32",
+        NOTE_BG="#1C2D26",
+        TEXT="#FFFFFF",
+        TEXT_SOFT="#D3E3DA",
+        TEXT_MUTED="#A3BCB0",
+        TEXT_DISABLED="#7D968A",
+        INFO="#9FE0C0",
+    ),
+    "ember": _theme(
+        BG="#241B17",
+        SURFACE="#33261F",
+        SURFACE_ALT="#3B2C24",
+        CONSOLE="#1C1512",
+        BORDER="#4A372D",
+        BORDER_STRONG="#5E463A",
+        CONTROL="#5E463A",
+        CONTROL_HOVER="#725648",
+        CONTROL_PRESSED="#4A372D",
+        ACCENT="#A85A2A",
+        ACCENT_HOVER="#BC6C3A",
+        ACCENT_PRESSED="#8E4B22",
+        DANGER="#A9434F",
+        DANGER_HOVER="#BC5662",
+        DANGER_PRESSED="#8A3641",
+        FOCUS="#F0B07A",
+        DISABLED_BG="#3A2D26",
+        NOTE_BG="#2C211C",
+        TEXT="#FFFFFF",
+        TEXT_SOFT="#EADBD0",
+        TEXT_MUTED="#C2AA9A",
+        TEXT_DISABLED="#957F71",
+        INFO="#FFC48F",
+    ),
+}
+DEFAULT_THEME = "midnight"
+_current_theme = DEFAULT_THEME
+
+
+def current_theme() -> str:
+    """Name of the theme on show."""
+    return _current_theme
+
+
+def color(role: str) -> str:
+    """A colour of the current theme, such as ``color("SURFACE")``."""
+    return THEMES[_current_theme][role]
+
+
+def _palette(theme: Optional[str]) -> Dict[str, str]:
+    return THEMES.get(theme or _current_theme, THEMES[DEFAULT_THEME])
+
+
+# The default theme's colours under their own names, for code that only needs
+# a colour that is the same in every theme (or the default's).
+globals().update(THEMES[DEFAULT_THEME])
+BG: str
+SURFACE: str
+SURFACE_ALT: str
+CONSOLE: str
+BORDER: str
+BORDER_STRONG: str
+CONTROL: str
+CONTROL_HOVER: str
+CONTROL_PRESSED: str
+ACCENT: str
+ACCENT_HOVER: str
+ACCENT_PRESSED: str
+DANGER: str
+DANGER_HOVER: str
+DANGER_PRESSED: str
+FOCUS: str
+DISABLED_BG: str
+NOTE_BG: str
+TEXT: str
+TEXT_SOFT: str
+TEXT_MUTED: str
+TEXT_DISABLED: str
+INFO: str
+SUCCESS: str
+WARNING: str
+ERROR: str
+PROGRESS: str
+PROGRESS_PAUSED: str
+PROGRESS_DONE: str
+SELECTION: str
+
+RADIUS = 6
+
+# Glyphs drawn into the style sheet (check marks and arrows): icon, colour
+# role, size.
+_GLYPHS = {
+    "check": ("fa5s.check", "TEXT", 12),
+    "arrow-down": ("fa5s.chevron-down", "TEXT_MUTED", 10),
+    "arrow-up": ("fa5s.chevron-up", "TEXT_MUTED", 10),
+    "arrow-down-disabled": ("fa5s.chevron-down", "TEXT_DISABLED", 10),
+    "arrow-up-disabled": ("fa5s.chevron-up", "TEXT_DISABLED", 10),
+}
+
+
+def _render_glyphs(directory: str, theme: Optional[str] = None) -> Dict[str, str]:
     """Draw the theme's glyphs to PNG files and return their QSS paths.
 
     Style sheets can only show images from files. Returns an empty mapping if
     the icons cannot be drawn, in which case Qt's defaults show instead.
     """
+    palette = _palette(theme)
     try:
         import qtawesome as qta
 
         os.makedirs(directory, exist_ok=True)
         paths = {}
-        for name, (icon, color, size) in _GLYPHS.items():
+        for name, (icon, role, size) in _GLYPHS.items():
             path = os.path.join(directory, f"{name}.png")
-            pixmap = qta.icon(icon, color=color).pixmap(size * 2, size * 2)
+            pixmap = qta.icon(icon, color=palette[role]).pixmap(size * 2, size * 2)
             pixmap.setDevicePixelRatio(2.0)
             if not pixmap.save(path, "PNG"):
                 return {}
@@ -99,9 +267,49 @@ def _render_glyphs(directory: str) -> Dict[str, str]:
         return {}
 
 
-def stylesheet(glyphs: Optional[Dict[str, str]] = None) -> str:
-    """Return the app-wide style sheet."""
+def stylesheet(
+    glyphs: Optional[Dict[str, str]] = None, theme: Optional[str] = None
+) -> str:
+    """Return the app-wide style sheet, in *theme* (the current one by default)."""
     glyphs = glyphs or {}
+    p = _palette(theme)
+    BG, SURFACE, SURFACE_ALT, CONSOLE = (
+        p["BG"],
+        p["SURFACE"],
+        p["SURFACE_ALT"],
+        p["CONSOLE"],
+    )
+    BORDER, BORDER_STRONG = p["BORDER"], p["BORDER_STRONG"]
+    CONTROL, CONTROL_HOVER, CONTROL_PRESSED = (
+        p["CONTROL"],
+        p["CONTROL_HOVER"],
+        p["CONTROL_PRESSED"],
+    )
+    ACCENT, ACCENT_HOVER, ACCENT_PRESSED = (
+        p["ACCENT"],
+        p["ACCENT_HOVER"],
+        p["ACCENT_PRESSED"],
+    )
+    DANGER, DANGER_HOVER, DANGER_PRESSED = (
+        p["DANGER"],
+        p["DANGER_HOVER"],
+        p["DANGER_PRESSED"],
+    )
+    FOCUS, DISABLED_BG, NOTE_BG = p["FOCUS"], p["DISABLED_BG"], p["NOTE_BG"]
+    TEXT, TEXT_SOFT, TEXT_MUTED, TEXT_DISABLED, INFO = (
+        p["TEXT"],
+        p["TEXT_SOFT"],
+        p["TEXT_MUTED"],
+        p["TEXT_DISABLED"],
+        p["INFO"],
+    )
+    SUCCESS, WARNING, ERROR = p["SUCCESS"], p["WARNING"], p["ERROR"]
+    PROGRESS, PROGRESS_PAUSED, PROGRESS_DONE = (
+        p["PROGRESS"],
+        p["PROGRESS_PAUSED"],
+        p["PROGRESS_DONE"],
+    )
+    SELECTION = p["SELECTION"]
 
     def image(name: str) -> str:
         path = glyphs.get(name)
@@ -289,26 +497,94 @@ QMessageBox QPushButton {{ min-width: 80px; }}
 """
 
 
-_applied_to: Optional[int] = None
+_applied_to: Optional[tuple] = None
 
 
-def apply_theme(app: QApplication) -> None:
-    """Load the theme into *app* (once per application object)."""
-    global _applied_to
-    if _applied_to == id(app):
+def theme_name(theme: Optional[str]) -> str:
+    """*theme* if it exists, otherwise the default theme."""
+    return theme if theme in THEMES else DEFAULT_THEME
+
+
+def apply_theme(app: QApplication, theme: Optional[str] = None) -> None:
+    """Load *theme* (the current theme by default) into *app*.
+
+    Calling it again with the same app and theme does nothing; a different
+    theme restyles every widget at once.
+    """
+    global _applied_to, _current_theme
+    name = _current_theme if theme is None else theme_name(theme)
+    if _applied_to == (id(app), name):
         return
     set_sheet = getattr(app, "setStyleSheet", None)
     if not callable(set_sheet):
         return  # not a real application object; Qt's default look stays
-    glyph_dir = os.path.join(tempfile.gettempdir(), "kemonodownloader-theme")
-    set_sheet(stylesheet(_render_glyphs(glyph_dir)))
+    _current_theme = name
+    glyph_dir = os.path.join(tempfile.gettempdir(), "kemonodownloader-theme", name)
+    set_sheet(stylesheet(_render_glyphs(glyph_dir, name), name))
     if isinstance(app, QApplication):
-        # Links in rich text follow the palette, not the style sheet.
-        palette = app.palette()
-        palette.setColor(QPalette.ColorRole.Link, QColor(INFO))
-        palette.setColor(QPalette.ColorRole.LinkVisited, QColor(INFO))
-        app.setPalette(palette)
-    _applied_to = id(app)
+        app.setPalette(qt_palette(app.palette(), name))
+    _applied_to = (id(app), name)
+
+
+def use_theme(theme: Optional[str]) -> str:
+    """Make *theme* the current theme for ``color()`` without restyling an
+    application. Returns the theme's name."""
+    global _current_theme
+    _current_theme = theme_name(theme)
+    return _current_theme
+
+
+def is_themed(app: object) -> bool:
+    """Whether ``apply_theme`` has styled *app*."""
+    return _applied_to is not None and _applied_to[0] == id(app)
+
+
+def qt_palette(base: QPalette, theme: Optional[str] = None) -> QPalette:
+    """*base* with the theme's colours, for what the style sheet doesn't
+    reach: rich-text links, and widgets drawn from the palette."""
+    p = _palette(theme)
+    palette = QPalette(base)
+    roles = {
+        QPalette.ColorRole.Window: p["BG"],
+        QPalette.ColorRole.WindowText: p["TEXT"],
+        QPalette.ColorRole.Base: p["SURFACE"],
+        QPalette.ColorRole.AlternateBase: p["SURFACE_ALT"],
+        QPalette.ColorRole.Text: p["TEXT"],
+        QPalette.ColorRole.Button: p["CONTROL"],
+        QPalette.ColorRole.ButtonText: p["TEXT"],
+        QPalette.ColorRole.Highlight: p["SELECTION"],
+        QPalette.ColorRole.HighlightedText: p["TEXT"],
+        QPalette.ColorRole.ToolTipBase: p["SURFACE"],
+        QPalette.ColorRole.ToolTipText: p["TEXT"],
+        QPalette.ColorRole.PlaceholderText: p["TEXT_DISABLED"],
+        QPalette.ColorRole.Link: p["INFO"],
+        QPalette.ColorRole.LinkVisited: p["INFO"],
+    }
+    for role, value in roles.items():
+        palette.setColor(role, QColor(value))
+    return palette
+
+
+ROW_PROPERTY = "kdRowState"
+
+
+def style_row(widget: QWidget, selected: bool = False) -> None:
+    """Colour a custom list row (the Post and Creator file and post rows).
+
+    The row's state is remembered, so ``restyle_rows`` can repaint it in a
+    new theme.
+    """
+    role = "CONTROL" if selected else "SURFACE"
+    widget.setStyleSheet(f"background-color: {color(role)}; border-radius: 5px;")
+    widget.setProperty(ROW_PROPERTY, "selected" if selected else "normal")
+
+
+def restyle_rows(root: QWidget) -> None:
+    """Repaint every custom list row under *root* in the current theme."""
+    for widget in root.findChildren(QWidget):
+        state = widget.property(ROW_PROPERTY)
+        if state in ("normal", "selected"):
+            style_row(widget, state == "selected")
 
 
 def repolish(widget: QWidget) -> None:
