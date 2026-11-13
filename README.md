@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.14.0-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.15.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -179,6 +179,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Fast Mode** | One-click toggle that selects all file categories, locks options, and enables batch URL input for rapid bulk downloading. In Creator Downloader, auto-detects and downloads all posts for each queued creator sequentially. |
 | **Download UI Lock** | All controls are disabled during active downloads (except Cancel and Expand Logs) to prevent accidental changes. |
 | **Download History** | Every finished post, creator and thumbnail download is recorded with files, posts, size, duration and status. Open its folder (with recovery options if the folder was moved or deleted), copy its links, queue it again, or export the list as CSV. Recording can be paused and the history cleared at any time. |
+| **Preview-Only Detection** | Files the site only keeps preview images of are recognised before downloading. A warning window explains them and they are skipped (or their previews saved, if you turn that on) instead of failing with 404 errors. |
 | **Favorites** | Bookmark posts and creators with the star button in the Post or Creator tab, from the history, or by pasting a link. Edit titles and notes, see when each was last downloaded, queue them in one click, and import or export them as a .txt list. |
 
 ### $\color{#90a4ae}{\sf{\text{Performance and Reliability}}}$
@@ -191,6 +192,8 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Connection Pooling** | Efficient HTTP connection management with gzip compression support. |
 | **Fast Startup** | The supported-domain list loads from the bundled file and refreshes in the background, so the app never waits on the network to start. |
 | **Lightweight Downloads** | Files are hashed while they download and progress is reported once per percent, keeping memory low and the interface responsive even for multi-gigabyte files. |
+| **Clear Download Reports** | Files missing on the media server are reported once instead of retried, and each download ends with how many files were downloaded, only previews, missing or failed. The History tab keeps the same counts. |
+| **Crash Protection** | An unexpected error shows a dialog with details to report instead of closing the app. |
 | **Safe File Handling** | Server-supplied file names cannot escape the download folder, partial files are removed after a failed download, and large downloads are never reported complete early. |
 
 ### $\color{#90a4ae}{\sf{\text{User Interface and Experience}}}$
@@ -207,10 +210,10 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 
 | Feature | Description |
 |---------|-------------|
-| **Proxy Support** | Tor integration and custom proxy configuration for privacy. |
+| **Proxy Support** | Tor integration and custom proxy configuration. With Tor selected, downloads only go through Tor, and the built-in Tor download is verified against Tor's published checksums. |
 | **Automatic Updates** | Optional version checking with download notifications. |
 | **Organized Storage** | Automatic directory creation (Downloads, Cache, Other Files) with customizable paths. |
-| **User Agent Rotation** | Realistic browser user agents to avoid detection. |
+| **User Agents** | Realistic browser user agents on Kemono and Coomer; on Pawchive the app identifies itself, as the site asks. |
 
 ### $\color{#90a4ae}{\sf{\text{Settings and Customization}}}$
 
@@ -247,7 +250,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | Platform | Support Details |
 |----------|-----------------|
 | **Windows** | Native .exe builds, portable and installer options |
-| **macOS** | Universal binaries for Intel and Apple Silicon |
+| **macOS** | Builds for Apple Silicon and Intel |
 | **Linux** | Packages for Arch, Fedora, Ubuntu, and other distributions |
 
 ### $\color{#90a4ae}{\sf{\text{Security and Privacy}}}$
