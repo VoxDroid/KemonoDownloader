@@ -49,13 +49,15 @@ from kemonodownloader.download_policy import (
 from kemonodownloader.download_utils import (
     ALLOWED_EXTENSIONS,
     DOWNLOAD_CHUNK_SIZE,
+    PreviewOnlyFile,
     ProgressTracker,
     ThreadSettings,
     abbreviate,
     create_connection_guard,
     extension_allowed,
     filename_from_url,
-    iter_post_files,
+    is_missing_file_error,
+    iter_post_file_entries,
     md5_file,
     parse_response_content,
     response_content_length,
@@ -84,6 +86,7 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
+from kemonodownloader.kd_preview_notice import PreviewOnlyNotice
 
 # Resolve translations dynamically at call time so tests can monkeypatch
 # the runtime translation function in `kemonodownloader.kd_language`.
@@ -781,10 +784,12 @@ class PostDetectionThread(QThread):
             return None
 
     def detect_files(self, post):
+        # Preview-only files can't be downloaded; leaving them out here keeps
+        # the "download all links" counts honest.
         detected_files = [
-            (name, url)
-            for _, name, url, ext in iter_post_files(post, self.domain_config)
-            if ext in ALLOWED_EXTENSIONS
+            (entry.name, entry.url)
+            for entry in iter_post_file_entries(post, self.domain_config)
+            if entry.extension in ALLOWED_EXTENSIONS and not entry.preview_only
         ]
         return list(dict.fromkeys(detected_files))
 
@@ -815,11 +820,27 @@ class FilePreparationThread(QThread):
         self.is_running = True
         self.url = url
         self.domain_config = get_domain_config(url)
+        # Files the site only has previews of; left out of the download and
+        # shown to the user when this thread finishes.
+        self.preview_only_files = []
+        self._preview_only_lock = threading.Lock()
 
     def stop(self):
         self.is_running = False
         self.log.emit(
             translate("log_info", "FilePreparationThread cancellation initiated"),
+            "INFO",
+        )
+
+    def _skip_preview_only(self, post, entry):
+        record = PreviewOnlyFile(
+            str(post.get("id", "")), post.get("title") or "", entry.name, entry.url
+        )
+        with self._preview_only_lock:
+            if all(r.url != entry.url for r in self.preview_only_files):
+                self.preview_only_files.append(record)
+        self.log.emit(
+            translate("log_debug", translate("preview_only_file_skipped", entry.name)),
             "INFO",
         )
 
@@ -838,12 +859,16 @@ class FilePreparationThread(QThread):
             "attachment": "attachment",
             "content": "content image",
         }
-        for kind, name, url, ext in iter_post_files(post, self.domain_config):
+        for entry in iter_post_file_entries(post, self.domain_config):
+            kind, name, url, ext = entry[:4]
             label = labels[kind]
             self.log.emit(
                 translate("log_debug", f"Checking {label}: {name} ({ext})"), "INFO"
             )
             if extension_allowed(ext, allowed_extensions):
+                if entry.preview_only:
+                    self._skip_preview_only(post, entry)
+                    continue
                 self.log.emit(translate("log_debug", f"Added {label}: {name}"), "INFO")
                 files_to_download.append((name, url))
 
@@ -1126,6 +1151,8 @@ class DownloadThread(QThread):
         self.service = self.extract_service_from_url(url)
         self.post_files_map = self.build_post_files_map()
         self.completed_files = set()
+        # Files the media server doesn't have (HTTP 404/410); not retried.
+        self.unavailable_files = set()
         self.post_title = None  # Store post title
         self.auto_rename = auto_rename
         self.download_text = download_text
@@ -1432,6 +1459,28 @@ class DownloadThread(QThread):
                 return
 
             except Exception as e:
+                if is_missing_file_error(e):
+                    # The media server doesn't have this file; retrying can't
+                    # help, and every retry is another request to the site.
+                    with self.completed_files_lock:
+                        self.unavailable_files.add(file_url)
+                    self.log.emit(
+                        translate(
+                            "log_warning",
+                            translate(
+                                "file_not_on_server",
+                                getattr(
+                                    getattr(e, "response", None), "status_code", ""
+                                ),
+                                filename_from_url(file_url),
+                                file_url,
+                            ),
+                        ),
+                        "WARNING",
+                    )
+                    self.file_progress.emit(file_index, 0)
+                    self.file_completed.emit(file_index, file_url, False)
+                    return
                 if attempt == max_retries:
                     self.log.emit(
                         translate(
@@ -1792,6 +1841,11 @@ class PostDownloaderTab(QWidget):
         self.total_files_to_download = 0
         self.completed_files = set()
         self.failed_files = set()
+        # Failed files the media server doesn't have (subset of failed_files).
+        self.unavailable_files = set()
+        # Files of the viewed post that the site only has previews of.
+        self.preview_only_urls = set()
+        self.preview_only_notice = PreviewOnlyNotice(self)
         self.completed_posts = set()
         self.total_posts_to_download = 0
         self.detected_files_during_check_all = []
@@ -2634,7 +2688,7 @@ class PostDownloaderTab(QWidget):
             self.checked_urls.clear()
 
             for file_name, file_url in self.all_detected_files:
-                self.checked_urls[file_url] = True
+                self.checked_urls[file_url] = not self._is_preview_only(file_url)
                 self.add_list_item(file_name, file_url)
             self.update_checked_files()
         except Exception as e:
@@ -2682,16 +2736,21 @@ class PostDownloaderTab(QWidget):
 
     def detect_files(self, post, allowed_extensions):
         domain_config = get_domain_config(self.current_post_url)
-        detected_files = [
-            (name, url)
-            for _, name, url, ext in iter_post_files(post, domain_config)
-            if extension_allowed(ext, allowed_extensions)
-        ]
+        detected_files = []
+        preview_only = set()
+        for entry in iter_post_file_entries(post, domain_config):
+            if extension_allowed(entry.extension, allowed_extensions):
+                detected_files.append((entry.name, entry.url))
+                if entry.preview_only:
+                    preview_only.add(entry.url)
+        # Listed, but shown as "preview only" and not selectable.
+        self.preview_only_urls = preview_only
         return list(dict.fromkeys(detected_files))
 
     def check_all_posts(self):
         self.all_files_map.clear()
         self.checked_urls.clear()
+        self.preview_only_urls = set()
         self.detected_files_during_check_all = []
         self.files_to_download = []
         self.file_url_map.clear()
@@ -2847,6 +2906,8 @@ class PostDownloaderTab(QWidget):
         self.completed_posts.clear()
         self.completed_files.clear()
         self.failed_files.clear()
+        self.unavailable_files.clear()
+        self.preview_only_notice.reset()
         self.total_files_to_download = 0
         self.post_overall_progress_label.setText(
             translate("overall_progress", 0, 0, 0, 0)
@@ -2990,6 +3051,28 @@ class PostDownloaderTab(QWidget):
     def update_background_progress(self, value):
         self.background_task_progress.setValue(value)
 
+    def _report_preview_only(self, skipped):
+        """Tell the user about files that were skipped as preview-only."""
+        skipped = [f for f in skipped if isinstance(f, PreviewOnlyFile)]
+        if not skipped:
+            return
+        # They were counted as selected before preparation found them out.
+        counted = [f for f in skipped if self.checked_urls.get(f.url)]
+        for file in counted:
+            self.checked_urls[file.url] = False
+        if counted:
+            self.total_files_to_download = max(
+                0, self.total_files_to_download - len(counted)
+            )
+            self.update_overall_progress()
+        self.append_log_to_console(
+            translate(
+                "log_warning", translate("preview_only_skipped_log", len(skipped))
+            ),
+            "WARNING",
+        )
+        self.preview_only_notice.add(skipped)
+
     def on_file_preparation_finished(self, urls, files_to_download, files_to_posts_map):
         self.append_log_to_console(
             translate(
@@ -2997,6 +3080,14 @@ class PostDownloaderTab(QWidget):
                 translate("files_prepared_for_urls", urls, len(files_to_download)),
             ),
             "INFO",
+        )
+        self._report_preview_only(
+            getattr(
+                getattr(self, "file_preparation_thread", None),
+                "preview_only_files",
+                None,
+            )
+            or []
         )
         for file_url in files_to_download:
             if file_url not in self.checked_urls:
@@ -3241,6 +3332,9 @@ class PostDownloaderTab(QWidget):
                     "INFO",
                 )
         else:
+            thread = getattr(self, "thread", None)
+            if file_url in (getattr(thread, "unavailable_files", None) or ()):
+                self.unavailable_files.add(file_url)
             if file_url not in self.failed_files:
                 self.failed_files.add(file_url)
                 self.append_log_to_console(
@@ -3306,12 +3400,28 @@ class PostDownloaderTab(QWidget):
                 if all_post_ids and all_post_ids.issubset(self.completed_posts):
                     self._fast_mode_remove_post_url(url)
 
+    def _log_download_summary(self):
+        """One line saying what happened to every file of the run."""
+        failed = set(self.failed_files)
+        unavailable = self.unavailable_files & failed
+        counts = (
+            len(self.completed_files),
+            self.preview_only_notice.count,
+            len(unavailable),
+            len(failed - unavailable),
+        )
+        if any(counts):
+            self.append_log_to_console(
+                translate("log_info", translate("download_summary", *counts)), "INFO"
+            )
+
     def post_download_finished(self):
         self.downloading = False
         self.set_downloading_ui_state(False)
         self.append_log_to_console(
             translate("log_info", translate("download_process_ended")), "INFO"
         )
+        self._log_download_summary()
 
         if (
             self.total_files_to_download > 0
@@ -3348,6 +3458,7 @@ class PostDownloaderTab(QWidget):
         self.total_files_to_download = 0
         self.completed_files.clear()
         self.failed_files.clear()
+        self.unavailable_files.clear()
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         self.background_task_label.setText(translate("idle"))
@@ -3360,7 +3471,9 @@ class PostDownloaderTab(QWidget):
         visible_urls = set()
         for i in range(self.post_file_list.count()):
             item = self.post_file_list.item(i)
-            if not item.isHidden():
+            if not item.isHidden() and not self._is_preview_only(
+                item.data(Qt.UserRole)
+            ):
                 visible_urls.add(item.data(Qt.UserRole))
 
         if not visible_urls:
@@ -3528,6 +3641,13 @@ class PostDownloaderTab(QWidget):
         label.setStyleSheet("color: white;")
         label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(label, stretch=1)
+        if self._is_preview_only(url):
+            # The site only has the preview: show it, but it can't be chosen.
+            check_box.setChecked(False)
+            check_box.setEnabled(False)
+            label.setText(f"{text}  ({translate('preview_only_label')})")
+            label.setStyleSheet("color: #8A94A6;")
+            widget.setToolTip(translate("preview_only_tooltip"))
         widget.setLayout(layout)
         item.setSizeHint(widget.sizeHint())
         self.post_file_list.addItem(item)
@@ -3535,6 +3655,9 @@ class PostDownloaderTab(QWidget):
         widget.check_box = check_box
         widget.label = label
         widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+
+    def _is_preview_only(self, url):
+        return url in (getattr(self, "preview_only_urls", None) or ())
 
     def toggle_checkbox_state(self, url):
         # Determine new state based on the clicked item
@@ -3554,6 +3677,8 @@ class PostDownloaderTab(QWidget):
             # Apply to all selected items
             for item in selected_items:
                 item_url = item.data(Qt.UserRole)
+                if self._is_preview_only(item_url):
+                    continue
                 self.checked_urls[item_url] = new_state
                 widget = self.post_file_list.itemWidget(item)
                 if widget:
@@ -3597,6 +3722,9 @@ class PostDownloaderTab(QWidget):
                 ).check_box.isChecked()
                 for i in range(self.post_file_list.count())
                 if not self.post_file_list.item(i).isHidden()
+                and not self._is_preview_only(
+                    self.post_file_list.item(i).data(Qt.UserRole)
+                )
             )
             and self.post_file_list.count() > 0
         )

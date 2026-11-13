@@ -11,7 +11,16 @@ import re
 import sys
 import threading
 import time
-from typing import Any, Callable, ContextManager, Dict, Iterator, Optional, Tuple
+from typing import (
+    Any,
+    Callable,
+    ContextManager,
+    Dict,
+    Iterator,
+    NamedTuple,
+    Optional,
+    Tuple,
+)
 
 from bs4 import BeautifulSoup
 
@@ -240,6 +249,87 @@ def extension_allowed(extension: str, allowed_extensions: Any) -> bool:
     return extension in allowed_extensions
 
 
+# HTTP statuses meaning the media server doesn't have the file at all, so
+# retrying can't help.
+MISSING_FILE_STATUSES = (404, 410)
+
+
+class PostFile(NamedTuple):
+    """A file a post references."""
+
+    kind: str  # "main", "attachment" or "content"
+    name: str
+    url: str
+    extension: str
+    # The site lists the file but only keeps its preview image (see
+    # is_preview_only), so downloading the full file fails with 404.
+    preview_only: bool = False
+
+
+class PreviewOnlyFile(NamedTuple):
+    """A file skipped because the site only has its preview."""
+
+    post_id: str
+    post_title: str
+    name: str
+    url: str
+
+
+def is_preview_only(entry: Any) -> bool:
+    """Return whether the site lists *entry* but only keeps its preview.
+
+    Pawchive marks such files with ``"preview_only": true`` (and gives them no
+    ``server``): the thumbnail exists, the full file does not.
+    """
+    return isinstance(entry, dict) and entry.get("preview_only") is True
+
+
+def is_missing_file_error(error: BaseException) -> bool:
+    """Return whether *error* is an HTTP error saying the file doesn't exist."""
+    response = getattr(error, "response", None)
+    status = getattr(response, "status_code", None)
+    return status in MISSING_FILE_STATUSES
+
+
+def iter_post_file_entries(
+    post: Dict[str, Any],
+    domain_config: Dict[str, str],
+    main: bool = True,
+    attachments: bool = True,
+    content: bool = True,
+) -> Iterator[PostFile]:
+    """Yield a :class:`PostFile` for every file a post references.
+
+    Filtering is left to the caller; ``preview_only`` tells which files the
+    site has no full copy of.
+    """
+
+    def describe(kind: str, entry: Dict[str, Any]) -> PostFile:
+        path = entry["path"]
+        name = entry.get("name", "")
+        url = clean_file_url(path, domain_config)
+        if "f=" not in url and name:
+            url += f"?f={name}"
+        return PostFile(
+            kind, name, url, effective_extension(path, name), is_preview_only(entry)
+        )
+
+    if main and "file" in post and post["file"] and "path" in post["file"]:
+        yield describe("main", post["file"])
+
+    if attachments and "attachments" in post:
+        for attachment in post["attachments"]:
+            if isinstance(attachment, dict) and "path" in attachment:
+                yield describe("attachment", attachment)
+
+    if content and "content" in post and post["content"]:
+        soup = BeautifulSoup(post["content"], "html.parser")
+        for img in soup.select("img[src]"):
+            img_url = clean_file_url(str(img["src"]), domain_config)
+            img_ext = os.path.splitext(img_url)[1].lower()
+            yield PostFile("content", os.path.basename(img_url), img_url, img_ext)
+
+
 def iter_post_files(
     post: Dict[str, Any],
     domain_config: Dict[str, str],
@@ -250,28 +340,10 @@ def iter_post_files(
     """Yield ``(kind, name, url, extension)`` for every file a post references.
 
     *kind* is ``"main"``, ``"attachment"`` or ``"content"``. Filtering is left to
-    the caller.
+    the caller. Use :func:`iter_post_file_entries` to also see which files are
+    preview-only.
     """
-
-    def describe(entry: Dict[str, Any]) -> Tuple[str, str, str]:
-        path = entry["path"]
-        name = entry.get("name", "")
-        url = clean_file_url(path, domain_config)
-        if "f=" not in url and name:
-            url += f"?f={name}"
-        return name, url, effective_extension(path, name)
-
-    if main and "file" in post and post["file"] and "path" in post["file"]:
-        yield ("main", *describe(post["file"]))
-
-    if attachments and "attachments" in post:
-        for attachment in post["attachments"]:
-            if isinstance(attachment, dict) and "path" in attachment:
-                yield ("attachment", *describe(attachment))
-
-    if content and "content" in post and post["content"]:
-        soup = BeautifulSoup(post["content"], "html.parser")
-        for img in soup.select("img[src]"):
-            img_url = clean_file_url(str(img["src"]), domain_config)
-            img_ext = os.path.splitext(img_url)[1].lower()
-            yield ("content", os.path.basename(img_url), img_url, img_ext)
+    for entry in iter_post_file_entries(
+        post, domain_config, main, attachments, content
+    ):
+        yield entry.kind, entry.name, entry.url, entry.extension

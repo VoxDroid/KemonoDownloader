@@ -46,13 +46,15 @@ from kemonodownloader.download_policy import (
 )
 from kemonodownloader.download_utils import (
     DOWNLOAD_CHUNK_SIZE,
+    PreviewOnlyFile,
     ProgressTracker,
     ThreadSettings,
     abbreviate,
     create_connection_guard,
     extension_allowed,
     filename_from_url,
-    iter_post_files,
+    is_missing_file_error,
+    iter_post_file_entries,
     md5_file,
     response_content_length,
     sanitize_filename,
@@ -81,6 +83,7 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
+from kemonodownloader.kd_preview_notice import PreviewOnlyNotice
 
 # get_domain_config is imported from domain_config; re-exported for
 # any callers that import it directly from this module.
@@ -825,9 +828,25 @@ class FilePreparationThread(QThread):
         self.settings = settings
         self.max_concurrent = max_concurrent
         self.is_running = True
+        # Files the site only has previews of; left out of the download and
+        # shown to the user when this thread finishes.
+        self.preview_only_files = []
+        self._preview_only_lock = threading.Lock()
 
     def stop(self):
         self.is_running = False
+
+    def _skip_preview_only(self, post, entry):
+        record = PreviewOnlyFile(
+            str(post.get("id", "")), post.get("title") or "", entry.name, entry.url
+        )
+        with self._preview_only_lock:
+            if all(r.url != entry.url for r in self.preview_only_files):
+                self.preview_only_files.append(record)
+        self.log.emit(
+            translate("log_debug", translate("preview_only_file_skipped", entry.name)),
+            "INFO",
+        )
 
     def detect_files(self, post, allowed_extensions, domain_config):
         files_to_download = []
@@ -843,18 +862,22 @@ class FilePreparationThread(QThread):
             "attachment": ("checking_attachment", "added_attachment"),
             "content": ("checking_content_image", "added_content_image"),
         }
-        for kind, name, url, ext in iter_post_files(
+        for entry in iter_post_file_entries(
             post,
             domain_config,
             main=self.creator_main_check,
             attachments=self.creator_attachments_check,
             content=self.creator_content_check,
         ):
+            kind, name, url, ext = entry[:4]
             checking_key, added_key = labels[kind]
             self.log.emit(
                 translate("log_debug", translate(checking_key, name, ext)), "INFO"
             )
             if extension_allowed(ext, allowed_extensions):
+                if entry.preview_only:
+                    self._skip_preview_only(post, entry)
+                    continue
                 self.log.emit(
                     translate("log_debug", translate(added_key, name)), "INFO"
                 )
@@ -1136,6 +1159,8 @@ class CreatorDownloadThread(QThread):
         self.post_files_map = self.build_post_files_map()
         self.completed_files = set()
         self.failed_files = {}  # Map file_url to error message
+        # Failed files the media server doesn't have (HTTP 404/410).
+        self.unavailable_files = set()
         self.post_titles_map = post_titles_map
         self.creator_name = None
         self.auto_rename_enabled = auto_rename_enabled
@@ -1665,6 +1690,32 @@ class CreatorDownloadThread(QThread):
                 return
 
             except requests.RequestException as e:
+                if is_missing_file_error(e):
+                    # The media server doesn't have this file; retrying can't
+                    # help, and every retry is another request to the site.
+                    self._safe_emit(
+                        self.log,
+                        translate(
+                            "log_warning",
+                            translate(
+                                "file_not_on_server",
+                                getattr(
+                                    getattr(e, "response", None), "status_code", ""
+                                ),
+                                filename_from_url(file_url),
+                                file_url,
+                            ),
+                        ),
+                        "WARNING",
+                    )
+                    with self.failed_files_lock:
+                        # Still a failure, so completion counting is unchanged.
+                        self.failed_files[file_url] = str(e)
+                        self.unavailable_files.add(file_url)
+                    self._safe_emit(self.file_progress, file_index, 0)
+                    self._safe_emit(self.file_completed, file_index, file_url, False)
+                    self.check_post_completion(file_url)
+                    return
                 if attempt == max_retries:
                     error_msg = translate(
                         "error_downloading_after_retries", file_url, max_retries, str(e)
@@ -1898,19 +1949,34 @@ class CreatorDownloadThread(QThread):
                 "WARNING",
             )
 
-        # Log summary of failed files
-        if self.failed_files:
+        # Log summary of failed files (files missing on the server were
+        # already reported as such)
+        real_failures = {
+            url: error
+            for url, error in self.failed_files.items()
+            if url not in self.unavailable_files
+        }
+        if self.unavailable_files:
+            self._safe_emit(
+                self.log,
+                translate(
+                    "log_warning",
+                    translate("files_not_on_server_count", len(self.unavailable_files)),
+                ),
+                "WARNING",
+            )
+        if real_failures:
             self._safe_emit(
                 self.log,
                 translate(
                     "log_warning",
                     translate(
-                        "download_completed_with_failed_files", len(self.failed_files)
+                        "download_completed_with_failed_files", len(real_failures)
                     ),
                 ),
                 "WARNING",
             )
-            for file_url, error in self.failed_files.items():
+            for file_url, error in real_failures.items():
                 self._safe_emit(
                     self.log,
                     translate(
@@ -2227,6 +2293,11 @@ class CreatorDownloaderTab(QWidget):
         self.completed_files = set()
         self.completed_file_paths = set()
         self.failed_files = {}  # Map file_url to error message
+        # Failed files the media server doesn't have, across the run.
+        self.unavailable_files = set()
+        # Files downloaded across the run (completed_files is per creator).
+        self._run_downloaded = 0
+        self.preview_only_notice = PreviewOnlyNotice(self)
         # Locks for thread-safe access to shared data structures
         self.completed_files_lock = threading.Lock()
         self.failed_files_lock = threading.Lock()
@@ -3575,6 +3646,9 @@ class CreatorDownloaderTab(QWidget):
         self.completed_posts.clear()
         self.completed_files.clear()
         self.failed_files.clear()
+        self.unavailable_files.clear()
+        self._run_downloaded = 0
+        self.preview_only_notice.reset()
         self.total_files_to_download = 0
         self.creator_overall_progress_label.setText(
             translate("overall_progress", 0, 0, 0, self.total_posts_to_download)
@@ -3678,7 +3752,29 @@ class CreatorDownloaderTab(QWidget):
     def update_background_progress(self, value):
         self.background_task_progress.setValue(value)
 
+    def _report_preview_only(self, skipped):
+        """Tell the user about files that were skipped as preview-only."""
+        skipped = [f for f in skipped if isinstance(f, PreviewOnlyFile)]
+        if not skipped:
+            return
+        self.append_log_to_console(
+            translate(
+                "log_warning", translate("preview_only_skipped_log", len(skipped))
+            ),
+            "WARNING",
+        )
+        self.preview_only_notice.add(skipped)
+
     def on_file_preparation_finished(self, urls, files_to_download, files_to_posts_map):
+        # Preview-only files were already left out of files_to_download.
+        self._report_preview_only(
+            getattr(
+                getattr(self, "file_preparation_thread", None),
+                "preview_only_files",
+                None,
+            )
+            or []
+        )
         self.total_files_to_download = len(files_to_download)
         self.append_log_to_console(
             translate(
@@ -3780,6 +3876,10 @@ class CreatorDownloaderTab(QWidget):
         """Clean up a download thread and proceed to the next creator or finish."""
         if isinstance(thread, CreatorDownloadThread):
             self._record_download(thread)
+            self._run_downloaded += len(getattr(thread, "completed_files", None) or ())
+            self.unavailable_files.update(
+                getattr(thread, "unavailable_files", None) or ()
+            )
         # Transfer failed files from thread to tab if present (handle threads
         # that weren't tracked in active_threads as well)
         try:
@@ -4059,6 +4159,7 @@ class CreatorDownloaderTab(QWidget):
         self.total_files_to_download = 0
         self.completed_files.clear()
         self.failed_files.clear()
+        self.unavailable_files.clear()
         self.completed_posts.clear()
         self.current_file_index = -1
         self.background_task_progress.setRange(0, 100)
@@ -4217,22 +4318,42 @@ class CreatorDownloaderTab(QWidget):
             )
             # self.creator_download_finished()
 
+    def _log_download_summary(self):
+        """One line saying what happened to every file of the run."""
+        unavailable = self.unavailable_files & set(self.failed_files)
+        counts = (
+            self._run_downloaded,
+            self.preview_only_notice.count,
+            len(unavailable),
+            len(set(self.failed_files) - unavailable),
+        )
+        if any(counts):
+            self.append_log_to_console(
+                translate("log_info", translate("download_summary", *counts)), "INFO"
+            )
+
     def creator_download_finished(self):
         """Reset UI state after download completes or is cancelled."""
         self.downloading = False
 
-        # Log summary of failed files
-        if self.failed_files:
+        # Log summary of failed files; files missing on the server were
+        # already reported as such.
+        real_failures = {
+            url: error
+            for url, error in self.failed_files.items()
+            if url not in self.unavailable_files
+        }
+        if real_failures:
             self.append_log_to_console(
                 translate(
                     "log_warning",
                     translate(
-                        "download_completed_with_failed_files", len(self.failed_files)
+                        "download_completed_with_failed_files", len(real_failures)
                     ),
                 ),
                 "WARNING",
             )
-            for file_url, error in self.failed_files.items():
+            for file_url, error in real_failures.items():
                 self.append_log_to_console(
                     translate(
                         "log_error",
@@ -4244,6 +4365,7 @@ class CreatorDownloaderTab(QWidget):
         self.append_log_to_console(
             translate("log_info", translate("download_process_completed")), "INFO"
         )
+        self._log_download_summary()
 
         # Always show Downloads Complete, even if some files failed
         self.creator_file_progress.setStyleSheet(
@@ -4262,6 +4384,7 @@ class CreatorDownloaderTab(QWidget):
         self.total_files_to_download = 0
         self.completed_files.clear()
         self.failed_files.clear()
+        self.unavailable_files.clear()
         self.completed_posts.clear()
         self.current_file_index = -1
         self.background_task_progress.setRange(0, 100)

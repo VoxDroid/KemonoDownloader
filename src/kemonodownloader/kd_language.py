@@ -4317,6 +4317,72 @@ class KDLanguage:
                 "korean": "미리 보려면 목록에서 항목을 선택하세요.",
                 "chinese-simplified": "请先在列表中选择要预览的项目。",
             },
+            "preview_only_title": {
+                "english": "Some Files Are Only Previews",
+                "japanese": "一部のファイルはプレビューのみです",
+                "korean": "일부 파일은 미리보기만 있습니다",
+                "chinese-simplified": "部分文件只有预览图",
+            },
+            "preview_only_text": {
+                "english": "{0} file(s) can't be downloaded because the site only has their preview images.",
+                "japanese": "{0}件のファイルは、サイトにプレビュー画像しかないためダウンロードできません。",
+                "korean": "{0}개의 파일은 사이트에 미리보기 이미지만 있어서 다운로드할 수 없습니다.",
+                "chinese-simplified": "{0} 个文件无法下载，因为网站上只有它们的预览图。",
+            },
+            "preview_only_info": {
+                "english": 'The site lists these files, but its media servers only kept their thumbnails, not the full files. This is not a problem with Kemono Downloader. These files are skipped and the other files download normally. To save the preview images instead, use the Thumbnail Downloader tab. Click "Show Details..." to see the list.',
+                "japanese": "サイトにはこれらのファイルが掲載されていますが、メディアサーバーにはサムネイルしか残っておらず、元のファイルはありません。Kemono Downloaderの不具合ではありません。これらのファイルはスキップされ、他のファイルは通常どおりダウンロードされます。プレビュー画像を保存したい場合は、サムネイルダウンローダータブを使用してください。一覧は「Show Details...」をクリックすると表示されます。",
+                "korean": '사이트에 이 파일들이 올라와 있지만 미디어 서버에는 원본 파일이 없고 썸네일만 남아 있습니다. Kemono Downloader의 문제가 아닙니다. 이 파일들은 건너뛰고 다른 파일은 정상적으로 다운로드됩니다. 미리보기 이미지를 저장하려면 썸네일 다운로더 탭을 사용하세요. 목록은 "Show Details..."를 클릭하면 볼 수 있습니다.',
+                "chinese-simplified": "网站列出了这些文件，但其媒体服务器只保留了缩略图，没有完整文件。这不是 Kemono Downloader 的问题。这些文件会被跳过，其他文件照常下载。如需保存预览图，请使用“缩略图下载器”选项卡。点击“Show Details...”可查看列表。",
+            },
+            "preview_only_more": {
+                "english": "... and {0} more",
+                "japanese": "…ほか{0}件",
+                "korean": "… 외 {0}개",
+                "chinese-simplified": "……以及另外 {0} 个",
+            },
+            "preview_only_file_skipped": {
+                "english": "Skipped {0}: the site only has a preview of this file",
+                "japanese": "{0}をスキップしました：サイトにはこのファイルのプレビューしかありません",
+                "korean": "{0} 건너뜀: 사이트에 이 파일의 미리보기만 있습니다",
+                "chinese-simplified": "已跳过 {0}：网站上只有此文件的预览图",
+            },
+            "preview_only_skipped_log": {
+                "english": "{0} file(s) are only available as previews on the site and were skipped (see the warning window for the list)",
+                "japanese": "{0}件のファイルはサイト上でプレビューのみのため、スキップしました（一覧は警告ウィンドウを参照）",
+                "korean": "{0}개의 파일은 사이트에 미리보기만 있어서 건너뛰었습니다(목록은 경고 창 참고)",
+                "chinese-simplified": "{0} 个文件在网站上只有预览图，已跳过（列表见警告窗口）",
+            },
+            "preview_only_label": {
+                "english": "preview only",
+                "japanese": "プレビューのみ",
+                "korean": "미리보기만",
+                "chinese-simplified": "仅预览",
+            },
+            "preview_only_tooltip": {
+                "english": "The site only has a preview of this file, so it can't be downloaded. Use the Thumbnail Downloader tab to save the preview.",
+                "japanese": "サイトにはこのファイルのプレビューしかないため、ダウンロードできません。プレビューを保存するには、サムネイルダウンローダータブを使用してください。",
+                "korean": "사이트에 이 파일의 미리보기만 있어서 다운로드할 수 없습니다. 미리보기를 저장하려면 썸네일 다운로더 탭을 사용하세요.",
+                "chinese-simplified": "网站上只有此文件的预览图，因此无法下载。如需保存预览图，请使用“缩略图下载器”选项卡。",
+            },
+            "file_not_on_server": {
+                "english": "Not available on the server (HTTP {0}): {1}. The site lists this file, but its media server doesn't have it, so it was skipped instead of retried. ({2})",
+                "japanese": "サーバー上にありません（HTTP {0}）：{1}。サイトにはこのファイルが掲載されていますが、メディアサーバーにないため、再試行せずにスキップしました。（{2}）",
+                "korean": "서버에 없음(HTTP {0}): {1}. 사이트에 이 파일이 올라와 있지만 미디어 서버에 없어서 재시도하지 않고 건너뛰었습니다. ({2})",
+                "chinese-simplified": "服务器上没有此文件（HTTP {0}）：{1}。网站列出了此文件，但其媒体服务器上没有，因此已跳过，不再重试。（{2}）",
+            },
+            "files_not_on_server_count": {
+                "english": "{0} file(s) were not available on the media server and were skipped",
+                "japanese": "{0}件のファイルはメディアサーバー上になかったため、スキップしました",
+                "korean": "{0}개의 파일은 미디어 서버에 없어서 건너뛰었습니다",
+                "chinese-simplified": "{0} 个文件不在媒体服务器上，已跳过",
+            },
+            "download_summary": {
+                "english": "Summary: {0} downloaded, {1} only available as previews (skipped), {2} not found on the server, {3} failed",
+                "japanese": "概要：ダウンロード済み {0}件、プレビューのみ（スキップ）{1}件、サーバー上になし {2}件、失敗 {3}件",
+                "korean": "요약: 다운로드 {0}개, 미리보기만 있음(건너뜀) {1}개, 서버에 없음 {2}개, 실패 {3}개",
+                "chinese-simplified": "摘要：已下载 {0} 个，仅有预览图（已跳过）{1} 个，服务器上不存在 {2} 个，失败 {3} 个",
+            },
         }
 
     def get_text(self, key, language=None, *args):

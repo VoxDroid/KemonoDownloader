@@ -3,6 +3,9 @@
 ## Unreleased
 **fix: crash-proof error handling, Tor that never falls back to a direct connection, Pawchive previews, Linux packaging, translations, docs and CI**
 
+- Explain files the site only has previews of, instead of failing on them.
+  Pawchive lists many files whose full copy is gone and only the thumbnail remains; downloading them failed with "404 Client Error" and was retried up to 50 times each, which looked like a broken app (one creator had over 8,000 such files). The site marks these files, so the downloaders now skip them, log one line per batch, and show a warning window (it doesn't pause the downloads) that explains why and lists the files, with a pointer to the Thumbnail Downloader tab for saving the previews. The Post tab shows them as "preview only" and they can't be selected. A file the media server doesn't have (HTTP 404 or 410) is no longer retried on any site and is reported in plain words, and each download ends with a summary of how many files were downloaded, only previews, not on the server, or failed. Progress counts no longer include the skipped files.
+
 - Keep the app running after an unexpected error.
   An error that nothing else caught used to make PyQt abort the whole app without a message (on Windows, exit code 0xC0000409). The app now prints the error, shows a dialog with the details to include in a bug report, and keeps running.
 
