@@ -1,57 +1,49 @@
 # Kemono Downloader Release Notes
 
-## Unreleased
-**fix: crash-proof error handling, Tor that never falls back to a direct connection, Pawchive previews, Linux packaging, translations, docs and CI**
+## v5.15.0 (13 November 2026)
+**feat: clear handling of preview-only and missing files, crash protection, Tor that never bypasses itself, and download reliability fixes**
+
+- Explain files the site only has previews of, instead of failing on them.
+  Pawchive lists many files whose full copy is gone and only the thumbnail remains (one creator had over 8,000). Downloading them failed with "404 Client Error" and was retried up to 50 times each, which looked like a broken app. The site marks these files, so the downloaders now recognise them before downloading: a warning window (it doesn't pause the downloads) explains why they can't be downloaded and lists them, and the Post tab shows them as "preview only" and doesn't let you select them. Progress counts no longer include them.
+
+- Optionally save their preview images.
+  A new setting, "Save the preview image when the site only has a preview of a file" (off by default), downloads the preview of such images instead, named like `00501_preview.png`.
+
+- Report files the media server doesn't have.
+  On every site, a file that answers HTTP 404 or 410 is no longer retried and is reported in plain words. Each download ends with a summary of how many files were downloaded, only previews, not on the server, or failed, and a window lists the missing files. The History tab's files column explains the same counts, and the CSV export includes them.
+
+- Make fewer requests to Pawchive.
+  Files are requested straight from the server Pawchive names for them, one request less per file, falling back to the usual address if that server fails. Files you already downloaded are still recognised.
 
 - Keep the app running after an unexpected error.
-  An error that nothing else caught used to make PyQt abort the whole app without a message (on Windows, exit code 0xC0000409). The app now prints the error, shows a dialog with the details to include in a bug report, and keeps running.
+  An error that nothing else caught used to make PyQt close the whole app without a message (on Windows, exit code 0xC0000409). The app now shows a dialog with details to include in a bug report, and keeps running.
+
+- Fix crashes when Creator tab background tasks finish.
+  The URL validation, post detection, file preparation, filtering and check-all threads could be destroyed while they were still finishing, which closed the app ("QThread: Destroyed while thread is still running").
+
+- Retry incomplete downloads in the Creator tab.
+  A file that arrived shorter than the server announced (usually a dropped connection) was deleted and given up after one attempt, whatever the retry setting; both tabs now retry it.
 
 - Never bypass Tor when it is selected.
-  With Tor chosen as the proxy but not running, downloads used to go straight to the site without any proxy, and a missing PySocks package switched to a Privoxy port the app never starts. Requests now always go to Tor's SOCKS port and fail if Tor isn't available, so the real IP address is never used by accident. This also works with a Tor service you run yourself on the default port. Proxy settings are no longer printed to the console on every request.
+  With Tor chosen but not running, downloads used to go straight to the site, and without PySocks they used a Privoxy port the app never starts. Requests now always go through Tor's port and fail if Tor isn't available, so your IP address is never used by accident. A Tor service you run yourself on the default port also works.
 
-- Update the built-in Tor download to 16.0.1 and verify it.
-  "Download Tor" now fetches the Tor 16.0.1 Expert Bundle, checks it against the SHA-256 published in Tor's signed checksum list before extracting anything, and refuses a file that doesn't match. Linux on ARM64 gets the matching bundle, and an unsupported system shows a message instead of downloading a bundle that can't run.
+- Update and verify the built-in Tor download.
+  "Download Tor" fetches the Tor 16.0.1 Expert Bundle (was 15.0.3) and checks it against the SHA-256 from Tor's signed checksum list before extracting anything. Linux on ARM64 gets the right bundle and unsupported systems get a message. On Linux, the bundle's debug symbols (`debug/tor`) are no longer picked as the Tor program; the download has a timeout, links pointing outside the Tor folder are refused, and a failed download no longer leaves its archive in the temp folder.
 
-- Translate the remaining English-only interface text.
-  The Tor status while starting, the Tor Help button and help dialog, the "Custom Proxy" option, folder errors in Settings, the Post tab's log saving messages, the Creator tab's log messages and Expand Logs tooltip, and the Thumbnail tab's preview hint now follow the selected language. Changing the language while Tor runs no longer shows it as stopped. Twenty unused translations were removed.
+- Fix Pawchive previews and links.
+  Previews now send the identifiable user agent Pawchive requires (they failed with HTTP 403), the Pawchive request policy covers every `pawchive.<suffix>` domain, and post links are accepted by the site's own name.
 
-- Use one "JPG/JPEG" file-type option in the Post tab, as in the Creator tab; both extensions were already filtered together.
+- Finish the translations and tidy the interface.
+  The remaining English-only text is translated (the Tor status and help, "Custom Proxy", Settings folder errors, log saving messages, the Expand Logs tooltip and the Thumbnail tab's preview hint), and changing the language while Tor runs no longer shows it as stopped. The Post tab has one "JPG/JPEG" option like the Creator tab, and its file-type filters now apply while files are prepared. Twenty unused translations were removed.
 
-- Correct the documentation.
-  The simultaneous downloads range is 1-20 (the docs and the in-app Help said 1-10, and the Help gave the default as 10 instead of 5), and the README's retry limits now match the app. The security policy covers the latest release, explains that GitHub issues are public, and offers private GitHub vulnerability reports; the Code of Conduct and Support page no longer suggest "private issues". The pull request template names the current sites, and the contributing guide explains how to run the tests and checks.
+- Improve the Linux packages and dependencies.
+  The `.deb`, `.rpm`, openSUSE and Arch packages declare the X11 libraries Qt needs, including `xcb-cursor`, whose absence made the app close at launch. Flatpak builds use the KDE 6.11 runtime, the unused Pillow dependency was removed, and the package description mentions Pawchive.
 
-- Trim dependencies and update the build configuration.
-  Pillow is no longer installed: the app never used it. `requirements.txt` names `beautifulsoup4` like the packaging config. Flatpak builds use the KDE 6.11 runtime and the matching PyQt base app instead of 6.7.
+- Correct the documentation and website.
+  The download range is 1-20 with a default of 5 everywhere (the docs and in-app Help said 1-10 and 10), and the README's retry limits match the app. The READMEs explain how to install `xcb-cursor` on Linux and where builds are available. The security policy covers the latest release and offers private vulnerability reports, and the Code of Conduct and Support page no longer suggest "private issues", which GitHub doesn't have. The in-app Help documents the new setting and has a troubleshooting entry for preview-only and missing files. On the website the build steps show their commands again, the Support, Contributing and License links are back, Pawchive is listed, the Simplified Chinese page no longer shows "undefined" on its language button, and the Korean page names the languages in Korean.
 
-- Test every supported Python in CI.
-  Tests now run on Python 3.9 to 3.14 (3.9, 3.11 and 3.14 on Windows, macOS and Linux; 3.10, 3.12 and 3.13 on Linux), where they ran on 3.9 to 3.11 only. The code checks run once in their own job instead of in every test job, and pyright is pinned so a new release can't fail CI on unchanged code.
-
-- Fix the website's build steps and links.
-  The page replaced several sections with translations that had lost their markup, so the build steps showed no commands, and the Support, Contributing and License links disappeared, in English, Japanese and Korean. The steps now match the README (virtual environment, Linux libraries, `briefcase dev`), the dependency list is complete, and documentation links open the rendered pages on GitHub.
-
-- Fix crashes when creator background tasks finish.
-  The Creator tab's URL validation, post detection, file preparation, filtering and check-all threads could be destroyed while they were still finishing, and Qt then aborted the whole app ("QThread: Destroyed while thread is still running"). Their cleanup now waits for each thread to exit first.
-
-- Fix Pawchive file previews.
-  Previews in the Post and Creator tabs now send the same identifiable user agent as downloads; Pawchive's file server refuses browser user agents with HTTP 403. The Pawchive request policy (user agent, pacing and the five-download cap) now also applies to every `pawchive.<suffix>` domain instead of only `pawchive.pw`.
-
-- Accept Pawchive post URLs by the site's own name.
-  Post URL validation no longer depends on a Pawchive page mentioning Kemono or Coomer.
-
-- Fix the built-in Tor setup.
-  On Linux it could configure the bundle's debug symbols (`debug/tor`) as the Tor program, which cannot run; it now uses `tor/tor`. The Tor download has a timeout instead of waiting forever on a stalled connection, links in the archive that point outside the Tor folder are refused, and a failed download no longer leaves its partial archive in the temp folder.
-
-- Declare the system libraries Qt needs on Linux.
-  The `.deb`, `.rpm`, openSUSE and Arch packages now depend on the X11 libraries the Qt platform plugin loads, including `xcb-cursor`, whose absence made the app abort at launch with "Could not load the Qt platform plugin xcb". The package description was shortened to Briefcase's recommended length and now mentions Pawchive.
-
-- Update the documentation.
-  The READMEs explain how to install `xcb-cursor` on Linux and now say correctly where builds are available (pre-compiled binaries on Ko-fi; the GitHub Releases page has release notes and source code). The website mentions Pawchive and has the five Simplified Chinese strings it was missing (its language button showed "undefined").
-
-- Improve CI.
-  Tests run on the new Ubuntu 26.04 runners (Python 3.9 stays on Ubuntu 24.04, which still has it), one failing job no longer cancels the others, GitHub Actions are updated to their Node 24 versions, pip downloads are cached, the workflow can be run manually, superseded pull request runs are cancelled, and only test reports are uploaded.
-
-- Make the test suite more reliable.
-  Thread tests wait for their threads to stop before returning (an intermittent abort in CI), tests no longer write a history database into the repository or `/tmp`, and new tests cover the Pawchive request policy, the Tor download and the version numbers.
+- Strengthen CI and tests.
+  Tests run on Python 3.9 to 3.14 on Windows, macOS and Linux, including the new Ubuntu 26.04 runners, with the code checks in their own job and pyright pinned. Flaky thread tests were fixed, tests no longer write into the repository or `/tmp`, and over 100 tests were added.
 
 ## v5.14.0 (03 November 2026)
 **feat: History tab with download history and favorites, a smoother and faster interface, and download reliability fixes**

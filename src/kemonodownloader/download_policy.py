@@ -5,7 +5,7 @@ import time
 from typing import Callable
 from urllib.parse import urlparse
 
-IDENTIFIABLE_USER_AGENT = "KemonoDownloader/5.14.0 (+mailto:izeno.contact@gmail.com)"
+IDENTIFIABLE_USER_AGENT = "KemonoDownloader/5.15.0 (+mailto:izeno.contact@gmail.com)"
 PAWCHIVE_MAX_ACTIVE_DOWNLOADS = 5
 PAWCHIVE_REQUEST_INTERVAL = 1.0
 

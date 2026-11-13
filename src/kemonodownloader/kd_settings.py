@@ -87,6 +87,8 @@ class SettingsTab(QWidget):
             "base_directory": self.get_default_base_directory(),
             "simultaneous_downloads": 5,
             "auto_check_updates": True,
+            # Save the preview image of files the site only has previews of.
+            "save_preview_images": False,
             "language": "english",
             "creator_posts_max_attempts": 200,
             "post_data_max_retries": 7,
@@ -144,6 +146,11 @@ class SettingsTab(QWidget):
         )
         settings_dict["auto_check_updates"] = self.qsettings.value(
             "auto_check_updates", self.default_settings["auto_check_updates"], type=bool
+        )
+        settings_dict["save_preview_images"] = self.qsettings.value(
+            "save_preview_images",
+            self.default_settings.get("save_preview_images", False),
+            type=bool,
         )
         settings_dict["language"] = self.qsettings.value(
             "language", self.default_settings["language"], type=str
@@ -208,6 +215,9 @@ class SettingsTab(QWidget):
         )
         self.qsettings.setValue(
             "auto_check_updates", self.settings["auto_check_updates"]
+        )
+        self.qsettings.setValue(
+            "save_preview_images", self.settings.get("save_preview_images", False)
         )
         self.qsettings.setValue("language", self.settings["language"])
         self.qsettings.setValue(
@@ -324,6 +334,18 @@ class SettingsTab(QWidget):
         )
         self.pawchive_policy_info_button.clicked.connect(self.show_pawchive_policy_info)
         download_layout.addWidget(self.pawchive_policy_info_button, 0, 3)
+
+        self.save_previews_checkbox = QCheckBox()
+        self.save_previews_checkbox.setChecked(
+            self.temp_settings.get("save_preview_images", False)
+        )
+        self.save_previews_checkbox.setStyleSheet("color: white;")
+        self.save_previews_checkbox.stateChanged.connect(
+            lambda state: self.update_temp_setting(
+                "save_preview_images", state == Qt.CheckState.Checked.value
+            )
+        )
+        download_layout.addWidget(self.save_previews_checkbox, 1, 0, 1, 4)
 
         self.download_group.setLayout(download_layout)
         layout.addWidget(self.download_group)
@@ -1291,6 +1313,9 @@ class SettingsTab(QWidget):
         self.download_slider.setValue(self.temp_settings["simultaneous_downloads"])
         self.download_spinbox.setValue(self.temp_settings["simultaneous_downloads"])
         self.auto_update_checkbox.setChecked(self.temp_settings["auto_check_updates"])
+        self.save_previews_checkbox.setChecked(
+            self.temp_settings.get("save_preview_images", False)
+        )
         self.creator_posts_max_attempts_spinbox.setValue(
             self.temp_settings["creator_posts_max_attempts"]
         )
@@ -1343,6 +1368,8 @@ class SettingsTab(QWidget):
         )  # Added text for open directory button
 
         self.download_group.setTitle(translate("download_settings"))
+        self.save_previews_checkbox.setText(translate("save_preview_images"))
+        self.save_previews_checkbox.setToolTip(translate("save_preview_images_tooltip"))
         self.simultaneous_downloads_label.setText(translate("simultaneous_downloads"))
         self.pawchive_policy_info_button.setToolTip(
             translate("pawchive_policy_info_title")
@@ -1481,6 +1508,9 @@ class SettingsTab(QWidget):
 
     def is_auto_check_updates_enabled(self):
         return self.settings["auto_check_updates"]
+
+    def is_save_preview_images_enabled(self):
+        return self.settings.get("save_preview_images", False) is True
 
     def get_creator_posts_max_attempts(self):
         return self.settings["creator_posts_max_attempts"]

@@ -82,6 +82,12 @@ const translations = {
       featureFavoritesDesc: "Bookmark posts and creators, add notes, see when you last downloaded them, and import or export your list.",
       featureSmoothInterface: "Smooth Interface",
       featureSmoothInterfaceDesc: "Instant launch, crossfades between tabs, gliding scrolling and easing progress bars.",
+      featurePreviewOnly: "Preview-Only Detection",
+      featurePreviewOnlyDesc: "Files the site only keeps previews of are explained and skipped, or their previews saved, instead of failing.",
+      featureDownloadReports: "Clear Download Reports",
+      featureDownloadReportsDesc: "Every download ends with how many files were downloaded, only previews, missing on the server or failed.",
+      featureCrashProtection: "Crash Protection",
+      featureCrashProtectionDesc: "Unexpected errors show a dialog with details to report instead of closing the app.",
   
       // Installation
       installationTitle: "Installation",
@@ -302,6 +308,12 @@ const translations = {
       featureFavoritesDesc: "投稿やクリエイターをブックマークし、メモを付け、最後にダウンロードした日時を確認し、リストをインポート・エクスポートできます。",
       featureSmoothInterface: "スムーズなインターフェース",
       featureSmoothInterfaceDesc: "即座に起動、タブ間のクロスフェード、滑らかなスクロールとプログレスバー。",
+      featurePreviewOnly: "プレビューのみの検出",
+      featurePreviewOnlyDesc: "プレビューしか残っていないファイルは、失敗する代わりに理由を説明してスキップ、またはプレビューを保存します。",
+      featureDownloadReports: "わかりやすい結果",
+      featureDownloadReportsDesc: "各ダウンロードの最後に、ダウンロード済み・プレビューのみ・サーバー上になし・失敗の件数を表示します。",
+      featureCrashProtection: "クラッシュ防止",
+      featureCrashProtectionDesc: "予期しないエラーが起きてもアプリを終了せず、報告用の詳細を表示します。",
   
       // Installation
       installationTitle: "インストール",
@@ -520,6 +532,12 @@ const translations = {
       featureFavoritesDesc: "게시물과 크리에이터를 북마크하고 메모를 추가하며, 마지막 다운로드 시각을 확인하고 목록을 가져오거나 내보냅니다.",
       featureSmoothInterface: "부드러운 인터페이스",
       featureSmoothInterfaceDesc: "즉시 실행, 탭 간 크로스페이드, 부드러운 스크롤과 진행률 표시줄.",
+      featurePreviewOnly: "미리보기 전용 감지",
+      featurePreviewOnlyDesc: "미리보기만 남은 파일은 실패하는 대신 이유를 설명하고 건너뛰거나 미리보기를 저장합니다.",
+      featureDownloadReports: "명확한 다운로드 결과",
+      featureDownloadReportsDesc: "각 다운로드가 끝나면 다운로드됨, 미리보기만, 서버에 없음, 실패 파일 수를 보여 줍니다.",
+      featureCrashProtection: "충돌 방지",
+      featureCrashProtectionDesc: "예기치 않은 오류가 발생해도 앱을 종료하지 않고 신고용 세부 정보를 표시합니다.",
   
       // Installation
       installationTitle: "설치",
@@ -735,6 +753,12 @@ const translations = {
       featureFavoritesDesc: "收藏帖子和创作者、添加备注、查看上次下载时间，并导入或导出你的列表。",
       featureSmoothInterface: "流畅的界面",
       featureSmoothInterfaceDesc: "即时启动、选项卡之间交叉淡入淡出、平滑滚动与进度条。",
+      featurePreviewOnly: "仅预览检测",
+      featurePreviewOnlyDesc: "对于只剩预览图的文件，会说明原因并跳过或保存预览图，而不是下载失败。",
+      featureDownloadReports: "清晰的下载结果",
+      featureDownloadReportsDesc: "每次下载结束时显示已下载、仅预览、服务器上不存在和失败的文件数量。",
+      featureCrashProtection: "防崩溃",
+      featureCrashProtectionDesc: "发生意外错误时不会关闭应用，而是显示可供报告的详细信息。",
   
       // Installation
       installationTitle: "安装",
