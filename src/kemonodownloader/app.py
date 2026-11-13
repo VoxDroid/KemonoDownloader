@@ -45,6 +45,7 @@ from kemonodownloader.kd_theme import (
     color,
     is_themed,
     qt_palette,
+    repolish,
     restyle_rows,
     set_role,
     use_theme,
@@ -352,6 +353,13 @@ class KemonoDownloader(QMainWindow):
         if app is not None and is_themed(app):
             apply_theme(app, theme)
         self.apply_palette()
+        # The tab widget keeps the background colour its style gave it, and
+        # its pages inherit that: the tab-switch fade (and a page's first
+        # frame) showed the previous theme until they are polished again.
+        tabs = getattr(self, "tabs", None)
+        if tabs is not None:
+            for widget in (tabs, *(tabs.widget(i) for i in range(tabs.count()))):
+                repolish(widget)
         restyle_rows(self)
         # Pages that draw icons and documents in theme colours.
         for name in ("help_tab", "extension_tab"):
