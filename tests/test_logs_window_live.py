@@ -226,3 +226,56 @@ def test_creator_window_follows_the_creator_console(qapp):
     finally:
         tab.deleteLater()
         console.deleteLater()
+
+
+def test_logs_follow_the_font_chosen_in_settings(qapp):
+    from PyQt6.QtGui import QFont
+
+    console = _console(lines=3)
+    window = pd.LogsWindow(console)
+    try:
+        # The app applies the Settings font to every widget, this view too.
+        window.logs_display.setFont(QFont("Poppins", 11))
+        console.clear()  # forces a full rebuild of the window's copy
+        console.append("after the font change")
+        window.refresh_now()
+        assert window.logs_display.document().defaultFont().family() == "Poppins"
+    finally:
+        window.deleteLater()
+        console.deleteLater()
+
+
+def test_copied_label_timer_dies_with_the_window(qapp, live):
+    console, window = live
+    window.copy_logs()
+    assert window.copy_logs_btn.text() == translate("logs_copied")
+    timer = window._copied_timer
+    assert timer.isActive() and timer.parent() is window
+    window._copied_timer.timeout.emit()
+    assert window.copy_logs_btn.text() == translate("copy_logs")
+    window.copy_logs()
+    window.close()
+    assert not window._copied_timer.isActive()
+
+
+def test_rebuilt_copies_belong_to_qt_alone(qapp):
+    import gc
+
+    from PyQt6 import sip
+
+    console = _console(lines=5)
+    window = pd.LogsWindow(console)
+    try:
+        for round_ in range(20):
+            # Each clear forces a new copy; the old one used to be freed by
+            # both Qt and Python, which crashed the app later on.
+            console.clear()
+            console.append(f"round {round_}")
+            window.refresh_now()
+            gc.collect()
+            qapp.processEvents()
+            assert not sip.ispyowned(window.logs_display.document())
+        assert window.logs_display.toPlainText() == "round 19"
+    finally:
+        window.deleteLater()
+        console.deleteLater()

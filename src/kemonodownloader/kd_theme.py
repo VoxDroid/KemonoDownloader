@@ -7,15 +7,16 @@ the palette below, and widgets only say what they are:
 
 * buttons: ``set_role(button, "primary" | "danger" | "icon")`` (plain buttons
   need nothing),
-* labels: ``set_role(label, "title" | "heading" | "muted")`` and
+* labels: ``set_role(label, "title" | "heading" | "muted" | "pill")`` and
   ``set_tone(label, "success" | "warning" | "error" | "info")``,
 * text views: ``set_role(view, "console")`` for log output,
 * progress bars: ``set_progress_state(bar, "paused" | "done")``.
 
 Hover and pressed states change colours only; borders and padding stay the
 same in every state, so nothing changes size under the pointer. The sheet
-sets no minimum sizes either: Qt applies those over a widget's own fixed
-size, which squashed the square icon buttons.
+names no font family, so the font chosen in Settings applies everywhere
+(logs included), and sets no minimum sizes: Qt applies those over a
+widget's own fixed size, which squashed the square icon buttons.
 """
 
 from __future__ import annotations
@@ -62,7 +63,6 @@ PROGRESS_DONE = "#4CAF50"
 SELECTION = ACCENT
 
 RADIUS = 6
-MONOSPACE = "'JetBrains Mono', 'Cascadia Mono', Consolas, Menlo, monospace"
 
 # Glyphs drawn into the style sheet (check marks and arrows).
 _GLYPHS = {
@@ -148,7 +148,7 @@ QPlainTextEdit:focus, QTextEdit:focus {{ border-color: {FOCUS}; }}
 QLineEdit:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QComboBox:disabled,
 QPlainTextEdit:disabled, QTextEdit:disabled {{ color: {TEXT_DISABLED}; background: {DISABLED_BG}; }}
 QTextEdit[kdRole="console"], QPlainTextEdit[kdRole="console"] {{
-    background: {CONSOLE}; font-family: {MONOSPACE}; padding: 6px;
+    background: {CONSOLE}; padding: 6px;
 }}
 QComboBox::drop-down {{ border: none; width: 24px; }}
 QComboBox::down-arrow {{ {image("arrow-down")} width: 10px; height: 10px; }}
@@ -189,6 +189,10 @@ QLabel[kdRole="empty"] {{
 }}
 QLabel[kdRole="notice"] {{
     color: #E8C468; background: #3A3524; border-radius: {RADIUS}px; padding: 8px;
+}}
+QLabel[kdRole="pill"] {{
+    background: {SURFACE_ALT}; border: 1px solid {BORDER}; border-radius: 11px;
+    padding: 3px 10px;
 }}
 QLabel[kdTone="success"] {{ color: {SUCCESS}; font-weight: bold; }}
 QLabel[kdTone="warning"] {{ color: {WARNING}; font-weight: bold; }}

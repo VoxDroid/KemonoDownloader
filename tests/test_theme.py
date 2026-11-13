@@ -167,3 +167,9 @@ def test_tab_action_buttons_have_roles():
         assert f'set_role(self.{prefix}_download_btn, "primary")' in source
         assert f'set_role(self.{prefix}_cancel_btn, "danger")' in source
         assert ".enterEvent =" not in source
+
+
+def test_theme_leaves_fonts_to_the_settings():
+    # The font picked in Settings is set on every widget; a font-family in the
+    # sheet would override it.
+    assert "font-family" not in stylesheet()

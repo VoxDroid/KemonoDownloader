@@ -6,10 +6,10 @@ import html
 from typing import Any, Optional
 
 import qtawesome as qta
+from PyQt6 import sip
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import (
     QColor,
-    QFont,
     QGuiApplication,
     QKeySequence,
     QShortcut,
@@ -36,7 +36,6 @@ from kemonodownloader.kd_theme import set_role, set_tone
 _LEVEL_COLORS = {"INFO": "#6FD08C", "WARNING": "#F5C451", "ERROR": "#FF7A7A"}
 _DEFAULT_COLOR = "#E6EDF7"
 
-LOG_FONT_FAMILIES = ["JetBrains Mono", "Cascadia Mono", "Consolas", "Menlo"]
 SYNC_INTERVAL_MS = 250
 # How close to the bottom (in pixels) still counts as following new lines.
 FOLLOW_SLACK_PX = 6
@@ -64,15 +63,6 @@ def counted(key: str, count: int) -> str:
     if count == 1:
         return translate(f"{key}_one")
     return translate(key, f"{count:,}")
-
-
-def log_font() -> QFont:
-    """The monospace font the full-logs window uses (JetBrains Mono is bundled)."""
-    font = QFont()
-    font.setFamilies(LOG_FONT_FAMILIES)
-    font.setStyleHint(QFont.StyleHint.Monospace)
-    font.setPointSize(10)
-    return font
 
 
 class LogsWindowBase(QDialog):
@@ -114,6 +104,14 @@ class LogsWindowBase(QDialog):
         self.update_timer = QTimer(self)
         self.update_timer.setInterval(SYNC_INTERVAL_MS)
         self.update_timer.timeout.connect(self._do_update)
+
+        # Owned by the window, so it can't fire after the window is gone.
+        self._copied_timer = QTimer(self)
+        self._copied_timer.setSingleShot(True)
+        self._copied_timer.setInterval(COPIED_FLASH_MS)
+        self._copied_timer.timeout.connect(
+            lambda: self.copy_logs_btn.setText(translate("copy_logs"))
+        )
 
     # ----------------------------------------------------------------- UI --
     def _build_ui(self) -> None:
@@ -158,7 +156,6 @@ class LogsWindowBase(QDialog):
         self.logs_display = QTextEdit()
         set_role(self.logs_display, "console")
         self.logs_display.setReadOnly(True)
-        self.logs_display.setFont(log_font())
         self.logs_display.document().setDocumentMargin(10)
         layout.addWidget(self.logs_display, stretch=1)
 
@@ -291,8 +288,12 @@ class LogsWindowBase(QDialog):
     def _copy_all(self, source: QTextDocument) -> None:
         value = self.logs_display.verticalScrollBar().value()
         # Parented to the view, so the view deletes it when it is replaced.
+        # PyQt also marks a clone as Python's to delete; hand it to Qt alone,
+        # or the replaced copy is deleted twice and corrupts memory.
         copy = source.clone(self.logs_display)
-        copy.setDefaultFont(log_font())
+        sip.transferto(copy, self.logs_display)
+        # The font chosen in Settings, which the app applies to every widget.
+        copy.setDefaultFont(self.logs_display.font())
         copy.setDocumentMargin(10)
         self._adjusting = True
         try:
@@ -486,9 +487,7 @@ class LogsWindowBase(QDialog):
             return
         clipboard.setText(text)
         self.copy_logs_btn.setText(translate("logs_copied"))
-        QTimer.singleShot(
-            COPIED_FLASH_MS, lambda: self.copy_logs_btn.setText(translate("copy_logs"))
-        )
+        self._copied_timer.start()
 
     def clear_logs(self) -> None:
         """Clear both this window and the console it mirrors."""
@@ -508,6 +507,8 @@ class LogsWindowBase(QDialog):
         """Stop refreshing once the window closes."""
         if hasattr(self, "update_timer"):
             self.update_timer.stop()
+        if hasattr(self, "_copied_timer"):
+            self._copied_timer.stop()
         self._bind(None)
         if a0 is not None:
             a0.accept()

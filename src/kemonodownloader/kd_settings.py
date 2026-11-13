@@ -540,16 +540,28 @@ class SettingsTab(QWidget):
         self.font_group.setLayout(font_layout)
         layout.addWidget(self.font_group)
 
-        # Enable proxy checkbox (outside the proxy group so it's always visible)
-        self.use_proxy_checkbox = QCheckBox()
-        self.use_proxy_checkbox.stateChanged.connect(self.on_use_proxy_changed)
+        # Proxy Settings Group. The switch and a short explanation are always
+        # visible; the options below them only while the switch is on.
+        self.network_group = QGroupBox()
+        network_layout = QVBoxLayout(self.network_group)
+        network_layout.setSpacing(8)
 
-        # Proxy Settings Group
-        self.proxy_group = QGroupBox()
-        self.proxy_group.setVisible(
-            False
-        )  # Start hidden, will be shown by on_use_proxy_changed
-        proxy_layout = QVBoxLayout()
+        self.use_proxy_checkbox = QCheckBox()
+        set_role(self.use_proxy_checkbox, "heading")
+        self.use_proxy_checkbox.stateChanged.connect(self.on_use_proxy_changed)
+        network_layout.addWidget(self.use_proxy_checkbox)
+
+        self.proxy_intro_label = QLabel()
+        set_role(self.proxy_intro_label, "muted")
+        self.proxy_intro_label.setWordWrap(True)
+        network_layout.addWidget(self.proxy_intro_label)
+
+        # Options shown while the proxy is on (kept as proxy_group).
+        self.proxy_group = QWidget()
+        self.proxy_group.setVisible(False)  # shown by on_use_proxy_changed
+        proxy_layout = QVBoxLayout(self.proxy_group)
+        proxy_layout.setContentsMargins(0, 6, 0, 0)
+        proxy_layout.setSpacing(10)
 
         # Proxy type selection
         proxy_type_layout = QHBoxLayout()
@@ -557,6 +569,7 @@ class SettingsTab(QWidget):
         proxy_type_layout.addWidget(self.proxy_type_label)
 
         self.proxy_type_combo = QComboBox()
+        self.proxy_type_combo.setMinimumWidth(220)
         self.proxy_type_combo.addItem(translate("custom_proxy"), "custom")
         self.proxy_type_combo.addItem("Tor", "tor")
         self.proxy_type_combo.currentIndexChanged.connect(self.on_proxy_type_changed)
@@ -575,75 +588,98 @@ class SettingsTab(QWidget):
         self.use_proxy_checkbox.blockSignals(False)
         self.proxy_type_combo.blockSignals(False)
 
-        layout.addWidget(self.use_proxy_checkbox)
-
         proxy_type_layout.addWidget(self.proxy_type_combo)
+        proxy_type_layout.addStretch()
         proxy_layout.addLayout(proxy_type_layout)
 
-        # Custom proxy input
+        # Custom proxy: address, test button and the accepted formats.
+        self.custom_proxy_panel = QWidget()
+        custom_panel_layout = QVBoxLayout(self.custom_proxy_panel)
+        custom_panel_layout.setContentsMargins(0, 0, 0, 0)
+        custom_panel_layout.setSpacing(6)
+
         self.custom_proxy_layout = QHBoxLayout()
         self.custom_proxy_label = QLabel()
         self.custom_proxy_layout.addWidget(self.custom_proxy_label)
 
         self.custom_proxy_input = QLineEdit(self.temp_settings["custom_proxy_url"])
-        self.custom_proxy_input.setPlaceholderText("e.g., 111.222.333.444:8080")
+        self.custom_proxy_input.setPlaceholderText("127.0.0.1:8080")
         self.custom_proxy_input.textChanged.connect(
             lambda: self.update_temp_setting(
                 "custom_proxy_url", self.custom_proxy_input.text()
             )
         )
-        self.custom_proxy_layout.addWidget(self.custom_proxy_input)
+        self.custom_proxy_layout.addWidget(self.custom_proxy_input, stretch=1)
 
         self.test_custom_proxy_button = QPushButton()
         self.test_custom_proxy_button.clicked.connect(self.test_custom_proxy)
         self.custom_proxy_layout.addWidget(self.test_custom_proxy_button)
+        custom_panel_layout.addLayout(self.custom_proxy_layout)
 
-        proxy_layout.addLayout(self.custom_proxy_layout)
+        self.custom_proxy_hint_label = QLabel()
+        set_role(self.custom_proxy_hint_label, "muted")
+        self.custom_proxy_hint_label.setWordWrap(True)
+        custom_panel_layout.addWidget(self.custom_proxy_hint_label)
+        proxy_layout.addWidget(self.custom_proxy_panel)
 
-        # Tor settings
-        self.tor_layout = QVBoxLayout()
+        # Tor: path and status, then the controls, then download progress
+        # and Tor's own output.
+        self.tor_panel = QWidget()
+        self.tor_layout = QVBoxLayout(self.tor_panel)
+        self.tor_layout.setContentsMargins(0, 0, 0, 0)
+        self.tor_layout.setSpacing(8)
+
+        tor_header_layout = QHBoxLayout()
         self.tor_label = QLabel()
-        self.tor_layout.addWidget(self.tor_label)
+        tor_header_layout.addWidget(self.tor_label)
+        tor_header_layout.addStretch()
+        self.tor_status_label = QLabel(translate("tor_status_stopped"))
+        set_role(self.tor_status_label, "pill")
+        set_tone(self.tor_status_label, "error")
+        self.tor_status_label.setVisible(False)
+        tor_header_layout.addWidget(self.tor_status_label)
+        self.tor_layout.addLayout(tor_header_layout)
 
         tor_path_layout = QHBoxLayout()
         self.tor_path_input = QLineEdit(self.temp_settings["tor_path"])
         self.tor_path_input.setReadOnly(True)
         self.tor_path_input.textChanged.connect(self.update_tor_button_states)
-        tor_path_layout.addWidget(self.tor_path_input)
+        tor_path_layout.addWidget(self.tor_path_input, stretch=1)
 
         self.browse_tor_button = QPushButton()
         self.browse_tor_button.clicked.connect(self.browse_tor_executable)
         tor_path_layout.addWidget(self.browse_tor_button)
 
+        self.download_tor_button = QPushButton()
+        self.download_tor_button.clicked.connect(self.download_tor)
+        tor_path_layout.addWidget(self.download_tor_button)
+        self.tor_layout.addLayout(tor_path_layout)
+
+        tor_actions_layout = QHBoxLayout()
         self.start_tor_button = QPushButton()
+        set_role(self.start_tor_button, "primary")
         self.start_tor_button.clicked.connect(self.start_tor)
-        tor_path_layout.addWidget(self.start_tor_button)
+        tor_actions_layout.addWidget(self.start_tor_button)
 
         self.stop_tor_button = QPushButton()
         set_role(self.stop_tor_button, "danger")
         self.stop_tor_button.clicked.connect(self.stop_tor)
-        tor_path_layout.addWidget(self.stop_tor_button)
-
-        # Tor status label
-        self.tor_status_label = QLabel(translate("tor_status_stopped"))
-        set_tone(self.tor_status_label, "error")
-        self.tor_status_label.setVisible(False)
-        tor_path_layout.addWidget(self.tor_status_label)
-        tor_path_layout.addStretch()
-
-        self.download_tor_button = QPushButton()
-        self.download_tor_button.clicked.connect(self.download_tor)
-        tor_path_layout.addWidget(self.download_tor_button)
+        tor_actions_layout.addWidget(self.stop_tor_button)
 
         self.test_tor_button = QPushButton()
         self.test_tor_button.clicked.connect(self.test_tor)
-        tor_path_layout.addWidget(self.test_tor_button)
+        tor_actions_layout.addWidget(self.test_tor_button)
+        tor_actions_layout.addStretch()
 
         self.help_tor_button = QPushButton(translate("help_button"))
         self.help_tor_button.clicked.connect(self.show_tor_help)
-        tor_path_layout.addWidget(self.help_tor_button)
+        tor_actions_layout.addWidget(self.help_tor_button)
+        self.tor_layout.addLayout(tor_actions_layout)
 
-        self.tor_layout.addLayout(tor_path_layout)
+        self.tor_hint_label = QLabel()
+        set_role(self.tor_hint_label, "muted")
+        self.tor_hint_label.setWordWrap(True)
+        self.tor_layout.addWidget(self.tor_hint_label)
 
         # Tor download progress bar
         self.tor_progress_bar = QProgressBar()
@@ -663,10 +699,9 @@ class SettingsTab(QWidget):
         self.tor_output_text.setVisible(False)
         self.tor_layout.addWidget(self.tor_output_text)
 
-        proxy_layout.addLayout(self.tor_layout)
-
-        self.proxy_group.setLayout(proxy_layout)
-        layout.addWidget(self.proxy_group)
+        proxy_layout.addWidget(self.tor_panel)
+        network_layout.addWidget(self.proxy_group)
+        layout.addWidget(self.network_group)
 
         # Initialize proxy UI state - hide widgets by default
         self.custom_proxy_label.setVisible(False)
@@ -1372,7 +1407,10 @@ class SettingsTab(QWidget):
         self.font_group.setTitle(translate("font_settings"))
         self.font_label.setText(translate("font"))
 
-        self.proxy_group.setTitle(translate("proxy_settings"))
+        self.network_group.setTitle(translate("proxy_settings"))
+        self.proxy_intro_label.setText(translate("proxy_intro"))
+        self.custom_proxy_hint_label.setText(translate("custom_proxy_hint"))
+        self.tor_hint_label.setText(translate("tor_hint"))
         self.use_proxy_checkbox.setText(translate("use_proxy"))
         self.proxy_type_label.setText(translate("proxy_type"))
         self.custom_proxy_label.setText(translate("custom_proxy_url"))
@@ -1530,6 +1568,10 @@ class SettingsTab(QWidget):
         self.tor_output_label.setVisible(enabled and proxy_type == "tor")
         self.tor_output_text.setVisible(enabled and proxy_type == "tor")
         self.tor_status_label.setVisible(enabled and proxy_type == "tor")
+
+        # Only the chosen proxy type's panel takes up room.
+        self.custom_proxy_panel.setVisible(proxy_type == "custom")
+        self.tor_panel.setVisible(proxy_type == "tor")
 
         # Update Tor button states
         self.update_tor_button_states()

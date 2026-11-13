@@ -4451,6 +4451,25 @@ class KDLanguage:
                 "korean": "{1}개 중 {0}개 파일을 다운로드했습니다.\n{2}개는 사이트에 미리보기만 있었습니다(건너뜀).\n{3}개는 미디어 서버에 없었습니다.",
                 "chinese-simplified": "已下载 {1} 个文件中的 {0} 个。\n{2} 个在网站上只有预览图（已跳过）。\n{3} 个不在媒体服务器上。",
             },
+            # Proxy settings
+            "proxy_intro": {
+                "english": "Send downloads through your own proxy server or the Tor network.",
+                "japanese": "ダウンロードを自分のプロキシサーバーまたは Tor ネットワーク経由で行います。",
+                "korean": "다운로드를 직접 지정한 프록시 서버나 Tor 네트워크를 통해 보냅니다.",
+                "chinese-simplified": "通过你自己的代理服务器或 Tor 网络进行下载。",
+            },
+            "custom_proxy_hint": {
+                "english": "Accepts host:port, http://host:port or socks5h://host:port. Add user:password@ before the host if the proxy needs a login.",
+                "japanese": "host:port、http://host:port、socks5h://host:port の形式に対応しています。ログインが必要なプロキシでは、ホストの前に user:password@ を付けてください。",
+                "korean": "host:port, http://host:port, socks5h://host:port 형식을 지원합니다. 로그인이 필요한 프록시라면 호스트 앞에 user:password@를 붙이세요.",
+                "chinese-simplified": "支持 host:port、http://host:port 或 socks5h://host:port 格式。如果代理需要登录，请在主机前加上 user:password@。",
+            },
+            "tor_hint": {
+                "english": "Downloads go through Tor (port 9050), including a Tor service you run yourself. If Tor isn't running, downloads fail instead of using your own connection.",
+                "japanese": "ダウンロードは Tor（ポート 9050）を経由します。自分で実行している Tor サービスも使えます。Tor が動いていない場合、自分の接続を使わずにダウンロードは失敗します。",
+                "korean": "다운로드는 Tor(포트 9050)를 통해 이루어지며, 직접 실행 중인 Tor 서비스도 사용할 수 있습니다. Tor가 실행 중이 아니면 내 연결을 사용하지 않고 다운로드가 실패합니다.",
+                "chinese-simplified": "下载会通过 Tor（端口 9050）进行，也可以使用你自己运行的 Tor 服务。如果 Tor 未运行，下载会失败，而不会使用你自己的网络连接。",
+            },
             # Full logs window
             "copy_logs": {
                 "english": "Copy All",
