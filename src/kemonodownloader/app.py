@@ -38,9 +38,9 @@ from kemonodownloader.kd_motion import (
     enable_pixel_scrolling,
     fade_in,
     fade_out_snapshot,
-    hover_highlight,
 )
 from kemonodownloader.kd_settings import SettingsTab
+from kemonodownloader.kd_theme import apply_theme, set_role
 from kemonodownloader.kd_thumbnaildl import ThumbnailDownloaderTab
 from kemonodownloader.post_downloader import PostDownloaderTab
 
@@ -409,40 +409,10 @@ class KemonoDownloader(QMainWindow):
         main_layout = QVBoxLayout(main_widget)
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(15)
-        main_widget.setStyleSheet("background: #1A2A44;")
+        main_widget.setObjectName("kdMain")
 
         # Tab Widget
         self.tabs = QTabWidget()
-        self.tabs.setStyleSheet(
-            """
-            QTabWidget::pane {
-                border: none;
-                background: #1A2A44;
-            }
-            QTabBar::tab {
-                background: #3A4B6A;
-                color: white;
-                padding: 10px 14px;
-                margin-right: 2px;
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
-                min-width: 70px;
-            }
-            QTabBar::tab:selected {
-                background: #4A5B7A;
-                color: white;
-            }
-            QTabBar::tab:!selected {
-                margin-top: 2px;
-            }
-            QTabBar::tab:disabled {
-                color: gray;
-            }
-            * {
-                color: white;
-            }
-        """
-        )
         # Seven tabs: shorten labels when the window is narrow instead of
         # hiding tabs behind scroll arrows.
         self.tabs.tabBar().setElideMode(Qt.TextElideMode.ElideRight)
@@ -528,7 +498,6 @@ class KemonoDownloader(QMainWindow):
         footer_layout = QHBoxLayout(footer)
         footer_layout.setContentsMargins(10, 5, 10, 5)
         self.status_label = QLabel(translate("idle"))
-        self.status_label.setStyleSheet("color: white; font-size: 12px;")
         footer_layout.addWidget(self.status_label)
         footer_layout.addStretch()
         self.dev_label = QLabel(
@@ -635,36 +604,10 @@ class KemonoDownloader(QMainWindow):
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Ignore
         )
         msg.setDefaultButton(QMessageBox.StandardButton.Ok)
+        ok_button = msg.button(QMessageBox.StandardButton.Ok)
+        if ok_button is not None:
+            set_role(ok_button, "primary")
         msg.setTextFormat(Qt.TextFormat.RichText)
-        msg.setStyleSheet(
-            """
-            QMessageBox {
-                background-color: #2A3B5A;
-                border: 1px solid #3A4B6A;
-                border-radius: 8px;
-            }
-            QMessageBox QLabel {
-                color: #FFFFFF;
-                font-size: 14px;
-                padding: 5px;
-            }
-            QPushButton {
-                background-color: #4A6B9A;
-                color: #FFFFFF;
-                border: none;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 12px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #5A7BA9;
-            }
-            QPushButton:pressed {
-                background-color: #3A5B7A;
-            }
-        """
-        )
         reply = msg.exec()
         if reply == QMessageBox.StandardButton.Ok:
             import webbrowser
@@ -677,43 +620,7 @@ class KemonoDownloader(QMainWindow):
         msg.setText(translate("unable_check_updates"))
         msg.setInformativeText(error_message)
         msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-        msg.setStyleSheet(
-            """
-            QMessageBox {
-                background-color: #2A3B5A;
-                border: 1px solid #3A4B6A;
-                border-radius: 8px;
-            }
-            QMessageBox QLabel {
-                color: #FFFFFF;
-                font-size: 14px;
-                padding: 5px;
-            }
-            QPushButton {
-                background-color: #4A6B9A;
-                color: #FFFFFF;
-                border: none;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 12px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #5A7BA9;
-            }
-            QPushButton:pressed {
-                background-color: #3A5B7A;
-            }
-        """
-        )
         msg.exec()
-
-    def animate_button(self, button, enter):
-        """Play the hover highlight on *button*.
-
-        Colour only: resizing the button fought its layout and deformed it.
-        """
-        hover_highlight(button).animate(enter)
 
     def log(self, message):
         self.status_label.setText(message)
@@ -725,6 +632,7 @@ def main():
     # Without this, any exception that escapes a slot or thread aborts the app.
     install_exception_hook()
     app.setStyle("Fusion")
+    apply_theme(app)
     load_bundled_fonts()
     install_filter = getattr(app, "installEventFilter", None)
     if install_filter is not None:

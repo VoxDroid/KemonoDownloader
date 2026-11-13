@@ -87,7 +87,7 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_logs import LogsWindowBase, format_log_line
-from kemonodownloader.kd_motion import SmoothProgressBar, hover_highlight
+from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     accept_language,
     get_headers,
@@ -95,6 +95,7 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_user_agent,
 )
 from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
+from kemonodownloader.kd_theme import set_progress_state, set_role
 
 # Resolve translations dynamically at call time so tests can monkeypatch
 # the runtime translation function in `kemonodownloader.kd_language`.
@@ -239,9 +240,6 @@ class MediaPreviewModal(QDialog):
 
         # Progress bar
         self.progress_bar = QProgressBar()
-        self.progress_bar.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.progress_bar.setMaximumWidth(600)
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.progress_bar, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -261,9 +259,6 @@ class MediaPreviewModal(QDialog):
         )
         self.display_combo.setCurrentText(translate("fit"))
         self.display_combo.currentTextChanged.connect(self.change_display_mode)
-        self.display_combo.setStyleSheet(
-            "background: #4A5B7A; color: white; padding: 5px; border-radius: 5px;"
-        )
         self.display_options_layout.addWidget(self.display_combo)
         self.display_options_layout.addStretch()
         self.layout.addWidget(self.display_options_widget)
@@ -277,18 +272,12 @@ class MediaPreviewModal(QDialog):
         # Play/Pause toggle button
         self.play_pause_button = QPushButton(qta.icon("fa5s.play", color="white"), "")
         self.play_pause_button.clicked.connect(self.toggle_playback)
-        self.play_pause_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.play_pause_button.setFixedSize(40, 40)
         self.controls_layout.addWidget(self.play_pause_button)
 
         # Stop button
         self.stop_button = QPushButton(qta.icon("fa5s.stop", color="white"), "")
         self.stop_button.clicked.connect(self.stop_playback)
-        self.stop_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.stop_button.setFixedSize(40, 40)
         self.controls_layout.addWidget(self.stop_button)
 
@@ -296,10 +285,6 @@ class MediaPreviewModal(QDialog):
         self.seek_slider = QSlider(Qt.Orientation.Horizontal)
         self.seek_slider.setRange(0, 0)
         self.seek_slider.sliderMoved.connect(self.seek)
-        self.seek_slider.setStyleSheet(
-            "QSlider::groove:horizontal { border: 1px solid #4A5B7A; height: 8px; background: #2A3B5A; margin: 2px 0; }"
-            "QSlider::handle:horizontal { background: #4A5B7A; width: 18px; margin: -2px 0; border-radius: 9px; }"
-        )
         self.seek_slider.setFixedWidth(300)
         self.controls_layout.addWidget(self.seek_slider)
 
@@ -316,11 +301,6 @@ class MediaPreviewModal(QDialog):
         self.volume_slider.setRange(0, 100)
         self.volume_slider.setValue(50)
         self.volume_slider.valueChanged.connect(self.set_volume)
-        self.volume_slider.setStyleSheet(
-            "QSlider::groove:horizontal { border: 1px solid #5A6B8A; height: 6px; background: #3A4B6A; margin: 2px 0; border-radius: 3px; }"
-            "QSlider::handle:horizontal { background: #6A7B9A; width: 16px; height: 16px; margin: -5px 0; border-radius: 8px; border: 1px solid #FFFFFF; }"
-            "QSlider::sub-page:horizontal { background: #4A5B7A; border-radius: 3px; }"
-        )
         self.volume_slider.setFixedWidth(100)
         self.volume_layout.addWidget(self.volume_slider)
         self.controls_layout.addLayout(self.volume_layout)
@@ -1849,30 +1829,20 @@ class PostDownloaderTab(QWidget):
         # Post URL input layout
         post_url_layout = QHBoxLayout()
         self.post_url_input = QLineEdit()
-        self.post_url_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         post_url_layout.addWidget(self.post_url_input)
         self.post_add_to_queue_btn = QPushButton(
             qta.icon("fa5s.plus", color="white"), ""
         )
         self.post_add_to_queue_btn.clicked.connect(self.add_post_to_queue)
-        self.post_add_to_queue_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         post_url_layout.addWidget(self.post_add_to_queue_btn)
         self.post_add_from_file_btn = QPushButton(
             qta.icon("fa5s.file-import", color="white"), ""
         )
         self.post_add_from_file_btn.clicked.connect(self.add_posts_from_file)
-        self.post_add_from_file_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.post_add_from_file_btn.setToolTip(translate("add_links_from_file"))
         post_url_layout.addWidget(self.post_add_from_file_btn)
         self.post_bookmark_btn = QPushButton(qta.icon("fa5s.star", color="white"), "")
         self.post_bookmark_btn.clicked.connect(self.bookmark_current_link)
-        self.post_bookmark_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.post_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))
         post_url_layout.addWidget(self.post_bookmark_btn)
         left_layout.addLayout(post_url_layout)
@@ -1880,9 +1850,6 @@ class PostDownloaderTab(QWidget):
         # Multi-URL input area
         self.multi_url_input = QTextEdit()
         self.multi_url_input.setPlaceholderText(translate("multi_url_placeholder"))
-        self.multi_url_input.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
-        )
         self.multi_url_input.setFixedHeight(80)
         self.multi_url_input.setVisible(False)
         left_layout.addWidget(self.multi_url_input)
@@ -1891,21 +1858,14 @@ class PostDownloaderTab(QWidget):
             qta.icon("fa5s.layer-group", color="white"), ""
         )
         self.multi_url_add_btn.clicked.connect(self.add_multiple_posts_to_queue)
-        self.multi_url_add_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.multi_url_add_btn.setVisible(False)
         left_layout.addWidget(self.multi_url_add_btn)
 
         # Post Queue Group
         self.post_queue_group = QGroupBox()
-        self.post_queue_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         post_queue_layout = QVBoxLayout()
         self.post_queue_list = QListWidget()
         self.post_queue_list.setFixedHeight(100)
-        self.post_queue_list.setStyleSheet("background: #2A3B5A; border-radius: 5px;")
         post_queue_layout.addWidget(self.post_queue_list)
         self.post_queue_group.setLayout(post_queue_layout)
         left_layout.addWidget(self.post_queue_group)
@@ -1915,17 +1875,11 @@ class PostDownloaderTab(QWidget):
         self.post_file_progress_label = QLabel()
         post_progress_layout.addWidget(self.post_file_progress_label)
         self.post_file_progress = SmoothProgressBar()
-        self.post_file_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.post_file_progress.setRange(0, 100)
         post_progress_layout.addWidget(self.post_file_progress)
         self.post_overall_progress_label = QLabel()
         post_progress_layout.addWidget(self.post_overall_progress_label)
         self.post_overall_progress = SmoothProgressBar()
-        self.post_overall_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.post_overall_progress.setRange(0, 100)
         post_progress_layout.addWidget(self.post_overall_progress)
         left_layout.addLayout(post_progress_layout)
@@ -1933,9 +1887,7 @@ class PostDownloaderTab(QWidget):
         # Console
         self.post_console = QTextEdit()
         self.post_console.setReadOnly(True)
-        self.post_console.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px;"
-        )
+        set_role(self.post_console, "console")
         left_layout.addWidget(self.post_console)
 
         # Fast Mode row: icon checkbox + info button
@@ -1944,7 +1896,7 @@ class PostDownloaderTab(QWidget):
         self.fast_mode_check = QCheckBox()
         self.fast_mode_check.setChecked(False)
         self.fast_mode_check.setIcon(qta.icon("fa5s.bolt", color="#FFD700"))
-        self.fast_mode_check.setStyleSheet("color: white; font-weight: bold;")
+        set_role(self.fast_mode_check, "heading")
         self.fast_mode_check.stateChanged.connect(self.toggle_fast_mode)
         fast_mode_layout.addWidget(self.fast_mode_check)
 
@@ -1952,9 +1904,7 @@ class PostDownloaderTab(QWidget):
             qta.icon("fa5s.info-circle", color="#A0C0FF"), ""
         )
         self.fast_mode_info_btn.setFixedSize(26, 26)
-        self.fast_mode_info_btn.setStyleSheet(
-            "background: #4A5B7A; border-radius: 5px;"
-        )
+        set_role(self.fast_mode_info_btn, "icon")
         self.fast_mode_info_btn.setToolTip(translate("fast_mode_info_title"))
         self.fast_mode_info_btn.clicked.connect(self.show_fast_mode_info)
         fast_mode_layout.addWidget(self.fast_mode_info_btn)
@@ -1964,13 +1914,11 @@ class PostDownloaderTab(QWidget):
         # Auto rename checkbox
         self.auto_rename_checkbox = QCheckBox()
         self.auto_rename_checkbox.setChecked(True)  # Set to checked by default
-        self.auto_rename_checkbox.setStyleSheet("color: white;")
         left_layout.addWidget(self.auto_rename_checkbox)
 
         # Download text checkbox
         self.post_download_text_check = QCheckBox(translate("download_text"))
         self.post_download_text_check.setChecked(True)
-        self.post_download_text_check.setStyleSheet("color: white;")
         left_layout.addWidget(self.post_download_text_check)
 
         # Post buttons layout
@@ -1979,11 +1927,11 @@ class PostDownloaderTab(QWidget):
             qta.icon("fa5s.download", color="white"), ""
         )
         self.post_download_btn.clicked.connect(self.start_post_download)
-        hover_highlight(self.post_download_btn)
+        set_role(self.post_download_btn, "primary")
         post_btn_layout.addWidget(self.post_download_btn)
         self.post_cancel_btn = QPushButton(qta.icon("fa5s.times", color="white"), "")
         self.post_cancel_btn.clicked.connect(self.cancel_post_download)
-        hover_highlight(self.post_cancel_btn)
+        set_role(self.post_cancel_btn, "danger")
         self.post_cancel_btn.setEnabled(False)
         post_btn_layout.addWidget(self.post_cancel_btn)
 
@@ -1991,7 +1939,6 @@ class PostDownloaderTab(QWidget):
             qta.icon("fa5s.expand", color="white"), ""
         )
         self.post_expand_logs_btn.clicked.connect(self.expand_logs)
-        hover_highlight(self.post_expand_logs_btn)
         self.post_expand_logs_btn.setToolTip(translate("expand_logs"))
         post_btn_layout.addWidget(self.post_expand_logs_btn)
 
@@ -2006,24 +1953,16 @@ class PostDownloaderTab(QWidget):
         left_scroll.setWidgetResizable(True)
         left_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        left_scroll.setStyleSheet(
-            "QScrollArea { background: transparent; }"
-            "QScrollArea > QWidget > QWidget { background: transparent; }"
-        )
         layout.addWidget(left_scroll, stretch=2)
 
         # Right widget (Files to Download section)
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
         self.file_list_group = QGroupBox()
-        self.file_list_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         file_list_layout = QVBoxLayout()
 
         # Search input
         self.post_search_input = QLineEdit()
-        self.post_search_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.post_search_input.textChanged.connect(self.filter_items)
         file_list_layout.addWidget(self.post_search_input)
 
@@ -2031,19 +1970,16 @@ class PostDownloaderTab(QWidget):
         checkbox_layout = QHBoxLayout()
         self.post_check_all = QCheckBox()
         self.post_check_all.setChecked(True)
-        self.post_check_all.setStyleSheet("color: white;")
         self.post_check_all.stateChanged.connect(self.toggle_check_all)
         checkbox_layout.addWidget(self.post_check_all)
 
         self.download_all_links = QCheckBox()
-        self.download_all_links.setStyleSheet("color: white;")
         self.download_all_links.stateChanged.connect(self.toggle_download_all_links)
         checkbox_layout.addWidget(self.download_all_links)
         file_list_layout.addLayout(checkbox_layout)
 
         # Filter group
         self.post_filter_group = QGroupBox()
-        self.post_filter_group.setStyleSheet("QGroupBox { color: white; }")
         filter_layout = QGridLayout()
         self.post_filter_checks = {
             # One option for both spellings, as in the Creator tab;
@@ -2076,7 +2012,6 @@ class PostDownloaderTab(QWidget):
 
         # File list
         self.post_file_list = QListWidget()
-        self.post_file_list.setStyleSheet("background: #2A3B5A; border-radius: 5px;")
         self.post_file_list.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection
         )
@@ -2087,12 +2022,10 @@ class PostDownloaderTab(QWidget):
         # Bottom layout with file count and view button
         bottom_layout = QHBoxLayout()
         self.post_file_count_label = QLabel()
-        self.post_file_count_label.setStyleSheet("color: white;")
         bottom_layout.addWidget(self.post_file_count_label)
         self.post_view_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-        self.post_view_button.setStyleSheet(
-            "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-        )
+        set_role(self.post_view_button, "icon")
+        self.post_view_button.setFixedSize(30, 30)
         self.post_view_button.clicked.connect(self.view_current_item)
         self.post_view_button.setEnabled(False)
         bottom_layout.addStretch()
@@ -2103,13 +2036,9 @@ class PostDownloaderTab(QWidget):
 
         # Background task indicators
         self.background_task_label = QLabel()
-        self.background_task_label.setStyleSheet("color: white;")
         right_layout.addWidget(self.background_task_label)
 
         self.background_task_progress = QProgressBar()
-        self.background_task_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         right_layout.addWidget(self.background_task_progress)
@@ -2155,10 +2084,9 @@ class PostDownloaderTab(QWidget):
         self.multi_url_add_btn.setText(translate("add_all_to_queue"))
 
     def update_progress_bar_style(self):
-        separator_style = "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        self.post_file_progress.setStyleSheet(separator_style)
-        self.post_overall_progress.setStyleSheet(separator_style)
-        self.background_task_progress.setStyleSheet(separator_style)
+        set_progress_state(self.post_file_progress, None)
+        set_progress_state(self.post_overall_progress, None)
+        set_progress_state(self.background_task_progress, None)
 
     def refresh_ui(self):
         self.update_progress_bar_style()
@@ -2475,21 +2403,18 @@ class PostDownloaderTab(QWidget):
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(5)
             view_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-            view_button.setStyleSheet(
-                "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-            )
+            set_role(view_button, "icon")
+            view_button.setFixedSize(30, 30)
             view_button.clicked.connect(self.create_view_handler(url, checked))
             layout.addWidget(view_button)
             label = QLabel(url)
-            label.setStyleSheet("color: white;")
             label.setAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
             )
             layout.addWidget(label, stretch=1)
             remove_button = QPushButton(qta.icon("fa5s.times", color="white"), "")
-            remove_button.setStyleSheet(
-                "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-            )
+            set_role(remove_button, "icon")
+            remove_button.setFixedSize(30, 30)
             remove_button.clicked.connect(self.create_remove_handler(url))
             layout.addWidget(remove_button)
             widget.setLayout(layout)
@@ -3252,12 +3177,8 @@ class PostDownloaderTab(QWidget):
                     "INFO",
                 )
                 thread.deleteLater()
-            self.post_file_progress.setStyleSheet(
-                "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
-            )
-            self.post_overall_progress.setStyleSheet(
-                "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
-            )
+            set_progress_state(self.post_file_progress, "paused")
+            set_progress_state(self.post_overall_progress, "paused")
             self.post_file_progress_label.setText(translate("downloads_terminated"))
             self.post_overall_progress_label.setText(translate("downloads_terminated"))
             self.active_threads.clear()
@@ -3390,12 +3311,8 @@ class PostDownloaderTab(QWidget):
             and len(self.completed_files) + len(self.failed_files)
             >= self.total_files_to_download
         ):
-            self.post_file_progress.setStyleSheet(
-                "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
-            )
-            self.post_overall_progress.setStyleSheet(
-                "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
-            )
+            set_progress_state(self.post_file_progress, "done")
+            set_progress_state(self.post_overall_progress, "done")
             self.post_overall_progress_label.setText(translate("downloads_complete"))
 
             # Fast mode: safety-net bulk removal (items should already be gone)
@@ -3592,7 +3509,6 @@ class PostDownloaderTab(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(5)
         check_box = QCheckBox()
-        check_box.setStyleSheet("color: white;")
         initial_state = self.checked_urls.get(url, True)
         check_box.setChecked(initial_state)
         check_box.clicked.connect(lambda: self.toggle_checkbox_state(url))
@@ -3600,7 +3516,6 @@ class PostDownloaderTab(QWidget):
             check_box.setEnabled(False)
         layout.addWidget(check_box)
         label = QLabel(text)
-        label.setStyleSheet("color: white;")
         label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(label, stretch=1)
         if self._is_preview_only(url):

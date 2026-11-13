@@ -30,7 +30,7 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import translate
-from kemonodownloader.kd_motion import hover_highlight
+from kemonodownloader.kd_theme import set_role, set_tone
 
 # Bright enough to read on the consoles' navy backgrounds.
 _LEVEL_COLORS = {"INFO": "#6FD08C", "WARNING": "#F5C451", "ERROR": "#FF7A7A"}
@@ -75,43 +75,6 @@ def log_font() -> QFont:
     return font
 
 
-_WINDOW_STYLE = """
-QDialog#kdLogsWindow { background: #1A2B4A; }
-QLabel#kdLogsTitle { color: #FFFFFF; font-size: 16px; font-weight: 600; }
-QLabel#kdLogsMeta { color: #9FB3D9; font-size: 12px; }
-QLabel#kdLogsMatches { color: #9FB3D9; font-size: 12px; }
-QLabel#kdLogsMatches[noMatch="true"] { color: #FF7A7A; }
-QLineEdit#kdLogsSearch {
-    background: #22324F; color: #FFFFFF; border: 1px solid #34486C;
-    border-radius: 6px; padding: 5px 8px; selection-background-color: #3D5A8F;
-}
-QLineEdit#kdLogsSearch:focus { border-color: #6F8FC9; }
-QTextEdit#kdLogsView {
-    background: #121E33; color: #E6EDF7; border: 1px solid #2C3F62;
-    border-radius: 8px; selection-background-color: #3D5A8F;
-}
-QTextEdit#kdLogsView QScrollBar:vertical {
-    background: transparent; width: 12px; margin: 6px 3px 6px 0;
-}
-QTextEdit#kdLogsView QScrollBar::handle:vertical {
-    background: #3A4F77; border-radius: 4px; min-height: 32px;
-}
-QTextEdit#kdLogsView QScrollBar::handle:vertical:hover { background: #4D6696; }
-QTextEdit#kdLogsView QScrollBar:horizontal {
-    background: transparent; height: 12px; margin: 0 6px 3px 6px;
-}
-QTextEdit#kdLogsView QScrollBar::handle:horizontal {
-    background: #3A4F77; border-radius: 4px; min-width: 32px;
-}
-QTextEdit#kdLogsView QScrollBar::add-line, QTextEdit#kdLogsView QScrollBar::sub-line {
-    width: 0; height: 0;
-}
-QTextEdit#kdLogsView QScrollBar::add-page, QTextEdit#kdLogsView QScrollBar::sub-page {
-    background: none;
-}
-"""
-
-
 class LogsWindowBase(QDialog):
     """A full-size, live view of a downloader tab's console.
 
@@ -129,12 +92,10 @@ class LogsWindowBase(QDialog):
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        self.setObjectName("kdLogsWindow")
         self.setWindowTitle(translate("full_logs"))
         self.setModal(False)
         self.resize(900, 620)
         self.setMinimumSize(560, 380)
-        self.setStyleSheet(_WINDOW_STYLE)
 
         self._source_doc: Optional[QTextDocument] = None
         self._synced_end = 0
@@ -166,15 +127,14 @@ class LogsWindowBase(QDialog):
         icon.setPixmap(qta.icon("fa5s.stream", color="#A0C0FF").pixmap(18, 18))
         header.addWidget(icon)
         self.title_label = QLabel()
-        self.title_label.setObjectName("kdLogsTitle")
+        set_role(self.title_label, "title")
         header.addWidget(self.title_label)
         self.line_count_label = QLabel()
-        self.line_count_label.setObjectName("kdLogsMeta")
+        set_role(self.line_count_label, "muted")
         header.addWidget(self.line_count_label)
         header.addStretch()
 
         self.search_input = QLineEdit()
-        self.search_input.setObjectName("kdLogsSearch")
         self.search_input.setClearButtonEnabled(True)
         self.search_input.addAction(
             qta.icon("fa5s.search", color="#9FB3D9"),
@@ -185,7 +145,7 @@ class LogsWindowBase(QDialog):
         self.search_input.returnPressed.connect(self._on_search_return)
         header.addWidget(self.search_input)
         self.match_label = QLabel()
-        self.match_label.setObjectName("kdLogsMatches")
+        set_role(self.match_label, "muted")
         header.addWidget(self.match_label)
         self.find_prev_btn = self._icon_button("fa5s.chevron-up")
         self.find_prev_btn.clicked.connect(lambda: self.find_in_logs(backward=True))
@@ -196,7 +156,7 @@ class LogsWindowBase(QDialog):
         layout.addLayout(header)
 
         self.logs_display = QTextEdit()
-        self.logs_display.setObjectName("kdLogsView")
+        set_role(self.logs_display, "console")
         self.logs_display.setReadOnly(True)
         self.logs_display.setFont(log_font())
         self.logs_display.document().setDocumentMargin(10)
@@ -214,15 +174,11 @@ class LogsWindowBase(QDialog):
         self.download_logs_btn = self._text_button("fa5s.save")
         self.download_logs_btn.clicked.connect(self.download_logs)
         footer.addWidget(self.download_logs_btn)
-        self.clear_logs_btn = self._text_button(
-            "fa5s.trash-alt", hover="#A0505E", pressed="#7A3A46"
-        )
+        self.clear_logs_btn = self._text_button("fa5s.trash-alt", "danger")
         self.clear_logs_btn.clicked.connect(self.clear_logs)
         footer.addWidget(self.clear_logs_btn)
         footer.addStretch()
-        self.jump_btn = self._text_button(
-            "fa5s.arrow-down", base="#3D6FB6", hover="#4F83CC", pressed="#2F5A96"
-        )
+        self.jump_btn = self._text_button("fa5s.arrow-down", "primary")
         self.jump_btn.clicked.connect(self.jump_to_latest)
         self.jump_btn.hide()
         footer.addWidget(self.jump_btn)
@@ -238,15 +194,15 @@ class LogsWindowBase(QDialog):
 
         self.update_ui_text()
 
-    def _text_button(self, icon_name: str, **colors: str) -> QPushButton:
+    def _text_button(self, icon_name: str, role: Optional[str] = None) -> QPushButton:
         button = QPushButton(qta.icon(icon_name, color="white"), "")
-        hover_highlight(button, padding="6px 14px", **colors)
+        set_role(button, role)
         return button
 
     def _icon_button(self, icon_name: str) -> QPushButton:
         button = QPushButton(qta.icon(icon_name, color="white"), "")
         button.setFixedSize(30, 30)
-        hover_highlight(button, padding="0px")
+        set_role(button, "icon")
         return button
 
     def update_ui_text(self) -> None:
@@ -519,13 +475,7 @@ class LogsWindowBase(QDialog):
         else:
             text = counted("logs_match_count", count)
         self.match_label.setText(text)
-        no_match = bool(needle) and not count
-        if self.match_label.property("noMatch") != no_match:
-            self.match_label.setProperty("noMatch", no_match)
-            style = self.match_label.style()
-            if style is not None:
-                style.unpolish(self.match_label)
-                style.polish(self.match_label)
+        set_tone(self.match_label, "error" if needle and not count else None)
 
     # ------------------------------------------------------------- actions --
     def copy_logs(self) -> None:

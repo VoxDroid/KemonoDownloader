@@ -1,14 +1,11 @@
-"""The full-logs window's live mirroring and the tab buttons' hover highlight."""
+"""The full-logs window's live mirroring of a tab's console."""
 
 import pytest
-from PyQt6.QtCore import QEvent
-from PyQt6.QtWidgets import QApplication, QHBoxLayout, QPushButton, QTextEdit, QWidget
+from PyQt6.QtWidgets import QApplication, QTextEdit, QWidget
 
-from kemonodownloader import creator_downloader as cd
-from kemonodownloader import post_downloader as pd
+from kemonodownloader import creator_downloader as cd, post_downloader as pd
 from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_logs import counted, format_log_line
-from kemonodownloader.kd_motion import HOVER_MS, HoverHighlight, hover_highlight
 
 
 def _console(lines=300, width=320):
@@ -173,7 +170,7 @@ def test_search_highlights_and_wraps(qapp, live):
 
     window.search_input.setText("absent")
     assert window.match_label.text() == translate("logs_no_matches")
-    assert window.match_label.property("noMatch") is True
+    assert window.match_label.property("kdTone") == "error"
     assert not window.find_in_logs()
 
     window.search_input.clear()
@@ -229,88 +226,3 @@ def test_creator_window_follows_the_creator_console(qapp):
     finally:
         tab.deleteLater()
         console.deleteLater()
-
-
-# --------------------------------------------------------------- hovering --
-
-
-def _hover(qapp, button, entered):
-    event = QEvent(QEvent.Type.Enter if entered else QEvent.Type.Leave)
-    QApplication.sendEvent(button, event)
-    animation = button.findChild(HoverHighlight)._fade
-    animation.setCurrentTime(HOVER_MS)
-    qapp.processEvents()
-
-
-@pytest.fixture
-def row(qapp):
-    host = QWidget()
-    layout = QHBoxLayout(host)
-    buttons = [QPushButton("x") for _ in range(3)]
-    for button in buttons:
-        hover_highlight(button)
-        layout.addWidget(button)
-    host.resize(360, 60)
-    host.show()
-    _settle(qapp)
-    yield buttons
-    host.deleteLater()
-    _settle(qapp)
-
-
-def test_hovering_never_changes_button_geometry(qapp, row):
-    before = [button.geometry() for button in row]
-    for _ in range(6):  # quick passes back and forth used to deform them
-        for button in row:
-            _hover(qapp, button, True)
-            _hover(qapp, button, False)
-    _hover(qapp, row[0], True)
-    assert [button.geometry() for button in row] == before
-
-
-def test_hover_changes_only_colours(qapp, row):
-    button = row[0]
-    resting = button.styleSheet()
-    _hover(qapp, button, True)
-    hovered = button.styleSheet()
-    assert hovered != resting
-    assert "#5e77a3" in hovered
-    _hover(qapp, button, False)
-    assert button.styleSheet() == resting
-
-
-def test_disabled_buttons_do_not_light_up(qapp, row):
-    button = row[1]
-    resting = button.styleSheet()
-    _hover(qapp, button, True)
-    button.setEnabled(False)
-    qapp.processEvents()
-    assert button.styleSheet() == resting
-    _hover(qapp, button, True)
-    assert button.styleSheet() == resting
-
-
-def test_hover_highlight_is_installed_once(qapp):
-    button = QPushButton()
-    first = hover_highlight(button)
-    assert hover_highlight(button) is first
-    assert len(button.findChildren(HoverHighlight)) == 1
-
-
-def test_tab_buttons_use_the_hover_highlight():
-    import inspect
-
-    for module in (pd, cd):
-        source = inspect.getsource(module)
-        assert ".enterEvent =" not in source
-        assert ".leaveEvent =" not in source
-    post_source = inspect.getsource(pd.PostDownloaderTab)
-    creator_source = inspect.getsource(cd.CreatorDownloaderTab)
-    for name in ("post_download_btn", "post_cancel_btn", "post_expand_logs_btn"):
-        assert f"hover_highlight(self.{name})" in post_source
-    for name in (
-        "creator_download_btn",
-        "creator_cancel_btn",
-        "creator_expand_logs_btn",
-    ):
-        assert f"hover_highlight(self.{name})" in creator_source

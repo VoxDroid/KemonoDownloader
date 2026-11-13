@@ -57,6 +57,7 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_theme import set_role, set_tone
 
 SORT_ROLE = Qt.ItemDataRole.UserRole + 1
 
@@ -78,44 +79,6 @@ _STATUS_COLORS = {
     STATUS_CANCELLED: "#B0B8C8",
 }
 _MISSING_COLOR = "#FF7B7B"
-
-BUTTON_STYLE = (
-    "QPushButton { background: #4A5B7A; color: white; padding: 6px 12px;"
-    " border-radius: 5px; }"
-    "QPushButton:hover { background: #5A6B8A; }"
-    "QPushButton:pressed { background: #3A4B6A; }"
-    "QPushButton:disabled { background: #3A4560; color: #8A93A6; }"
-)
-INPUT_STYLE = (
-    "padding: 6px; border-radius: 5px; background: #2A3B5A; color: white;"
-    " border: 1px solid #3A4B6A;"
-)
-TABLE_STYLE = """
-QTableView {
-    background: #2A3B5A;
-    alternate-background-color: #2F4163;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    gridline-color: transparent;
-    selection-background-color: #4A6B9A;
-    selection-color: white;
-}
-QHeaderView::section {
-    background: #3A4B6A;
-    color: white;
-    padding: 6px;
-    border: none;
-}
-QTableCornerButton::section { background: #3A4B6A; border: none; }
-QScrollBar:vertical {
-    border: none; background: #3A4B6A; width: 10px; border-radius: 5px;
-}
-QScrollBar::handle:vertical {
-    background: #4A5B7A; min-height: 20px; border-radius: 5px;
-}
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0px; }
-"""
 
 
 def format_size(size: Optional[int]) -> str:
@@ -427,7 +390,6 @@ def _make_table(model, proxy) -> QTableView:
     proxy.setSourceModel(model)
     table = QTableView()
     table.setModel(proxy)
-    table.setStyleSheet(TABLE_STYLE)
     table.setAlternatingRowColors(True)
     table.setSortingEnabled(True)
     table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -461,7 +423,6 @@ def _size_columns(table: QTableView, widths: dict, stretch: Tuple[int, ...]) -> 
 
 def _button(icon: str, handler: Callable) -> QPushButton:
     button = QPushButton(qta.icon(icon, color="white"), "")
-    button.setStyleSheet(BUTTON_STYLE)
     button.clicked.connect(handler)
     return button
 
@@ -499,21 +460,12 @@ class HistoryTab(QWidget):
 
         self.storage_warning = QLabel()
         self.storage_warning.setWordWrap(True)
-        self.storage_warning.setStyleSheet(
-            "color: #E8C468; background: #3A3524; padding: 8px; border-radius: 5px;"
-        )
+        set_role(self.storage_warning, "notice")
         self.storage_warning.setVisible(False)
         layout.addWidget(self.storage_warning)
 
         self.views = QTabWidget()
         self.views.setDocumentMode(True)
-        self.views.setStyleSheet(
-            "QTabBar::tab { background: #2A3B5A; color: white; padding: 8px 18px;"
-            " margin-right: 2px; border-top-left-radius: 6px;"
-            " border-top-right-radius: 6px; }"
-            "QTabBar::tab:selected { background: #4A5B7A; }"
-            "QTabWidget::pane { border: none; }"
-        )
         self.views.addTab(
             self._build_history_page(), qta.icon("fa5s.history", color="white"), ""
         )
@@ -535,7 +487,7 @@ class HistoryTab(QWidget):
             model.setParent(self)
 
         self.status_label = QLabel()
-        self.status_label.setStyleSheet("color: #A0C0FF;")
+        set_tone(self.status_label, "info")
         layout.addWidget(self.status_label)
         # A Qt slot, not a Python lambda: nothing to call back into Python.
         self._status_clear.timeout.connect(self.status_label.clear)
@@ -547,21 +499,18 @@ class HistoryTab(QWidget):
 
         toolbar = QHBoxLayout()
         self.history_search = QLineEdit()
-        self.history_search.setStyleSheet(INPUT_STYLE)
         self.history_search.setClearButtonEnabled(True)
         toolbar.addWidget(self.history_search, stretch=1)
         self.kind_filter = QComboBox()
-        self.kind_filter.setStyleSheet(INPUT_STYLE)
         toolbar.addWidget(self.kind_filter)
         self.record_check = QCheckBox()
-        self.record_check.setStyleSheet("color: white;")
         self.record_check.setChecked(self.store.recording_enabled)
         self.record_check.toggled.connect(self._set_recording)
         toolbar.addWidget(self.record_check)
         layout.addLayout(toolbar)
 
         self.summary_label = QLabel()
-        self.summary_label.setStyleSheet("color: #D0D0D0; padding: 2px 0;")
+        set_role(self.summary_label, "soft")
         layout.addWidget(self.summary_label)
 
         self.history_model = HistoryModel()
@@ -630,7 +579,6 @@ class HistoryTab(QWidget):
 
         add_row = QHBoxLayout()
         self.favorite_input = QLineEdit()
-        self.favorite_input.setStyleSheet(INPUT_STYLE)
         self.favorite_input.returnPressed.connect(self.add_favorite_from_input)
         add_row.addWidget(self.favorite_input, stretch=1)
         self.favorite_add_btn = _button("fa5s.star", self.add_favorite_from_input)
@@ -638,7 +586,6 @@ class HistoryTab(QWidget):
         layout.addLayout(add_row)
 
         self.favorites_search = QLineEdit()
-        self.favorites_search.setStyleSheet(INPUT_STYLE)
         self.favorites_search.setClearButtonEnabled(True)
         layout.addWidget(self.favorites_search)
 
@@ -706,9 +653,7 @@ class HistoryTab(QWidget):
         label = QLabel()
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setWordWrap(True)
-        label.setStyleSheet(
-            "color: #8A93A6; background: #2A3B5A; border-radius: 5px; padding: 30px;"
-        )
+        set_role(label, "empty")
         return label
 
     @staticmethod

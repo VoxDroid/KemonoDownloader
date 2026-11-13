@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import language_manager, translate
+from kemonodownloader.kd_theme import set_role, set_tone
 
 # The SOCKS port configured for the Tor process this app starts (and Tor's
 # default). socks5h makes Tor resolve host names too, so DNS doesn't leak.
@@ -256,15 +257,11 @@ class SettingsTab(QWidget):
 
         # Folder Settings Group
         self.folder_group = QGroupBox()
-        self.folder_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         folder_layout = QGridLayout()
 
         self.folder_name_label = QLabel()
         folder_layout.addWidget(self.folder_name_label, 0, 0)
         self.folder_name_input = QLineEdit(self.temp_settings["base_folder_name"])
-        self.folder_name_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.folder_name_input.textChanged.connect(
             lambda: self.update_temp_setting(
                 "base_folder_name", self.folder_name_input.text()
@@ -275,7 +272,6 @@ class SettingsTab(QWidget):
         self.directory_label = QLabel()
         folder_layout.addWidget(self.directory_label, 1, 0)
         self.directory_input = QLineEdit(self.temp_settings["base_directory"])
-        self.directory_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.directory_input.textChanged.connect(
             lambda: self.update_temp_setting(
                 "base_directory", self.directory_input.text()
@@ -284,16 +280,10 @@ class SettingsTab(QWidget):
         folder_layout.addWidget(self.directory_input, 1, 1)
 
         self.browse_button = QPushButton()
-        self.browse_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.browse_button.clicked.connect(self.browse_directory)
         folder_layout.addWidget(self.browse_button, 1, 2)
 
         self.open_directory_button = QPushButton()
-        self.open_directory_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.open_directory_button.clicked.connect(self.open_app_directory)
         folder_layout.addWidget(self.open_directory_button, 1, 3)
 
@@ -302,9 +292,6 @@ class SettingsTab(QWidget):
 
         # Download Settings Group
         self.download_group = QGroupBox()
-        self.download_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         download_layout = QGridLayout()
 
         self.simultaneous_downloads_label = QLabel()
@@ -312,16 +299,11 @@ class SettingsTab(QWidget):
         self.download_slider = QSlider(Qt.Orientation.Horizontal)
         self.download_slider.setRange(1, 20)
         self.download_slider.setValue(self.temp_settings["simultaneous_downloads"])
-        self.download_slider.setStyleSheet(
-            "QSlider::groove:horizontal { border: 1px solid #4A5B7A; height: 8px; background: #2A3B5A; margin: 2px 0; }"
-            "QSlider::handle:horizontal { background: #4A5B7A; width: 18px; margin: -2px 0; border-radius: 9px; }"
-        )
         self.download_slider.valueChanged.connect(self.update_simultaneous_downloads)
         download_layout.addWidget(self.download_slider, 0, 1)
         self.download_spinbox = QSpinBox()
         self.download_spinbox.setRange(1, 20)
         self.download_spinbox.setValue(self.temp_settings["simultaneous_downloads"])
-        self.download_spinbox.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.download_spinbox.valueChanged.connect(self.update_simultaneous_downloads)
         download_layout.addWidget(self.download_spinbox, 0, 2)
 
@@ -329,9 +311,7 @@ class SettingsTab(QWidget):
             qta.icon("fa5s.info-circle", color="#A0C0FF"), ""
         )
         self.pawchive_policy_info_button.setFixedSize(28, 28)
-        self.pawchive_policy_info_button.setStyleSheet(
-            "background: #4A5B7A; border-radius: 5px;"
-        )
+        set_role(self.pawchive_policy_info_button, "icon")
         self.pawchive_policy_info_button.clicked.connect(self.show_pawchive_policy_info)
         download_layout.addWidget(self.pawchive_policy_info_button, 0, 3)
 
@@ -339,7 +319,6 @@ class SettingsTab(QWidget):
         self.save_previews_checkbox.setChecked(
             self.temp_settings.get("save_preview_images", False)
         )
-        self.save_previews_checkbox.setStyleSheet("color: white;")
         self.save_previews_checkbox.stateChanged.connect(
             lambda state: self.update_temp_setting(
                 "save_preview_images", state == Qt.CheckState.Checked.value
@@ -352,9 +331,6 @@ class SettingsTab(QWidget):
 
         # Retry Settings Group
         self.retry_group = QGroupBox()
-        self.retry_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         retry_layout = QGridLayout()
 
         self.creator_posts_max_attempts_label = QLabel()
@@ -363,9 +339,6 @@ class SettingsTab(QWidget):
         self.creator_posts_max_attempts_spinbox.setRange(1, 1000)
         self.creator_posts_max_attempts_spinbox.setValue(
             self.temp_settings["creator_posts_max_attempts"]
-        )
-        self.creator_posts_max_attempts_spinbox.setStyleSheet(
-            "padding: 5px; border-radius: 5px;"
         )
         self.creator_posts_max_attempts_spinbox.valueChanged.connect(
             lambda value: self.update_temp_setting("creator_posts_max_attempts", value)
@@ -379,9 +352,6 @@ class SettingsTab(QWidget):
         self.post_data_max_retries_spinbox.setValue(
             self.temp_settings["post_data_max_retries"]
         )
-        self.post_data_max_retries_spinbox.setStyleSheet(
-            "padding: 5px; border-radius: 5px;"
-        )
         self.post_data_max_retries_spinbox.valueChanged.connect(
             lambda value: self.update_temp_setting("post_data_max_retries", value)
         )
@@ -393,9 +363,6 @@ class SettingsTab(QWidget):
         self.file_download_max_retries_spinbox.setRange(1, 200)
         self.file_download_max_retries_spinbox.setValue(
             self.temp_settings["file_download_max_retries"]
-        )
-        self.file_download_max_retries_spinbox.setStyleSheet(
-            "padding: 5px; border-radius: 5px;"
         )
         self.file_download_max_retries_spinbox.valueChanged.connect(
             lambda value: self.update_temp_setting("file_download_max_retries", value)
@@ -409,9 +376,6 @@ class SettingsTab(QWidget):
         self.api_request_max_retries_spinbox.setValue(
             self.temp_settings["api_request_max_retries"]
         )
-        self.api_request_max_retries_spinbox.setStyleSheet(
-            "padding: 5px; border-radius: 5px;"
-        )
         self.api_request_max_retries_spinbox.valueChanged.connect(
             lambda value: self.update_temp_setting("api_request_max_retries", value)
         )
@@ -422,9 +386,6 @@ class SettingsTab(QWidget):
 
         # Creator downloader customization group
         self.creator_custom_group = QGroupBox()
-        self.creator_custom_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         creator_custom_layout = QGridLayout()
 
         self.creator_custom_label = QLabel()
@@ -464,7 +425,6 @@ class SettingsTab(QWidget):
             )
             self.creator_filename_combo.setEditText(current_tpl)
 
-        self.creator_filename_combo.setStyleSheet("padding: 5px; border-radius: 5px;")
         # Connect both change events
         self.creator_filename_combo.currentIndexChanged.connect(
             lambda idx: self.update_temp_setting(
@@ -484,9 +444,8 @@ class SettingsTab(QWidget):
 
         # Help button for template variables
         self.creator_template_help_btn = QPushButton("?")
-        self.creator_template_help_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px; min-width: 26px; max-width: 26px;"
-        )
+        set_role(self.creator_template_help_btn, "icon")
+        self.creator_template_help_btn.setFixedSize(30, 30)
         self.creator_template_help_btn.clicked.connect(self.show_template_help)
         creator_custom_layout.addWidget(self.creator_template_help_btn, 0, 2)
 
@@ -502,9 +461,6 @@ class SettingsTab(QWidget):
         )
         self.creator_folder_strategy_combo.addItem(
             translate("subfolders_by_file_type"), "by_file_type"
-        )
-        self.creator_folder_strategy_combo.setStyleSheet(
-            "padding: 5px; border-radius: 5px;"
         )
         # Set current index based on temp setting
         strategy = self.temp_settings.get("creator_folder_strategy", "per_post")
@@ -525,20 +481,12 @@ class SettingsTab(QWidget):
 
         # Update Settings Group
         self.update_group = QGroupBox()
-        self.update_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         update_layout = QGridLayout()
 
         self.auto_update_label = QLabel()
         update_layout.addWidget(self.auto_update_label, 0, 0)
         self.auto_update_checkbox = QCheckBox()
         self.auto_update_checkbox.setChecked(self.temp_settings["auto_check_updates"])
-        self.auto_update_checkbox.setStyleSheet(
-            "QCheckBox::indicator { width: 16px; height: 16px; }"
-            "QCheckBox::indicator:unchecked { background: #2A3B5A; border: 1px solid #4A5B7A; }"
-            "QCheckBox::indicator:checked { background: #4A6B9A; border: 1px solid #5A7BA9; }"
-        )
         self.auto_update_checkbox.stateChanged.connect(
             lambda state: self.update_temp_setting(
                 "auto_check_updates", state == Qt.CheckState.Checked.value
@@ -551,9 +499,6 @@ class SettingsTab(QWidget):
 
         # Language Settings Group
         self.language_group = QGroupBox()
-        self.language_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         language_layout = QGridLayout()
 
         self.language_label = QLabel()
@@ -562,7 +507,6 @@ class SettingsTab(QWidget):
         self.language_combo = QComboBox()
         self.update_language_combo()
 
-        self.language_combo.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.language_combo.currentIndexChanged.connect(self.update_language)
         language_layout.addWidget(self.language_combo, 0, 1)
 
@@ -571,9 +515,6 @@ class SettingsTab(QWidget):
 
         # Font Settings Group
         self.font_group = QGroupBox()
-        self.font_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         font_layout = QGridLayout()
 
         self.font_label = QLabel()
@@ -586,7 +527,6 @@ class SettingsTab(QWidget):
         ]
         for display_name, font_family in self._available_fonts:
             self.font_combo.addItem(display_name, font_family)
-        self.font_combo.setStyleSheet("padding: 5px; border-radius: 5px;")
 
         # Set current font selection
         current_font = self.temp_settings.get("font", "JetBrains Mono")
@@ -602,18 +542,10 @@ class SettingsTab(QWidget):
 
         # Enable proxy checkbox (outside the proxy group so it's always visible)
         self.use_proxy_checkbox = QCheckBox()
-        self.use_proxy_checkbox.setStyleSheet(
-            "QCheckBox::indicator { width: 16px; height: 16px; }"
-            "QCheckBox::indicator:unchecked { background: #2A3B5A; border: 1px solid #4A5B7A; }"
-            "QCheckBox::indicator:checked { background: #4A6B9A; border: 1px solid #5A7BA9; }"
-        )
         self.use_proxy_checkbox.stateChanged.connect(self.on_use_proxy_changed)
 
         # Proxy Settings Group
         self.proxy_group = QGroupBox()
-        self.proxy_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         self.proxy_group.setVisible(
             False
         )  # Start hidden, will be shown by on_use_proxy_changed
@@ -627,7 +559,6 @@ class SettingsTab(QWidget):
         self.proxy_type_combo = QComboBox()
         self.proxy_type_combo.addItem(translate("custom_proxy"), "custom")
         self.proxy_type_combo.addItem("Tor", "tor")
-        self.proxy_type_combo.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.proxy_type_combo.currentIndexChanged.connect(self.on_proxy_type_changed)
 
         # Block signals during initialization to prevent premature UI updates
@@ -655,7 +586,6 @@ class SettingsTab(QWidget):
         self.custom_proxy_layout.addWidget(self.custom_proxy_label)
 
         self.custom_proxy_input = QLineEdit(self.temp_settings["custom_proxy_url"])
-        self.custom_proxy_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.custom_proxy_input.setPlaceholderText("e.g., 111.222.333.444:8080")
         self.custom_proxy_input.textChanged.connect(
             lambda: self.update_temp_setting(
@@ -665,9 +595,6 @@ class SettingsTab(QWidget):
         self.custom_proxy_layout.addWidget(self.custom_proxy_input)
 
         self.test_custom_proxy_button = QPushButton()
-        self.test_custom_proxy_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.test_custom_proxy_button.clicked.connect(self.test_custom_proxy)
         self.custom_proxy_layout.addWidget(self.test_custom_proxy_button)
 
@@ -680,59 +607,39 @@ class SettingsTab(QWidget):
 
         tor_path_layout = QHBoxLayout()
         self.tor_path_input = QLineEdit(self.temp_settings["tor_path"])
-        self.tor_path_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.tor_path_input.setReadOnly(True)
         self.tor_path_input.textChanged.connect(self.update_tor_button_states)
         tor_path_layout.addWidget(self.tor_path_input)
 
         self.browse_tor_button = QPushButton()
-        self.browse_tor_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.browse_tor_button.clicked.connect(self.browse_tor_executable)
         tor_path_layout.addWidget(self.browse_tor_button)
 
         self.start_tor_button = QPushButton()
-        self.start_tor_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.start_tor_button.clicked.connect(self.start_tor)
         tor_path_layout.addWidget(self.start_tor_button)
 
         self.stop_tor_button = QPushButton()
-        self.stop_tor_button.setStyleSheet(
-            "background: #7A4A4A; padding: 5px; border-radius: 5px;"
-        )
+        set_role(self.stop_tor_button, "danger")
         self.stop_tor_button.clicked.connect(self.stop_tor)
         tor_path_layout.addWidget(self.stop_tor_button)
 
         # Tor status label
         self.tor_status_label = QLabel(translate("tor_status_stopped"))
-        self.tor_status_label.setStyleSheet(
-            "color: #FF6B6B; font-weight: bold; margin-left: 10px;"
-        )
+        set_tone(self.tor_status_label, "error")
         self.tor_status_label.setVisible(False)
         tor_path_layout.addWidget(self.tor_status_label)
         tor_path_layout.addStretch()
 
         self.download_tor_button = QPushButton()
-        self.download_tor_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.download_tor_button.clicked.connect(self.download_tor)
         tor_path_layout.addWidget(self.download_tor_button)
 
         self.test_tor_button = QPushButton()
-        self.test_tor_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.test_tor_button.clicked.connect(self.test_tor)
         tor_path_layout.addWidget(self.test_tor_button)
 
         self.help_tor_button = QPushButton(translate("help_button"))
-        self.help_tor_button.setStyleSheet(
-            "background: #5A6B8A; padding: 5px; border-radius: 5px;"
-        )
         self.help_tor_button.clicked.connect(self.show_tor_help)
         tor_path_layout.addWidget(self.help_tor_button)
 
@@ -740,23 +647,18 @@ class SettingsTab(QWidget):
 
         # Tor download progress bar
         self.tor_progress_bar = QProgressBar()
-        self.tor_progress_bar.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.tor_progress_bar.setVisible(False)
         self.tor_layout.addWidget(self.tor_progress_bar)
 
         # Tor output text area
         self.tor_output_label = QLabel("Tor Output:")
-        self.tor_output_label.setStyleSheet("font-weight: bold; margin-top: 10px;")
+        set_role(self.tor_output_label, "heading")
         self.tor_output_label.setVisible(False)
         self.tor_layout.addWidget(self.tor_output_label)
 
         self.tor_output_text = QTextEdit()
         self.tor_output_text.setMaximumHeight(150)
-        self.tor_output_text.setStyleSheet(
-            "QTextEdit { border: 1px solid #4A5B7A; border-radius: 5px; padding: 5px; background: #2A2A2A; color: #FFFFFF; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 10px; }"
-        )
+        set_role(self.tor_output_text, "console")
         self.tor_output_text.setReadOnly(True)
         self.tor_output_text.setVisible(False)
         self.tor_layout.addWidget(self.tor_output_text)
@@ -788,16 +690,12 @@ class SettingsTab(QWidget):
         buttons_layout = QHBoxLayout()
 
         self.apply_button = QPushButton()
-        self.apply_button.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        set_role(self.apply_button, "primary")
         self.apply_button.clicked.connect(self.confirm_and_apply_settings)
         buttons_layout.addWidget(self.apply_button)
 
         self.reset_button = QPushButton(translate("reset_to_defaults"))
-        self.reset_button.setStyleSheet(
-            "background: #7A4A5B; padding: 8px; border-radius: 5px;"
-        )
+        set_role(self.reset_button, "danger")
         self.reset_button.clicked.connect(self.confirm_and_reset_settings)
         buttons_layout.addWidget(self.reset_button)
 
@@ -1821,9 +1719,7 @@ GeoIPExcludeUnknown 1
         self.stop_tor_button.setEnabled(True)
         self.test_tor_button.setEnabled(True)
         self.tor_status_label.setText(translate("tor_status_starting"))
-        self.tor_status_label.setStyleSheet(
-            "color: #FFD93D; font-weight: bold; margin-left: 10px;"
-        )
+        set_tone(self.tor_status_label, "warning")
 
         # Disable proxy type selection while Tor is running
         self.proxy_type_combo.setEnabled(False)
@@ -1856,9 +1752,7 @@ GeoIPExcludeUnknown 1
         self.start_tor_button.setEnabled(True)
         self.stop_tor_button.setEnabled(False)
         self.tor_status_label.setText(translate("tor_status_stopped"))
-        self.tor_status_label.setStyleSheet(
-            "color: #FF6B6B; font-weight: bold; margin-left: 10px;"
-        )
+        set_tone(self.tor_status_label, "error")
 
         # Re-enable proxy type selection
         self.proxy_type_combo.setEnabled(True)
@@ -1995,9 +1889,7 @@ GeoIPExcludeUnknown 1
                 # Check for bootstrap completion
                 if "Bootstrapped 100%" in output:
                     self.tor_status_label.setText(translate("tor_status_running"))
-                    self.tor_status_label.setStyleSheet(
-                        "color: #6BCF7F; font-weight: bold; margin-left: 10px;"
-                    )
+                    set_tone(self.tor_status_label, "success")
                     QMessageBox.information(
                         self, translate("success"), translate("tor_running")
                     )
@@ -2042,9 +1934,7 @@ GeoIPExcludeUnknown 1
         self.start_tor_button.setEnabled(True)
         self.stop_tor_button.setEnabled(False)
         self.tor_status_label.setText(translate("tor_status_stopped"))
-        self.tor_status_label.setStyleSheet(
-            "color: #FF6B6B; font-weight: bold; margin-left: 10px;"
-        )
+        set_tone(self.tor_status_label, "error")
 
     def get_proxy_settings(self):
         """Return proxy settings for use with requests"""

@@ -3,6 +3,7 @@ from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QFrame, QLabel, QTextBrowser, QVBoxLayout, QWidget
 
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_theme import set_role
 
 # (title key, body key) for each section of the manual, in order.
 HELP_SECTIONS = [
@@ -40,17 +41,13 @@ class HelpTab(QWidget):
 
         panel = QFrame()
         panel.setObjectName("helpPanel")
-        panel.setStyleSheet(
-            "QFrame#helpPanel { background: #2A3B5A; border-radius: 5px; }"
-        )
+        set_role(panel, "card")
         panel_layout = QVBoxLayout(panel)
         panel_layout.setContentsMargins(10, 10, 4, 10)
         panel_layout.setSpacing(10)
 
         self.title_label = QLabel()
-        self.title_label.setStyleSheet(
-            "color: white; padding: 10px; background: transparent;"
-        )
+        set_role(self.title_label, "title")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         panel_layout.addWidget(self.title_label)
 
@@ -60,29 +57,7 @@ class HelpTab(QWidget):
         self.manual = QTextBrowser()
         self.manual.setOpenExternalLinks(True)
         self.manual.setFrameShape(QFrame.Shape.NoFrame)
-        self.manual.setStyleSheet(
-            """
-            QTextBrowser {
-                background: transparent;
-                border: none;
-            }
-            QScrollBar:vertical {
-                border: none;
-                background: #3A4B6A;
-                width: 10px;
-                margin: 0px 0px 0px 0px;
-                border-radius: 5px;
-            }
-            QScrollBar::handle:vertical {
-                background: #4A5B7A;
-                min-height: 20px;
-                border-radius: 5px;
-            }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                height: 0px;
-            }
-        """
-        )
+        set_role(self.manual, "plain")
         panel_layout.addWidget(self.manual, stretch=1)
         main_layout.addWidget(panel)
 

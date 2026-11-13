@@ -1062,8 +1062,13 @@ class TestPostDownloaderTab:
         assert url in post_tab.files_to_download
 
     def test_update_progress_bar_style(self, post_tab):
+        from kemonodownloader.kd_theme import set_progress_state
+
+        set_progress_state(post_tab.post_file_progress, "paused")
         post_tab.update_progress_bar_style()
-        assert "QProgressBar" in post_tab.post_file_progress.styleSheet()
+        # Back to the theme's normal colour, without an inline style.
+        assert post_tab.post_file_progress.property("kdState") is None
+        assert post_tab.post_file_progress.styleSheet() == ""
 
     def test_cleanup_thread(self, post_tab):
         mock_thread = MagicMock()

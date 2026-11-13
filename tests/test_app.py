@@ -164,13 +164,6 @@ class TestKemonoDownloader:
             # Test status logging
             window.log("Test log")
             assert window.status_label.text() == "Test log"
-
-            # Test animate_button (lines 570-578)
-            from PyQt6.QtWidgets import QPushButton
-
-            btn = QPushButton()
-            window.animate_button(btn, True)
-            window.animate_button(btn, False)
         finally:
             window.deleteLater()
 

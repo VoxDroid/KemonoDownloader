@@ -83,7 +83,7 @@ from kemonodownloader.history_store import (
 )
 from kemonodownloader.kd_language import translate
 from kemonodownloader.kd_logs import LogsWindowBase, format_log_line
-from kemonodownloader.kd_motion import SmoothProgressBar, hover_highlight
+from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     _thread_local,
     accept_language,
@@ -92,6 +92,7 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_user_agent,
 )
 from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
+from kemonodownloader.kd_theme import set_progress_state, set_role
 
 # get_domain_config is imported from domain_config; re-exported for
 # any callers that import it directly from this module.
@@ -204,9 +205,6 @@ class ImageModal(QDialog):
         self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._layout.addWidget(self._label)
         self._progress_bar = QProgressBar()
-        self._progress_bar.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self._layout.addWidget(self._progress_bar)
         self.setLayout(self._layout)
 
@@ -2324,32 +2322,22 @@ class CreatorDownloaderTab(QWidget):
         # Creator URL input layout
         creator_url_layout = QHBoxLayout()
         self.creator_url_input = QLineEdit()
-        self.creator_url_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         creator_url_layout.addWidget(self.creator_url_input)
 
         self.creator_add_to_queue_btn = QPushButton(
             qta.icon("fa5s.plus", color="white"), ""
         )
         self.creator_add_to_queue_btn.clicked.connect(self.add_creator_to_queue)
-        self.creator_add_to_queue_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         creator_url_layout.addWidget(self.creator_add_to_queue_btn)
 
         self.creator_add_from_file_btn = QPushButton(
             qta.icon("fa5s.file-import", color="white"), ""
         )
         self.creator_add_from_file_btn.clicked.connect(self.add_creators_from_file)
-        self.creator_add_from_file_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.creator_bookmark_btn = QPushButton(
             qta.icon("fa5s.star", color="white"), ""
         )
         self.creator_bookmark_btn.clicked.connect(self.bookmark_current_link)
-        self.creator_bookmark_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.creator_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))
         self.creator_add_from_file_btn.setToolTip(translate("add_links_from_file"))
         creator_url_layout.addWidget(self.creator_add_from_file_btn)
@@ -2361,9 +2349,6 @@ class CreatorDownloaderTab(QWidget):
         self.creator_multi_url_input.setPlaceholderText(
             translate("multi_url_placeholder_creator")
         )
-        self.creator_multi_url_input.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
-        )
         self.creator_multi_url_input.setFixedHeight(80)
         self.creator_multi_url_input.setVisible(False)
         left_layout.addWidget(self.creator_multi_url_input)
@@ -2374,32 +2359,20 @@ class CreatorDownloaderTab(QWidget):
         self.creator_multi_url_add_btn.clicked.connect(
             self.add_multiple_creators_to_queue
         )
-        self.creator_multi_url_add_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.creator_multi_url_add_btn.setVisible(False)
         left_layout.addWidget(self.creator_multi_url_add_btn)
 
         # Creator Queue Group
         self.creator_queue_group = QGroupBox()
-        self.creator_queue_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         creator_queue_layout = QVBoxLayout()
         self.creator_queue_list = QListWidget()
         self.creator_queue_list.setFixedHeight(100)
-        self.creator_queue_list.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px;"
-        )
         creator_queue_layout.addWidget(self.creator_queue_list)
         self.creator_queue_group.setLayout(creator_queue_layout)
         left_layout.addWidget(self.creator_queue_group)
 
         # Download Options Group
         self.creator_options_group = QGroupBox()
-        self.creator_options_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         creator_options_layout = QVBoxLayout()
 
         creator_categories_layout = QHBoxLayout()
@@ -2421,7 +2394,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_fast_mode_check = QCheckBox()
         self.creator_fast_mode_check.setChecked(False)
         self.creator_fast_mode_check.setIcon(qta.icon("fa5s.bolt", color="#FFD700"))
-        self.creator_fast_mode_check.setStyleSheet("color: white; font-weight: bold;")
+        set_role(self.creator_fast_mode_check, "heading")
         self.creator_fast_mode_check.stateChanged.connect(self.toggle_fast_mode)
         creator_fast_mode_layout.addWidget(self.creator_fast_mode_check)
 
@@ -2429,9 +2402,7 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.info-circle", color="#A0C0FF"), ""
         )
         self.creator_fast_mode_info_btn.setFixedSize(26, 26)
-        self.creator_fast_mode_info_btn.setStyleSheet(
-            "background: #4A5B7A; border-radius: 5px;"
-        )
+        set_role(self.creator_fast_mode_info_btn, "icon")
         self.creator_fast_mode_info_btn.setToolTip(translate("fast_mode_info_title"))
         self.creator_fast_mode_info_btn.clicked.connect(self.show_fast_mode_info)
         creator_fast_mode_layout.addWidget(self.creator_fast_mode_info_btn)
@@ -2441,17 +2412,14 @@ class CreatorDownloaderTab(QWidget):
         # Auto rename checkbox
         self.creator_auto_rename_check = QCheckBox()
         self.creator_auto_rename_check.setChecked(True)  # Default to enabled
-        self.creator_auto_rename_check.setStyleSheet("color: white;")
         creator_options_layout.addWidget(self.creator_auto_rename_check)
 
         # Download text checkbox
         self.creator_download_text_check = QCheckBox(translate("download_text"))
         self.creator_download_text_check.setChecked(True)
-        self.creator_download_text_check.setStyleSheet("color: white;")
         creator_options_layout.addWidget(self.creator_download_text_check)
 
         self.creator_ext_group = QGroupBox()
-        self.creator_ext_group.setStyleSheet("QGroupBox { color: white; }")
         creator_ext_layout = QGridLayout()
         creator_ext_layout.setHorizontalSpacing(20)
         creator_ext_layout.setVerticalSpacing(10)
@@ -2489,17 +2457,11 @@ class CreatorDownloaderTab(QWidget):
         self.creator_file_progress_label = QLabel()
         creator_progress_layout.addWidget(self.creator_file_progress_label)
         self.creator_file_progress = SmoothProgressBar()
-        self.creator_file_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.creator_file_progress.setRange(0, 100)
         creator_progress_layout.addWidget(self.creator_file_progress)
         self.creator_overall_progress_label = QLabel()
         creator_progress_layout.addWidget(self.creator_overall_progress_label)
         self.creator_overall_progress = SmoothProgressBar()
-        self.creator_overall_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.creator_overall_progress.setRange(0, 100)
         creator_progress_layout.addWidget(self.creator_overall_progress)
         left_layout.addLayout(creator_progress_layout)
@@ -2507,9 +2469,7 @@ class CreatorDownloaderTab(QWidget):
         # Console
         self.creator_console = QTextEdit()
         self.creator_console.setReadOnly(True)
-        self.creator_console.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px;"
-        )
+        set_role(self.creator_console, "console")
         left_layout.addWidget(self.creator_console)
 
         # Buttons layout
@@ -2518,11 +2478,11 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.download", color="white"), ""
         )
         self.creator_download_btn.clicked.connect(self.start_creator_download)
-        hover_highlight(self.creator_download_btn)
+        set_role(self.creator_download_btn, "primary")
         creator_btn_layout.addWidget(self.creator_download_btn)
         self.creator_cancel_btn = QPushButton(qta.icon("fa5s.times", color="white"), "")
         self.creator_cancel_btn.clicked.connect(self.cancel_creator_download)
-        hover_highlight(self.creator_cancel_btn)
+        set_role(self.creator_cancel_btn, "danger")
         self.creator_cancel_btn.setEnabled(False)
         creator_btn_layout.addWidget(self.creator_cancel_btn)
 
@@ -2530,7 +2490,6 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.expand", color="white"), ""
         )
         self.creator_expand_logs_btn.clicked.connect(self.expand_logs)
-        hover_highlight(self.creator_expand_logs_btn)
         self.creator_expand_logs_btn.setToolTip(translate("expand_logs"))
         creator_btn_layout.addWidget(self.creator_expand_logs_btn)
 
@@ -2545,10 +2504,6 @@ class CreatorDownloaderTab(QWidget):
         left_scroll.setWidgetResizable(True)
         left_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        left_scroll.setStyleSheet(
-            "QScrollArea { background: transparent; }"
-            "QScrollArea > QWidget > QWidget { background: transparent; }"
-        )
         layout.addWidget(left_scroll, stretch=2)
 
         # Right widget
@@ -2557,33 +2512,26 @@ class CreatorDownloaderTab(QWidget):
 
         # Posts to Download Group
         self.post_list_group = QGroupBox()
-        self.post_list_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         post_list_layout = QVBoxLayout()
 
         self.creator_search_input = QLineEdit()
-        self.creator_search_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.creator_search_input.textChanged.connect(self.filter_items)
         post_list_layout.addWidget(self.creator_search_input)
 
         checkbox_layout = QHBoxLayout()
         self.creator_check_all = QCheckBox()
         self.creator_check_all.setChecked(False)
-        self.creator_check_all.setStyleSheet("color: white;")
         self.creator_check_all.stateChanged.connect(self.toggle_check_all)
         checkbox_layout.addWidget(self.creator_check_all)
 
         self.creator_check_all_all = QCheckBox()
         self.creator_check_all_all.setChecked(False)
-        self.creator_check_all_all.setStyleSheet("color: white;")
         self.creator_check_all_all.stateChanged.connect(self.toggle_check_all_all)
         checkbox_layout.addWidget(self.creator_check_all_all)
 
         post_list_layout.addLayout(checkbox_layout)
 
         self.creator_post_list = QListWidget()
-        self.creator_post_list.setStyleSheet("background: #2A3B5A; border-radius: 5px;")
         self.creator_post_list.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection
         )
@@ -2595,21 +2543,18 @@ class CreatorDownloaderTab(QWidget):
 
         bottom_layout = QHBoxLayout()
         self.creator_post_count_label = QLabel()
-        self.creator_post_count_label.setStyleSheet("color: white;")
         bottom_layout.addWidget(self.creator_post_count_label)
 
         # Pagination controls
         self.page_label = QLabel()
-        self.page_label.setStyleSheet("color: white;")
         bottom_layout.addStretch()
         bottom_layout.addWidget(self.page_label)
 
         self.prev_page_btn = QPushButton(
             qta.icon("fa5s.chevron-left", color="white"), ""
         )
-        self.prev_page_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-        )
+        set_role(self.prev_page_btn, "icon")
+        self.prev_page_btn.setFixedSize(30, 30)
         self.prev_page_btn.clicked.connect(self.prev_page)
         self.prev_page_btn.setEnabled(False)
         bottom_layout.addWidget(self.prev_page_btn)
@@ -2617,18 +2562,16 @@ class CreatorDownloaderTab(QWidget):
         self.next_page_btn = QPushButton(
             qta.icon("fa5s.chevron-right", color="white"), ""
         )
-        self.next_page_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-        )
+        set_role(self.next_page_btn, "icon")
+        self.next_page_btn.setFixedSize(30, 30)
         self.next_page_btn.clicked.connect(self.next_page)
         self.next_page_btn.setEnabled(False)
         bottom_layout.addWidget(self.next_page_btn)
 
         bottom_layout.addStretch()
         self.creator_view_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-        self.creator_view_button.setStyleSheet(
-            "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-        )
+        set_role(self.creator_view_button, "icon")
+        self.creator_view_button.setFixedSize(30, 30)
         self.creator_view_button.clicked.connect(self.view_current_item)
         self.creator_view_button.setEnabled(False)
         bottom_layout.addWidget(self.creator_view_button)
@@ -2639,13 +2582,9 @@ class CreatorDownloaderTab(QWidget):
 
         # Background task indicators
         self.background_task_label = QLabel()
-        self.background_task_label.setStyleSheet("color: white;")
         right_layout.addWidget(self.background_task_label)
 
         self.background_task_progress = QProgressBar()
-        self.background_task_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         right_layout.addWidget(self.background_task_progress)
@@ -2698,10 +2637,9 @@ class CreatorDownloaderTab(QWidget):
         self.update_creator_queue_list()
 
     def update_progress_bar_style(self):
-        separator_style = "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        self.creator_file_progress.setStyleSheet(separator_style)
-        self.creator_overall_progress.setStyleSheet(separator_style)
-        self.background_task_progress.setStyleSheet(separator_style)
+        set_progress_state(self.creator_file_progress, None)
+        set_progress_state(self.creator_overall_progress, None)
+        set_progress_state(self.background_task_progress, None)
 
     def refresh_ui(self):
         self.update_progress_bar_style()
@@ -3024,23 +2962,20 @@ class CreatorDownloaderTab(QWidget):
             layout.setSpacing(5)
 
             view_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-            view_button.setStyleSheet(
-                "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-            )
+            set_role(view_button, "icon")
+            view_button.setFixedSize(30, 30)
             view_button.clicked.connect(self.create_view_handler(url, checked))
             layout.addWidget(view_button)
 
             label = QLabel(url)
-            label.setStyleSheet("color: white;")
             label.setAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
             )
             layout.addWidget(label, stretch=1)
 
             remove_button = QPushButton(qta.icon("fa5s.times", color="white"), "")
-            remove_button.setStyleSheet(
-                "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-            )
+            set_role(remove_button, "icon")
+            remove_button.setFixedSize(30, 30)
             remove_button.clicked.connect(self.create_remove_handler(url))
             layout.addWidget(remove_button)
 
@@ -4097,12 +4032,8 @@ class CreatorDownloaderTab(QWidget):
             self._cancellation_thread.deleteLater()
             self._cancellation_thread = None
 
-        self.creator_file_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
-        )
-        self.creator_overall_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
-        )
+        set_progress_state(self.creator_file_progress, "paused")
+        set_progress_state(self.creator_overall_progress, "paused")
         self.creator_file_progress_label.setText(translate("downloads_terminated"))
         self.creator_overall_progress_label.setText(translate("downloads_terminated"))
         self.downloading = False
@@ -4322,12 +4253,8 @@ class CreatorDownloaderTab(QWidget):
         self.missing_files_notice.show(self.unavailable_files & set(self.failed_files))
 
         # Always show Downloads Complete, even if some files failed
-        self.creator_file_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
-        )
-        self.creator_overall_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
-        )
+        set_progress_state(self.creator_file_progress, "done")
+        set_progress_state(self.creator_overall_progress, "done")
         self.creator_file_progress_label.setText(translate("downloads_complete"))
         self.creator_overall_progress_label.setText(translate("downloads_complete"))
 
@@ -4606,13 +4533,11 @@ class CreatorDownloaderTab(QWidget):
         layout.setSpacing(5)
 
         check_box = QCheckBox()
-        check_box.setStyleSheet("color: white;")
         check_box.setChecked(is_checked)
         check_box.clicked.connect(lambda: self.toggle_checkbox_state(text))
         layout.addWidget(check_box)
 
         label = QLabel(text)
-        label.setStyleSheet("color: white;")
         label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(label, stretch=1)
 
