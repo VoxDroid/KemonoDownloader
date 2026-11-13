@@ -119,10 +119,10 @@ As of **August 01, 2026**, primary full-resolution media download servers for **
 
 | Site / Server | Status | Last Checked |
 | :--- | :---: | :--- |
-| [Kemono.cr Media Server](https://kemono.cr) | 🔴 Intermittent / Unavailable | November 3, 2026 |
-| [Coomer.st Media Server](https://coomer.st) | 🔴 Intermittent / Unavailable | November 3, 2026 |
-| [Pawchive.pw Media Server](https://pawchive.pw) | 🟢 Available | November 3, 2026 |
-| Thumbnail Delivery Servers (`img.*`) | 🟢 Available | November 3, 2026 |
+| [Kemono.cr Media Server](https://kemono.cr) | 🔴 Intermittent / Unavailable | November 13, 2026 |
+| [Coomer.st Media Server](https://coomer.st) | 🔴 Intermittent / Unavailable | November 13, 2026 |
+| [Pawchive.pw Media Server](https://pawchive.pw) | 🟢 Available | November 13, 2026 |
+| Thumbnail Delivery Servers (`img.*`) | 🟢 Available | November 13, 2026 |
 
 *Note: Status reflects the availability of backend media download servers. Front-end availability and thumbnail servers may vary.*
 
