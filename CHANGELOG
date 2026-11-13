@@ -1,7 +1,7 @@
 # Kemono Downloader Release Notes
 
 ## v5.15.0 (13 November 2026)
-**feat: clear handling of preview-only and missing files, crash protection, Tor that never bypasses itself, and download reliability fixes**
+**feat: clear handling of preview-only and missing files, crash protection, Tor that never bypasses itself, a redesigned logs window, and download reliability fixes**
 
 - Explain files the site only has previews of, instead of failing on them.
   Pawchive lists many files whose full copy is gone and only the thumbnail remains (one creator had over 8,000). Downloading them failed with "404 Client Error" and was retried up to 50 times each, which looked like a broken app. The site marks these files, so the downloaders now recognise them before downloading: a warning window (it doesn't pause the downloads) explains why they can't be downloaded and lists them, and the Post tab shows them as "preview only" and doesn't let you select them. Progress counts no longer include them.
@@ -23,6 +23,12 @@
 
 - Retry incomplete downloads in the Creator tab.
   A file that arrived shorter than the server announced (usually a dropped connection) was deleted and given up after one attempt, whatever the retry setting; both tabs now retry it.
+
+- Keep your place in the full logs window, and redesign it.
+  Scrolling back through the logs during a download kept jumping, because the window and the tab's console shared one copy of the log and kept re-wrapping it at each other's width. The window now keeps its own copy and adds new lines as they arrive: at the bottom it follows them, and scrolled up it stays where you are while a button shows how many new lines are waiting. It also gets a monospace font, search with highlighted matches (Ctrl+F, Enter and Shift+Enter), a line count and a Copy All button, and log colours in both the window and the console are easier to read.
+
+- Stop the Download, Cancel and Expand Logs buttons from deforming.
+  The hover animation resized the buttons, which fought the layout: moving the pointer across them left them misshapen or shifted. Hovering now fades the button colour only, so the buttons keep their shape, and the Creator tab's Expand Logs button has the same effect.
 
 - Never bypass Tor when it is selected.
   With Tor chosen but not running, downloads used to go straight to the site, and without PySocks they used a Privoxy port the app never starts. Requests now always go through Tor's port and fail if Tor isn't available, so your IP address is never used by accident. A Tor service you run yourself on the default port also works.

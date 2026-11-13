@@ -203,7 +203,7 @@ KemonoDownloader offers a comprehensive set of features designed to efficiently 
 | **Cross-Platform GUI** | Modern PyQt6 interface for Windows, macOS, and Linux. |
 | **Multilingual Support** | Dynamic language switching between English, Japanese, Korean, and Simplified Chinese. |
 | **Media Playback** | Built-in video and GIF preview with play/pause/seek/volume controls. |
-| **Real-time Logging** | In-app console with progress bars and detailed status updates. |
+| **Real-time Logging** | In-app console with progress bars and detailed status updates, plus a full logs window with search, Copy All and Save that keeps your place while new lines arrive. |
 | **Smooth Interface** | Tabs are prepared while the intro is showing so Launch is instant; crossfades between screens and tabs, gliding mouse-wheel scrolling, and progress bars that ease to new values. |
 
 ### $\color{#90a4ae}{\sf{\text{Advanced Features}}}$

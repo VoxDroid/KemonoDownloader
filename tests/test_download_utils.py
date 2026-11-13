@@ -23,7 +23,7 @@ from kemonodownloader.download_utils import (
     safe_local_filename,
     wait_for_workers,
 )
-from kemonodownloader.kd_logs import format_log_line, share_console_document
+from kemonodownloader.kd_logs import format_log_line
 
 
 class FakeWorker:
@@ -181,21 +181,27 @@ def test_domain_refresh_rejects_malformed_lists(monkeypatch):
 
 def test_log_lines_escape_server_text():
     line = format_log_line("Title <b>bold</b> & co", "ERROR")
-    assert "color:red" in line
+    assert "color:#FF7A7A" in line
     assert "<b>" not in line
     assert "&lt;b&gt;" in line and "&amp;" in line
 
 
-def test_logs_window_shares_console_document(qapp):
+def test_logs_window_mirrors_console_without_sharing_its_document(qapp):
     from kemonodownloader.post_downloader import LogsWindow
 
     console = QTextEdit()
     console.append("first line")
     window = LogsWindow(console)
     try:
-        assert window.logs_display.document() is console.document()
+        # A shared document is laid out at both widgets' widths in turn,
+        # which moved the text under a reader scrolling the window.
+        assert window.logs_display.document() is not console.document()
         console.append("second line")
-        assert "second line" in window.logs_display.toPlainText()
+        window.refresh_now()
+        assert window.logs_display.toPlainText().splitlines() == [
+            "first line",
+            "second line",
+        ]
     finally:
         window.deleteLater()
 
@@ -209,9 +215,14 @@ def test_post_translate_does_not_repeat_formatted_args():
     assert pd.translate("no_such_key", 7) == "no_such_key: 7"
 
 
-def test_share_console_document_rejects_non_widgets(qapp):
-    view = QTextEdit()
-    assert share_console_document(view, object()) is False
+def test_logs_window_copies_html_from_non_widget_consoles(qapp):
+    from kemonodownloader.post_downloader import LogsWindow
+
+    window = LogsWindow(SimpleNamespace(toHtml=lambda: "<b>copied</b>"))
+    try:
+        assert window.logs_display.toPlainText() == "copied"
+    finally:
+        window.deleteLater()
 
 
 def test_creator_filter_reruns_for_text_typed_meanwhile(qapp, monkeypatch):

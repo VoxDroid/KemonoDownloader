@@ -82,8 +82,8 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
-from kemonodownloader.kd_logs import format_log_line, share_console_document
-from kemonodownloader.kd_motion import SmoothProgressBar
+from kemonodownloader.kd_logs import LogsWindowBase, format_log_line
+from kemonodownloader.kd_motion import SmoothProgressBar, hover_highlight
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     _thread_local,
     accept_language,
@@ -2184,89 +2184,21 @@ class CheckboxToggleThread(QThread):
         self.finished.emit(self.checked_urls, posts_to_download)
 
 
-class LogsWindow(QDialog):
+class LogsWindow(LogsWindowBase):
+    """Full logs window for the Creator tab; mirrors ``creator_console``."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._parent = parent
-        self.setWindowTitle(translate("full_logs"))
-        self.setModal(False)
-        self.resize(800, 600)
-        self.setStyleSheet("background: #1A2B4A; color: white;")
+        self.refresh_now()
 
-        layout = QVBoxLayout(self)
+    def _console(self):
+        return getattr(self._parent, "creator_console", None)
 
-        # Logs display
-        self.logs_display = QTextEdit()
-        self.logs_display.setReadOnly(True)
-        self.logs_display.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px;"
-        )
-        layout.addWidget(self.logs_display)
-
-        # Buttons layout
-        buttons_layout = QHBoxLayout()
-
-        self.clear_logs_btn = QPushButton(translate("clear_logs"))
-        self.clear_logs_btn.clicked.connect(self.clear_logs)
-        self.clear_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
-        buttons_layout.addWidget(self.clear_logs_btn)
-
-        self.download_logs_btn = QPushButton(translate("download_logs"))
-        self.download_logs_btn.clicked.connect(self.download_logs)
-        self.download_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
-        buttons_layout.addWidget(self.download_logs_btn)
-
-        buttons_layout.addStretch()
-        layout.addLayout(buttons_layout)
-
-        # Batch update with timer to reduce UI updates
-        from PyQt6.QtCore import QTimer
-
-        self.update_timer = QTimer()
-        self.update_timer.timeout.connect(self._do_update)
-        self.update_timer.setInterval(500)  # Update every 500ms instead of every log
-        self.needs_update = False
-
-        self._shares_console = self._parent is not None and share_console_document(
-            self.logs_display, getattr(self._parent, "creator_console", None)
-        )
-
-        # Update logs content
-        self.update_logs_content()
-
+    # The Creator tab's name for update_logs.
     def update_logs_content(self):
         """Schedule a batched update instead of updating immediately"""
-        self.needs_update = True
-        if not self.update_timer.isActive():
-            self.update_timer.start()
-
-    def _do_update(self):
-        """Actually perform the update (called by timer)"""
-        if (
-            self.needs_update
-            and self._parent
-            and hasattr(self._parent, "creator_console")
-        ):
-            if not self._shares_console:
-                self.logs_display.setHtml(self._parent.creator_console.toHtml())
-            self.needs_update = False
-
-    def closeEvent(self, a0):
-        """Stop timer when window closes"""
-        if hasattr(self, "update_timer"):
-            self.update_timer.stop()
-        if a0 is not None:
-            a0.accept()
-
-    def clear_logs(self):
-        """Clear both the logs window and parent console"""
-        self.logs_display.clear()
-        if self._parent and hasattr(self._parent, "creator_console"):
-            self._parent.creator_console.clear()
+        self.update_logs()
 
     def download_logs(self):
         """Download logs as a txt file"""
@@ -2586,15 +2518,11 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.download", color="white"), ""
         )
         self.creator_download_btn.clicked.connect(self.start_creator_download)
-        self.creator_download_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        hover_highlight(self.creator_download_btn)
         creator_btn_layout.addWidget(self.creator_download_btn)
         self.creator_cancel_btn = QPushButton(qta.icon("fa5s.times", color="white"), "")
         self.creator_cancel_btn.clicked.connect(self.cancel_creator_download)
-        self.creator_cancel_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        hover_highlight(self.creator_cancel_btn)
         self.creator_cancel_btn.setEnabled(False)
         creator_btn_layout.addWidget(self.creator_cancel_btn)
 
@@ -2602,9 +2530,7 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.expand", color="white"), ""
         )
         self.creator_expand_logs_btn.clicked.connect(self.expand_logs)
-        self.creator_expand_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        hover_highlight(self.creator_expand_logs_btn)
         self.creator_expand_logs_btn.setToolTip(translate("expand_logs"))
         creator_btn_layout.addWidget(self.creator_expand_logs_btn)
 
@@ -2726,29 +2652,6 @@ class CreatorDownloaderTab(QWidget):
 
         right_layout.addStretch()
         layout.addWidget(right_widget, stretch=1)
-
-        # Button hover animations
-        if self._parent:
-            self.creator_download_btn.enterEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_download_btn, True
-                )
-            )
-            self.creator_download_btn.leaveEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_download_btn, False
-                )
-            )
-            self.creator_cancel_btn.enterEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_cancel_btn, True
-                )
-            )
-            self.creator_cancel_btn.leaveEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_cancel_btn, False
-                )
-            )
 
         # Initial text update
         self.update_ui_text()

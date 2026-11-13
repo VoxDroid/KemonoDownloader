@@ -86,8 +86,8 @@ from kemonodownloader.history_store import (
     link_kind,
     normalize_link,
 )
-from kemonodownloader.kd_logs import format_log_line, share_console_document
-from kemonodownloader.kd_motion import SmoothProgressBar
+from kemonodownloader.kd_logs import LogsWindowBase, format_log_line
+from kemonodownloader.kd_motion import SmoothProgressBar, hover_highlight
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     accept_language,
     get_headers,
@@ -1717,90 +1717,21 @@ class DownloadThread(QThread):
         self.finished.emit()
 
 
-class LogsWindow(QDialog):
+class LogsWindow(LogsWindowBase):
+    """Full logs window for the Post tab; mirrors ``parent_console``."""
+
     def __init__(self, parent_console, parent=None):
         super().__init__(parent)
         self.parent_console = parent_console
-        self.setWindowTitle(translate("full_logs"))
         # Ensure Python-level `windowTitle()` reflects current translation even
         # if `translate` is monkeypatched after construction. Assigning a
         # callable on the instance overrides the PyQt C++ binding when
         # accessed from Python code (tests call `window.windowTitle()`).
         self.windowTitle = lambda: translate("full_logs")
-        self.setModal(False)
-        self.resize(800, 600)
-        self.init_ui()
+        self.refresh_now()
 
-        # Batch update with timer to reduce UI updates and prevent freezing
-        self.update_timer = QTimer()
-        self.update_timer.timeout.connect(self._do_update)
-        self.update_timer.setInterval(500)  # Update every 500ms
-        self.needs_update = False
-
-    def init_ui(self):
-        layout = QVBoxLayout(self)
-
-        # Full logs display
-        self.logs_display = QTextEdit()
-        self.logs_display.setReadOnly(True)
-        self.logs_display.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
-        )
-        layout.addWidget(self.logs_display)
-
-        # Show the parent console's logs
-        self._shares_console = share_console_document(
-            self.logs_display, self.parent_console
-        )
-        if not self._shares_console:
-            self.logs_display.setHtml(self.parent_console.toHtml())
-
-        # Buttons layout
-        buttons_layout = QHBoxLayout()
-
-        # Clear logs button
-        self.clear_logs_btn = QPushButton(translate("clear_logs"))
-        self.clear_logs_btn.clicked.connect(self.clear_logs)
-        self.clear_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px; color: white;"
-        )
-        buttons_layout.addWidget(self.clear_logs_btn)
-
-        # Download logs button
-        self.download_logs_btn = QPushButton(translate("download_logs"))
-        self.download_logs_btn.clicked.connect(self.download_logs)
-        self.download_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px; color: white;"
-        )
-        buttons_layout.addWidget(self.download_logs_btn)
-
-        buttons_layout.addStretch()
-        layout.addLayout(buttons_layout)
-
-    def update_logs(self):
-        """Schedule a batched update instead of updating immediately"""
-        self.needs_update = True
-        if not self.update_timer.isActive():
-            self.update_timer.start()
-
-    def _do_update(self):
-        """Actually perform the update (called by timer)"""
-        if self.needs_update and self.parent_console:
-            if not self._shares_console:
-                self.logs_display.setHtml(self.parent_console.toHtml())
-            self.needs_update = False
-
-    def closeEvent(self, a0):
-        """Stop timer when window closes"""
-        if hasattr(self, "update_timer"):
-            self.update_timer.stop()
-        if a0 is not None:
-            a0.accept()
-
-    def clear_logs(self):
-        """Clear both the logs window and parent console"""
-        self.logs_display.clear()
-        self.parent_console.clear()
+    def _console(self):
+        return self.parent_console
 
     def download_logs(self):
         """Download logs as txt file"""
@@ -2048,15 +1979,11 @@ class PostDownloaderTab(QWidget):
             qta.icon("fa5s.download", color="white"), ""
         )
         self.post_download_btn.clicked.connect(self.start_post_download)
-        self.post_download_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        hover_highlight(self.post_download_btn)
         post_btn_layout.addWidget(self.post_download_btn)
         self.post_cancel_btn = QPushButton(qta.icon("fa5s.times", color="white"), "")
         self.post_cancel_btn.clicked.connect(self.cancel_post_download)
-        self.post_cancel_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        hover_highlight(self.post_cancel_btn)
         self.post_cancel_btn.setEnabled(False)
         post_btn_layout.addWidget(self.post_cancel_btn)
 
@@ -2064,9 +1991,7 @@ class PostDownloaderTab(QWidget):
             qta.icon("fa5s.expand", color="white"), ""
         )
         self.post_expand_logs_btn.clicked.connect(self.expand_logs)
-        self.post_expand_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        hover_highlight(self.post_expand_logs_btn)
         self.post_expand_logs_btn.setToolTip(translate("expand_logs"))
         post_btn_layout.addWidget(self.post_expand_logs_btn)
 
@@ -2191,27 +2116,6 @@ class PostDownloaderTab(QWidget):
 
         right_layout.addStretch()
         layout.addWidget(right_widget, stretch=1)
-
-        # Button hover animations
-        self.post_download_btn.enterEvent = lambda e: self.parent.animate_button(
-            self.post_download_btn, True
-        )
-        self.post_download_btn.leaveEvent = lambda e: self.parent.animate_button(
-            self.post_download_btn, False
-        )
-        self.post_cancel_btn.enterEvent = lambda e: self.parent.animate_button(
-            self.post_cancel_btn, True
-        )
-        self.post_cancel_btn.leaveEvent = lambda e: self.parent.animate_button(
-            self.post_cancel_btn, False
-        )
-
-        self.post_expand_logs_btn.enterEvent = lambda e: self.parent.animate_button(
-            self.post_expand_logs_btn, True
-        )
-        self.post_expand_logs_btn.leaveEvent = lambda e: self.parent.animate_button(
-            self.post_expand_logs_btn, False
-        )
 
         self.update_ui_text()
 

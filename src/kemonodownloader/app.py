@@ -8,16 +8,7 @@ import qtawesome as qta
 import requests
 from bs4 import MarkupResemblesLocatorWarning
 from packaging import version
-from PyQt6.QtCore import (
-    QEasingCurve,
-    QPoint,
-    QPropertyAnimation,
-    QRect,
-    Qt,
-    QThread,
-    QTimer,
-    pyqtSignal,
-)
+from PyQt6.QtCore import QPoint, QRect, Qt, QThread, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QCursor, QFont, QFontDatabase, QIcon, QPalette, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -47,6 +38,7 @@ from kemonodownloader.kd_motion import (
     enable_pixel_scrolling,
     fade_in,
     fade_out_snapshot,
+    hover_highlight,
 )
 from kemonodownloader.kd_settings import SettingsTab
 from kemonodownloader.kd_thumbnaildl import ThumbnailDownloaderTab
@@ -717,17 +709,11 @@ class KemonoDownloader(QMainWindow):
         msg.exec()
 
     def animate_button(self, button, enter):
-        # Owned by the button: a parentless local animation is garbage-collected
-        # before it plays a single frame.
-        anim = QPropertyAnimation(button, b"geometry", button)
-        anim.setDuration(200)
-        anim.setEasingCurve(QEasingCurve.Type.InOutQuad)
-        rect = button.geometry()
-        if enter:
-            anim.setEndValue(rect.adjusted(-3, -3, 3, 3))
-        else:
-            anim.setEndValue(rect.adjusted(3, 3, -3, -3))
-        anim.start(QPropertyAnimation.DeletionPolicy.DeleteWhenStopped)
+        """Play the hover highlight on *button*.
+
+        Colour only: resizing the button fought its layout and deformed it.
+        """
+        hover_highlight(button).animate(enter)
 
     def log(self, message):
         self.status_label.setText(message)

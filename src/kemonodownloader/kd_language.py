@@ -4451,6 +4451,91 @@ class KDLanguage:
                 "korean": "{1}개 중 {0}개 파일을 다운로드했습니다.\n{2}개는 사이트에 미리보기만 있었습니다(건너뜀).\n{3}개는 미디어 서버에 없었습니다.",
                 "chinese-simplified": "已下载 {1} 个文件中的 {0} 个。\n{2} 个在网站上只有预览图（已跳过）。\n{3} 个不在媒体服务器上。",
             },
+            # Full logs window
+            "copy_logs": {
+                "english": "Copy All",
+                "japanese": "すべてコピー",
+                "korean": "모두 복사",
+                "chinese-simplified": "全部复制",
+            },
+            "logs_copied": {
+                "english": "Copied!",
+                "japanese": "コピーしました",
+                "korean": "복사됨",
+                "chinese-simplified": "已复制",
+            },
+            "logs_search_placeholder": {
+                "english": "Search logs…",
+                "japanese": "ログを検索…",
+                "korean": "로그 검색…",
+                "chinese-simplified": "搜索日志…",
+            },
+            "logs_find_previous": {
+                "english": "Previous match (Shift+Enter)",
+                "japanese": "前の一致 (Shift+Enter)",
+                "korean": "이전 결과 (Shift+Enter)",
+                "chinese-simplified": "上一个匹配（Shift+Enter）",
+            },
+            "logs_find_next": {
+                "english": "Next match (Enter)",
+                "japanese": "次の一致 (Enter)",
+                "korean": "다음 결과 (Enter)",
+                "chinese-simplified": "下一个匹配（Enter）",
+            },
+            "logs_match_count": {
+                "english": "{0} matches",
+                "japanese": "{0}件一致",
+                "korean": "{0}개 일치",
+                "chinese-simplified": "{0} 个匹配",
+            },
+            "logs_match_count_one": {
+                "english": "1 match",
+                "japanese": "1件一致",
+                "korean": "1개 일치",
+                "chinese-simplified": "1 个匹配",
+            },
+            "logs_no_matches": {
+                "english": "No matches",
+                "japanese": "一致なし",
+                "korean": "일치 항목 없음",
+                "chinese-simplified": "无匹配",
+            },
+            "logs_line_count": {
+                "english": "{0} lines",
+                "japanese": "{0}行",
+                "korean": "{0}줄",
+                "chinese-simplified": "{0} 行",
+            },
+            "logs_line_count_one": {
+                "english": "1 line",
+                "japanese": "1行",
+                "korean": "1줄",
+                "chinese-simplified": "1 行",
+            },
+            "logs_jump_to_latest": {
+                "english": "Jump to Latest",
+                "japanese": "最新へ移動",
+                "korean": "최신으로 이동",
+                "chinese-simplified": "跳到最新",
+            },
+            "logs_new_lines": {
+                "english": "{0} New Lines",
+                "japanese": "新しい行 {0}件",
+                "korean": "새 줄 {0}개",
+                "chinese-simplified": "{0} 条新日志",
+            },
+            "logs_new_lines_one": {
+                "english": "1 New Line",
+                "japanese": "新しい行 1件",
+                "korean": "새 줄 1개",
+                "chinese-simplified": "1 条新日志",
+            },
+            "logs_follow_tooltip": {
+                "english": "Auto-scroll pauses while you scroll up and resumes when you reach the bottom.",
+                "japanese": "上にスクロールすると自動スクロールが一時停止し、一番下まで戻ると再開します。",
+                "korean": "위로 스크롤하면 자동 스크롤이 일시 중지되고, 맨 아래로 돌아오면 다시 시작됩니다.",
+                "chinese-simplified": "向上滚动时自动滚动会暂停，回到底部后自动恢复。",
+            },
         }
 
     def get_text(self, key, language=None, *args):
