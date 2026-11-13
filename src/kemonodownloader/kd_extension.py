@@ -1,8 +1,15 @@
-from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtGui import QDesktopServices, QFont
+"""The Browser Extension tab: what the extension does and how to install it."""
+
+import qtawesome as qta
+from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import (
+    QApplication,
+    QFrame,
+    QGridLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPushButton,
     QScrollArea,
     QVBoxLayout,
@@ -10,6 +17,52 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_notes import retranslate_notes, tip, tips
+from kemonodownloader.kd_theme import color, set_role
+
+RELEASES_URL = "https://github.com/VoxDroid/KemonoDownloader/releases"
+EXTENSION_FOLDER_URL = (
+    "https://github.com/VoxDroid/KemonoDownloader/tree/main/browser-extension"
+)
+
+# (title key, text key, icon) for the feature cards.
+FEATURES = [
+    ("ext_feature_pick_title", "ext_feature_pick_text", "fa5s.check-square"),
+    ("ext_feature_zip_title", "ext_feature_zip_text", "fa5s.file-archive"),
+    ("ext_feature_progress_title", "ext_feature_progress_text", "fa5s.tasks"),
+    ("ext_feature_sites_title", "ext_feature_sites_text", "fa5s.globe"),
+]
+
+# (label, command) to put the right manifest in place, run in the folder.
+MANIFEST_COMMANDS = [
+    (
+        "Chrome / Edge · PowerShell",
+        "Copy-Item chrome_manifest.json manifest.json -Force",
+    ),
+    ("Chrome / Edge · macOS, Linux", "cp chrome_manifest.json manifest.json"),
+    (
+        "Firefox · PowerShell",
+        "Copy-Item firefox_manifest.json manifest.json -Force",
+    ),
+    ("Firefox · macOS, Linux", "cp firefox_manifest.json manifest.json"),
+]
+
+COPIED_FLASH_MS = 1500
+
+
+def _card() -> QFrame:
+    card = QFrame()
+    set_role(card, "card")
+    return card
+
+
+def _text(role: str = "soft") -> QLabel:
+    label = QLabel()
+    set_role(label, role)
+    label.setWordWrap(True)
+    label.setTextFormat(Qt.TextFormat.RichText)
+    label.setOpenExternalLinks(True)
+    return label
 
 
 class ExtensionTab(QWidget):
@@ -28,222 +81,209 @@ class ExtensionTab(QWidget):
         """Refresh UI when font changes."""
         self.update_ui_text()
 
+    # ----------------------------------------------------------------- UI --
     def setup_ui(self):
-        # Main layout for the Extension tab
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(15, 15, 15, 15)
 
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet(
-            """
-            QScrollArea {
-                border: none;
-                background: #2A3B5A;
-                border-radius: 5px;
-            }
-            QScrollBar:vertical {
-                border: none;
-                background: #3A4B6A;
-                width: 10px;
-                margin: 0px 0px 0px 0px;
-                border-radius: 5px;
-            }
-            QScrollBar::handle:vertical {
-                background: #4A5B7A;
-                min-height: 20px;
-                border-radius: 5px;
-            }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-                height: 0px;
-            }
-        """
-        )
-
-        content_widget = QWidget()
-        self.content_layout = QVBoxLayout(content_widget)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        content = QWidget()
+        self.content_layout = QVBoxLayout(content)
+        self.content_layout.setContentsMargins(0, 0, 8, 0)
+        self.content_layout.setSpacing(14)
         self.content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.content_layout.setSpacing(20)
 
-        self.update_ui_text()
+        self._build_header()
+        self._build_features()
+        self._build_steps()
+        self._build_usage()
 
-        scroll_area.setWidget(content_widget)
+        scroll_area.setWidget(content)
         main_layout.addWidget(scroll_area)
 
+        # Owned by the tab, so it can't fire after the tab is gone.
+        self._copied_timer = QTimer(self)
+        self._copied_timer.setSingleShot(True)
+        self._copied_timer.setInterval(COPIED_FLASH_MS)
+        self._copied_timer.timeout.connect(self._reset_copy_buttons)
+
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.releases_button, "tip_open_releases")
+        tip(self.folder_button, "tip_open_extension_folder")
+        tips(self.copy_buttons, "tip_copy_command")
+        self.update_ui_text()
         self.setMinimumSize(300, 400)
 
-    def update_ui_text(self):
-        while self.content_layout.count():
-            item = self.content_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
-            elif item.layout():
-                # Clear the layout and delete its contents
-                layout = item.layout()
-                while layout.count():
-                    sub_item = layout.takeAt(0)
-                    if sub_item.widget():
-                        sub_item.widget().deleteLater()
-                # The layout itself will be deleted when the parent layout is cleared
+    def _build_header(self) -> None:
+        header = _card()
+        layout = QHBoxLayout(header)
+        layout.setContentsMargins(18, 16, 18, 16)
+        layout.setSpacing(14)
+        icon = QLabel()
+        self.theme_icons = [(icon, "fa5s.puzzle-piece", 40)]
+        icon.setAlignment(Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(icon)
 
-        # Title
-        title_label = QLabel(f"<h1>{translate('extension_title')}</h1>")
-        title_label.setFont(QFont(self._get_font_family(), 20, QFont.Weight.Bold))
-        title_label.setStyleSheet("color: white; padding: 10px;")
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.content_layout.addWidget(title_label)
+        text_column = QVBoxLayout()
+        text_column.setSpacing(4)
+        self.title_label = QLabel()
+        set_role(self.title_label, "title")
+        text_column.addWidget(self.title_label)
+        self.subtitle_label = _text("muted")
+        text_column.addWidget(self.subtitle_label)
 
-        # Introduction
-        intro_label = QLabel(translate("extension_intro"))
-        intro_label.setFont(QFont(self._get_font_family(), 12))
-        intro_label.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        intro_label.setWordWrap(True)
-        intro_label.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(intro_label)
-
-        # Usage Section
-        usage_title = QLabel(f"<h2>{translate('extension_download_title')}</h2>")
-        usage_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
-        usage_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(usage_title)
-
-        usage_text = QLabel(translate("extension_download_text"))
-        usage_text.setFont(QFont(self._get_font_family(), 12))
-        usage_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        usage_text.setWordWrap(True)
-        usage_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        usage_text.setOpenExternalLinks(True)
-        self.content_layout.addWidget(usage_text)
-
-        # Download button
-        download_button_layout = QHBoxLayout()
-        download_button_layout.addStretch()
-
-        download_button = QPushButton("📦 " + translate("download"))
-        download_button.setFont(QFont(self._get_font_family(), 12, QFont.Weight.Bold))
-        download_button.setStyleSheet(
-            """
-            QPushButton {
-                background: #4A5B7A;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background: #5A6B8A;
-            }
-            QPushButton:pressed {
-                background: #3A4B6A;
-            }
-        """
+        buttons = QHBoxLayout()
+        buttons.setSpacing(8)
+        self.releases_button = QPushButton(qta.icon("fa5s.download", color="white"), "")
+        set_role(self.releases_button, "primary")
+        self.releases_button.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl(RELEASES_URL))
         )
-        download_button.clicked.connect(
-            lambda: QDesktopServices.openUrl(
-                QUrl("https://github.com/VoxDroid/KemonoDownloader/releases")
+        buttons.addWidget(self.releases_button)
+        self.folder_button = QPushButton(qta.icon("fa5b.github", color="white"), "")
+        self.folder_button.clicked.connect(
+            lambda: QDesktopServices.openUrl(QUrl(EXTENSION_FOLDER_URL))
+        )
+        buttons.addWidget(self.folder_button)
+        buttons.addStretch()
+        text_column.addSpacing(6)
+        text_column.addLayout(buttons)
+        layout.addLayout(text_column, stretch=1)
+        self.content_layout.addWidget(header)
+
+    def _build_features(self) -> None:
+        grid = QGridLayout()
+        grid.setSpacing(12)
+        self.feature_labels = []
+        for index, (title_key, text_key, icon_name) in enumerate(FEATURES):
+            card = _card()
+            layout = QHBoxLayout(card)
+            layout.setContentsMargins(14, 12, 14, 12)
+            layout.setSpacing(12)
+            icon = QLabel()
+            self.theme_icons.append((icon, icon_name, 24))
+            icon.setAlignment(Qt.AlignmentFlag.AlignTop)
+            layout.addWidget(icon)
+            column = QVBoxLayout()
+            column.setSpacing(2)
+            title = QLabel()
+            set_role(title, "heading")
+            column.addWidget(title)
+            text = _text("muted")
+            column.addWidget(text)
+            layout.addLayout(column, stretch=1)
+            self.feature_labels.append((title, text, title_key, text_key))
+            grid.addWidget(card, index // 2, index % 2)
+        self.content_layout.addLayout(grid)
+
+    def _step_card(self):
+        card = _card()
+        layout = QVBoxLayout(card)
+        layout.setContentsMargins(16, 12, 16, 14)
+        layout.setSpacing(6)
+        title = QLabel()
+        set_role(title, "heading")
+        layout.addWidget(title)
+        text = _text()
+        layout.addWidget(text)
+        return card, layout, title, text
+
+    def _build_steps(self) -> None:
+        self.install_heading = QLabel()
+        set_role(self.install_heading, "title")
+        self.content_layout.addWidget(self.install_heading)
+
+        card, _layout, self.step_get_title, self.step_get_text = self._step_card()
+        self.content_layout.addWidget(card)
+
+        card, layout, self.step_manifest_title, self.step_manifest_text = (
+            self._step_card()
+        )
+        self.commands_label = _text("muted")
+        layout.addSpacing(4)
+        layout.addWidget(self.commands_label)
+        self.copy_buttons = []
+        commands = QGridLayout()
+        commands.setHorizontalSpacing(8)
+        commands.setVerticalSpacing(6)
+        for row, (label_text, command) in enumerate(MANIFEST_COMMANDS):
+            label = QLabel(label_text)
+            set_role(label, "muted")
+            commands.addWidget(label, row, 0)
+            field = QLineEdit(command)
+            field.setReadOnly(True)
+            field.setCursorPosition(0)
+            commands.addWidget(field, row, 1)
+            button = QPushButton(qta.icon("fa5s.copy", color="white"), "")
+            button.clicked.connect(
+                lambda _checked=False, c=command, b=button: self._copy(c, b)
             )
+            commands.addWidget(button, row, 2)
+            self.copy_buttons.append(button)
+        commands.setColumnStretch(1, 1)
+        layout.addLayout(commands)
+        self.content_layout.addWidget(card)
+
+        browsers = QHBoxLayout()
+        browsers.setSpacing(12)
+        card, _layout, self.step_chrome_title, self.step_chrome_text = self._step_card()
+        browsers.addWidget(card)
+        card, _layout, self.step_firefox_title, self.step_firefox_text = (
+            self._step_card()
         )
-        download_button_layout.addWidget(download_button)
-        download_button_layout.addStretch()
-        self.content_layout.addLayout(download_button_layout)
+        browsers.addWidget(card)
+        self.content_layout.addLayout(browsers)
 
-        # Install Section
-        install_title = QLabel(f"<h2>{translate('extension_install_title')}</h2>")
-        install_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
-        install_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(install_title)
+    def _build_usage(self) -> None:
+        card, _layout, self.use_title, self.use_text = self._step_card()
+        self.content_layout.addWidget(card)
+        card, _layout, self.trouble_title, self.trouble_text = self._step_card()
+        self.content_layout.addWidget(card)
 
-        install_text = QLabel(translate("extension_install_text"))
-        install_text.setFont(QFont(self._get_font_family(), 12))
-        install_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        install_text.setWordWrap(True)
-        install_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        install_text.setOpenExternalLinks(True)
-        self.content_layout.addWidget(install_text)
+    # ------------------------------------------------------------ actions --
+    def _copy(self, command: str, button: QPushButton) -> None:
+        clipboard = QApplication.clipboard()
+        if clipboard is None:
+            return
+        clipboard.setText(command)
+        self._reset_copy_buttons()
+        button.setText(translate("ext_copied"))
+        self._copied_timer.start()
 
-        # Chrome/Edge installation
-        chrome_install = QLabel(translate("extension_install_chrome"))
-        chrome_install.setFont(QFont(self._get_font_family(), 12))
-        chrome_install.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        chrome_install.setWordWrap(True)
-        chrome_install.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(chrome_install)
+    def _reset_copy_buttons(self) -> None:
+        for button in self.copy_buttons:
+            button.setText(translate("ext_copy_command"))
 
-        # Firefox installation
-        firefox_install = QLabel(translate("extension_install_firefox"))
-        firefox_install.setFont(QFont(self._get_font_family(), 12))
-        firefox_install.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        firefox_install.setWordWrap(True)
-        firefox_install.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(firefox_install)
-
-        # Setup Section
-        setup_title = QLabel(f"<h2>{translate('extension_setup_title')}</h2>")
-        setup_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
-        setup_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(setup_title)
-
-        setup_text = QLabel(translate("extension_setup_text"))
-        setup_text.setFont(QFont(self._get_font_family(), 12))
-        setup_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        setup_text.setWordWrap(True)
-        setup_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(setup_text)
-
-        # Manifest compatibility / notes
-        manifest_title = QLabel(f"<h2>{translate('extension_manifest_title')}</h2>")
-        manifest_title.setFont(QFont(self._get_font_family(), 16, QFont.Weight.Bold))
-        manifest_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(manifest_title)
-
-        manifest_text = QLabel(translate("extension_manifest_text"))
-        manifest_text.setFont(QFont(self._get_font_family(), 12))
-        manifest_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        manifest_text.setWordWrap(True)
-        manifest_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        manifest_text.setOpenExternalLinks(True)
-        self.content_layout.addWidget(manifest_text)
-
-        chrome_manifest = QLabel(translate("extension_manifest_chrome"))
-        chrome_manifest.setFont(QFont(self._get_font_family(), 12))
-        chrome_manifest.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        chrome_manifest.setWordWrap(True)
-        chrome_manifest.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(chrome_manifest)
-
-        firefox_manifest = QLabel(translate("extension_manifest_firefox"))
-        firefox_manifest.setFont(QFont(self._get_font_family(), 12))
-        firefox_manifest.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        firefox_manifest.setWordWrap(True)
-        firefox_manifest.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(firefox_manifest)
-
-        manifest_quick = QLabel(translate("extension_manifest_quickcopy"))
-        manifest_quick.setFont(QFont(self._get_font_family(), 12))
-        manifest_quick.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        manifest_quick.setWordWrap(True)
-        manifest_quick.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(manifest_quick)
-
-        # Troubleshooting Section
-        troubleshooting_title = QLabel(
-            f"<h2>{translate('extension_troubleshooting_title')}</h2>"
-        )
-        troubleshooting_title.setFont(
-            QFont(self._get_font_family(), 16, QFont.Weight.Bold)
-        )
-        troubleshooting_title.setStyleSheet("color: white; padding: 10px 5px 5px 5px;")
-        self.content_layout.addWidget(troubleshooting_title)
-
-        troubleshooting_text = QLabel(translate("extension_troubleshooting_text"))
-        troubleshooting_text.setFont(QFont(self._get_font_family(), 12))
-        troubleshooting_text.setStyleSheet("color: #D0D0D0; padding: 5px;")
-        troubleshooting_text.setWordWrap(True)
-        troubleshooting_text.setAlignment(Qt.AlignmentFlag.AlignJustify)
-        self.content_layout.addWidget(troubleshooting_text)
-
-        self.content_layout.addStretch()
+    # ---------------------------------------------------------- language --
+    def update_ui_text(self):
+        retranslate_notes(self)
+        # Icons in the theme's accent colour, redrawn when the theme changes.
+        for label, icon_name, size in self.theme_icons:
+            label.setPixmap(qta.icon(icon_name, color=color("INFO")).pixmap(size, size))
+        self.title_label.setText(translate("extension_title"))
+        self.subtitle_label.setText(translate("ext_subtitle"))
+        self.releases_button.setText(translate("ext_open_releases"))
+        self.folder_button.setText(translate("ext_open_folder"))
+        for title, text, title_key, text_key in self.feature_labels:
+            title.setText(translate(title_key))
+            text.setText(translate(text_key))
+        self.install_heading.setText(translate("ext_install_heading"))
+        self.step_get_title.setText(translate("ext_step_get_title"))
+        self.step_get_text.setText(translate("ext_step_get_text"))
+        self.step_manifest_title.setText(translate("ext_step_manifest_title"))
+        self.step_manifest_text.setText(translate("ext_step_manifest_text"))
+        self.commands_label.setText(translate("ext_commands_label"))
+        self.step_chrome_title.setText(translate("ext_step_chrome_title"))
+        self.step_chrome_text.setText(translate("ext_step_chrome_text"))
+        self.step_firefox_title.setText(translate("ext_step_firefox_title"))
+        self.step_firefox_text.setText(translate("ext_step_firefox_text"))
+        self.use_title.setText(translate("ext_use_title"))
+        self.use_text.setText(translate("ext_use_text"))
+        self.trouble_title.setText(translate("ext_trouble_title"))
+        self.trouble_text.setText(translate("ext_trouble_text"))
+        self._reset_copy_buttons()
 
     def refresh_ui(self):
         self.update_ui_text()

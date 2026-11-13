@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
+    QScrollArea,
     QSpinBox,
     QTextEdit,
     QVBoxLayout,
@@ -51,8 +52,11 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_logs import log_level_shown, message_level
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import get_session
+from kemonodownloader.kd_notes import add_note, retranslate_notes, section_note, tip
+from kemonodownloader.kd_theme import set_role
 from kemonodownloader.post_downloader import MediaPreviewModal
 
 SUPPORTED_THUMBNAIL_EXTS = (".jpg", ".jpeg", ".png", ".gif", ".webp")
@@ -829,16 +833,13 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Mode Selection Group
         self.mode_group = QGroupBox(translate("download_mode"))
-        self.mode_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
-        mode_layout = QHBoxLayout(self.mode_group)
+        mode_column = QVBoxLayout(self.mode_group)
+        mode_column.addWidget(section_note("note_thumb_mode"))
+        mode_layout = QHBoxLayout()
+        mode_column.addLayout(mode_layout)
         self.mode_label = QLabel(translate("download_mode"))
         self.mode_combo = QComboBox()
         self.mode_combo.addItems([translate("post_mode"), translate("creator_mode")])
-        self.mode_combo.setStyleSheet(
-            "background: #4A5B7A; color: white; padding: 5px; border-radius: 5px;"
-        )
         self.mode_combo.currentIndexChanged.connect(self.on_mode_changed)
         mode_layout.addWidget(self.mode_label)
         mode_layout.addWidget(self.mode_combo)
@@ -846,30 +847,20 @@ class ThumbnailDownloaderTab(QWidget):
 
         # URL Input & Queue controls
         self.queue_group = QGroupBox(translate("thumbnail_downloader_tab"))
-        self.queue_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         queue_layout = QVBoxLayout(self.queue_group)
+        add_note(queue_layout, "note_thumb_queue")
         queue_layout.setSpacing(8)
 
         input_row = QHBoxLayout()
         self.url_input = QLineEdit()
         self.url_input.setPlaceholderText(translate("thumbnail_queue_placeholder"))
-        self.url_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.url_input.returnPressed.connect(self.add_url_to_queue)
 
         self.add_url_button = QPushButton(qta.icon("fa5s.plus", color="white"), "")
-        self.add_url_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
-        self.add_url_button.setToolTip(translate("added_to_queue"))
         self.add_url_button.clicked.connect(self.add_url_to_queue)
 
         self.import_file_button = QPushButton(
             qta.icon("fa5s.file-import", color="white"), ""
-        )
-        self.import_file_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
         )
         self.import_file_button.setToolTip(translate("add_links_from_file_title"))
         self.import_file_button.clicked.connect(self.import_urls_from_file)
@@ -882,9 +873,6 @@ class ThumbnailDownloaderTab(QWidget):
         # Multi-line URL area
         self.multi_url_input = QTextEdit()
         self.multi_url_input.setPlaceholderText(translate("multi_url_placeholder"))
-        self.multi_url_input.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
-        )
         self.multi_url_input.setFixedHeight(70)
         self.multi_url_input.setVisible(False)
         queue_layout.addWidget(self.multi_url_input)
@@ -895,25 +883,17 @@ class ThumbnailDownloaderTab(QWidget):
         self.queue_list.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection
         )
-        self.queue_list.setStyleSheet(
-            "QListWidget { background: #2A3B5A; border: 1px solid #3A4B6A; border-radius: 6px; color: white; }"
-        )
+        set_role(self.queue_list, "roomy")
         queue_layout.addWidget(self.queue_list)
 
         queue_btn_row = QHBoxLayout()
         self.remove_queue_btn = QPushButton(
             qta.icon("fa5s.trash-alt", color="white"), translate("remove")
         )
-        self.remove_queue_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.remove_queue_btn.clicked.connect(self.remove_selected_from_queue)
 
         self.clear_queue_btn = QPushButton(
             qta.icon("fa5s.eraser", color="white"), translate("clear")
-        )
-        self.clear_queue_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
         )
         self.clear_queue_btn.clicked.connect(self.clear_queue)
 
@@ -924,9 +904,7 @@ class ThumbnailDownloaderTab(QWidget):
         self.detect_button = QPushButton(
             qta.icon("fa5s.search", color="white"), translate("detect_thumbnails")
         )
-        self.detect_button.setStyleSheet(
-            "background: #3A5B7A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;"
-        )
+        set_role(self.detect_button, "primary")
         self.detect_button.clicked.connect(self.start_detection)
         queue_layout.addWidget(self.detect_button)
 
@@ -934,14 +912,11 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Settings Options Group
         self.options_group = QGroupBox(translate("download_options"))
-        self.options_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         options_layout = QVBoxLayout(self.options_group)
+        add_note(options_layout, "note_thumb_options")
 
         sim_row = QHBoxLayout()
         sim_label = QLabel(translate("simultaneous_downloads"))
-        sim_label.setStyleSheet("color: white;")
         self.threads_spin = QSpinBox()
         self.threads_spin.setRange(1, 10)
         default_threads = 3
@@ -952,26 +927,20 @@ class ThumbnailDownloaderTab(QWidget):
                 "simultaneous_downloads", 3
             )
         self.threads_spin.setValue(default_threads)
-        self.threads_spin.setStyleSheet(
-            "background: #2A3B5A; color: white; padding: 3px; border-radius: 4px;"
-        )
         sim_row.addWidget(sim_label)
         sim_row.addWidget(self.threads_spin)
         options_layout.addLayout(sim_row)
 
         self.skip_existing_check = QCheckBox(translate("skip_existing_files"))
         self.skip_existing_check.setChecked(True)
-        self.skip_existing_check.setStyleSheet("color: white;")
         options_layout.addWidget(self.skip_existing_check)
 
         self.auto_rename_check = QCheckBox(translate("auto_rename"))
         self.auto_rename_check.setChecked(True)
-        self.auto_rename_check.setStyleSheet("color: white;")
         options_layout.addWidget(self.auto_rename_check)
 
         self.download_text_check = QCheckBox(translate("download_text"))
         self.download_text_check.setChecked(True)
-        self.download_text_check.setStyleSheet("color: white;")
         options_layout.addWidget(self.download_text_check)
 
         left_layout.addWidget(self.options_group)
@@ -979,29 +948,19 @@ class ThumbnailDownloaderTab(QWidget):
         # Progress Section
         progress_layout = QVBoxLayout()
         self.file_progress_label = QLabel(translate("file_progress", 0))
-        self.file_progress_label.setStyleSheet("color: white;")
         progress_layout.addWidget(self.file_progress_label)
 
         self.file_progress_bar = SmoothProgressBar()
         self.file_progress_bar.setRange(0, 100)
-        self.file_progress_bar.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; text-align: center; color: white; }"
-            "QProgressBar::chunk { background: #4A5B7A; border-radius: 5px; }"
-        )
         progress_layout.addWidget(self.file_progress_bar)
 
         self.overall_progress_label = QLabel(
             translate("thumbnail_overall_progress", 0, 0)
         )
-        self.overall_progress_label.setStyleSheet("color: white;")
         progress_layout.addWidget(self.overall_progress_label)
 
         self.overall_progress_bar = SmoothProgressBar()
         self.overall_progress_bar.setRange(0, 100)
-        self.overall_progress_bar.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; text-align: center; color: white; }"
-            "QProgressBar::chunk { background: #4A5B7A; border-radius: 5px; }"
-        )
         progress_layout.addWidget(self.overall_progress_bar)
         left_layout.addLayout(progress_layout)
 
@@ -1010,17 +969,13 @@ class ThumbnailDownloaderTab(QWidget):
         self.download_button = QPushButton(
             qta.icon("fa5s.download", color="white"), translate("start_download")
         )
-        self.download_button.setStyleSheet(
-            "background: #4A6B9A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;"
-        )
+        set_role(self.download_button, "primary")
         self.download_button.clicked.connect(self.start_download)
 
         self.cancel_button = QPushButton(
             qta.icon("fa5s.times", color="white"), translate("cancel")
         )
-        self.cancel_button.setStyleSheet(
-            "background: #A94A4A; padding: 8px; border-radius: 5px; font-weight: bold; color: white;"
-        )
+        set_role(self.cancel_button, "danger")
         self.cancel_button.setEnabled(False)
         self.cancel_button.clicked.connect(self.cancel_operation)
 
@@ -1029,8 +984,9 @@ class ThumbnailDownloaderTab(QWidget):
         left_layout.addLayout(action_btn_layout)
 
         self.status_label = QLabel(translate("idle"))
-        self.status_label.setStyleSheet("color: white; font-size: 12px;")
         left_layout.addWidget(self.status_label)
+        # Spare height goes below the controls, not between them.
+        left_layout.addStretch()
 
         # ==========================================
         # RIGHT PANEL: Detected Thumbnails & Log Output
@@ -1042,17 +998,14 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Group Box for Thumbnails List
         self.thumbnails_group = QGroupBox(translate("thumbnails_to_download"))
-        self.thumbnails_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         thumbnails_group_layout = QVBoxLayout(self.thumbnails_group)
+        add_note(thumbnails_group_layout, "note_thumb_list")
         thumbnails_group_layout.setSpacing(8)
 
         # Filter & Selection Header
         filter_row = QHBoxLayout()
         self.filter_input = QLineEdit()
         self.filter_input.setPlaceholderText(translate("filter_placeholder"))
-        self.filter_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.filter_input.textChanged.connect(self.filter_detected_items)
         filter_row.addWidget(self.filter_input)
         thumbnails_group_layout.addLayout(filter_row)
@@ -1060,11 +1013,10 @@ class ThumbnailDownloaderTab(QWidget):
         selection_row = QHBoxLayout()
         self.check_all_cb = QCheckBox(translate("check_all"))
         self.check_all_cb.setChecked(True)
-        self.check_all_cb.setStyleSheet("color: white;")
         self.check_all_cb.stateChanged.connect(self.toggle_check_all)
 
         self.selected_count_label = QLabel(translate("selected_count", 0, 0))
-        self.selected_count_label.setStyleSheet("color: #CCCCCC; font-size: 11px;")
+        set_role(self.selected_count_label, "muted")
 
         selection_row.addWidget(self.check_all_cb)
         selection_row.addStretch()
@@ -1073,19 +1025,13 @@ class ThumbnailDownloaderTab(QWidget):
 
         # Detected Items List
         self.detected_list = QListWidget()
-        self.detected_list.setStyleSheet(
-            "QListWidget { background: #2A3B5A; border: 1px solid #3A4B6A; border-radius: 6px; color: white; }"
-            "QListWidget::item { padding: 4px; }"
-        )
         self.detected_list.itemChanged.connect(self.update_selected_count)
+        set_role(self.detected_list, "roomy")
         thumbnails_group_layout.addWidget(self.detected_list, stretch=2)
 
         # Item actions (Preview button)
         item_action_row = QHBoxLayout()
         self.preview_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-        self.preview_button.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.preview_button.setToolTip(translate("media_preview"))
         self.preview_button.clicked.connect(self.preview_selected_thumbnail)
         item_action_row.addWidget(self.preview_button)
@@ -1097,12 +1043,12 @@ class ThumbnailDownloaderTab(QWidget):
         # Log Output Console
         log_header = QHBoxLayout()
         log_label = QLabel(translate("log_console"))
-        log_label.setStyleSheet("font-weight: bold; color: white;")
+        set_role(log_label, "heading")
         self.toggle_logs_btn = QPushButton(
             qta.icon("fa5s.chevron-down", color="white"), ""
         )
         self.toggle_logs_btn.setFixedSize(24, 24)
-        self.toggle_logs_btn.setStyleSheet("background: #4A5B7A; border-radius: 5px;")
+        set_role(self.toggle_logs_btn, "icon")
         self.toggle_logs_btn.setToolTip(translate("expand_logs"))
         self.toggle_logs_btn.clicked.connect(self.toggle_log_console)
         log_header.addWidget(log_label)
@@ -1112,19 +1058,40 @@ class ThumbnailDownloaderTab(QWidget):
 
         self.log_console = QTextEdit()
         self.log_console.setReadOnly(True)
-        self.log_console.setStyleSheet(
-            "QTextEdit { background: #1A2A44; border: 1px solid #3A4B6A; color: #A0C0FF; font-family: monospace; }"
-        )
+        set_role(self.log_console, "console")
         right_layout.addWidget(self.log_console, stretch=1)
 
-        main_layout.addWidget(left_panel, stretch=2)
+        # Scrollable, like the Post and Creator tabs, so the window fits
+        # smaller screens instead of growing to this panel's full height.
+        left_scroll = QScrollArea()
+        left_scroll.setWidget(left_panel)
+        left_scroll.setWidgetResizable(True)
+        left_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        main_layout.addWidget(left_scroll, stretch=2)
         main_layout.addWidget(right_panel, stretch=3)
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.mode_combo, "tip_thumb_mode")
+        tip(self.url_input, "tip_thumb_url")
+        tip(self.add_url_button, "tip_add_to_queue")
+        tip(self.remove_queue_btn, "tip_remove_selected")
+        tip(self.clear_queue_btn, "tip_clear_queue")
+        tip(self.detect_button, "tip_detect_thumbnails")
+        tip(self.threads_spin, "tip_thumb_threads")
+        tip(self.skip_existing_check, "tip_skip_existing")
+        tip(self.auto_rename_check, "tip_auto_rename")
+        tip(self.download_text_check, "tip_download_text")
+        tip(self.download_button, "tip_download_start")
+        tip(self.cancel_button, "tip_cancel")
+        tip(self.filter_input, "tip_filter_thumbnails")
+        tip(self.check_all_cb, "tip_check_all_page")
 
     def refresh_ui(self):
         """Update translation texts across controls."""
         self.update_ui_text()
 
     def update_ui_text(self):
+        retranslate_notes(self)
         self.mode_group.setTitle(translate("download_mode"))
         self.mode_label.setText(translate("download_mode"))
 
@@ -1626,4 +1593,8 @@ class ThumbnailDownloaderTab(QWidget):
         self.toggle_logs_btn.setIcon(qta.icon(icon_name, color="white"))
 
     def append_log(self, text: str):
+        # Messages here carry their level only as a tag ("[WARNING] ...").
+        settings_tab = getattr(self.parent, "settings_tab", None)
+        if not log_level_shown(settings_tab, message_level(text)):
+            return  # hidden in Settings › Log Settings
         self.log_console.append(text)

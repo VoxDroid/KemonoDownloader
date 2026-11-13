@@ -2062,1203 +2062,17 @@ class KDLanguage:
             },
             # Help Tab Translations (expanded with full content)
             "help_title": {
-                "english": "Kemono Downloader User Manual",
-                "japanese": "ケモノダウンローダーユーザーマニュアル",
-                "korean": "케모노 다운로더 사용자 매뉴얼",
-                "chinese-simplified": "Kemono 下载器用户手册",
-            },
-            "help_intro": {
-                "english": "Welcome to the Kemono Downloader, a powerful tool designed to help you download content from Kemono.cr, "
-                "a platform that archives posts from various creator services such as Patreon, Fanbox, and more. This user manual provides "
-                "detailed instructions on how to use the application, covering every feature and tab in depth. Whether you're downloading a single post "
-                "or an entire creator's archive, this guide will walk you through each step, explain the interface, and offer troubleshooting tips to ensure a smooth experience.<br><br>"
-                "<b>Key Features:</b><br>"
-                "- Download individual posts or entire creator profiles from Kemono.cr.<br>"
-                "- Support for multiple file types including images (JPG, PNG, GIF), videos (MP4), archives (ZIP, 7Z), and PDFs.<br>"
-                "- Concurrent downloads for faster performance, with customizable settings.<br>"
-                "- Preview images before downloading to confirm content.<br>"
-                "- Deduplication of files using URL hashes to avoid redundant downloads.<br>"
-                "- Detailed logging for monitoring download progress and diagnosing issues.<br>"
-                "- Customizable save directories, themes, and notification settings.<br><br>"
-                "Follow the sections below to learn how to use each tab and feature of the Kemono Downloader.",
-                "japanese": "ケモノダウンローダーへようこそ。このツールは、PatreonやFanboxなどのさまざまなクリエイターサービスから投稿をアーカイブするプラットフォーム、Kemono.suからコンテンツをダウンロードするために設計された強力なツールです。"
-                "このユーザーマニュアルでは、アプリケーションの使用方法を詳しく説明し、すべての機能とタブを深くカバーしています。単一の投稿をダウンロードする場合でも、クリエイター全体のアーカイブをダウンロードする場合でも、このガイドは各ステップを案内し、インターフェースを説明し、スムーズな体験を保証するためのトラブルシューティングのヒントを提供します。<br><br>"
-                "<b>主な機能:</b><br>"
-                "- Kemono.suから個々の投稿またはクリエイター全体のプロファイルをダウンロード。<br>"
-                "- 画像（JPG、PNG、GIF）、動画（MP4）、アーカイブ（ZIP、7Z）、PDFなど、複数のファイルタイプをサポート。<br>"
-                "- カスタマイズ可能な設定で、より高速なパフォーマンスのための同時ダウンロード。<br>"
-                "- ダウンロード前に画像をプレビューして内容を確認。<br>"
-                "- URLハッシュを使用してファイルの重複を回避。<br>"
-                "- ダウンロードの進捗状況の監視と問題の診断のための詳細なログ記録。<br>"
-                "- 保存ディレクトリ、テーマ、通知設定のカスタマイズ可能。<br><br>"
-                "以下のセクションに従って、ケモノダウンローダーの各タブと機能の使用方法を学んでください。",
-                "korean": "케모노 다운로더에 오신 것을 환영합니다. 이 도구는 Patreon, Fanbox 등 다양한 크리에이터 서비스의 게시물을 아카이브하는 플랫폼인 Kemono.su에서 콘텐츠를 다운로드하도록 설계된 강력한 도구입니다. "
-                "이 사용자 매뉴얼은 애플리케이션 사용 방법에 대한 자세한 지침을 제공하며, 모든 기능과 탭을 심도 있게 다룹니다. 단일 게시물을 다운로드하든, 크리에이터 전체의 아카이브를 다운로드하든, 이 가이드는 각 단계를 안내하고 인터페이스를 설명하며 원활한 경험을 보장하기 위한 문제 해결 팁을 제공합니다.<br><br>"
-                "<b>주요 기능:</b><br>"
-                "- Kemono.su에서 개별 게시물 또는 전체 크리에이터 프로필을 다운로드.<br>"
-                "- 이미지(JPG, PNG, GIF), 비디오(MP4), 아카이브(ZIP, 7Z), PDF 등 다양한 파일 유형 지원.<br>"
-                "- 사용자 정의 가능한 설정으로 더 빠른 성능을 위한 동시 다운로드.<br>"
-                "- 다운로드 전에 이미지를 미리 보고 콘텐츠 확인.<br>"
-                "- URL 해시를 사용한 파일 중복 방지.<br>"
-                "- 다운로드 진행 상황 모니터링 및 문제 진단을 위한 상세 로그.<br>"
-                "- 저장 디렉토리, 테마, 알림 설정 사용자 정의 가능.<br><br>"
-                "아래 섹션을 따라 케모노 다운로더의 각 탭과 기능을 사용하는 방법을 알아보세요.",
-                "chinese-simplified": "欢迎使用 Kemono 下载器，这是一款功能强大的工具，旨在帮助您从 Kemono.cr 下载内容，这是一个归档 Patreon、Fanbox 等多种创作者服务帖子的平台。本用户手册提供了详细的使用说明，深入涵盖应用程序的每个功能和选项卡。无论您是下载单个帖子还是整个创作者的归档，本指南都将引导您完成每个步骤，解释界面，并提供故障排除提示，以确保顺畅的使用体验。<br><br>"
-                "<b>主要功能：</b><br>"
-                "- 从 Kemono.cr 下载单个帖子或整个创作者资料。<br>"
-                "- 支持多种文件类型，包括图片（JPG、PNG、GIF）、视频（MP4）、归档文件（ZIP、7Z）和 PDF。<br>"
-                "- 支持并发下载以提高性能，并提供可自定义的设置。<br>"
-                "- 下载前预览图片以确认内容。<br>"
-                "- 使用 URL 哈希进行文件去重，避免重复下载。<br>"
-                "- 提供详细日志，用于监控下载进度和诊断问题。<br>"
-                "- 可自定义保存目录、主题和通知设置。<br><br>"
-                "请按照以下章节学习如何使用 Kemono 下载器的每个选项卡和功能。",
-            },
-            "help_getting_started_title": {
-                "english": "1. Getting Started",
-                "japanese": "1. はじめに",
-                "korean": "1. 시작하기",
-                "chinese-simplified": "1. 开始使用",
-            },
-            "help_getting_started_text": {
-                "english": "<b>1.1 Launching the Application</b><br>"
-                "- When you first open the Kemono Downloader, you'll be greeted by an introductory screen featuring the application title 'Kemono.cr Downloader'.<br>"
-                "- Below the title, you'll see the developer's name ('Developed by VoxDroid') and a clickable link to the GitHub repository (github.com/VoxDroid) for updates and support.<br>"
-                "- Click the 'Launch' button in the center of the screen to proceed to the main interface.<br><br>"
-                "<b>1.2 Main Interface Overview</b><br>"
-                "The main interface is divided into four tabs, each serving a specific purpose:<br>"
-                "  - <b>Post Downloader</b>: Use this tab to download files from specific Kemono.cr posts by entering their URLs. Ideal for downloading individual posts.<br>"
-                "  - <b>Creator Downloader</b>: Use this tab to download content from an entire creator's profile, fetching all their posts and associated files.<br>"
-                "  - <b>Settings</b>: Configure the application's behavior, such as save directories, simultaneous downloads, and UI preferences.<br>"
-                "  - <b>Help</b>: You're here! This tab provides this comprehensive user manual to guide you through using the application.<br><br>"
-                "<b>1.3 Interface Elements</b><br>"
-                "- <b>Tabs</b>: Located at the top of the main interface, the tabs are styled with icons and labels. The active tab is highlighted with a darker background.<br>"
-                "- <b>Status Bar</b>: At the bottom of the window, a status label (e.g., 'Idle') indicates the application's current state. It updates during operations like downloading.<br>"
-                "- <b>Footer</b>: Also at the bottom, the footer displays the developer's name and GitHub link for quick access to the project page.<br><br>"
-                "<b>1.4 Initial Setup</b><br>"
-                "- Upon first launch, the application creates several directories in the default save location (configurable in the Settings tab):<br>"
-                "  - <b>Downloads</b>: Where downloaded files are saved.<br>"
-                "  - <b>Cache</b>: Stores temporary files for image previews.<br>"
-                "  - <b>Other Files</b>: Contains metadata like file hashes for deduplication.<br>"
-                "- Ensure you have an active internet connection, as the application needs to fetch data from Kemono.cr.",
-                "japanese": "<b>1.1 アプリケーションの起動</b><br>"
-                "- ケモノダウンローダーを初めて開くと、アプリケーションタイトル「Kemono.cr Downloader」が表示された紹介画面が表示されます。<br>"
-                "- タイトルの下には、開発者名（「Developed by VoxDroid」）と、更新やサポートのためのGitHubリポジトリへのクリック可能なリンク（github.com/VoxDroid）が表示されます。<br>"
-                "- 画面中央の「起動」ボタンをクリックしてメインインターフェースに進みます。<br><br>"
-                "<b>1.2 メインインターフェースの概要</b><br>"
-                "メインインターフェースは4つのタブに分かれており、それぞれ特定の目的を持っています：<br>"
-                "  - <b>投稿ダウンローダー</b>：このタブを使用して、URLを入力することで特定のKemono.su投稿からファイルをダウンロードします。個々の投稿のダウンロードに最適です。<br>"
-                "  - <b>クリエイターダウンローダー</b>：このタブを使用して、クリエイター全体のプロフィールからコンテンツをダウンロードし、すべての投稿と関連ファイルをフェッチします。<br>"
-                "  - <b>設定</b>：保存ディレクトリ、同時ダウンロード数、UI設定など、アプリケーションの動作を設定します。<br>"
-                "  - <b>ヘルプ</b>：ここです！このタブは、アプリケーションの使用をガイドする包括的なユーザーマニュアルを提供します。<br><br>"
-                "<b>1.3 インターフェース要素</b><br>"
-                "- <b>タブ</b>：メインインターフェースの上部に位置し、アイコンとラベルでスタイルされています。アクティブなタブは濃い背景で強調されます。<br>"
-                "- <b>ステータスバー</b>：ウィンドウの下部にあり、ステータスラベル（例：「アイドル」）がアプリケーションの現在の状態を示します。ダウンロードなどの操作中に更新されます。<br>"
-                "- <b>フッター</b>：下部にもあり、開発者名とGitHubリンクが表示され、プロジェクトページに素早くアクセスできます。<br><br>"
-                "<b>1.4 初期設定</b><br>"
-                "- 初回起動時に、アプリケーションはデフォルトの保存場所（設定タブで変更可能）にいくつかのディレクトリを作成します：<br>"
-                "  - <b>ダウンロード</b>：ダウンロードしたファイルが保存される場所。<br>"
-                "  - <b>キャッシュ</b>：画像プレビューの一時ファイルを保存します。<br>"
-                "  - <b>その他のファイル</b>：重複排除のためのファイルハッシュなどのメタデータを含みます。<br>"
-                "- アプリケーションはKemono.suからデータをフェッチする必要があるため、アクティブなインターネット接続を確保してください。",
-                "korean": "<b>1.1 애플리케이션 실행</b><br>"
-                "- 케모노 다운로더를 처음 열면 'Kemono.cr Downloader'라는 애플리케이션 제목이 포함된 소개 화면이 표시됩니다。<br>"
-                "- 제목 아래에는 개발자 이름('Developed by VoxDroid')과 업데이트 및 지원을 위한 GitHub 저장소에 대한 클릭 가능한 링크(github.com/VoxDroid)가 표시됩니다.<br>"
-                "- 화면 중앙의 '실행' 버튼을 클릭하여 메인 인터페이스로 이동합니다。<br><br>"
-                "<b>1.2 메인 인터페이스 개요</b><br>"
-                "메인 인터페이스는 네 개의 탭으로 나뉘며, 각 탭은 특정 목적을 제공합니다:<br>"
-                "  - <b>게시물 다운로더</b>: 이 탭을 사용하여 URL을 입력함으로써 특정 Kemono.cr 게시물에서 파일을 다운로드합니다. 개별 게시물 다운로드에 이상적입니다.<br>"
-                "  - <b>크리에이터 다운로더</b>: 이 탭을 사용하여 크리에이터 전체 프로필에서 콘텐츠를 다운로드하며, 모든 게시물과 관련 파일을 가져옵니다.<br>"
-                "  - <b>설정</b>: 저장 디렉토리, 동시 다운로드 수, UI 설정 등 애플리케이션 동작을 구성합니다.<br>"
-                "  - <b>도움말</b>: 여기입니다! 이 탭은 애플리케이션 사용을 안내하는 포괄적인 사용자 매뉴얼을 제공합니다.<br><br>"
-                "<b>1.3 인터페이스 요소</b><br>"
-                "- <b>탭</b>: 메인 인터페이스 상단에 위치하며, 아이콘과 레이블로 스타일이 지정됩니다. 활성 탭은 더 어두운 배경으로 강조됩니다.<br>"
-                "- <b>상태 표시줄</b>: 창 하단에 있으며, 상태 레이블(예: '대기 중')이 애플리케이션의 현재 상태를 나타냅니다. 다운로드와 같은 작업 중에 업데이트됩니다.<br>"
-                "- <b>푸터</b>: 하단에도 있으며, 개발자 이름과 GitHub 링크가 표시되어 프로젝트 페이지에 빠르게 접근할 수 있습니다.<br><br>"
-                "<b>1.4 초기 설정</b><br>"
-                "- 첫 실행 시, 애플리케이션은 기본 저장 위치(설정 탭에서 변경 가능)에 여러 디렉토리를 생성합니다:<br>"
-                "  - <b>다운로드</b>: 다운로드된 파일이 저장되는 곳입니다.<br>"
-                "  - <b>캐시</b>: 이미지 미리보기를 위한 임시 파일을 저장합니다.<br>"
-                "  - <b>기타 파일</b>: 중복 제거를 위한 파일 해시와 같은 메타데이터를 포함합니다.<br>"
-                "- 애플리케이션이 Kemono.su에서 데이터를 가져와야 하므로 활성 인터넷 연결을 확인하세요.",
-                "chinese-simplified": "<b>1.1 启动应用程序</b><br>"
-                "- 首次打开 Kemono 下载器时，您将看到一个包含应用程序标题“Kemono.cr 下载器”的介绍屏幕。<br>"
-                "- 标题下方显示开发者的名称（“Developed by VoxDroid”）以及指向 GitHub 仓库（github.com/VoxDroid）的可点击链接，以获取更新和支持。<br>"
-                "- 点击屏幕中央的“启动”按钮进入主界面。<br><br>"
-                "<b>1.2 主界面概览</b><br>"
-                "主界面分为四个选项卡，每个选项卡都有特定用途：<br>"
-                "  - <b>帖子下载器</b>：使用此选项卡通过输入 URL 下载特定 Kemono.cr 帖子的文件。适合下载单个帖子。<br>"
-                "  - <b>创作者下载器</b>：使用此选项卡下载整个创作者资料的内容，获取所有帖子及相关文件。<br>"
-                "  - <b>设置</b>：配置应用程序的行为，例如保存目录、同时下载数量和界面偏好设置。<br>"
-                "  - <b>帮助</b>：您现在所在的位置！此选项卡提供全面的用户手册，指导您使用应用程序。<br><br>"
-                "<b>1.3 界面元素</b><br>"
-                "- <b>选项卡</b>：位于主界面顶部，带有图标和标签样式。当前激活的选项卡会以较深的背景高亮显示。<br>"
-                "- <b>状态栏</b>：位于窗口底部，状态标签（例如“空闲”）显示应用程序的当前状态。在下载等操作期间会更新。<br>"
-                "- <b>页脚</b>：同样位于底部，显示开发者名称和 GitHub 链接，便于快速访问项目页面。<br><br>"
-                "<b>1.4 初始设置</b><br>"
-                "- 首次启动时，应用程序会在默认保存位置（可在设置选项卡中配置）创建以下目录：<br>"
-                "  - <b>下载</b>：保存下载文件的目录。<br>"
-                "  - <b>缓存</b>：存储用于图片预览的临时文件。<br>"
-                "  - <b>其他文件</b>：包含用于去重的文件哈希等元数据。<br>"
-                "- 确保您的网络连接正常，因为应用程序需要从 Kemono.cr 获取数据。",
-            },
-            "help_post_downloader_title": {
-                "english": "2. Using the Post Downloader Tab",
-                "japanese": "2. 投稿ダウンローダータブの使用",
-                "korean": "2. 게시물 다운로더 탭 사용",
-                "chinese-simplified": "2. 使用投稿下载器选项卡",
-            },
-            "help_post_downloader_text": {
-                "english": "The Post Downloader tab is designed for downloading content from specific Kemono.cr posts. You can add multiple posts to a queue, view their contents, select files to download, and monitor the download progress. Below are the detailed steps to use this tab effectively:<br><br>"
-                "<b>2.1 Adding a Post to the Queue</b><br>"
-                "- <b>Step 1</b>: Navigate to the 'Post Downloader' tab by clicking its label at the top of the interface. The tab is marked with a download icon.<br>"
-                "- <b>Step 2</b>: Locate the 'Enter post URL' field at the top left of the tab. This is a text input field with a placeholder text 'Enter post URL (e.g., https://kemono.cr/patreon/user/123/post/456)'.<br>"
-                "- <b>Step 3</b>: Enter the URL of a Kemono.cr post. The URL must follow the format: https://kemono.cr/[service]/user/[user_id]/post/[post_id]. For example: https://kemono.cr/patreon/user/123456785/post/12345678.<br>"
-                "- <b>Step 4</b>: Click the 'Add to Queue' button next to the input field. The button is styled with a plus icon and a blue background.<br>"
-                "- <b>Step 5</b>: The post URL will appear in the 'Post Queue' list below the input field. Each entry in the list includes:<br>"
-                "  - An eye icon to view the post's contents.<br>"
-                "  - The post URL as a clickable label.<br>"
-                "  - An 'X' button to remove the post from the queue.<br><br>"
-                "<b>2.2 Viewing Post Contents</b><br>"
-                "- <b>Step 1</b>: In the 'Post Queue' list, find the post you want to inspect.<br>"
-                "- <b>Step 2</b>: Click the eye icon next to the post URL. This initiates a background task to fetch the post's data from Kemono.cr.<br>"
-                "- <b>Step 3</b>: The files associated with the post will be displayed in the 'Files to Download' list on the right side of the tab.<br>"
-                "- <b>Step 4</b>: Use the 'Filter by Type' checkboxes (e.g., JPG, ZIP, MP4) to show only specific file types. For example, checking 'JPG' will display only image files with .jpg or .jpeg extensions.<br>"
-                "- <b>Step 5</b>: Use the search bar above the 'Files to Download' list to filter files by name. For example, typing 'image' will show only files with 'image' in their names.<br>"
-                "- <b>Note</b>: The 'Background Task Progress' bar at the bottom right will show a looping animation while the post data is being fetched. The label above it will read 'Fetching files from link...'.<br><br>"
-                "<b>2.3 Selecting Files to Download</b><br>"
-                "- <b>Step 1</b>: In the 'Files to Download' list, each file is listed with a checkbox next to its name. By default, all files are selected (checkboxes are checked).<br>"
-                "- <b>Step 2</b>: Uncheck the boxes next to files you do not wish to download. For example, if you only want images, uncheck ZIP or MP4 files.<br>"
-                "- <b>Step 3</b>: Use the 'Check ALL' checkbox above the list to quickly select or deselect all visible files. If filters are applied, this affects only the filtered files.<br>"
-                "- <b>Step 4</b>: To download files from all posts in the queue at once, check the 'Download All Links' option. This disables individual file selection and prepares all files from all queued posts for download.<br>"
-                "- <b>Note</b>: When 'Download All Links' is enabled, the checkboxes in the 'Files to Download' list are disabled, and the application will attempt to download all files from all posts in the queue.<br><br>"
-                "<b>2.4 Starting the Download</b><br>"
-                "- <b>Step 1</b>: Ensure you have selected the desired files or enabled 'Download All Links'.<br>"
-                "- <b>Step 2</b>: Click the 'Download' button at the bottom left of the tab. The button is marked with a download icon and styled with a blue background.<br>"
-                "- <b>Step 3</b>: The download process will begin, and the following elements will update:<br>"
-                "  - <b>File Progress Bar</b>: Shows the progress of the current file being downloaded (0% to 100%). The label above it (e.g., 'File Progress 50%') updates accordingly.<br>"
-                "  - <b>Overall Progress Bar</b>: Displays the total progress across all files and posts (e.g., 'Overall Progress (5/10 files, 2/3 posts)').<br>"
-                "  - <b>Console</b>: Logs messages about the download process, such as 'Starting download of file 1/10: [URL]' or 'Successfully downloaded: [path]'. Logs are color-coded: green for info, yellow for warnings, red for errors.<br>"
-                "- <b>Note</b>: During the download, the 'Download' button becomes disabled, and the 'Cancel' button is enabled.<br><br>"
-                "<b>2.5 Managing Downloads</b><br>"
-                "- <b>Canceling Downloads</b>: Click the 'Cancel' button (marked with an 'X' icon) to stop all active downloads. The progress bars will turn yellow, and the labels will update to 'Downloads Terminated'.<br>"
-                "- <b>Removing Posts from Queue</b>: Click the 'X' button next to a post URL in the 'Post Queue' list to remove it. You'll be prompted to confirm the removal.<br>"
-                "- <b>Previewing Images</b>: Select an image file (JPG, JPEG, PNG, or GIF) in the 'Files to Download' list, then click the eye icon button below the list to preview it. A modal window will open showing the image, with a progress bar while it loads.<br>"
-                "- <b>Note</b>: If a post is removed during an active download, the download for that post's files will be canceled.<br><br>"
-                "<b>2.6 Where Files Are Saved</b><br>"
-                "- Files are saved in the directory specified in the Settings tab (default is your user directory under 'Kemono Downloader/Downloads').<br>"
-                "- The folder structure is organized as follows:<br>"
-                "  - <b>Service Folder</b>: Named after the service (e.g., 'patreon').<br>"
-                "  - <b>Post Folder</b>: Named 'post_[post_id]' (e.g., 'post_12345678').<br>"
-                "  - Example: If downloading from https://kemono.cr/patreon/user/123456785/post/12345678, files will be saved in '[Save Directory]/patreon/post_12345678/'.<br>"
-                "- Files are named based on their original URLs, with any special characters (e.g., '/') replaced with underscores to ensure compatibility with your filesystem.<br><br>"
-                "<b>2.7 Additional Features</b><br>"
-                "- <b>Concurrent Downloads</b>: The application supports downloading multiple files simultaneously, with the number of concurrent downloads set in the Settings tab (default is 5, adjustable between 1-20).<br>"
-                "- <b>File Deduplication</b>: The application uses URL hashes to detect and skip previously downloaded files, preventing duplicates. Hash data is stored in the 'Other Files' directory as 'file_hashes.json'.<br>"
-                "- <b>Image Caching</b>: When previewing images, they are cached in the 'Cache' directory to speed up future previews of the same image.<br>"
-                "- <b>Logging</b>: The console provides detailed logs of all operations, including file detection, download progress, and errors. This is useful for debugging issues.",
-                "japanese": "投稿ダウンローダータブは、特定のKemono.su投稿からコンテンツをダウンロードするために設計されています。複数の投稿をキューに追加し、その内容を表示し、ダウンロードするファイルを選択し、ダウンロードの進捗を監視できます。以下に、このタブを効果的に使用するための詳細な手順を示します：<br><br>"
-                "<b>2.1 投稿をキューに追加する</b><br>"
-                "- <b>ステップ1</b>：インターフェース上部の「投稿ダウンローダー」タブをクリックして移動します。このタブはダウンロードアイコンでマークされています。<br>"
-                "- <b>ステップ2</b>：タブの左上にある「投稿URLを入力」フィールドを見つけます。これは「投稿URLを入力（例: https://kemono.cr/patreon/user/123/post/456）」というプレースホルダーテキストが表示されたテキスト入力フィールドです。<br>"
-                "- <b>ステップ3</b>：Kemono.suの投稿URLを入力します。URLは次の形式である必要があります：https://kemono.cr/[service]/user/[user_id]/post/[post_id]。例: https://kemono.cr/patreon/user/123456785/post/12345678。<br>"
-                "- <b>ステップ4</b>：入力フィールドの横にある「キューに追加」ボタンをクリックします。このボタンはプラスアイコンと青い背景でスタイルされています。<br>"
-                "- <b>ステップ5</b>：投稿URLが入力フィールド下の「投稿キュー」リストに表示されます。リストの各エントリには以下が含まれます：<br>"
-                "  - 投稿の内容を表示するための目アイコン。<br>"
-                "  - クリック可能なラベルとしての投稿URL。<br>"
-                "  - キューから投稿を削除するための「X」ボタン。<br><br>"
-                "<b>2.2 投稿内容の表示</b><br>"
-                "- <b>ステップ1</b>：「投稿キュー」リストで、確認したい投稿を見つけます。<br>"
-                "- <b>ステップ2</b>：投稿URLの横にある目アイコンをクリックします。これにより、Kemono.suから投稿データを取得するバックグラウンドタスクが開始されます。<br>"
-                "- <b>ステップ3</b>：投稿に関連するファイルがタブの右側にある「ダウンロードするファイル」リストに表示されます。<br>"
-                "- <b>ステップ4</b>：「タイプでフィルタリング」チェックボックス（例: JPG、ZIP、MP4）を使用して、特定のファイルタイプのみを表示します。たとえば、「JPG」をチェックすると、.jpgまたは.jpeg拡張子の画像ファイルのみが表示されます。<br>"
-                "- <b>ステップ5</b>：「ダウンロードするファイル」リスト上部の検索バーを使用して、名前でファイルをフィルタリングします。たとえば、「image」と入力すると、「image」という名前を含むファイルのみが表示されます。<br>"
-                "- <b>注意</b>：投稿データが取得されている間、右下の「バックグラウンドタスク進捗」バーがループアニメーションを表示し、その上のラベルには「リンクからファイルをフェッチ中...」と表示されます。<br><br>"
-                "<b>2.3 ダウンロードするファイルの選択</b><br>"
-                "- <b>ステップ1</b>：「ダウンロードするファイル」リストでは、各ファイルが名前横のチェックボックスと共にリストされています。デフォルトではすべてのファイルが選択されています（チェックボックスがオン）。<br>"
-                "- <b>ステップ2</b>：ダウンロードしたくないファイルのチェックボックスをオフにします。たとえば、画像だけが必要な場合、ZIPやMP4ファイルのチェックを外します。<br>"
-                "- <b>ステップ3</b>：リスト上部の「すべてチェック」チェックボックスを使用して、表示されているすべてのファイルを迅速に選択または選択解除します。フィルターが適用されている場合、これはフィルターされたファイルにのみ影響します。<br>"
-                "- <b>ステップ4</b>：キュー内のすべての投稿から一度にファイルをダウンロードするには、「すべてのリンクをダウンロード」オプションをチェックします。これにより個別のファイル選択が無効になり、キュー内のすべての投稿からすべてのファイルがダウンロードの準備をします。<br>"
-                "- <b>注意</b>：「すべてのリンクをダウンロード」が有効な場合、「ダウンロードするファイル」リストのチェックボックスが無効になり、アプリケーションはキュー内のすべての投稿からすべてのファイルをダウンロードしようとします。<br><br>"
-                "<b>2.4 ダウンロードの開始</b><br>"
-                "- <b>ステップ1</b>：希望するファイルを選択したか、「すべてのリンクをダウンロード」を有効にしたことを確認します。<br>"
-                "- <b>ステップ2</b>：タブの左下にある「ダウンロード」ボタンをクリックします。このボタンはダウンロードアイコンでマークされ、青い背景でスタイルされています。<br>"
-                "- <b>ステップ3</b>：ダウンロードプロセスが開始され、以下の要素が更新されます：<br>"
-                "  - <b>ファイル進捗バー</b>：現在ダウンロード中のファイルの進捗（0%から100%）を表示します。その上のラベル（例: 「ファイル進捗 50%」）がそれに応じて更新されます。<br>"
-                "  - <b>全体進捗バー</b>：すべてのファイルと投稿にわたる全体の進捗を表示します（例: 「全体進捗 (5/10 ファイル, 2/3 投稿)」）。<br>"
-                "  - <b>コンソール</b>：ダウンロードプロセスに関するメッセージを記録します。たとえば、「ファイル 1/10 のダウンロード開始: [URL]」や「ダウンロード成功: [path]」など。ログは色分けされています：情報は緑、警告は黄、エラーは赤。<br>"
-                "- <b>注意</b>：ダウンロード中は「ダウンロード」ボタンが無効になり、「キャンセル」ボタンが有効になります。<br><br>"
-                "<b>2.5 ダウンロードの管理</b><br>"
-                "- <b>ダウンロードのキャンセル</b>：「キャンセル」ボタン（「X」アイコンでマーク）をクリックしてすべてのアクティブなダウンロードを停止します。進捗バーが黄色に変わり、ラベルが「ダウンロード中断」に更新されます。<br>"
-                "- <b>キューからの投稿の削除</b>：「投稿キュー」リストの投稿URL横の「X」ボタンをクリックして削除します。削除の確認が求められます。<br>"
-                "- <b>画像のプレビュー</b>：「ダウンロードするファイル」リストで画像ファイル（JPG、JPEG、PNG、またはGIF）を選択し、リスト下の目アイコンボタンをクリックしてプレビューします。画像を表示するモーダルウィンドウが開き、読み込み中に進捗バーが表示されます。<br>"
-                "- <b>注意</b>：アクティブなダウンロード中に投稿が削除された場合、その投稿のファイルのダウンロードがキャンセルされます。<br><br>"
-                "<b>2.6 ファイルの保存場所</b><br>"
-                "- ファイルは設定タブで指定されたディレクトリに保存されます（デフォルトはユーザーディレクトリ内の「Kemono Downloader/Downloads」）。<br>"
-                "- フォルダ構造は次のように整理されています：<br>"
-                "  - <b>サービスフォルダ</b>：サービス名に基づいて命名されます（例: 「patreon」）。<br>"
-                "  - <b>投稿フォルダ</b>：「post_[post_id]」と命名されます（例: 「post_12345678」）。<br>"
-                "  - 例: https://kemono.cr/patreon/user/123456785/post/12345678 からダウンロードする場合、ファイルは「[保存ディレクトリ]/patreon/post_12345678/」に保存されます。<br>"
-                "- ファイル名は元のURLに基づいて命名され、ファイルシステムとの互換性を確保するために特殊文字（例: 「/」）はアンダースコアに置き換えられます。<br><br>"
-                "<b>2.7 追加機能</b><br>"
-                "- <b>同時ダウンロード</b>：アプリケーションは複数のファイルを同時にダウンロードでき、同時ダウンロードの数は設定タブで設定されます（デフォルトは5、1-20の間で調整可能）。<br>"
-                "- <b>ファイルの重複排除</b>：アプリケーションはURLハッシュを使用して以前にダウンロードされたファイルを検出し、重複を防ぎます。ハッシュデータは「その他のファイル」ディレクトリ内の「file_hashes.json」に保存されます。<br>"
-                "- <b>画像キャッシュ</b>：画像をプレビューする際、それらは「キャッシュ」ディレクトリにキャッシュされ、同じ画像の将来のプレビューを高速化します。<br>"
-                "- <b>ログ記録</b>：コンソールは、ファイル検出、ダウンロード進捗、エラーを含むすべての操作の詳細なログを提供し、問題のデバッグに役立ちます。",
-                "korean": "게시물 다운로더 탭은 특정 Kemono.cr 게시물에서 콘텐츠를 다운로드하기 위해 설계되었습니다. 여러 게시물을 대기열에 추가하고, 내용을 보고, 다운로드할 파일을 선택하며, 다운로드 진행 상황을 모니터링할 수 있습니다. 아래는 이 탭을 효과적으로 사용하는 자세한 단계입니다:<br><br>"
-                "<b>2.1 게시물을 대기열에 추가하기</b><br>"
-                "- <b>단계 1</b>: 인터페이스 상단의 '게시물 다운로더' 탭을 클릭하여 이동합니다. 이 탭은 다운로드 아이콘으로 표시됩니다.<br>"
-                "- <b>단계 2</b>: 탭의 좌측 상단에 있는 '게시물 URL 입력' 필드를 찾습니다. 이 필드는 '게시물 URL 입력(예: https://kemono.cr/patreon/user/123/post/456)'이라는 플레이스홀더 텍스트가 있는 텍스트 입력 필드입니다.<br>"
-                "- <b>단계 3</b>: Kemono.cr 게시물의 URL을 입력합니다. URL은 다음 형식을 따라야 합니다: https://kemono.cr/[service]/user/[user_id]/post/[post_id]. 예: https://kemono.cr/patreon/user/123456785/post/12345678.<br>"
-                "- <b>단계 4</b>: 입력 필드 옆의 '대기열에 추가' 버튼을 클릭합니다. 이 버튼은 플러스 아이콘과 파란색 배경으로 스타일링되어 있습니다.<br>"
-                "- <b>단계 5</b>: 게시물 URL이 입력 필드 아래의 '게시물 대기열' 목록에 나타납니다. 목록의 각 항목에는 다음이 포함됩니다:<br>"
-                "  - 게시물 내용을 보기 위한 눈 아이콘.<br>"
-                "  - 클릭 가능한 레이블로 표시된 게시물 URL.<br>"
-                "  - 대기열에서 게시물을 제거하기 위한 'X' 버튼.<br><br>"
-                "<b>2.2 게시물 내용 보기</b><br>"
-                "- <b>단계 1</b>: '게시물 대기열' 목록에서 확인하고 싶은 게시물을 찾습니다.<br>"
-                "- <b>단계 2</b>: 게시물 URL 옆의 눈 아이콘을 클릭합니다. 그러면 Kemono.su에서 게시물 데이터를 가져오는 백그라운드 작업이 시작됩니다.<br>"
-                "- <b>단계 3</b>: 게시물과 관련된 파일이 탭의 오른쪽에 있는 '다운로드할 파일' 목록에 표시됩니다.<br>"
-                "- <b>단계 4</b>: '유형별 필터링' 체크박스(예: JPG, ZIP, MP4)를 사용하여 특정 파일 유형만 표시합니다. 예를 들어, 'JPG'를 체크하면 .jpg 또는 .jpeg 확장자를 가진 이미지 파일만 표시됩니다.<br>"
-                "- <b>단계 5</b>: '다운로드할 파일' 목록 위의 검색창을 사용하여 파일 이름을 필터링합니다. 예를 들어, 'image'를 입력하면 이름에 'image'가 포함된 파일만 표시됩니다.<br>"
-                "- <b>참고</b>: 게시물 데이터가 가져와지는 동안 오른쪽 하단의 '백그라운드 작업 진행률' 바가 루프 애니메이션을 표시하며, 위의 레이블은 '링크에서 파일 가져오는 중...'이라고 표시됩니다.<br><br>"
-                "<b>2.3 다운로드할 파일 선택</b><br>"
-                "- <b>단계 1</b>: '다운로드할 파일' 목록에서 각 파일은 이름 옆에 체크박스와 함께 나열됩니다. 기본적으로 모든 파일이 선택되어 있습니다(체크박스가 체크됨).<br>"
-                "- <b>단계 2</b>: 다운로드하고 싶지 않은 파일의 체크박스를 해제합니다. 예를 들어, 이미지 파일만 원한다면 ZIP이나 MP4 파일의 체크를 해제합니다.<br>"
-                "- <b>단계 3</b>: 목록 위의 '모두 선택' 체크박스를 사용하여 표시된 모든 파일을 빠르게 선택하거나 선택 해제합니다. 필터가 적용된 경우, 이는 필터링된 파일에만 영향을 미칩니다.<br>"
-                "- <b>단계 4</b>: 대기열에 있는 모든 게시물의 파일을 한 번에 다운로드하려면 '모든 링크 다운로드' 옵션을 체크합니다. 이렇게 하면 개별 파일 선택이 비활성화되고 대기열에 있는 모든 게시물의 모든 파일이 다운로드 준비됩니다.<br>"
-                "- <b>참고</b>: '모든 링크 다운로드'가 활성화되면 '다운로드할 파일' 목록의 체크박스가 비활성화되며, 애플리케이션은 대기열에 있는 모든 게시물의 모든 파일을 다운로드하려고 시도합니다.<br><br>"
-                "<b>2.4 다운로드 시작</b><br>"
-                "- <b>단계 1</b>: 원하는 파일을 선택했거나 '모든 링크 다운로드'를 활성화했는지 확인합니다.<br>"
-                "- <b>단계 2</b>: 탭의 좌측 하단에 있는 '다운로드' 버튼을 클릭합니다. 이 버튼은 다운로드 아이콘으로 표시되며 파란색 배경으로 스타일링되어 있습니다.<br>"
-                "- <b>단계 3</b>: 다운로드 프로세스가 시작되며, 다음 요소들이 업데이트됩니다:<br>"
-                "  - <b>파일 진행률 바</b>: 현재 다운로드 중인 파일의 진행률(0%에서 100%)을 표시합니다. 위의 레이블(예: '파일 진행률 50%')이 그에 따라 업데이트됩니다.<br>"
-                "  - <b>전체 진행률 바</b>: 모든 파일과 게시물에 걸친 총 진행률을 표시합니다(예: '전체 진행률 (5/10 파일, 2/3 게시물)').<br>"
-                "  - <b>콘솔</b>: 다운로드 프로세스에 대한 메시지를 기록합니다. 예: '파일 1/10 다운로드 시작: [URL]' 또는 '다운로드 성공: [경로]'. 로그는 색상으로 구분됩니다: 정보는 녹색, 경고는 노란색, 오류는 빨간색.<br>"
-                "- <b>참고</b>: 다운로드 중에는 '다운로드' 버튼이 비활성화되고 '취소' 버튼이 활성화됩니다.<br><br>"
-                "<b>2.5 다운로드 관리</b><br>"
-                "- <b>다운로드 취소</b>: '취소' 버튼('X' 아이콘으로 표시)을 클릭하여 모든 활성 다운로드를 중지합니다. 진행률 바가 노란색으로 변하고 레이블이 '다운로드 중단됨'으로 업데이트됩니다.<br>"
-                "- <b>대기열에서 게시물 제거</b>: '게시물 대기열' 목록에서 게시물 URL 옆의 'X' 버튼을 클릭하여 제거합니다. 제거 확인 메시지가 표시됩니다.<br>"
-                "- <b>이미지 미리보기</b>: '다운로드할 파일' 목록에서 이미지 파일(JPG, JPEG, PNG, GIF)을 선택한 후 목록 아래의 눈 아이콘 버튼을 클릭하여 미리 봅니다. 이미지를 표시하는 모달 창이 열리며, 로드 중에는 진행률 바가 표시됩니다.<br>"
-                "- <b>참고</b>: 활성 다운로드 중에 게시물이 제거되면 해당 게시물의 파일 다운로드가 취소됩니다.<br><br>"
-                "<b>2.6 파일 저장 위치</b><br>"
-                "- 파일은 설정 탭에서 지정된 디렉토리에 저장됩니다(기본값은 사용자 디렉토리 내 'Kemono Downloader/Downloads').<br>"
-                "- 폴더 구조는 다음과 같이 구성됩니다:<br>"
-                "  - <b>서비스 폴더</b>: 서비스 이름으로 명명됩니다(예: 'patreon').<br>"
-                "  - <b>게시물 폴더</b>: 'post_[post_id]'로 명명됩니다(예: 'post_12345678').<br>"
-                "  - 예: https://kemono.cr/patreon/user/123456785/post/12345678에서 다운로드하면 파일은 '[저장 디렉토리]/patreon/post_12345678/'에 저장됩니다.<br>"
-                "- 파일 이름은 원래 URL을 기반으로 하며, 파일 시스템 호환성을 보장하기 위해 특수 문자(예: '/')는 밑줄로 대체됩니다.<br><br>"
-                "<b>2.7 추가 기능</b><br>"
-                "- <b>동시 다운로드</b>: 애플리케이션은 여러 파일을 동시에 다운로드할 수 있으며, 동시 다운로드 수는 설정 탭에서 설정됩니다(기본값은 5, 1-20 사이에서 조정 가능).<br>"
-                "- <b>파일 중복 제거</b>: 애플리케이션은 URL 해시를 사용하여 이전에 다운로드된 파일을 감지하고 중복을 방지합니다. 해시 데이터는 '기타 파일' 디렉토리의 'file_hashes.json'에 저장됩니다.<br>"
-                "- <b>이미지 캐싱</b>: 이미지를 미리 볼 때, '캐시' 디렉토리에 캐시되어 동일한 이미지의 향후 미리보기를 빠르게 합니다.<br>"
-                "- <b>로깅</b>: 콘솔은 파일 감지, 다운로드 진행 상황, 오류를 포함한 모든 작업에 대한 자세한 로그를 제공하여 문제 디버깅에 유용합니다.",
-                "chinese-simplified": "帖子下载器选项卡专为从特定 Kemono.cr 帖子下载内容而设计。您可以将多个帖子添加到队列，查看其内容，选择要下载的文件，并监控下载进度。以下是有效使用此选项卡的详细步骤：<br><br>"
-                "<b>2.1 将帖子添加到队列</b><br>"
-                "- <b>步骤 1</b>：点击界面顶部的“帖子下载器”标签进入该选项卡。该选项卡标有下载图标。<br>"
-                "- <b>步骤 2</b>：找到选项卡左上方的“输入帖子 URL”字段。这是一个带有占位符文本“输入帖子 URL（例如：https://kemono.cr/patreon/user/123/post/456）”的文本输入框。<br>"
-                "- <b>步骤 3</b>：输入 Kemono.cr 帖子的 URL。URL 必须遵循以下格式：https://kemono.cr/[service]/user/[user_id]/post/[post_id]。例如：https://kemono.cr/patreon/user/123456785/post/12345678。<br>"
-                "- <b>步骤 4</b>：点击输入字段旁边的“添加到队列”按钮。该按钮带有加号图标和蓝色背景。<br>"
-                "- <b>步骤 5</b>：帖子 URL 将显示在输入字段下方的“帖子队列”列表中。列表中的每个条目包括：<br>"
-                "  - 一个用于查看帖子内容的眼睛图标。<br>"
-                "  - 作为可点击标签的帖子 URL。<br>"
-                "  - 一个用于从队列中删除帖子的“X”按钮。<br><br>"
-                "<b>2.2 查看帖子内容</b><br>"
-                "- <b>步骤 1</b>：在“帖子队列”列表中，找到您想要检查的帖子。<br>"
-                "- <b>步骤 2</b>：点击帖子 URL 旁边的眼睛图标。这将启动一个后台任务，从 Kemono.cr 获取帖子数据。<br>"
-                "- <b>步骤 3</b>：与帖子相关的文件将显示在选项卡右侧的“待下载文件”列表中。<br>"
-                "- <b>步骤 4</b>：使用“按类型过滤”复选框（例如：JPG、ZIP、MP4）仅显示特定文件类型。例如，勾选“JPG”将仅显示扩展名为 .jpg 或 .jpeg 的图片文件。<br>"
-                "- <b>步骤 5</b>：使用“待下载文件”列表上方的搜索栏按文件名过滤文件。例如，输入“image”将仅显示文件名中包含“image”的文件。<br>"
-                "- <b>注意</b>：在获取帖子数据时，右下方的“后台任务进度”条将显示循环动画，其上方标签将显示“正在从链接获取文件...”。<br><br>"
-                "<b>2.3 选择要下载的文件</b><br>"
-                "- <b>步骤 1</b>：在“待下载文件”列表中，每个文件旁都有一个复选框。默认情况下，所有文件都被选中（复选框已勾选）。<br>"
-                "- <b>步骤 2</b>：取消勾选您不想下载的文件的复选框。例如，如果您只想要图片，请取消 ZIP 或 MP4 文件的勾选。<br>"
-                "- <b>步骤 3</b>：使用列表上方的“全选”复选框快速选择或取消选择所有可见文件。如果应用了过滤器，这仅影响过滤后的文件。<br>"
-                "- <b>步骤 4</b>：要一次性下载队列中所有帖子的文件，请勾选“下载所有链接”选项。这将禁用单个文件选择，并准备下载队列中所有帖子的所有文件。<br>"
-                "- <b>注意</b>：当启用“下载所有链接”时，“待下载文件”列表中的复选框将被禁用，应用程序将尝试下载队列中所有帖子的所有文件。<br><br>"
-                "<b>2.4 开始下载</b><br>"
-                "- <b>步骤 1</b>：确保已选择所需文件或启用了“下载所有链接”。<br>"
-                "- <b>步骤 2</b>：点击选项卡左下方的“下载”按钮。该按钮标有下载图标并带有蓝色背景。<br>"
-                "- <b>步骤 3</b>：下载过程将开始，以下元素将更新：<br>"
-                "  - <b>文件进度条</b>：显示当前下载文件的进度（0% 到 100%）。其上方的标签（例如“文件进度 50%”）会相应更新。<br>"
-                "  - <b>总进度条</b>：显示所有文件和帖子的总体进度（例如“总进度（5/10 文件，2/3 帖子）”）。<br>"
-                "  - <b>控制台</b>：记录下载过程的消息，例如“开始下载文件 1/10：[URL]”或“成功下载：[路径]”。日志采用颜色编码：绿色表示信息，黄色表示警告，红色表示错误。<br>"
-                "- <b>注意</b>：下载期间，“下载”按钮将禁用，“取消”按钮将启用。<br><br>"
-                "<b>2.5 管理下载</b><br>"
-                "- <b>取消下载</b>：点击“取消”按钮（标有“X”图标）停止所有活动下载。进度条将变为黄色，标签将更新为“下载已终止”。<br>"
-                "- <b>从队列中删除帖子</b>：点击“帖子队列”列表中帖子 URL 旁边的“X”按钮删除帖子。您将被提示确认删除。<br>"
-                "- <b>预览图片</b>：在“待下载文件”列表中选择图片文件（JPG、JPEG、PNG 或 GIF），然后点击列表下方的眼睛图标按钮进行预览。将打开一个显示图片的模态窗口，加载时显示进度条。<br>"
-                "- <b>注意</b>：如果在活动下载期间删除了帖子，该帖子的文件下载将被取消。<br><br>"
-                "<b>2.6 文件保存位置</b><br>"
-                "- 文件将保存在设置选项卡中指定的目录中（默认为用户目录下的“Kemono Downloader/Downloads”）。<br>"
-                "- 文件夹结构组织如下：<br>"
-                "  - <b>服务文件夹</b>：以服务命名（例如“patreon”）。<br>"
-                "  - <b>帖子文件夹</b>：命名为“post_[post_id]”（例如“post_12345678”）。<br>"
-                "  - 示例：从 https://kemono.cr/patreon/user/123456785/post/12345678 下载的文件将保存在“[保存目录]/patreon/post_12345678/”中。<br>"
-                "- 文件名基于其原始 URL，任何特殊字符（例如“/”）都将替换为下划线，以确保与文件系统的兼容性。<br><br>"
-                "<b>2.7 附加功能</b><br>"
-                "- <b>并发下载</b>：应用程序支持同时下载多个文件，并发下载数量在设置选项卡中设置（默认为 5，可在 1-20 之间调整）。<br>"
-                "- <b>文件去重</b>：应用程序使用 URL 哈希检测并跳过之前下载的文件，防止重复。哈希数据存储在“其他文件”目录中的“file_hashes.json”中。<br>"
-                "- <b>图片缓存</b>：预览图片时，图片会缓存到“缓存”目录中，以加快相同图片的未来预览速度。<br>"
-                "- <b>日志记录</b>：控制台提供所有操作的详细日志，包括文件检测、下载进度和错误。这对于调试问题非常有用。",
-            },
-            "help_creator_downloader_title": {
-                "english": "3. Using the Creator Downloader Tab",
-                "japanese": "3. クリエイターダウンローダータブの使用",
-                "korean": "3. 크리에이터 다운로더 탭 사용",
-                "chinese-simplified": "3. 使用创作者下载器选项卡",
-            },
-            "help_creator_downloader_text": {
-                "english": "The Creator Downloader tab is designed for bulk downloading content from a creator's entire profile on Kemono.cr. You can queue multiple creators, fetch their posts, select specific content to download, and monitor the progress. This tab is ideal for archiving a creator's work or downloading content from multiple creators at once. Below are the detailed steps to use this tab effectively:<br><br>"
-                "<b>3.1 Adding a Creator to the Queue</b><br>"
-                "- <b>Step 1</b>: Navigate to the 'Creator Downloader' tab by clicking its label at the top of the interface. The tab is marked with a user-edit icon.<br>"
-                "- <b>Step 2</b>: Locate the 'Enter creator URL' field at the top left of the tab. This is a text input field with a placeholder text 'Enter creator URL (e.g., https://kemono.cr/patreon/user/12345678)'.<br>"
-                "- <b>Step 3</b>: Enter the URL of a creator's profile on Kemono.cr. The URL must follow the format: https://kemono.cr/[service]/user/[user_id]. For example: https://kemono.cr/patreon/user/12345678.<br>"
-                "- <b>Step 4</b>: Click the 'Add to Queue' button next to the input field. The button is styled with a plus icon and a blue background.<br>"
-                "- <b>Step 5</b>: The creator URL will appear in the 'Creator Queue' list below the input field. Each entry in the list includes:<br>"
-                "  - An eye icon to fetch and view the creator's posts.<br>"
-                "  - The creator URL as a clickable label.<br>"
-                "  - An 'X' button to remove the creator from the queue.<br>"
-                "- <b>Note</b>: Duplicate URLs are automatically prevented. If you try to add a URL already in the queue, a warning message will appear in the console: '[WARNING] URL already in queue.'<br><br>"
-                "<b>3.2 Viewing Creator Posts</b><br>"
-                "- <b>Step 1</b>: In the 'Creator Queue' list, find the creator whose posts you want to view.<br>"
-                "- <b>Step 2</b>: Click the eye icon next to the creator URL. This initiates a background task to fetch all posts associated with the creator from Kemono.cr.<br>"
-                "- <b>Step 3</b>: The posts will be displayed in the 'Posts to Download' list on the right side of the tab. Each post entry includes:<br>"
-                "  - A checkbox to select the post for download.<br>"
-                "  - The post title (or 'Post [post_id]' if no title is available).<br>"
-                "  - A thumbnail URL (if available) stored as user data for previewing.<br>"
-                "- <b>Step 4</b>: Use the search bar above the 'Posts to Download' list to filter posts by title. For example, typing 'artwork' will show only posts with 'artwork' in their titles.<br>"
-                "- <b>Note</b>: The 'Background Task Progress' bar at the bottom right will show a looping animation while posts are being fetched, with the label 'Detecting posts from link...'. Once complete, the label changes to 'Idle'.<br><br>"
-                "<b>3.3 Configuring Download Options</b><br>"
-                "- <b>Step 1</b>: Under the 'Download Options' group box, configure which content types to include in the download:<br>"
-                "  - <b>Main File</b>: Includes the primary file attached to each post (e.g., a featured image or video). Enabled by default.<br>"
-                "  - <b>Attachments</b>: Includes additional files attached to the post (e.g., ZIP files, extra images). Enabled by default.<br>"
-                "  - <b>Content Images</b>: Includes images embedded in the post's content (e.g., images in the post description). Enabled by default.<br>"
-                "- <b>Step 2</b>: In the 'File Extensions' group box, select which file types to download:<br>"
-                "  - Options include JPG/JPEG, PNG, ZIP, MP4, GIF, PDF, and 7Z.<br>"
-                "  - All file types are enabled by default. Uncheck any file types you do not wish to download.<br>"
-                "  - Example: If you only want images, uncheck ZIP, MP4, PDF, and 7Z, leaving JPG/JPEG, PNG, and GIF checked.<br>"
-                "- <b>Note</b>: Changing these options will automatically update the list of files to download when you start the download process.<br><br>"
-                "<b>3.4 Selecting Posts to Download</b><br>"
-                "- <b>Step 1</b>: In the 'Posts to Download' list, check the boxes next to the posts you want to download. By default, no posts are selected.<br>"
-                "- <b>Step 2</b>: Use the 'Check ALL' checkbox above the list to select or deselect all visible posts. If the search filter is applied, this affects only the filtered posts.<br>"
-                "- <b>Step 3</b>: Alternatively, enable the 'Download All Links' option to download all files from all queued creators without manual selection:<br>"
-                "  - When enabled, this option disables individual post checkboxes and fetches all posts from all creators in the queue.<br>"
-                "  - The application will automatically select all posts for download, ignoring manual selections.<br>"
-                "- <b>Note</b>: The 'Posts: [number]' label below the list updates to reflect the number of selected posts. When 'Download All Links' is enabled, this shows the total number of posts across all queued creators.<br><br>"
-                "<b>3.5 Starting the Download</b><br>"
-                "- <b>Step 1</b>: Ensure you have selected the desired posts or enabled 'Download All Links'.<br>"
-                "- <b>Step 2</b>: Click the 'Download' button at the bottom left of the tab. The button is marked with a download icon and styled with a blue background.<br>"
-                "- <b>Step 3</b>: The application will first prepare the files for download, showing 'Preparing files to download...' in the background task label and a progress bar.<br>"
-                "- <b>Step 4</b>: Once preparation is complete, the download process begins, and the following elements update:<br>"
-                "  - <b>File Progress Bar</b>: Shows the progress of the current file being downloaded (0% to 100%). The label above it (e.g., 'File Progress 50%') updates accordingly.<br>"
-                "  - <b>Overall Progress Bar</b>: Displays the total progress across all files and posts (e.g., 'Overall Progress (5/10 files, 2/3 posts)').<br>"
-                "  - <b>Console</b>: Logs messages such as 'Starting download of file 1/10: [URL]' or 'Successfully downloaded: [path]'. Logs are color-coded: green for info, yellow for warnings, red for errors.<br>"
-                "- <b>Note</b>: During the download, the 'Download' button becomes disabled, the 'Cancel' button is enabled, and the 'Post Downloader' tab is temporarily disabled to prevent conflicts.<br><br>"
-                "<b>3.6 Managing Downloads</b><br>"
-                "- <b>Canceling Downloads</b>: Click the 'Cancel' button (marked with an 'X' icon) to stop all active downloads. The progress bars will turn yellow, and the labels will update to 'Downloads Terminated'. The 'Post Downloader' tab will be re-enabled.<br>"
-                "- <b>Removing Creators from Queue</b>: Click the 'X' button next to a creator URL in the 'Creator Queue' list to remove it. You'll be prompted to confirm the removal. If removed during an active download, the download for that creator's posts will be canceled.<br>"
-                "- <b>Previewing Images</b>: Select a post in the 'Posts to Download' list, then click the eye icon button below the list to preview its thumbnail (if available). Only JPG, JPEG, PNG, and GIF files are supported for preview. A modal window will open showing the image, with a progress bar while it loads.<br>"
-                "- <b>Note</b>: If no posts are selected when you click 'Download', a warning will appear in the console: '[WARNING] No posts selected for download.'<br><br>"
-                "<b>3.7 Where Files Are Saved</b><br>"
-                "- Files are saved in the directory specified in the Settings tab (default is your user directory under 'Kemono Downloader/Downloads').<br>"
-                "- The folder structure is organized as follows:<br>"
-                "  - <b>Creator Folder</b>: Named after the creator's ID (e.g., '12345678').<br>"
-                "  - <b>Post Folder</b>: Named 'post_[post_id]' within the creator folder (e.g., 'post_12345678').<br>"
-                "  - Example: If downloading from creator https://kemono.cr/patreon/user/12345678, files from post 12345678 will be saved in '[Save Directory]/12345678/post_12345678/'.<br>"
-                "- Files are named based on their original URLs, with any special characters (e.g., '/') replaced with underscores to ensure compatibility with your filesystem.<br>"
-                "- <b>File Deduplication</b>: The application uses URL hashes to detect and skip previously downloaded files, storing hash data in 'file_hashes.json' in the 'Other Files' directory.<br><br>"
-                "<b>3.8 Additional Features</b><br>"
-                "- <b>Concurrent Downloads</b>: The application supports downloading multiple files simultaneously, with the number of concurrent downloads set in the Settings tab (default is 5, adjustable between 1-20).<br>"
-                "- <b>Image Caching</b>: Thumbnails and preview images are cached in the 'Cache' directory to speed up future previews of the same image.<br>"
-                "- <b>Logging</b>: The console provides detailed logs of all operations, including post detection, file preparation, download progress, and errors. This is useful for debugging issues.<br>"
-                "- <b>Batch Processing</b>: When 'Download All Links' is enabled, the application processes creators sequentially, preparing and downloading files for each creator one at a time to manage resources efficiently.",
-                "japanese": "クリエイターダウンローダータブは、Kemono.su上のクリエイターの全プロフィールからコンテンツを一括ダウンロードするために設計されています。複数のクリエイターをキューに追加し、投稿を取得し、特定のコンテンツを選択してダウンロードし、進捗を監視できます。このタブは、クリエイターの作品をアーカイブしたり、複数のクリエイターから一度にコンテンツをダウンロードするのに最適です。以下に、このタブを効果的に使用するための詳細な手順を示します：<br><br>"
-                "<b>3.1 クリエイターをキューに追加する</b><br>"
-                "- <b>ステップ1</b>：インターフェース上部の「クリエイターダウンローダー」タブをクリックして移動します。このタブはユーザー編集アイコンでマークされています。<br>"
-                "- <b>ステップ2</b>：タブの左上にある「クリエイターURLを入力」フィールドを見つけます。これは「クリエイターURLを入力（例: https://kemono.cr/patreon/user/12345678）」というプレースホルダーテキストが表示されたテキスト入力フィールドです。<br>"
-                "- <b>ステップ3</b>：Kemono.suのクリエイタープロフィールのURLを入力します。URLは次の形式である必要があります：https://kemono.cr/[service]/user/[user_id]。例: https://kemono.cr/patreon/user/12345678。<br>"
-                "- <b>ステップ4</b>：入力フィールドの横にある「キューに追加」ボタンをクリックします。このボタンはプラスアイコンと青い背景でスタイルされています。<br>"
-                "- <b>ステップ5</b>：クリエイターURLが入力フィールド下の「クリエイターキュー」リストに表示されます。リストの各エントリには以下が含まれます：<br>"
-                "  - クリエイターの投稿を取得して表示するための目アイコン。<br>"
-                "  - クリック可能なラベルとしてのクリエイターURL。<br>"
-                "  - キューからクリエイターを削除するための「X」ボタン。<br>"
-                "- <b>注意</b>：重複するURLは自動的に防止されます。すでにキューにあるURLを追加しようとすると、コンソールに警告メッセージが表示されます：「[警告] URLはすでにキューにあります。」<br><br>"
-                "<b>3.2 クリエイターの投稿を表示する</b><br>"
-                "- <b>ステップ1</b>：「クリエイターキュー」リストで、投稿を表示したいクリエイターを見つけます。<br>"
-                "- <b>ステップ2</b>：クリエイターURLの横にある目アイコンをクリックします。これにより、Kemono.suからクリエイターに関連するすべての投稿を取得するバックグラウンドタスクが開始されます。<br>"
-                "- <b>ステップ3</b>：投稿がタブの右側にある「ダウンロードする投稿」リストに表示されます。各投稿エントリには以下が含まれます：<br>"
-                "  - ダウンロード用に投稿を選択するためのチェックボックス。<br>"
-                "  - 投稿タイトル（タイトルがない場合は「投稿 [post_id]」）。<br>"
-                "  - プレビュー用にユーザーデータとして保存されたサムネイルURL（利用可能な場合）。<br>"
-                "- <b>ステップ4</b>：「ダウンロードする投稿」リスト上部の検索バーを使用して、タイトルで投稿をフィルタリングします。たとえば、「artwork」と入力すると、タイトルに「artwork」を含む投稿のみが表示されます。<br>"
-                "- <b>注意</b>：投稿が取得されている間、右下の「バックグラウンドタスク進捗」バーがループアニメーションを表示し、ラベルには「リンクから投稿を検出中...」と表示されます。完了すると、ラベルは「アイドル」に変わります。<br><br>"
-                "<b>3.3 ダウンロードオプションの設定</b><br>"
-                "- <b>ステップ1</b>：「ダウンロードオプション」グループボックス内で、ダウンロードに含めるコンテンツタイプを設定します：<br>"
-                "  - <b>メインファイル</b>：各投稿に添付された主要ファイル（例: 注目画像や動画）を含みます。デフォルトで有効。<br>"
-                "  - <b>添付ファイル</b>：投稿に添付された追加ファイル（例: ZIPファイル、追加画像）を含みます。デフォルトで有効。<br>"
-                "  - <b>コンテンツ画像</b>：投稿のコンテンツに埋め込まれた画像（例: 投稿説明内の画像）を含みます。デフォルトで有効。<br>"
-                "- <b>ステップ2</b>：「ファイル拡張子」グループボックスで、ダウンロードするファイルタイプを選択します：<br>"
-                "  - オプションにはJPG/JPEG、PNG、ZIP、MP4、GIF、PDF、7Zが含まれます。<br>"
-                "  - すべてのファイルタイプがデフォルトで有効です。ダウンロードしたくないファイルタイプのチェックを外します。<br>"
-                "  - 例: 画像のみが必要な場合、ZIP、MP4、PDF、7Zのチェックを外し、JPG/JPEG、PNG、GIFをチェックしたままにします。<br>"
-                "- <b>注意</b>：これらのオプションを変更すると、ダウンロードプロセスを開始したときにダウンロードするファイルのリストが自動的に更新されます。<br><br>"
-                "<b>3.4 ダウンロードする投稿の選択</b><br>"
-                "- <b>ステップ1</b>：「ダウンロードする投稿」リストで、ダウンロードしたい投稿の横にあるチェックボックスをオンにします。デフォルトでは投稿は選択されていません。<br>"
-                "- <b>ステップ2</b>：リスト上部の「すべてチェック」チェックボックスを使用して、表示されているすべての投稿を選択または選択解除します。検索フィルターが適用されている場合、これはフィルターされた投稿にのみ影響します。<br>"
-                "- <b>ステップ3</b>：または、「すべてのリンクをダウンロード」オプションを有効にして、手動選択せずにキュー内のすべてのクリエイターからすべてのファイルをダウンロードします：<br>"
-                "  - 有効にすると、このオプションは個別の投稿チェックボックスを無効にし、キュー内のすべてのクリエイターからすべての投稿を取得します。<br>"
-                "  - アプリケーションは手動選択を無視してすべての投稿を自動的にダウンロード用に選択します。<br>"
-                "- <b>注意</b>：リスト下の「投稿: [数]」ラベルは選択された投稿の数を反映して更新されます。「すべてのリンクをダウンロード」が有効な場合、これはキュー内のすべてのクリエイターにわたる投稿の総数を表示します。<br><br>"
-                "<b>3.5 ダウンロードの開始</b><br>"
-                "- <b>ステップ1</b>：希望する投稿を選択したか、「すべてのリンクをダウンロード」を有効にしたことを確認します。<br>"
-                "- <b>ステップ2</b>：タブの左下にある「ダウンロード」ボタンをクリックします。このボタンはダウンロードアイコンでマークされ、青い背景でスタイルされています。<br>"
-                "- <b>ステップ3</b>：アプリケーションは最初にダウンロード用のファイルを準備し、バックグラウンドタスクラベルに「ダウンロードするファイルを準備中...」と表示され、進捗バーが表示されます。<br>"
-                "- <b>ステップ4</b>：準備が完了すると、ダウンロードプロセスが開始され、以下の要素が更新されます：<br>"
-                "  - <b>ファイル進捗バー</b>：現在ダウンロード中のファイルの進捗（0%から100%）を表示します。その上のラベル（例: 「ファイル進捗 50%」）がそれに応じて更新されます。<br>"
-                "  - <b>全体進捗バー</b>：すべてのファイルと投稿にわたる全体の進捗を表示します（例: 「全体進捗 (5/10 ファイル, 2/3 投稿)」）。<br>"
-                "  - <b>コンソール</b>：ダウンロードプロセスに関するメッセージを記録します。たとえば、「ファイル 1/10 のダウンロード開始: [URL]」や「ダウンロード成功: [path]」など。ログは色分けされています：情報は緑、警告は黄、エラーは赤。<br>"
-                "- <b>注意</b>：ダウンロード中は「ダウンロード」ボタンが無効になり、「キャンセル」ボタンが有効になり、「投稿ダウンローダー」タブは競合を防ぐために一時的に無効になります。<br><br>"
-                "<b>3.6 ダウンロードの管理</b><br>"
-                "- <b>ダウンロードのキャンセル</b>：「キャンセル」ボタン（「X」アイコンでマーク）をクリックしてすべてのアクティブなダウンロードを停止します。進捗バーが黄色に変わり、ラベルが「ダウンロード中断」に更新されます。「投稿ダウンローダー」タブが再び有効になります。<br>"
-                "- <b>キューからのクリエイターの削除</b>：「クリエイターキュー」リストのクリエイターURL横の「X」ボタンをクリックして削除します。削除の確認が求められます。アクティブなダウンロード中に削除された場合、そのクリエイターの投稿のダウンロードがキャンセルされます。<br>"
-                "- <b>画像のプレビュー</b>：「ダウンロードする投稿」リストで投稿を選択し、リスト下の目アイコンボタンをクリックしてサムネイル（利用可能な場合）をプレビューします。JPG、JPEG、PNG、GIFファイルのみがプレビューに対応しています。画像を表示するモーダルウィンドウが開き、読み込み中に進捗バーが表示されます。<br>"
-                "- <b>注意</b>：「ダウンロード」をクリックしたときに投稿が選択されていない場合、コンソールに警告が表示されます：「[警告] ダウンロードする投稿が選択されていません。」<br><br>"
-                "<b>3.7 ファイルの保存場所</b><br>"
-                "- ファイルは設定タブで指定されたディレクトリに保存されます（デフォルトはユーザーディレクトリ内の「Kemono Downloader/Downloads」）。<br>"
-                "- フォルダ構造は次のように整理されています：<br>"
-                "  - <b>クリエイターフォルダ</b>：クリエイターのIDに基づいて命名されます（例: 「12345678」）。<br>"
-                "  - <b>投稿フォルダ</b>：クリエイターフォルダ内で「post_[post_id]」と命名されます（例: 「post_12345678」）。<br>"
-                "  - 例: クリエイター https://kemono.cr/patreon/user/12345678 からダウンロードする場合、投稿12345678のファイルは「[保存ディレクトリ]/12345678/post_12345678/」に保存されます。<br>"
-                "- ファイル名は元のURLに基づいて命名され、ファイルシステムとの互換性を確保するために特殊文字（例: 「/」）はアンダースコアに置き換えられます。<br>"
-                "- <b>ファイルの重複排除</b>：アプリケーションはURLハッシュを使用して以前にダウンロードされたファイルを検出しスキップし、ハッシュデータは「その他のファイル」ディレクトリの「file_hashes.json」に保存されます。<br><br>"
-                "<b>3.8 追加機能</b><br>"
-                "- <b>同時ダウンロード</b>：アプリケーションは複数のファイルを同時にダウンロードでき、同時ダウンロードの数は設定タブで設定されます（デフォルトは5、1-20の間で調整可能）。<br>"
-                "- <b>画像キャッシュ</b>：サムネイルやプレビュー画像は「キャッシュ」ディレクトリにキャッシュされ、同じ画像の将来のプレビューを高速化します。<br>",
-                "korean": "크리에이터 다운로더 탭은 Kemono.su에서 크리에이터의 전체 프로필에서 콘텐츠를 대량으로 다운로드하도록 설계되었습니다. 여러 크리에이터를 대기열에 추가하고, 그들의 게시물을 가져오며, 다운로드할 특정 콘텐츠를 선택하고 진행 상황을 모니터링할 수 있습니다. 이 탭은 크리에이터의 작업을 아카이빙하거나 여러 크리에이터의 콘텐츠를 한 번에 다운로드하는 데 이상적입니다. 아래는 이 탭을 효과적으로 사용하는 자세한 단계입니다:<br><br>"
-                "<b>3.1 크리에이터를 대기열에 추가하기</b><br>"
-                "- <b>단계 1</b>: 인터페이스 상단의 '크리에이터 다운로더' 탭을 클릭하여 이동합니다. 이 탭은 사용자 편집 아이콘으로 표시됩니다.<br>"
-                "- <b>단계 2</b>: 탭의 좌측 상단에 있는 '크리에이터 URL 입력' 필드를 찾습니다. 이 필드는 '크리에이터 URL 입력(예: https://kemono.cr/patreon/user/12345678)'라는 플레이스홀더 텍스트가 있는 텍스트 입력 필드입니다.<br>"
-                "- <b>단계 3</b>: Kemono.su의 크리에이터 프로필 URL을 입력합니다. URL은 다음 형식을 따라야 합니다: https://kemono.cr/[service]/user/[user_id]. 예: https://kemono.cr/patreon/user/12345678.<br>"
-                "- <b>단계 4</b>: 입력 필드 옆의 '대기열에 추가' 버튼을 클릭합니다. 이 버튼은 플러스 아이콘과 파란색 배경으로 스타일링되어 있습니다.<br>"
-                "- <b>단계 5</b>: 크리에이터 URL이 입력 필드 아래의 '크리에이터 대기열' 목록에 나타납니다. 목록의 각 항목에는 다음이 포함됩니다:<br>"
-                "  - 크리에이터의 게시물을 가져오고 보기 위한 눈 아이콘.<br>"
-                "  - 클릭 가능한 레이블로 표시된 크리에이터 URL.<br>"
-                "  - 대기열에서 크리에이터를 제거하기 위한 'X' 버튼.<br>"
-                "- <b>참고</b>: 중복 URL은 자동으로 방지됩니다. 이미 대기열에 있는 URL을 추가하려고 하면 콘솔에 경고 메시지가 표시됩니다: '[경고] URL이 이미 대기열에 있습니다.'<br><br>"
-                "<b>3.2 크리에이터 게시물 보기</b><br>"
-                "- <b>단계 1</b>: '크리에이터 대기열' 목록에서 게시물을 보고 싶은 크리에이터를 찾습니다.<br>"
-                "- <b>단계 2</b>: 크리에이터 URL 옆의 눈 아이콘을 클릭합니다. 그러면 Kemono.su에서 크리에이터와 관련된 모든 게시물을 가져오는 백그라운드 작업이 시작됩니다.<br>"
-                "- <b>단계 3</b>: 게시물이 탭의 오른쪽에 있는 '다운로드할 게시물' 목록에 표시됩니다. 각 게시물 항목에는 다음이 포함됩니다:<br>"
-                "  - 다운로드를 위해 게시물을 선택하는 체크박스.<br>"
-                "  - 게시물 제목(제목이 없는 경우 '게시물 [post_id]')<br>"
-                "  - 미리보기를 위해 사용자 데이터로 저장된 썸네일 URL(사용 가능한 경우).<br>"
-                "- <b>단계 4</b>: '다운로드할 게시물' 목록 위의 검색창을 사용하여 제목으로 게시물을 필터링합니다. 예를 들어, 'artwork'를 입력하면 제목에 'artwork'가 포함된 게시물만 표시됩니다.<br>"
-                "- <b>참고</b>: 게시물이 가져와지는 동안 오른쪽 하단의 '백그라운드 작업 진행률' 바가 루프 애니메이션을 표시하며, 레이블은 '링크에서 게시물 감지 중...'이라고 표시됩니다. 완료되면 레이블이 '대기 중'으로 변경됩니다.<br><br>"
-                "<b>3.3 다운로드 옵션 설정</b><br>"
-                "- <b>단계 1</b>: '다운로드 옵션' 그룹 박스에서 다운로드에 포함할 콘텐츠 유형을 설정합니다:<br>"
-                "  - <b>주요 파일</b>: 각 게시물에 첨부된 주요 파일(예: 주요 이미지 또는 비디오)을 포함합니다. 기본적으로 활성화됨.<br>"
-                "  - <b>첨부 파일</b>: 게시물에 첨부된 추가 파일(예: ZIP 파일, 추가 이미지)을 포함합니다. 기본적으로 활성화됨.<br>"
-                "  - <b>콘텐츠 이미지</b>: 게시물 콘텐츠에 포함된 이미지(예: 게시물 설명의 이미지)를 포함합니다. 기본적으로 활성화됨.<br>"
-                "- <b>단계 2</b>: '파일 확장자' 그룹 박스에서 다운로드할 파일 유형을 선택합니다:<br>"
-                "  - 옵션에는 JPG/JPEG, PNG, ZIP, MP4, GIF, PDF, 7Z가 포함됩니다.<br>"
-                "  - 모든 파일 유형이 기본적으로 활성화되어 있습니다. 다운로드하고 싶지 않은 파일 유형의 체크를 해제합니다.<br>"
-                "  - 예: 이미지 파일만 원한다면 ZIP, MP4, PDF, 7Z의 체크를 해제하고 JPG/JPEG, PNG, GIF를 체크 상태로 둡니다.<br>"
-                "- <b>참고</b>: 이러한 옵션을 변경하면 다운로드 프로세스를 시작할 때 다운로드할 파일 목록이 자동으로 업데이트됩니다.<br><br>"
-                "<b>3.4 다운로드할 게시물 선택</b><br>"
-                "- <b>단계 1</b>: '다운로드할 게시물' 목록에서 다운로드하고 싶은 게시물 옆의 체크박스를 선택합니다. 기본적으로 게시물이 선택되어 있지 않습니다.<br>"
-                "- <b>단계 2</b>: 목록 위의 '모두 선택' 체크박스를 사용하여 표시된 모든 게시물을 선택하거나 선택 해제합니다. 검색 필터가 적용된 경우, 이는 필터링된 게시물에만 영향을 미칩니다.<br>"
-                "- <b>단계 3</b>: 또는 '모든 링크 다운로드' 옵션을 활성화하여 수동 선택 없이 대기열에 있는 모든 크리에이터의 모든 파일을 다운로드합니다:<br>"
-                "  - 활성화되면 이 옵션은 개별 게시물 체크박스를 비활성화하고 대기열에 있는 모든 크리에이터의 모든 게시물을 가져옵니다.<br>"
-                "  - 애플리케이션은 수동 선택을 무시하고 모든 게시물을 자동으로 다운로드 대상으로 선택합니다.<br>"
-                "- <b>참고</b>: 목록 아래의 '게시물: [숫자]' 레이블은 선택된 게시물 수를 반영하여 업데이트됩니다. '모든 링크 다운로드'가 활성화되면 대기열에 있는 모든 크리에이터의 총 게시물 수를 표시합니다.<br><br>"
-                "<b>3.5 다운로드 시작</b><br>"
-                "- <b>단계 1</b>: 원하는 게시물을 선택했거나 '모든 링크 다운로드'를 활성화했는지 확인합니다.<br>"
-                "- <b>단계 2</b>: 탭의 좌측 하단에 있는 '다운로드' 버튼을 클릭합니다. 이 버튼은 다운로드 아이콘으로 표시되며 파란색 배경으로 스타일링되어 있습니다.<br>"
-                "- <b>단계 3</b>: 애플리케이션이 먼저 다운로드할 파일을 준비하며, 백그라운드 작업 레이블에 '다운로드할 파일 준비 중...'이 표시되고 진행률 바가 나타납니다.<br>"
-                "- <b>단계 4</b>: 준비가 완료되면 다운로드 프로세스가 시작되고 다음 요소들이 업데이트됩니다:<br>"
-                "  - <b>파일 진행률 바</b>: 현재 다운로드 중인 파일의 진행률(0%에서 100%)을 표시합니다. 위의 레이블(예: '파일 진행률 50%')이 그에 따라 업데이트됩니다.<br>"
-                "  - <b>전체 진행률 바</b>: 모든 파일과 게시물에 걸친 총 진행률을 표시합니다(예: '전체 진행률 (5/10 파일, 2/3 게시물)').<br>"
-                "  - <b>콘솔</b>: '파일 1/10 다운로드 시작: [URL]' 또는 '다운로드 성공: [경로]'와 같은 메시지를 기록합니다. 로그는 색상으로 구분됩니다: 정보는 녹색, 경고는 노란색, 오류는 빨간색.<br>"
-                "- <b>참고</b>: 다운로드 중에는 '다운로드' 버튼이 비활성화되고, '취소' 버튼이 활성화되며, '게시물 다운로더' 탭은 충돌을 방지하기 위해 일시적으로 비활성화됩니다.<br><br>"
-                "<b>3.6 다운로드 관리</b><br>"
-                "- <b>다운로드 취소</b>: '취소' 버튼('X' 아이콘으로 표시)을 클릭하여 모든 활성 다운로드를 중지합니다. 진행률 바가 노란색으로 변하고 레이블이 '다운로드 중단됨'으로 업데이트됩니다. '게시물 다운로더' 탭이 다시 활성화됩니다.<br>"
-                "- <b>대기열에서 크리에이터 제거</b>: '크리에이터 대기열' 목록에서 크리에이터 URL 옆의 'X' 버튼을 클릭하여 제거합니다. 제거 확인 메시지가 표시됩니다. 활성 다운로드 중에 제거되면 해당 크리에이터의 게시물 다운로드가 취소됩니다.<br>"
-                "- <b>이미지 미리보기</b>: '다운로드할 게시물' 목록에서 게시물을 선택한 후 목록 아래의 눈 아이콘 버튼을 클릭하여 썸네일(사용 가능한 경우)을 미리 봅니다. JPG, JPEG, PNG, GIF 파일만 미리보기가 지원됩니다. 이미지를 표시하는 모달 창이 열리며 로드 중에는 진행률 바가 표시됩니다.<br>"
-                "- <b>참고</b>: '다운로드'를 클릭했을 때 선택된 게시물이 없으면 콘솔에 경고가 표시됩니다: '[경고] 다운로드할 게시물이 선택되지 않았습니다.'<br><br>"
-                "<b>3.7 파일 저장 위치</b><br>"
-                "- 파일은 설정 탭에서 지정된 디렉토리에 저장됩니다(기본값은 사용자 디렉토리 내 'Kemono Downloader/Downloads').<br>"
-                "- 폴더 구조는 다음과 같이 구성됩니다:<br>"
-                "  - <b>크리에이터 폴더</b>: 크리에이터의 ID로 명명됩니다(예: '12345678').<br>"
-                "  - <b>게시물 폴더</b>: 크리에이터 폴더 내에서 'post_[post_id]'로 명명됩니다(예: 'post_12345678').<br>"
-                "  - 예: 크리에이터 https://kemono.cr/patreon/user/12345678에서 다운로드하면 게시물 12345678의 파일은 '[저장 디렉토리]/12345678/post_12345678/'에 저장됩니다.<br>"
-                "- 파일 이름은 원래 URL을 기반으로 하며, 파일 시스템 호환성을 보장하기 위해 특수 문자(예: '/')는 밑줄로 대체됩니다.<br>"
-                "- <b>파일 중복 제거</b>: 애플리케이션은 URL 해시를 사용하여 이전에 다운로드된 파일을 감지하고 건너뛰며, 해시 데이터는 '기타 파일' 디렉토리의 'file_hashes.json'에 저장됩니다.<br><br>"
-                "<b>3.8 추가 기능</b><br>"
-                "- <b>동시 다운로드</b>: 애플리케이션은 여러 파일을 동시에 다운로드할 수 있으며, 동시 다운로드 수는 설정 탭에서 설정됩니다(기본값은 5, 1-20 사이에서 조정 가능).<br>"
-                "- <b>이미지 캐싱</b>: 썸네일 및 미리보기 이미지는 '캐시' 디렉토리에 캐시되어 동일한 이미지의 향후 미리보기를 빠르게 합니다.<br>"
-                "- <b>로깅</b>: 콘솔은 게시물 감지, 파일 준비, 다운로드 진행 상황, 오류를 포함한 모든 작업에 대한 자세한 로그를 제공하여 문제 디버깅에 유용합니다.<br>"
-                "- <b>배치 처리</b>: '모든 링크 다운로드'가 활성화되면 애플리케이션은 자원을 효율적으로 관리하기 위해 각 크리에이터를 순차적으로 처리하며, 한 번에 한 크리에이터의 파일을 준비하고 다운로드합니다.",
-                "chinese-simplified": "创作者下载器选项卡专为从 Kemono.cr 上某个创作者的整个资料批量下载内容而设计。您可以将多个创作者添加到队列，获取他们的帖子，选择特定内容进行下载，并监控进度。此选项卡非常适合归档创作者的作品或一次下载多个创作者的内容。以下是有效使用此选项卡的详细步骤：<br><br>"
-                "<b>3.1 将创作者添加到队列</b><br>"
-                "- <b>步骤 1</b>：点击界面顶部的“创作者下载器”标签进入该选项卡。该选项卡标有用户编辑图标。<br>"
-                "- <b>步骤 2</b>：找到选项卡左上方的“输入创作者 URL”字段。这是一个带有占位符文本“输入创作者 URL（例如：https://kemono.cr/patreon/user/12345678）”的文本输入框。<br>"
-                "- <b>步骤 3</b>：输入 Kemono.cr 上创作者资料的 URL。URL 必须遵循以下格式：https://kemono.cr/[service]/user/[user_id]。例如：https://kemono.cr/patreon/user/12345678。<br>"
-                "- <b>步骤 4</b>：点击输入字段旁边的“添加到队列”按钮。该按钮带有加号图标和蓝色背景。<br>"
-                "- <b>步骤 5</b>：创作者 URL 将显示在输入字段下方的“创作者队列”列表中。列表中的每个条目包括：<br>"
-                "  - 一个用于获取和查看创作者帖子的眼睛图标。<br>"
-                "  - 作为可点击标签的创作者 URL。<br>"
-                "  - 一个用于从队列中删除创作者的“X”按钮。<br>"
-                "- <b>注意</b>：系统会自动防止重复的 URL。如果您尝试添加已在队列中的 URL，控制台将显示警告消息：“[警告] URL 已在队列中。”<br><br>"
-                "<b>3.2 查看创作者帖子</b><br>"
-                "- <b>步骤 1</b>：在“创作者队列”列表中，找到您想要查看帖子的创作者。<br>"
-                "- <b>步骤 2</b>：点击创作者 URL 旁边的眼睛图标。这将启动一个后台任务，从 Kemono.cr 获取与该创作者相关的所有帖子。<br>"
-                "- <b>步骤 3</b>：帖子将显示在选项卡右侧的“待下载帖子”列表中。每个帖子条目包括：<br>"
-                "  - 用于选择下载帖子的复选框。<br>"
-                "  - 帖子标题（如果没有标题，则显示为“帖子 [post_id]”）。<br>"
-                "  - 作为用户数据存储的缩略图 URL（如果可用）用于预览。<br>"
-                "- <b>步骤 4</b>：使用“待下载帖子”列表上方的搜索栏按标题过滤帖子。例如，输入“artwork”将仅显示标题中包含“artwork”的帖子。<br>"
-                "- <b>注意</b>：在获取帖子时，右下方的“后台任务进度”条将显示循环动画，其标签显示“正在从链接检测帖子...”。完成后，标签将变为“空闲”。<br><br>"
-                "<b>3.3 配置下载选项</b><br>"
-                "- <b>步骤 1</b>：在“下载选项”分组框中，配置要包含的下载内容类型：<br>"
-                "  - <b>主要文件</b>：包括每个帖子的主要文件（例如特色图片或视频）。默认启用。<br>"
-                "  - <b>附件</b>：包括帖子附加的其他文件（例如 ZIP 文件、额外图片）。默认启用。<br>"
-                "  - <b>内容图片</b>：包括帖子内容中嵌入的图片（例如帖子描述中的图片）。默认启用。<br>"
-                "- <b>步骤 2</b>：在“文件扩展名”分组框中，选择要下载的文件类型：<br>"
-                "  - 选项包括 JPG/JPEG、PNG、ZIP、MP4、GIF、PDF 和 7Z。<br>"
-                "  - 所有文件类型默认启用。取消勾选您不想下载的文件类型。<br>"
-                "  - 示例：如果您只想要图片，请取消 ZIP、MP4、PDF 和 7Z 的勾选，仅保留 JPG/JPEG、PNG 和 GIF。<br>"
-                "- <b>注意</b>：更改这些选项将会在开始下载过程时自动更新待下载文件列表。<br><br>"
-                "<b>3.4 选择要下载的帖子</b><br>"
-                "- <b>步骤 1</b>：在“待下载帖子”列表中，勾选您想要下载的帖子旁边的复选框。默认情况下没有帖子被选中。<br>"
-                "- <b>步骤 2</b>：使用列表上方的“全选”复选框快速选择或取消选择所有可见帖子。如果应用了搜索过滤器，这仅影响过滤后的帖子。<br>"
-                "- <b>步骤 3</b>：或者，启用“下载所有链接”选项，无需手动选择即可下载队列中所有创作者的所有文件：<br>"
-                "  - 启用后，此选项将禁用单个帖子复选框，并获取队列中所有创作者的所有帖子。<br>"
-                "  - 应用程序将自动选择所有帖子进行下载，忽略手动选择。<br>"
-                "- <b>注意</b>：列表下方的“帖子：[数量]”标签会更新以反映所选帖子的数量。启用“下载所有链接”时，它显示队列中所有创作者的帖子总数。<br><br>"
-                "<b>3.5 开始下载</b><br>"
-                "- <b>步骤 1</b>：确保已选择所需帖子或启用了“下载所有链接”。<br>"
-                "- <b>步骤 2</b>：点击选项卡左下方的“下载”按钮。该按钮标有下载图标并带有蓝色背景。<br>"
-                "- <b>步骤 3</b>：应用程序将首先准备下载文件，在后台任务标签中显示“正在准备下载文件...”并显示进度条。<br>"
-                "- <b>步骤 4</b>：准备完成后，下载过程开始，以下元素将更新：<br>"
-                "  - <b>文件进度条</b>：显示当前下载文件的进度（0% 到 100%）。其上方的标签（例如“文件进度 50%”）会相应更新。<br>"
-                "  - <b>总进度条</b>：显示所有文件和帖子的总体进度（例如“总进度（5/10 文件，2/3 帖子）”）。<br>"
-                "  - <b>控制台</b>：记录消息，例如“开始下载文件 1/10：[URL]”或“成功下载：[路径]”。日志采用颜色编码：绿色表示信息，黄色表示警告，红色表示错误。<br>"
-                "- <b>注意</b>：下载期间，“下载”按钮将禁用，“取消”按钮将启用，“帖子下载器”选项卡将暂时禁用以防止冲突。<br><br>"
-                "<b>3.6 管理下载</b><br>"
-                "- <b>取消下载</b>：点击“取消”按钮（标有“X”图标）停止所有活动下载。进度条将变为黄色，标签将更新为“下载已终止”。“帖子下载器”选项卡将重新启用。<br>"
-                "- <b>从队列中删除创作者</b>：点击“创作者队列”列表中创作者 URL 旁边的“X”按钮删除。您将被提示确认删除。如果在活动下载期间删除，该创作者的帖子下载将被取消。<br>"
-                "- <b>预览图片</b>：在“待下载帖子”列表中选择帖子，然后点击列表下方的眼睛图标按钮预览其缩略图（如果可用）。仅支持 JPG、JPEG、PNG 和 GIF 文件的预览。将打开一个显示图片的模态窗口，加载时显示进度条。<br>"
-                "- <b>注意</b>：如果点击“下载”时未选择任何帖子，控制台将显示警告：“[警告] 未选择要下载的帖子。”<br><br>"
-                "<b>3.7 文件保存位置</b><br>"
-                "- 文件将保存在设置选项卡中指定的目录中（默认为用户目录下的“Kemono Downloader/Downloads”）。<br>"
-                "- 文件夹结构组织如下：<br>"
-                "  - <b>创作者文件夹</b>：以创作者的 ID 命名（例如“12345678”）。<br>"
-                "  - <b>帖子文件夹</b>：在创作者文件夹内命名为“post_[post_id]”（例如“post_12345678”）。<br>"
-                "  - 示例：从创作者 https://kemono.cr/patreon/user/12345678 下载的帖子 12345678 的文件将保存在“[保存目录]/12345678/post_12345678/”中。<br>"
-                "- 文件名基于其原始 URL，任何特殊字符（例如“/”）都将替换为下划线，以确保与文件系统的兼容性。<br>"
-                "- <b>文件去重</b>：应用程序使用 URL 哈希检测并跳过之前下载的文件，哈希数据存储在“其他文件”目录中的“file_hashes.json”中。<br><br>"
-                "<b>3.8 附加功能</b><br>"
-                "- <b>并发下载</b>：应用程序支持同时下载多个文件，并发下载数量在设置选项卡中设置（默认为 5，可在 1-20 之间调整）。<br>"
-                "- <b>图片缓存</b>：缩略图和预览图片缓存到“缓存”目录中，以加快相同图片的未来预览速度。<br>"
-                "- <b>日志记录</b>：控制台提供所有操作的详细日志，包括帖子检测、文件准备、下载进度和错误。这对于调试问题非常有用。<br>"
-                "- <b>批量处理</b>：启用“下载所有链接”时，应用程序按顺序处理创作者，逐一准备和下载每个创作者的文件，以有效管理资源。",
-            },
-            "help_settings_title": {
-                "english": "4. Using the Settings Tab",
-                "japanese": "4. 設定タブの使用",
-                "korean": "4. 설정 탭 사용",
-                "chinese-simplified": "4. 使用设置选项卡",
-            },
-            "help_settings_text": {
-                "english": "The Settings tab allows you to customize the behavior and appearance of the Kemono Downloader to suit your preferences. From changing the save directory to adjusting the number of simultaneous downloads, this tab provides all the tools you need to optimize your experience. Below are the detailed options available in this tab:<br><br>"
-                "<b>4.1 General Settings</b><br>"
-                "- <b>Save Directory</b>: Specify where downloaded files are saved.<br>"
-                "  - Default: Your user directory under 'Kemono Downloader/Downloads'.<br>"
-                "  - Click the 'Browse' button next to the text field to open a file dialog and select a new directory.<br>"
-                "  - Example: Change it to 'D:/Kemono Downloads' to save files there instead.<br>"
-                "- <b>Max Simultaneous Downloads</b>: Control how many files are downloaded at once.<br>"
-                "  - Default: 5.<br>"
-                "  - Use the spin box to adjust between 1 and 20. Lower values reduce bandwidth usage but slow down the process; higher values speed it up but may strain your connection.<br><br>"
-                "- <b>Save the preview image when the site only has a preview of a file</b>: Some sites list files whose full copy is gone and only the preview image remains (shown as 'preview only'). Those files are always skipped; with this option on, their preview image is saved instead, named like 00501_preview.png.<br>"
-                "  - Default: off.<br><br>"
-                "<b>4.2 Saving Changes</b><br>"
-                "- Changes to settings like 'Save Directory', 'Max Simultaneous Downloads', and 'Language' are saved automatically when adjusted.<br>"
-                "- Actions like 'Clear Cache' and 'Reset File Hashes' require manual confirmation via their respective buttons.<br>"
-                "- There’s no 'Save' button; all settings persist across sessions unless manually reset (e.g., via 'Reset Hashes').<br><br>"
-                "<b>4.3 Notes</b><br>"
-                "- Changing the 'Save Directory' only affects new downloads; existing files remain in their original locations.<br>"
-                "- Adjusting 'Max Simultaneous Downloads' during an active download won’t affect the current session but will apply to the next one.<br>"
-                "- If you disable 'Enable Logging', you’ll still see critical errors in the console, but routine info and warnings will be hidden.",
-                "japanese": "設定タブでは、ケモノダウンローダーの動作や外観を好みに合わせてカスタマイズできます。保存ディレクトリの変更から同時ダウンロード数の調整まで、このタブには体験を最適化するために必要なすべてのツールが揃っています。以下に、このタブで利用可能な詳細なオプションを示します：<br><br>"
-                "<b>4.1 一般設定</b><br>"
-                "- <b>保存ディレクトリ</b>：ダウンロードしたファイルの保存先を指定します。<br>"
-                "  - デフォルト：ユーザーディレクトリ内の「Kemono Downloader/Downloads」。<br>"
-                "  - テキストフィールド横の「参照」ボタンをクリックしてファイルダイアログを開き、新しいディレクトリを選択します。<br>"
-                "  - 例：「D:/Kemono Downloads」に変更すると、そこにファイルが保存されます。<br>"
-                "- <b>最大同時ダウンロード数</b>：一度にダウンロードするファイル数を制御します。<br>"
-                "  - デフォルト：5。<br>"
-                "  - スピンボックスを使用して1から20の間で調整します。低い値は帯域幅使用量を減らしますが処理が遅くなり、高い値は速度を上げますが接続に負担をかける可能性があります。<br><br>"
-                "- <b>サイトにプレビューしかないファイルは、プレビュー画像を保存する</b>：サイトによっては、元のファイルがなくプレビュー画像だけが残っているファイル（「プレビューのみ」と表示）を掲載しています。このようなファイルは常にスキップされます。オンにすると、代わりに00501_preview.pngのような名前でプレビュー画像を保存します。<br>"
-                "  - デフォルト：オフ。<br><br>"
-                "<b>4.2 変更の保存</b><br>"
-                "- 「保存ディレクトリ」、「最大同時ダウンロード数」、「言語」の設定変更は調整時に自動的に保存されます。<br>"
-                "- 「キャッシュのクリア」や「ファイルハッシュのリセット」などのアクションは、それぞれのボタンを介して手動で確認が必要です。<br>"
-                "- 「保存」ボタンはありません。すべての設定は手動でリセットされない限り（例：「ハッシュのリセット」）、セッション間で保持されます。<br><br>"
-                "<b>4.3 注意事項</b><br>"
-                "- 「保存ディレクトリ」の変更は新しいダウンロードにのみ影響し、既存のファイルは元の場所に残ります。<br>"
-                "- アクティブなダウンロード中に「最大同時ダウンロード数」を調整しても現在のセッションには影響しませんが、次のセッションに適用されます。<br>"
-                "- 「ログを有効にする」を無効にしても、コンソールには重大なエラーが表示されますが、通常の情報や警告は非表示になります。",
-                "korean": "설정 탭을 사용하면 케모노 다운로더의 동작과 외관을 사용자의 선호도에 맞게 사용자 정의할 수 있습니다. 저장 디렉토리 변경부터 동시 다운로드 수 조정까지, 이 탭은 사용 경험을 최적화하는 데 필요한 모든 도구를 제공합니다. 아래는 이 탭에서 사용할 수 있는 자세한 옵션입니다:<br><br>"
-                "<b>4.1 일반 설정</b><br>"
-                "- <b>저장 디렉토리</b>: 다운로드한 파일이 저장될 위치를 지정합니다.<br>"
-                "  - 기본값: 사용자 디렉토리 내 'Kemono Downloader/Downloads'.<br>"
-                "  - 텍스트 필드 옆의 '찾아보기' 버튼을 클릭하여 파일 대화 상자를 열고 새 디렉토리를 선택합니다.<br>"
-                "  - 예: 'D:/Kemono Downloads'로 변경하면 파일이 그곳에 저장됩니다.<br>"
-                "- <b>최대 동시 다운로드 수</b>: 한 번에 다운로드되는 파일 수를 제어합니다.<br>"
-                "  - 기본값: 5.<br>"
-                "  - 스핀 박스를 사용하여 1에서 20 사이로 조정합니다. 낮은 값은 대역폭 사용을 줄이지만 프로세스가 느려지고, 높은 값은 속도를 높이지만 연결에 부담을 줄 수 있습니다.<br><br>"
-                "- <b>사이트에 미리보기만 있는 파일은 미리보기 이미지를 저장</b>: 일부 사이트에는 원본 파일이 없고 미리보기 이미지만 남은 파일('미리보기만'으로 표시)이 올라와 있습니다. 이런 파일은 항상 건너뜁니다. 켜면 대신 00501_preview.png 같은 이름으로 미리보기 이미지를 저장합니다.<br>"
-                "  - 기본값: 꺼짐.<br><br>"
-                "<b>4.2 변경 사항 저장</b><br>"
-                "- '저장 디렉토리', '최대 동시 다운로드 수', '언어'와 같은 설정 변경은 조정 시 자동으로 저장됩니다.<br>"
-                "- '캐시 지우기'와 '파일 해시 초기화'와 같은 작업은 해당 버튼을 통해 수동으로 확인해야 합니다.<br>"
-                "- '저장' 버튼은 없습니다. 모든 설정은 수동으로 초기화되지 않는 한(예: '해시 초기화') 세션 간에 유지됩니다.<br><br>"
-                "<b>4.3 참고 사항</b><br>"
-                "- '저장 디렉토리'를 변경하면 새 다운로드에만 영향을 미치며 기존 파일은 원래 위치에 남습니다.<br>"
-                "- 활성 다운로드 중에 '최대 동시 다운로드 수'를 조정해도 현재 세션에는 영향을 주지 않지만 다음 세션에 적용됩니다.<br>"
-                "- '로깅 활성화'를 비활성화하면 콘솔에 치명적인 오류만 표시되며, 일상적인 정보와 경고는 숨겨집니다.",
-                "chinese-simplified": "设置选项卡允许您自定义 Kemono 下载器的行为和外观，以满足您的偏好。从更改保存目录到调整同时下载数量，此选项卡提供了优化使用体验所需的所有工具。以下是此选项卡中可用的详细选项：<br><br>"
-                "<b>4.1 常规设置</b><br>"
-                "- <b>保存目录</b>：指定下载文件的保存位置。<br>"
-                "  - 默认：用户目录下的“Kemono Downloader/Downloads”。<br>"
-                "  - 点击文本字段旁边的“浏览”按钮，打开文件对话框并选择新目录。<br>"
-                "  - 示例：将其更改为“D:/Kemono Downloads”，文件将保存到该目录。<br>"
-                "- <b>最大同时下载数</b>：控制一次下载的文件数量。<br>"
-                "  - 默认：5。<br>"
-                "  - 使用旋转框在 1 到 20 之间调整。较低的值会减少带宽使用但会减慢进程；较高的值会加快速度但可能对网络连接造成压力。<br><br>"
-                "- <b>网站上只有预览图的文件，保存其预览图</b>：有些网站会列出原始文件已不存在、只剩预览图的文件（标为“仅预览”）。这类文件总会被跳过；开启此选项后，会改为以 00501_preview.png 这样的名称保存其预览图。<br>"
-                "  - 默认：关闭。<br><br>"
-                "<b>4.2 保存更改</b><br>"
-                "- 对“保存目录”、“最大同时下载数”和“语言”等设置的更改在调整时会自动保存。<br>"
-                "- “清除缓存”和“重置文件哈希”等操作需要通过相应按钮手动确认。<br>"
-                "- 没有“保存”按钮；所有设置除非手动重置（例如通过“重置哈希”），否则会在会话间持久保存。<br><br>"
-                "<b>4.3 注意事项</b><br>"
-                "- 更改“保存目录”仅影响新下载；现有文件将保留在原始位置。<br>"
-                "- 在活动下载期间调整“最大同时下载数”不会影响当前会话，但会应用于下一个会话。<br>"
-                "- 如果禁用“启用日志”，控制台仍会显示严重错误，但常规信息和警告将被隐藏。",
-            },
-            "help_help_tab_title": {
-                "english": "5. Using the Help Tab",
-                "japanese": "5. ヘルプタブの使用",
-                "korean": "5. 도움말 탭 사용",
-                "chinese-simplified": "5. 使用帮助选项卡",
-            },
-            "help_help_tab_text": {
-                "english": "The Help tab provides a comprehensive user manual for the Kemono Downloader, guiding you through every aspect of the application. Whether you’re a new user or need a refresher, this tab is your go-to resource for understanding how to use the tool effectively.<br><br>"
-                "<b>5.1 Accessing the Help Tab</b><br>"
-                "- Navigate to the 'Help' tab by clicking its label at the top of the interface. The tab is marked with a question mark icon.<br>"
-                "- The content is displayed in a scrollable area with a dark blue-gray background (#2A3B5A), matching the default theme.<br><br>"
-                "<b>5.2 Content Overview</b><br>"
-                "- <b>Introduction</b>: A welcome message and overview of the application’s key features.<br>"
-                "- <b>Getting Started</b>: Instructions for launching the application and understanding the main interface.<br>"
-                "- <b>Post Downloader Tab</b>: Detailed steps for downloading content from specific posts.<br>"
-                "- <b>Creator Downloader Tab</b>: Instructions for bulk downloading from creator profiles.<br>"
-                "- <b>Settings Tab</b>: Explanation of all customizable options.<br>"
-                "- <b>Help Tab</b>: This section, describing the purpose and structure of the Help tab.<br>"
-                "- <b>Troubleshooting</b>: Common issues and their solutions.<br>"
-                "- <b>Contact and Support</b>: Information on how to get help or report issues.<br><br>"
-                "<b>5.3 Using the Help Tab</b><br>"
-                "- Scroll through the sections using the vertical scrollbar on the right side of the tab.<br>"
-                "- Each section is clearly labeled with a bold heading (e.g., '1. Getting Started') in white text, followed by detailed explanations in light gray (#D0D0D0).<br>"
-                "- The text is formatted with HTML tags (e.g., <b> for bold) to highlight important points.<br>"
-                "- The content dynamically updates to reflect the language selected in the Settings tab (English, Japanese, or Korean).<br><br>"
-                "<b>5.4 Notes</b><br>"
-                "- The Help tab is static and does not require an internet connection to view, as all content is embedded in the application.<br>"
-                "- If you encounter an issue not covered here, refer to the 'Troubleshooting' or 'Contact and Support' sections for further assistance.",
-                "japanese": "ヘルプタブは、ケモノダウンローダーの包括的なユーザーマニュアルを提供し、アプリケーションのあらゆる側面をガイドします。初めてのユーザーでも、リフレッシュが必要な場合でも、このタブはツールを効果的に使用する方法を理解するための主要なリソースです。<br><br>"
-                "<b>5.1 ヘルプタブへのアクセス</b><br>"
-                "- インターフェース上部の「ヘルプ」タブをクリックして移動します。このタブは疑問符アイコンでマークされています。<br>"
-                "- コンテンツは、デフォルトテーマに合わせた暗い青灰色の背景（#2A3B5A）を持つスクロール可能なエリアに表示されます。<br><br>"
-                "<b>5.2 コンテンツの概要</b><br>"
-                "- <b>イントロダクション</b>：ウェルカムメッセージとアプリケーションの主要機能の概要。<br>"
-                "- <b>はじめに</b>：アプリケーションの起動とメインインターフェースの理解に関する指示。<br>"
-                "- <b>投稿ダウンローダータブ</b>：特定の投稿からコンテンツをダウンロードする詳細な手順。<br>"
-                "- <b>クリエイターダウンローダータブ</b>：クリエイタープロフィールからの一括ダウンロードに関する指示。<br>"
-                "- <b>設定タブ</b>：すべてのカスタマイズ可能なオプションの説明。<br>"
-                "- <b>ヘルプタブ</b>：このセクションで、ヘルプタブの目的と構造を説明します。<br>"
-                "- <b>トラブルシューティング</b>：一般的な問題とその解決策。<br>"
-                "- <b>連絡とサポート</b>：ヘルプの取得方法や問題の報告方法に関する情報。<br><br>"
-                "<b>5.3 ヘルプタブの使用</b><br>"
-                "- タブの右側にある垂直スクロールバーを使用してセクションをスクロールします。<br>"
-                "- 各セクションは、白いテキストで太字の見出し（例：「1. はじめに」）で明確にラベル付けされ、その後に薄い灰色（#D0D0D0）で詳細な説明が続きます。<br>"
-                "- テキストは重要なポイントを強調するためにHTMLタグ（例：<b>で太字）でフォーマットされています。<br>"
-                "- コンテンツは、設定タブで選択した言語（英語、日本語、韓国語）を反映して動的に更新されます。<br><br>"
-                "<b>5.4 注意事項</b><br>"
-                "- ヘルプタブは静的であり、すべてのコンテンツがアプリケーションに埋め込まれているため、表示にインターネット接続は必要ありません。<br>"
-                "- ここでカバーされていない問題に遭遇した場合は、「トラブルシューティング」または「連絡とサポート」セクションを参照してさらなる支援を受けてください。",
-                "korean": "도움말 탭은 케모노 다운로더에 대한 포괄적인 사용자 매뉴얼을 제공하여 애플리케이션의 모든 측면을 안내합니다. 신규 사용자가 되든, 복습이 필요하든, 이 탭은 도구를 효과적으로 사용하는 방법을 이해하기 위한 주요 자료입니다.<br><br>"
-                "<b>5.1 도움말 탭 접근</b><br>"
-                "- 인터페이스 상단의 '도움말' 탭을 클릭하여 이동합니다. 이 탭은 물음표 아이콘으로 표시됩니다.<br>"
-                "- 콘텐츠는 기본 테마와 일치하는 어두운 청회색 배경(#2A3B5A)을 가진 스크롤 가능한 영역에 표시됩니다.<br><br>"
-                "<b>5.2 콘텐츠 개요</b><br>"
-                "- <b>소개</b>: 환영 메시지와 애플리케이션의 주요 기능 개요.<br>"
-                "- <b>시작하기</b>: 애플리케이션 실행 및 메인 인터페이스 이해에 대한 지침.<br>"
-                "- <b>게시물 다운로더 탭</b>: 특정 게시물에서 콘텐츠를 다운로드하는 자세한 단계.<br>"
-                "- <b>크리에이터 다운로더 탭</b>: 크리에이터 프로필에서 대량 다운로드에 대한 지침.<br>"
-                "- <b>설정 탭</b>: 모든 사용자 정의 옵션 설명.<br>"
-                "- <b>도움말 탭</b>: 이 섹션으로, 도움말 탭의 목적과 구조를 설명합니다.<br>"
-                "- <b>문제 해결</b>: 일반적인 문제와 해결 방법.<br>"
-                "- <b>연락 및 지원</b>: 도움을 받거나 문제를 보고하는 방법에 대한 정보.<br><br>"
-                "<b>5.3 도움말 탭 사용</b><br>"
-                "- 탭 오른쪽의 수직 스크롤바를 사용하여 섹션을 스크롤합니다.<br>"
-                "- 각 섹션은 흰색 텍스트로 굵은 제목(예: '1. 시작하기')으로 명확히 표시되며, 그 뒤에 연한 회색(#D0D0D0)으로 자세한 설명이 이어집니다.<br>"
-                "- 텍스트는 중요한 포인트를 강조하기 위해 HTML 태그(예: <b>로 굵게)를 사용하여 포맷팅됩니다.<br>"
-                "- 콘텐츠는 설정 탭에서 선택한 언어(영어, 일본어, 한국어)를 반영하여 동적으로 업데이트됩니다.<br><br>"
-                "<b>5.4 참고 사항</b><br>"
-                "- 도움말 탭은 정적이며 모든 콘텐츠가 애플리케이션에 내장되어 있어 보기에 인터넷 연결이 필요하지 않습니다.<br>"
-                "- 여기서 다루지 않은 문제에 직면하면 '문제 해결' 또는 '연락 및 지원' 섹션을 참조하여 추가 도움을 받으세요.",
-                "chinese-simplified": "帮助选项卡为 Kemono 下载器提供了全面的用户手册，指导您了解应用程序的每个方面。无论您是新用户还是需要复习，此选项卡是您了解如何有效使用该工具的主要资源。<br><br>"
-                "<b>5.1 访问帮助选项卡</b><br>"
-                "- 点击界面顶部的“帮助”标签进入该选项卡。该选项卡标有问号图标。<br>"
-                "- 内容显示在可滚动区域中，背景为深蓝色灰色（#2A3B5A），与默认主题相匹配。<br><br>"
-                "<b>5.2 内容概览</b><br>"
-                "- <b>简介</b>：欢迎消息和应用程序主要功能的概述。<br>"
-                "- <b>开始使用</b>：启动应用程序和了解主界面的说明。<br>"
-                "- <b>帖子下载器选项卡</b>：从特定帖子下载内容的详细步骤。<br>"
-                "- <b>创作者下载器选项卡</b>：从创作者资料批量下载的说明。<br>"
-                "- <b>设置选项卡</b>：所有可自定义选项的说明。<br>"
-                "- <b>帮助选项卡</b>：本节，描述帮助选项卡的目的和结构。<br>"
-                "- <b>故障排除</b>：常见问题及其解决方法。<br>"
-                "- <b>联系与支持</b>：获取帮助或报告问题的信息。<br><br>"
-                "<b>5.3 使用帮助选项卡</b><br>"
-                "- 使用选项卡右侧的垂直滚动条浏览各个部分。<br>"
-                "- 每个部分都以白色文本的粗体标题（例如“1. 开始使用”）清晰标注，后面跟着浅灰色（#D0D0D0）的详细说明。<br>"
-                "- 文本使用 HTML 标签（例如，<b> 表示粗体）格式化，以突出重要内容。<br>"
-                "- 内容会根据设置选项卡中选择的语言（英语、日语或韩语）动态更新。<br><br>"
-                "<b>5.4 注意事项</b><br>"
-                "- 帮助选项卡是静态的，所有内容都嵌入在应用程序中，因此查看时无需互联网连接。<br>"
-                "- 如果遇到本文未涵盖的问题，请参阅“故障排除”或“联系与支持”部分以获取进一步帮助。",
-            },
-            "help_troubleshooting_title": {
-                "english": "7. Troubleshooting",
-                "japanese": "7. トラブルシューティング",
-                "korean": "7. 문제 해결",
-                "chinese-simplified": "7. 故障排除",
-            },
-            "help_troubleshooting_text": {
-                "english": "This section addresses common issues you might encounter while using the Kemono Downloader and provides solutions to resolve them. If your problem isn’t listed here, refer to the 'Contact and Support' section for further assistance.<br><br>"
-                "<b>6.1 Download Fails with 'Connection Error'</b><br>"
-                "- <b>Cause</b>: No internet connection or Kemono.cr is temporarily unavailable.<br>"
-                "- <b>Solution</b>: Check your internet connection. Wait a few minutes and try again, as the site may be down for maintenance. Check the console for specific error messages (e.g., '[ERROR] Failed to connect to URL').<br><br>"
-                "<b>6.2 Files Are Not Downloading</b><br>"
-                "- <b>Cause</b>: No files selected, or the post/creator URL is invalid.<br>"
-                "- <b>Solution</b>: Ensure you’ve selected files or posts in the 'Files to Download' or 'Posts to Download' lists. Verify the URL format (e.g., https://kemono.cr/patreon/user/12345678/post/12345678). Check the console for warnings like '[WARNING] No files found for URL'.<br><br>"
-                "<b>6.3 Downloads Are Slow</b><br>"
-                "- <b>Cause</b>: Too many simultaneous downloads or a slow internet connection.<br>"
-                "- <b>Solution</b>: Reduce the 'Max Simultaneous Downloads' value in the Settings tab (e.g., from 10 to 5). Test your internet speed to ensure it’s not the bottleneck.<br><br>"
-                "<b>6.4 Image Previews Don’t Load</b><br>"
-                "- <b>Cause</b>: Corrupted cache or network issues.<br>"
-                "- <b>Solution</b>: Go to the Settings tab and click 'Clear Cache' to remove temporary files. Try previewing again. If the issue persists, check your internet connection or the file’s availability on Kemono.cr.<br><br>"
-                "<b>6.5 Duplicate Files Are Downloaded</b><br>"
-                "- <b>Cause</b>: The 'file_hashes.json' file is missing or corrupted.<br>"
-                "- <b>Solution</b>: In the Settings tab, click 'Reset File Hashes' to clear the deduplication data, then re-download. The application will rebuild the hash file to prevent future duplicates.<br><br>"
-                "<b>6.6 Application Crashes or Freezes</b><br>"
-                "- <b>Cause</b>: Resource overload or a bug.<br>"
-                "- <b>Solution</b>: Restart the application. Reduce 'Max Simultaneous Downloads' to lessen the load. Check the console logs for error messages and report them via the GitHub link in the 'Contact and Support' section.<br><br>"
-                "<b>6.7 Language Doesn’t Change</b><br>"
-                "- <b>Cause</b>: UI refresh issue.<br>"
-                "- <b>Solution</b>: After selecting a new language in the Settings tab, restart the application if the change doesn’t take effect immediately."
-                "<br><br><b>6.8 Files Marked 'Preview Only' or 'Not Available on the Server'</b><br>"
-                "- <b>Cause</b>: The site lists the file, but its media server doesn’t have it (sometimes only the preview image remains). This is not a problem with the app.<br>"
-                "- <b>Solution</b>: Retrying won’t help. To keep the previews, turn on 'Save the preview image when the site only has a preview of a file' in the Settings tab, or use the Thumbnail Downloader tab. Each download ends with a summary of how many files were downloaded, skipped or missing.",
-                "japanese": "このセクションでは、ケモノダウンローダーの使用中に遭遇する可能性のある一般的な問題とその解決策を扱います。ここに記載されていない問題が発生した場合は、「連絡とサポート」セクションを参照してさらなる支援を受けてください。<br><br>"
-                "<b>6.1 「接続エラー」でダウンロードが失敗する</b><br>"
-                "- <b>原因</b>：インターネット接続がないか、Kemono.suが一時的に利用できない。<br>"
-                "- <b>解決策</b>：インターネット接続を確認してください。サイトがメンテナンス中の可能性があるため、数分待ってから再試行してください。コンソールで具体的なエラーメッセージ（例：「[エラー] URLへの接続に失敗しました」）を確認してください。<br><br>"
-                "<b>6.2 ファイルがダウンロードされない</b><br>"
-                "- <b>原因</b>：ファイルが選択されていないか、投稿/クリエイターURLが無効。<br>"
-                "- <b>解決策</b>：「ダウンロードするファイル」または「ダウンロードする投稿」リストでファイルまたは投稿を選択していることを確認してください。URL形式（例：https://kemono.cr/patreon/user/12345678/post/12345678）が正しいか確認してください。コンソールで「[警告] URLにファイルが見つかりませんでした」などの警告を確認してください。<br><br>"
-                "<b>6.3 ダウンロードが遅い</b><br>"
-                "- <b>原因</b>：同時ダウンロード数が多すぎるか、インターネット接続が遅い。<br>"
-                "- <b>解決策</b>：設定タブで「最大同時ダウンロード数」を減らしてください（例：10から5へ）。インターネット速度をテストしてボトルネックでないことを確認してください。<br><br>"
-                "<b>6.4 画像プレビューが読み込まれない</b><br>"
-                "- <b>原因</b>：キャッシュの破損またはネットワークの問題。<br>"
-                "- <b>解決策</b>：設定タブに移動し、「キャッシュのクリア」をクリックして一時ファイルを削除してください。再度プレビューを試してください。問題が続く場合は、インターネット接続やKemono.suでのファイルの可用性を確認してください。<br><br>"
-                "<b>6.5 重複ファイルがダウンロードされる</b><br>"
-                "- <b>原因</b>：「file_hashes.json」ファイルが欠落しているか破損している。<br>"
-                "- <b>解決策</b>：設定タブで「ファイルハッシュのリセット」をクリックして重複排除データをクリアし、再ダウンロードしてください。アプリケーションは将来の重複を防ぐためにハッシュファイルを再構築します。<br><br>"
-                "<b>6.6 アプリケーションがクラッシュまたはフリーズする</b><br>"
-                "- <b>原因</b>：リソースの過負荷またはバグ。<br>"
-                "- <b>解決策</b>：アプリケーションを再起動してください。「最大同時ダウンロード数」を減らして負荷を軽減してください。コンソールログでエラーメッセージを確認し、「連絡とサポート」セクションのGitHubリンクを介して報告してください。<br><br>"
-                "<b>6.7 言語が変更されない</b><br>"
-                "- <b>原因</b>：UIのリフレッシュ問題。<br>"
-                "- <b>解決策</b>：設定タブで新しい言語を選択した後、変更が即座に反映されない場合はアプリケーションを再起動してください。"
-                "<br><br><b>6.8 「プレビューのみ」や「サーバー上にありません」と表示されるファイル</b><br>"
-                "- <b>原因</b>：サイトにはファイルが掲載されていますが、メディアサーバーにはありません（プレビュー画像だけが残っている場合もあります）。アプリの不具合ではありません。<br>"
-                "- <b>解決策</b>：再試行しても解決しません。プレビューを残したい場合は、設定タブで「サイトにプレビューしかないファイルは、プレビュー画像を保存する」をオンにするか、サムネイルダウンローダータブを使用してください。各ダウンロードの最後に、ダウンロード済み・スキップ・サーバー上になしのファイル数の概要が表示されます。",
-                "korean": "이 섹션에서는 케모노 다운로더 사용 중 발생할 수 있는 일반적인 문제와 해결 방법을 다룹니다. 여기에 나열되지 않은 문제가 발생하면 '연락 및 지원' 섹션을 참조하여 추가 지원을 받으세요.<br><br>"
-                "<b>6.1 '연결 오류'로 다운로드 실패</b><br>"
-                "- <b>원인</b>: 인터넷 연결이 없거나 Kemono.su가 일시적으로 사용 불가능.<br>"
-                "- <b>해결책</b>: 인터넷 연결을 확인하세요. 사이트가 유지보수 중일 수 있으니 몇 분 기다린 후 다시 시도하세요. 콘솔에서 구체적인 오류 메시지(예: '[오류] URL 연결 실패')를 확인하세요.<br><br>"
-                "<b>6.2 파일이 다운로드되지 않음</b><br>"
-                "- <b>원인</b>: 파일이 선택되지 않았거나 게시물/크리에이터 URL이 유효하지 않음.<br>"
-                "- <b>해결책</b>: '다운로드할 파일' 또는 '다운로드할 게시물' 목록에서 파일이나 게시물을 선택했는지 확인하세요. URL 형식이 올바른지(예: https://kemono.cr/patreon/user/12345678/post/12345678) 확인하세요. 콘솔에서 '[경고] URL에서 파일을 찾을 수 없음'과 같은 경고를 확인하세요.<br><br>"
-                "<b>6.3 다운로드 속도가 느림</b><br>"
-                "- <b>원인</b>: 동시 다운로드가 너무 많거나 인터넷 연결이 느림.<br>"
-                "- <b>해결책</b>: 설정 탭에서 '최대 동시 다운로드 수'를 줄이세요(예: 10에서 5로). 인터넷 속도를 테스트하여 병목 현상이 아닌지 확인하세요.<br><br>"
-                "<b>6.4 이미지 미리보기가 로드되지 않음</b><br>"
-                "- <b>원인</b>: 캐시 손상 또는 네트워크 문제.<br>"
-                "- <b>해결책</b>: 설정 탭으로 이동하여 '캐시 지우기'를 클릭해 임시 파일을 삭제하세요. 다시 미리보기를 시도하세요. 문제가 지속되면 인터넷 연결이나 Kemono.su에서 파일의 가용성을 확인하세요.<br><br>"
-                "<b>6.5 중복 파일이 다운로드됨</b><br>"
-                "- <b>원인</b>: 'file_hashes.json' 파일이 없거나 손상됨.<br>"
-                "- <b>해결책</b>: 설정 탭에서 '파일 해시 초기화'를 클릭하여 중복 제거 데이터를 지우고 다시 다운로드하세요. 애플리케이션이 해시 파일을 재구축하여 향후 중복을 방지합니다.<br><br>"
-                "<b>6.6 애플리케이션이 충돌하거나 멈춤</b><br>"
-                "- <b>원인</b>: 자원 과부하 또는 버그.<br>"
-                "- <b>해결책</b>: 애플리케이션을 재시작하세요. '최대 동시 다운로드 수'를 줄여 부하를 줄이세요. 콘솔 로그에서 오류 메시지를 확인하고 '연락 및 지원' 섹션의 GitHub 링크를 통해 보고하세요.<br><br>"
-                "<b>6.7 언어가 변경되지 않음</b><br>"
-                "- <b>원인</b>: UI 새로고침 문제.<br>"
-                "- <b>해결책</b>: 설정 탭에서 새 언어를 선택한 후 변경이 즉시 적용되지 않으면 애플리케이션을 재시작하세요."
-                "<br><br><b>6.8 '미리보기만' 또는 '서버에 없음'으로 표시되는 파일</b><br>"
-                "- <b>원인</b>: 사이트에 파일이 올라와 있지만 미디어 서버에는 없습니다(미리보기 이미지만 남아 있는 경우도 있습니다). 앱의 문제가 아닙니다.<br>"
-                "- <b>해결책</b>: 다시 시도해도 해결되지 않습니다. 미리보기를 남기려면 설정 탭에서 '사이트에 미리보기만 있는 파일은 미리보기 이미지를 저장'을 켜거나 썸네일 다운로더 탭을 사용하세요. 각 다운로드가 끝나면 다운로드됨, 건너뜀, 서버에 없음 파일 수가 요약됩니다.",
-                "chinese-simplified": "本节解决您在使用 Kemono 下载器时可能遇到的常见问题，并提供相应的解决方案。如果您的问题未在此列出，请参阅“联系与支持”部分以获取进一步帮助。<br><br>"
-                "<b>6.1 下载失败并显示“连接错误”</b><br>"
-                "- <b>原因</b>：无互联网连接或 Kemono.cr 暂时不可用。<br>"
-                "- <b>解决方案</b>：检查您的互联网连接。等待几分钟后重试，因为网站可能正在维护。检查控制台中的具体错误消息（例如“[错误] 无法连接到 URL”）。<br><br>"
-                "<b>6.2 文件未下载</b><br>"
-                "- <b>原因</b>：未选择文件，或帖子/创作者 URL 无效。<br>"
-                "- <b>解决方案</b>：确保在“待下载文件”或“待下载帖子”列表中选择了文件或帖子。验证 URL 格式（例如 https://kemono.cr/patreon/user/12345678/post/12345678）。检查控制台中的警告，例如“[警告] 未找到 URL 的文件”。<br><br>"
-                "<b>6.3 下载速度慢</b><br>"
-                "- <b>原因</b>：同时下载过多或互联网连接缓慢。<br>"
-                "- <b>解决方案</b>：在设置选项卡中减少“最大同时下载数”（例如从 10 减少到 5）。测试您的互联网速度，确保这不是瓶颈。<br><br>"
-                "<b>6.4 图片预览无法加载</b><br>"
-                "- <b>原因</b>：缓存损坏或网络问题。<br>"
-                "- <b>解决方案</b>：转到设置选项卡，点击“清除缓存”删除临时文件。再次尝试预览。如果问题持续，检查您的互联网连接或 Kemono.cr 上文件的可用性。<br><br>"
-                "<b>6.5 下载了重复文件</b><br>"
-                "- <b>原因</b>：“file_hashes.json”文件丢失或损坏。<br>"
-                "- <b>解决方案</b>：在设置选项卡中，点击“重置文件哈希”清除去重数据，然后重新下载。应用程序将重建哈希文件以防止未来出现重复。<br><br>"
-                "<b>6.6 应用程序崩溃或冻结</b><br>"
-                "- <b>原因</b>：资源过载或程序错误。<br>"
-                "- <b>解决方案</b>：重新启动应用程序。减少“最大同时下载数”以减轻负载。检查控制台日志中的错误消息，并通过“联系与支持”部分中的 GitHub 链接报告问题。<br><br>"
-                "<b>6.7 语言未更改</b><br>"
-                "- <b>原因</b>：界面刷新问题。<br>"
-                "- <b>解决方案</b>：在设置选项卡中选择新语言后，如果更改未立即生效，请重新启动应用程序。"
-                "<br><br><b>6.8 标为“仅预览”或“服务器上没有此文件”的文件</b><br>"
-                "- <b>原因</b>：网站列出了该文件，但其媒体服务器上没有（有时只剩预览图）。这不是应用的问题。<br>"
-                "- <b>解决方案</b>：重试无济于事。如需保留预览图，请在设置选项卡中开启“网站上只有预览图的文件，保存其预览图”，或使用缩略图下载器选项卡。每次下载结束时都会显示已下载、已跳过和服务器上不存在的文件数量摘要。",
-            },
-            "help_support_title": {
-                "english": "8. Contact and Support",
-                "japanese": "8. 連絡とサポート",
-                "korean": "8. 연락 및 지원",
-                "chinese-simplified": "8. 联系和支持",
-            },
-            "help_support_text": {
-                "english": "If you need further assistance or want to report a bug, this section provides the necessary information to get help.<br><br>"
-                "<b>7.1 GitHub Repository</b><br>"
-                "- The Kemono Downloader is an open-source project hosted on GitHub.<br>"
-                "- Visit the project page at: <a href='https://github.com/VoxDroid'>github.com/VoxDroid</a>.<br>"
-                "- Check the 'Issues' tab for existing bug reports or feature requests. If your issue isn’t listed, create a new issue with the following details:<br>"
-                "  - A clear description of the problem or request.<br>"
-                "  - Steps to reproduce the issue (if applicable).<br>"
-                "  - Any relevant console logs or screenshots.<br>"
-                "- The developer, VoxDroid, monitors the repository and will respond to issues as time permits.<br><br>"
-                "<b>7.2 Updates</b><br>"
-                "- Check the GitHub repository for the latest releases and updates.<br>"
-                "- The application does not have an auto-update feature, so download the latest version manually from the repository if needed.<br><br>"
-                "<b>7.3 Notes</b><br>"
-                "- Support is provided on a volunteer basis by the developer and community.<br>"
-                "- Be patient when awaiting a response, especially for non-critical issues.",
-                "japanese": "さらなる支援が必要な場合やバグを報告したい場合、このセクションではヘルプを得るために必要な情報を提供します。<br><br>"
-                "<b>7.1 GitHubリポジトリ</b><br>"
-                "- ケモノダウンローダーはGitHubでホストされているオープンソースプロジェクトです。<br>"
-                "- プロジェクトページをご覧ください：<a href='https://github.com/VoxDroid'>github.com/VoxDroid</a>。<br>"
-                "- 「Issues」タブで既存のバグ報告や機能リクエストを確認してください。問題がリストにない場合、以下の詳細を含めて新しいイシューを作成してください：<br>"
-                "  - 問題またはリクエストの明確な説明。<br>"
-                "  - 問題を再現する手順（該当する場合）。<br>"
-                "  - 関連するコンソールログやスクリーンショット。<br>"
-                "- 開発者のVoxDroidはリポジトリを監視し、時間があるときにイシューに応答します。<br><br>"
-                "<b>7.2 更新</b><br>"
-                "- GitHubリポジトリで最新のリリースと更新を確認してください。<br>"
-                "- アプリケーションには自動更新機能がないため、必要に応じてリポジトリから最新バージョンを手動でダウンロードしてください。<br><br>"
-                "<b>7.3 注意事項</b><br>"
-                "- サポートは開発者とコミュニティによるボランティアベースで提供されます。<br>"
-                "- 特に重要でない問題については、応答を待つ際に辛抱強くお待ちください。",
-                "korean": "추가 지원이 필요하거나 버그를 보고하려면 이 섹션에서 도움을 받는 데 필요한 정보를 제공합니다.<br><br>"
-                "<b>7.1 GitHub 저장소</b><br>"
-                "- 케모노 다운로더는 GitHub에서 호스팅되는 오픈 소스 프로젝트입니다.<br>"
-                "- 프로젝트 페이지를 방문하세요: <a href='https://github.com/VoxDroid'>github.com/VoxDroid</a>.<br>"
-                "- 'Issues' 탭에서 기존 버그 보고서나 기능 요청을 확인하세요. 문제가 나열되지 않았다면 다음 세부 사항을 포함하여 새 이슈를 생성하세요:<br>"
-                "  - 문제 또는 요청에 대한 명확한 설명.<br>"
-                "  - 문제를 재현하는 단계(해당되는 경우).<br>"
-                "  - 관련 콘솔 로그 또는 스크린샷.<br>"
-                "- 개발자인 VoxDroid는 저장소를 모니터링하며 시간이 허락하는 한 이슈에 응답합니다.<br><br>"
-                "<b>7.2 업데이트</b><br>"
-                "- GitHub 저장소에서 최신 릴리스와 업데이트를 확인하세요.<br>"
-                "- 애플리케이션에는 자동 업데이트 기능이 없으므로 필요하면 저장소에서 최신 버전을 수동으로 다운로드하세요.<br><br>"
-                "<b>7.3 참고 사항</b><br>"
-                "- 지원은 개발자와 커뮤니티가 자원봉사로 제공합니다.<br>"
-                "- 특히 중요하지 않은 문제에 대한 응답을 기다릴 때는 인내심을 가지세요.",
-                "chinese-simplified": "如果您需要进一步的帮助或想报告错误，本节提供了获取帮助的必要信息。<br><br>"
-                "<b>7.1 GitHub 仓库</b><br>"
-                "- Kemono 下载器是一个在 GitHub 上托管的开源项目。<br>"
-                "- 访问项目页面：<a href='https://github.com/VoxDroid'>github.com/VoxDroid</a>。<br>"
-                "- 查看“Issues”选项卡，了解现有的错误报告或功能请求。如果您的问题未列出，请创建新的问题，并包含以下详细信息：<br>"
-                "  - 对问题或请求的清晰描述。<br>"
-                "  - 重现问题的步骤（如果适用）。<br>"
-                "  - 相关的控制台日志或截图。<br>"
-                "- 开发者 VoxDroid 会监控仓库，并在时间允许的情况下回应问题。<br><br>"
-                "<b>7.2 更新</b><br>"
-                "- 在 GitHub 仓库中检查最新的发布和更新。<br>"
-                "- 应用程序没有自动更新功能，因此如有需要，请从仓库手动下载最新版本。<br><br>"
-                "<b>7.3 注意事项</b><br>"
-                "- 支持由开发者和社区以志愿者形式提供。<br>"
-                "- 对于非紧急问题，等待回复时请保持耐心。",
+                "english": "Kemono Downloader Guide",
+                "japanese": "Kemono Downloader ガイド",
+                "korean": "Kemono Downloader 안내서",
+                "chinese-simplified": "Kemono Downloader 指南",
             },
             # Extension tab translations
             "extension_title": {
-                "english": "Browser Extension Features",
-                "japanese": "ブラウザ拡張機能の機能",
-                "korean": "브라우저 확장 기능",
-                "chinese-simplified": "浏览器扩展功能",
-            },
-            "extension_intro": {
-                "english": "A standalone browser extension for downloading content from Kemono and Coomer sites. This extension provides an alternative to the desktop application, allowing you to download posts directly from your browser.<br><br>"
-                "<b>Core Features:</b><br>"
-                "- Download individual posts or multiple files from Kemono/Coomer pages<br>"
-                "- Selective file downloads with checkbox selection<br>"
-                "- ZIP compression for multiple files with progress tracking<br>"
-                "- Individual downloads for large video files<br>"
-                "- Automatic file organization and naming<br>"
-                "- Compatible with both kemono.cr and coomer.st<br><br>"
-                "The extension works independently from the desktop application and uses your browser's download manager.",
-                "japanese": "KemonoおよびCoomerサイトからコンテンツをダウンロードするためのスタンドアロンブラウザ拡張機能。この拡張機能はデスクトップアプリケーションの代替手段を提供し、ブラウザから直接投稿をダウンロードできます。<br><br>"
-                "<b>コア機能:</b><br>"
-                "- Kemono/Coomerページから個別の投稿または複数のファイルをダウンロード<br>"
-                "- チェックボックス選択による選択的なファイルダウンロード<br>"
-                "- 進捗追跡付きの複数ファイルのZIP圧縮<br>"
-                "- 大容量動画ファイルの個別ダウンロード<br>"
-                "- 自動ファイル整理と命名<br>"
-                "- kemono.crとcoomer.stの両方に対応<br><br>"
-                "拡張機能はデスクトップアプリケーションから独立して動作し、ブラウザのダウンロードマネージャーを使用します。",
-                "korean": "Kemono 및 Coomer 사이트에서 콘텐츠를 다운로드하기 위한 독립형 브라우저 확장 프로그램입니다. 이 확장 프로그램은 데스크톱 응용 프로그램의 대안을 제공하여 브라우저에서 직접 게시물을 다운로드할 수 있습니다.<br><br>"
-                "<b>핵심 기능:</b><br>"
-                "- Kemono/Coomer 페이지에서 개별 게시물 또는 여러 파일 다운로드<br>"
-                "- 체크박스 선택을 통한 선택적 파일 다운로드<br>"
-                "- 진행률 추적과 함께 여러 파일 ZIP 압축<br>"
-                "- 대용량 비디오 파일 개별 다운로드<br>"
-                "- 자동 파일 구성 및 이름 지정<br>"
-                "- kemono.cr 및 coomer.st 모두와 호환<br><br>"
-                "확장 프로그램은 데스크톱 응용 프로그램과 독립적으로 작동하며 브라우저의 다운로드 관리자를 사용합니다.",
-                "chinese-simplified": "用于从 Kemono 和 Coomer 站点下载内容的独立浏览器扩展程序。此扩展程序提供桌面应用程序的替代方案，允许您直接从浏览器下载帖子。<br><br>"
-                "<b>核心功能:</b><br>"
-                "- 从 Kemono/Coomer 页面下载单个帖子或多个文件<br>"
-                "- 通过复选框选择进行选择性文件下载<br>"
-                "- 带进度跟踪的多个文件 ZIP 压缩<br>"
-                "- 大型视频文件的单独下载<br>"
-                "- 自动文件组织和命名<br>"
-                "- 兼容 kemono.cr 和 coomer.st<br><br>"
-                "扩展程序独立于桌面应用程序运行，并使用浏览器的下载管理器。",
-            },
-            "extension_download_title": {
-                "english": "How It Works",
-                "japanese": "動作の仕組み",
-                "korean": "작동 방식",
-                "chinese-simplified": "工作原理",
-            },
-            "extension_download_text": {
-                "english": "The extension automatically detects when you're on a Kemono or Coomer post page and provides a download interface. You can select which files to download and choose between ZIP compression or individual file downloads.<br><br>"
-                "<b>Download Options:</b><br>"
-                "- <b>Selective Downloads:</b> Choose specific files using checkboxes<br>"
-                "- <b>ZIP Compression:</b> Download multiple files as a single compressed archive<br>"
-                "- <b>Individual Files:</b> Download large files separately for better performance<br>"
-                "- <b>Progress Tracking:</b> Monitor download progress in real-time<br><br>"
-                "Files are downloaded directly to your browser's default download folder.",
-                "japanese": "拡張機能は自動的にKemonoまたはCoomerの投稿ページにいることを検知し、ダウンロードインターフェースを提供します。ダウンロードするファイルを選択し、ZIP圧縮または個別ファイルダウンロードを選択できます。<br><br>"
-                "<b>ダウンロードオプション:</b><br>"
-                "- <b>選択ダウンロード:</b> チェックボックスを使用して特定のファイルを選択<br>"
-                "- <b>ZIP圧縮:</b> 複数のファイルを単一の圧縮アーカイブとしてダウンロード<br>"
-                "- <b>個別ファイル:</b> 大容量ファイルを個別にダウンロードしてパフォーマンスを向上<br>"
-                "- <b>進捗追跡:</b> リアルタイムでダウンロード進捗を監視<br><br>"
-                "ファイルはブラウザのデフォルトダウンロードフォルダに直接ダウンロードされます。",
-                "korean": "확장 프로그램은 자동으로 Kemono 또는 Coomer 게시물 페이지에 있는 것을 감지하고 다운로드 인터페이스를 제공합니다. 다운로드할 파일을 선택하고 ZIP 압축 또는 개별 파일 다운로드 중에서 선택할 수 있습니다.<br><br>"
-                "<b>다운로드 옵션:</b><br>"
-                "- <b>선택적 다운로드:</b> 체크박스를 사용하여 특정 파일 선택<br>"
-                "- <b>ZIP 압축:</b> 여러 파일을 단일 압축 아카이브로 다운로드<br>"
-                "- <b>개별 파일:</b> 대용량 파일을 개별적으로 다운로드하여 성능 향상<br>"
-                "- <b>진행률 추적:</b> 실시간으로 다운로드 진행률 모니터링<br><br>"
-                "파일은 브라우저의 기본 다운로드 폴더에 직접 다운로드됩니다.",
-                "chinese-simplified": "扩展程序会自动检测您何时在 Kemono 或 Coomer 帖子页面上，并提供下载界面。您可以选择要下载的文件，并选择 ZIP 压缩或单独文件下载。<br><br>"
-                "<b>下载选项:</b><br>"
-                "- <b>选择性下载:</b> 使用复选框选择特定文件<br>"
-                "- <b>ZIP 压缩:</b> 将多个文件作为单个压缩存档下载<br>"
-                "- <b>单独文件:</b> 单独下载大文件以提高性能<br>"
-                "- <b>进度跟踪:</b> 实时监控下载进度<br><br>"
-                "文件直接下载到浏览器的默认下载文件夹。",
-            },
-            "extension_install_title": {
-                "english": "Installation",
-                "japanese": "インストール",
-                "korean": "설치",
-                "chinese-simplified": "安装",
-            },
-            "extension_install_text": {
-                "english": "Ready to enhance your Kemono browsing experience? Install the extension now:<br><br>"
-                "<b>1.</b> Download the extension package from our <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a><br>"
-                "<b>2.</b> Extract the ZIP file to a folder on your computer<br>"
-                "<b>3.</b> Follow the browser-specific installation instructions below<br><br>"
-                "The extension works with Chrome, Edge, and other Chromium-based browsers.",
-                "japanese": "Kemonoブラウジング体験を向上させる準備はできましたか？今すぐ拡張機能をインストールしてください：<br><br>"
-                "<b>1.</b> <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a>から拡張機能パッケージをダウンロード<br>"
-                "<b>2.</b> ZIPファイルをコンピュータ上のフォルダに解凍<br>"
-                "<b>3.</b> 以下のブラウザ固有のインストール手順に従ってください<br><br>"
-                "拡張機能はChrome、Edge、およびその他のChromiumベースのブラウザで動作します。",
-                "korean": "Kemono 브라우징 경험을 향상시킬 준비가 되셨나요? 지금 확장을 설치하세요:<br><br>"
-                "<b>1.</b> <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a>에서 확장 패키지 다운로드<br>"
-                "<b>2.</b> ZIP 파일을 컴퓨터의 폴더에 압축 해제<br>"
-                "<b>3.</b> 아래 브라우저별 설치 지침을 따르세요<br><br>"
-                "확장은 Chrome, Edge 및 기타 Chromium 기반 브라우저와 작동합니다.",
-                "chinese-simplified": "准备好增强您的 Kemono 浏览体验了吗？立即安装扩展程序：<br><br>"
-                "<b>1.</b> 从我们的 <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a> 下载扩展包<br>"
-                "<b>2.</b> 将 ZIP 文件解压到计算机上的文件夹中<br>"
-                "<b>3.</b> 按照下面的浏览器特定安装说明操作<br><br>"
-                "扩展程序适用于 Chrome、Edge 和其他基于 Chromium 的浏览器。",
-            },
-            "extension_install_chrome": {
-                "english": "<b>For Chrome/Edge:</b><br>"
-                "<b>1.</b> Open Chrome or Edge and type <code>chrome://extensions/</code> in the address bar<br>"
-                "<b>2.</b> Enable 'Developer mode' in the top right corner<br>"
-                "<b>3.</b> Click 'Load unpacked' and select the extracted extension folder<br>"
-                "<b>4.</b> The extension should now appear in your extensions list<br><br>",
-                "japanese": "<b>Chrome/Edgeの場合:</b><br>"
-                "<b>1.</b> ChromeまたはEdgeを開き、アドレスバーに<code>chrome://extensions/</code>と入力<br>"
-                "<b>2.</b> 右上隅の「デベロッパーモード」を有効化<br>"
-                "<b>3.</b> 「パッケージ化されていない拡張機能を読み込む」をクリックし、解凍した拡張機能フォルダを選択<br>"
-                "<b>4.</b> 拡張機能が拡張機能リストに表示されるはずです<br><br>",
-                "korean": "<b>Chrome/Edge의 경우:</b><br>"
-                "<b>1.</b> Chrome 또는 Edge를 열고 주소 표시줄에 <code>chrome://extensions/</code> 입력<br>"
-                "<b>2.</b> 오른쪽 상단에서 '개발자 모드' 활성화<br>"
-                "<b>3.</b> '압축 해제된 확장 프로그램 로드'를 클릭하고 압축 해제된 확장 폴더 선택<br>"
-                "<b>4.</b> 확장이 확장 목록에 나타나야 합니다<br><br>",
-                "chinese-simplified": "<b>Chrome/Edge：</b><br>"
-                "<b>1.</b> 打开 Chrome 或 Edge，在地址栏中输入 <code>chrome://extensions/</code><br>"
-                "<b>2.</b> 在右上角启用'开发者模式'<br>"
-                "<b>3.</b> 点击'加载已解压的扩展程序'并选择解压的扩展文件夹<br>"
-                "<b>4.</b> 扩展程序现在应该出现在您的扩展列表中<br><br>",
-            },
-            "extension_install_firefox": {
-                "english": "<b>For Firefox:</b><br>"
-                "<b>1.</b> Open Firefox and type <code>about:debugging</code> in the address bar<br>"
-                "<b>2.</b> Click 'This Firefox' in the left sidebar<br>"
-                "<b>3.</b> Click 'Load Temporary Add-on' and select the manifest.json file from the extracted folder<br>"
-                "<b>4.</b> The extension will be temporarily installed (you'll need to reinstall after browser restart)<br><br>",
-                "japanese": "<b>Firefoxの場合:</b><br>"
-                "<b>1.</b> Firefoxを開き、アドレスバーに<code>about:debugging</code>と入力<br>"
-                "<b>2.</b> 左サイドバーの「This Firefox」をクリック<br>"
-                "<b>3.</b> 「Load Temporary Add-on」をクリックし、解凍したフォルダからmanifest.jsonファイルを選択<br>"
-                "<b>4.</b> 拡張機能が一時的にインストールされます（ブラウザ再起動後に再インストールが必要です）<br><br>",
-                "korean": "<b>Firefox의 경우:</b><br>"
-                "<b>1.</b> Firefox를 열고 주소 표시줄에 <code>about:debugging</code> 입력<br>"
-                "<b>2.</b> 왼쪽 사이드바에서 'This Firefox' 클릭<br>"
-                "<b>3.</b> 'Load Temporary Add-on'을 클릭하고 압축 해제된 폴더에서 manifest.json 파일 선택<br>"
-                "<b>4.</b> 확장이 임시로 설치됩니다(브라우저 재시작 후 재설치 필요)<br><br>",
-                "chinese-simplified": "<b>Firefox：</b><br>"
-                "<b>1.</b> 打开 Firefox，在地址栏中输入 <code>about:debugging</code><br>"
-                "<b>2.</b> 在左侧边栏中点击'此 Firefox'<br>"
-                "<b>3.</b> 点击'加载临时附加组件'并从解压文件夹中选择 manifest.json 文件<br>"
-                "<b>4.</b> 扩展程序将被临时安装（浏览器重启后需要重新安装）<br><br>",
-            },
-            "extension_setup_title": {
-                "english": "Configure the Extension",
-                "japanese": "拡張機能を設定",
-                "korean": "확장 구성",
-                "chinese-simplified": "配置扩展",
-            },
-            "extension_setup_text": {
-                "english": "The extension works out of the box with sensible defaults, but you can customize its behavior:<br><br>"
-                "<b>Download Location:</b> Files are downloaded to your browser's default download folder. The extension integrates with your system's download manager for the best experience.<br><br>"
-                "<b>File Organization:</b> The extension automatically organizes downloads with post titles and maintains file structure. No additional configuration needed.<br><br>"
-                "<b>Performance:</b> Large video files are downloaded individually for optimal performance, while smaller files are compressed into ZIP archives.<br><br>"
-                "<b>Compatibility:</b> The extension automatically detects whether you're on kemono.cr or coomer.st and adjusts accordingly.<br><br>"
-                "Note: This repository now includes two manifest files for convenience: `chrome_manifest.json` (MV3) and `firefox_manifest.json` (MV2). Rename or copy the appropriate file to `manifest.json` before loading the extension in your browser's developer UI.",
-                "japanese": "拡張機能はすぐに使用できる適切なデフォルト設定で動作しますが、動作をカスタマイズできます：<br><br>"
-                "<b>ダウンロード場所:</b> ファイルはブラウザのデフォルトダウンロードフォルダにダウンロードされます。拡張機能は最適なエクスペリエンスのためにシステムのダウンロードマネージャーと統合します。<br><br>"
-                "<b>ファイル整理:</b> 拡張機能は投稿タイトルでダウンロードを自動的に整理し、ファイル構造を維持します。追加の設定は必要ありません。<br><br>"
-                "<b>パフォーマンス:</b> 大容量動画ファイルは最適なパフォーマンスのために個別にダウンロードされ、小さいファイルはZIPアーカイブに圧縮されます。<br><br>"
-                "<b>互換性:</b> 拡張機能は自動的にkemono.crまたはcoomer.stにいるかを検知し、それに応じて調整します。",
-                "korean": "확장은 합리적인 기본값으로 즉시 작동하지만 동작을 사용자 정의할 수 있습니다:<br><br>"
-                "<b>다운로드 위치:</b> 파일은 브라우저의 기본 다운로드 폴더에 다운로드됩니다. 확장은 최상의 경험을 위해 시스템 다운로드 관리자와 통합합니다.<br><br>"
-                "<b>파일 구성:</b> 확장은 게시물 제목으로 다운로드를 자동으로 구성하고 파일 구조를 유지합니다. 추가 구성이 필요하지 않습니다.<br><br>"
-                "<b>성능:</b> 대용량 비디오 파일은 최적의 성능을 위해 개별적으로 다운로드되며, 작은 파일은 ZIP 아카이브로 압축됩니다.<br><br>"
-                "<b>호환성:</b> 확장은 자동으로 kemono.cr 또는 coomer.st에 있는지 감지하고 그에 따라 조정합니다.",
-                "chinese-simplified": "扩展程序开箱即用，具有合理的默认设置，但您可以自定义其行为：<br><br>"
-                "<b>下载位置：</b>文件下载到浏览器的默认下载文件夹。扩展程序与您的系统下载管理器集成以获得最佳体验。<br><br>"
-                "<b>文件组织：</b>扩展程序自动使用帖子标题组织下载并维护文件结构。不需要额外配置。<br><br>"
-                "<b>性能：</b>大型视频文件为获得最佳性能而单独下载，而较小的文件则压缩到 ZIP 存档中。<br><br>"
-                "<b>兼容性：</b>扩展程序自动检测您是在 kemono.cr 还是 coomer.st 上，并相应调整。",
-            },
-            "extension_troubleshooting_title": {
-                "english": "Troubleshooting",
-                "japanese": "トラブルシューティング",
-                "korean": "문제 해결",
-                "chinese-simplified": "故障排除",
-            },
-            "extension_troubleshooting_text": {
-                "english": "If you encounter issues with the extension:<br><br>"
-                "<b>Extension not showing buttons:</b> Make sure you're on a valid Kemono or Coomer page<br>"
-                "<b>Downloads not working:</b> Check that the download folder path is correct in extension settings<br>"
-                "<b>Extension disappeared:</b> For Firefox, you'll need to reinstall after browser restart<br>"
-                "<b>Permission issues:</b> Ensure the extension has the necessary permissions enabled<br><br>"
-                "For additional help, check the GitHub repository or create an issue.",
-                "japanese": "拡張機能で問題が発生した場合：<br><br>"
-                "<b>拡張機能がボタンを表示しない:</b> 有効なKemonoまたはCoomerページにいることを確認してください<br>"
-                "<b>ダウンロードが機能しない:</b> 拡張機能設定でダウンロードフォルダパスが正しいことを確認してください<br>"
-                "<b>拡張機能が消えた:</b> Firefoxの場合、ブラウザ再起動後に再インストールが必要です<br>"
-                "<b>権限の問題:</b> 拡張機能に必要な権限が有効になっていることを確認してください<br><br>"
-                "追加のヘルプについては、GitHubリポジトリを確認するか、イシューを作成してください。",
-                "korean": "확장에서 문제가 발생하는 경우:<br><br>"
-                "<b>확장이 버튼을 표시하지 않음:</b> 유효한 Kemono 또는 Coomer 페이지에 있는지 확인하세요<br>"
-                "<b>다운로드가 작동하지 않음:</b> 확장 설정에서 다운로드 폴더 경로가 올바른지 확인하세요<br>"
-                "<b>확장이 사라짐:</b> Firefox의 경우 브라우저 재시작 후 재설치 필요<br>"
-                "<b>권한 문제:</b> 확장에 필요한 권한이 활성화되어 있는지 확인하세요<br><br>"
-                "추가 도움말은 GitHub 저장소를 확인하거나 이슈를 생성하세요.",
-                "chinese-simplified": "如果您遇到扩展程序问题：<br><br>"
-                "<b>扩展程序不显示按钮：</b>确保您在有效的 Kemono 或 Coomer 页面上<br>"
-                "<b>下载不工作：</b>检查扩展设置中的下载文件夹路径是否正确<br>"
-                "<b>扩展程序消失：</b>对于 Firefox，您需要在浏览器重启后重新安装<br>"
-                "<b>权限问题：</b>确保扩展程序已启用必要的权限<br><br>"
-                "如需额外帮助，请查看 GitHub 仓库或创建问题。",
-            },
-            "extension_manifest_title": {
-                "english": "Manifest & Browser compatibility",
-                "japanese": "マニフェストとブラウザ互換性",
-                "korean": "매니페스트 및 브라우저 호환성",
-                "chinese-simplified": "清单与浏览器兼容性",
-            },
-            "extension_manifest_text": {
-                "english": "This repository now includes two manifest files for convenience: `chrome_manifest.json` (Manifest V3 for Chrome/Edge) and `firefox_manifest.json` (Manifest V2 for Firefox).\n\nBefore loading the extension in your browser's developer UI, rename or copy the appropriate file to `manifest.json`.",
-                "japanese": "このリポジトリには、便利なように2つのマニフェストファイルが含まれています: `chrome_manifest.json` (Chrome/Edge 用の Manifest V3) と `firefox_manifest.json` (Firefox 用の Manifest V2)。\n\nブラウザのデベロッパーUIに拡張機能を読み込む前に、適切なファイルを `manifest.json` にリネームまたはコピーしてください。",
-                "korean": "이 저장소에는 Chrome/Edge용 Manifest V3의 `chrome_manifest.json`과 Firefox용 Manifest V2의 `firefox_manifest.json` 두 가지 매니페스트 파일이 포함되어 있습니다.\n\n브라우저 개발자 UI에서 확장을 로드하기 전에 적절한 파일을 `manifest.json`으로 이름을 바꾸거나 복사하세요.",
-                "chinese-simplified": "此仓库现在为了方便包含两个清单文件：`chrome_manifest.json`（适用于 Chrome/Edge 的 Manifest V3）和 `firefox_manifest.json`（适用于 Firefox 的 Manifest V2）。\n\n在浏览器的开发者 UI 中加载扩展之前，请将合适的文件重命名或复制为 `manifest.json`。",
-            },
-            "extension_manifest_chrome": {
-                "english": "For Chrome/Edge, use `chrome_manifest.json` (Manifest V3). Move host patterns into `host_permissions` and use a `background.service_worker` entry.",
-                "japanese": "Chrome/Edge の場合は `chrome_manifest.json` (Manifest V3) を使用します。ホストパターンを `host_permissions` に移動し、`background.service_worker` を使用します。",
-                "korean": "Chrome/Edge의 경우 `chrome_manifest.json`(Manifest V3)을 사용하세요. 호스트 패턴을 `host_permissions`로 이동하고 `background.service_worker`를 사용합니다.",
-                "chinese-simplified": "对于 Chrome/Edge，请使用 `chrome_manifest.json`（Manifest V3）。将主机模式移到 `host_permissions` 并使用 `background.service_worker`。",
-            },
-            "extension_manifest_firefox": {
-                "english": "For Firefox, use `firefox_manifest.json` (Manifest V2). Keep `background.scripts` and the `applications.gecko` block if needed.",
-                "japanese": "Firefox の場合は `firefox_manifest.json` (Manifest V2) を使用します。必要に応じて `background.scripts` と `applications.gecko` ブロックを維持してください。",
-                "korean": "Firefox의 경우 `firefox_manifest.json`(Manifest V2)을 사용하세요. 필요시 `background.scripts` 및 `applications.gecko` 블록을 유지하세요.",
-                "chinese-simplified": "对于 Firefox，请使用 `firefox_manifest.json`（Manifest V2）。如有需要，请保留 `background.scripts` 和 `applications.gecko` 块。",
-            },
-            "extension_manifest_quickcopy": {
-                "english": "Quick copy commands (PowerShell):<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
-                "japanese": "クイックコピーコマンド（PowerShell）：<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
-                "korean": "빠른 복사 명령(파워셸):<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
-                "chinese-simplified": "快速复制命令 (PowerShell)：<br>Copy-Item browser-extension\\chrome_manifest.json browser-extension\\manifest.json<br>Copy-Item browser-extension\\firefox_manifest.json browser-extension\\manifest.json",
+                "english": "Browser Extension",
+                "japanese": "ブラウザ拡張機能",
+                "korean": "브라우저 확장",
+                "chinese-simplified": "浏览器扩展",
             },
             "tor_status_stopped": {
                 "english": "Tor Status: Stopped",
@@ -3655,7 +2469,7 @@ class KDLanguage:
             "download_mode": {
                 "english": "Download Mode:",
                 "japanese": "ダウンロードモード:",
-                "korean": "다운ロード 모드:",
+                "korean": "다운로드 모드:",
                 "chinese-simplified": "下载模式：",
             },
             "post_mode": {
@@ -3703,7 +2517,7 @@ class KDLanguage:
             "downloading_thumbnails": {
                 "english": "Downloading thumbnails...",
                 "japanese": "サムネイルをダウンロード中...",
-                "korean": "サムネイル 다운ロード 중...",
+                "korean": "썸네일 다운로드 중...",
                 "chinese-simplified": "正在下载缩略图...",
             },
             "thumbnails_downloaded": {
@@ -3721,7 +2535,7 @@ class KDLanguage:
             "thumbnails_to_download": {
                 "english": "Thumbnails to Download",
                 "japanese": "ダウンロードするサムネイル",
-                "korean": "다운ロード할 썸네일",
+                "korean": "다운로드할 썸네일",
                 "chinese-simplified": "要下载的缩略图",
             },
             "filter_placeholder": {
@@ -3745,7 +2559,7 @@ class KDLanguage:
             "start_download": {
                 "english": "Start Download",
                 "japanese": "ダウンロード開始",
-                "korean": "다운ロード 시작",
+                "korean": "다운로드 시작",
                 "chinese-simplified": "开始下载",
             },
             "remove": {
@@ -4247,18 +3061,6 @@ class KDLanguage:
                 "korean": "즐겨찾기에 저장하려면 먼저 링크를 입력하거나 여세요",
                 "chinese-simplified": "请先输入或查看一个链接，再保存到收藏夹",
             },
-            "help_history_title": {
-                "english": "6. Using the History Tab",
-                "japanese": "6. 履歴タブの使用",
-                "korean": "6. 기록 탭 사용",
-                "chinese-simplified": "6. 使用历史记录选项卡",
-            },
-            "help_history_text": {
-                "english": "<b>6.1 Download History</b><br>- Every finished post, creator and thumbnail download is listed with its date, type, files (done/total and failures), posts, size on disk, duration and status.<br>- Search by title, link or creator and filter by type. The line above the table adds up what is shown.<br>- 'Open Folder' (or a double-click) opens where the files were saved. If the folder was moved, renamed or deleted, the app tells you and offers to locate it, open the nearest parent folder, or download it again.<br>- 'Copy Link', 'Add to Queue' (sent to the right downloader tab) and 'Add to Favorites' work on several selected rows at once. 'Remove' and 'Clear History' only delete the records, never your files.<br>- Untick 'Record download history' to stop recording. 'Export CSV' saves the list for a spreadsheet.<br><br><b>6.2 Favorites</b><br>- Save links with the star button in the Post or Creator tab, from the history, or by pasting a link into the Favorites view.<br>- Double-click a title or note to edit it; double-click anywhere else on a row to add the link to the queue.<br>- Copy links, open them in your browser, or import and export them as a .txt file with one link per line.",
-                "japanese": "<b>6.1 ダウンロード履歴</b><br>- 完了した投稿・クリエイター・サムネイルのダウンロードが、日時、種類、ファイル数（完了数/合計と失敗数）、投稿数、ディスク上のサイズ、所要時間、状態とともに一覧表示されます。<br>- タイトル、リンク、クリエイターで検索し、種類で絞り込めます。表の上の行には表示中の項目の合計が表示されます。<br>- 「フォルダーを開く」（またはダブルクリック）で保存先を開きます。フォルダーが移動・名前変更・削除されていた場合はその旨を表示し、フォルダーの指定、最も近い親フォルダーを開く、再ダウンロードのいずれかを選べます。<br>- 「リンクをコピー」「キューに追加」（適切なダウンローダータブに送られます）「お気に入りに追加」は、複数の行を選択してまとめて実行できます。「削除」と「履歴を消去」は記録だけを削除し、ファイルは削除しません。<br>- 「ダウンロード履歴を記録」のチェックを外すと記録を停止します。「CSVにエクスポート」で一覧を表計算ソフト用に保存できます。<br><br><b>6.2 お気に入り</b><br>- 投稿・クリエイタータブの星ボタン、履歴、またはお気に入り画面へのリンク貼り付けでリンクを保存できます。<br>- タイトルやメモをダブルクリックすると編集できます。行のそれ以外の場所をダブルクリックするとリンクをキューに追加します。<br>- リンクのコピー、ブラウザーで開く、1行に1リンクの.txtファイルとしてのインポート・エクスポートができます。",
-                "korean": "<b>6.1 다운로드 기록</b><br>- 완료된 게시물, 크리에이터, 썸네일 다운로드가 날짜, 유형, 파일(완료/전체 및 실패), 게시물 수, 디스크 크기, 소요 시간, 상태와 함께 표시됩니다.<br>- 제목, 링크, 크리에이터로 검색하고 유형별로 필터링할 수 있습니다. 표 위의 줄에는 표시된 항목의 합계가 나옵니다.<br>- '폴더 열기'(또는 더블클릭)로 파일이 저장된 위치를 엽니다. 폴더가 이동되었거나 이름이 바뀌었거나 삭제된 경우 알려 주고, 폴더 찾기, 가장 가까운 상위 폴더 열기, 다시 다운로드 중에서 선택할 수 있습니다.<br>- '링크 복사', '대기열에 추가'(알맞은 다운로더 탭으로 전송), '즐겨찾기에 추가'는 여러 행을 선택해 한 번에 실행할 수 있습니다. '삭제'와 '기록 지우기'는 기록만 삭제하며 파일은 삭제하지 않습니다.<br>- '다운로드 기록 저장'의 체크를 해제하면 기록을 멈춥니다. 'CSV로 내보내기'로 목록을 스프레드시트용으로 저장할 수 있습니다.<br><br><b>6.2 즐겨찾기</b><br>- 게시물 또는 크리에이터 탭의 별 버튼, 기록, 또는 즐겨찾기 화면에 링크를 붙여넣어 저장할 수 있습니다.<br>- 제목이나 메모를 더블클릭하면 편집할 수 있고, 행의 다른 곳을 더블클릭하면 링크를 대기열에 추가합니다.<br>- 링크를 복사하거나 브라우저에서 열거나, 한 줄에 하나씩 링크가 담긴 .txt 파일로 가져오고 내보낼 수 있습니다.",
-                "chinese-simplified": "<b>6.1 下载历史</b><br>- 每个已完成的帖子、创作者和缩略图下载都会列出日期、类型、文件（完成/总数及失败数）、帖子数、磁盘大小、用时和状态。<br>- 可按标题、链接或创作者搜索，并按类型筛选。表格上方的一行汇总当前显示的内容。<br>- “打开文件夹”（或双击）会打开文件的保存位置。如果文件夹已被移动、重命名或删除，应用会提示你，并可选择定位文件夹、打开最近的上级文件夹或重新下载。<br>- “复制链接”“添加到队列”（发送到对应的下载选项卡）和“添加到收藏夹”可同时作用于多个选中的行。“删除”和“清除历史”只删除记录，绝不删除你的文件。<br>- 取消勾选“记录下载历史”即可停止记录。“导出 CSV”可将列表保存为电子表格。<br><br><b>6.2 收藏夹</b><br>- 可通过帖子或创作者选项卡中的星形按钮、历史记录，或在收藏夹视图中粘贴链接来保存链接。<br>- 双击标题或备注可进行编辑；双击行的其他位置会将链接添加到队列。<br>- 可复制链接、在浏览器中打开，或以每行一个链接的 .txt 文件导入和导出。",
-            },
             "unexpected_error_title": {
                 "english": "Unexpected Error",
                 "japanese": "予期しないエラー",
@@ -4450,6 +3252,1156 @@ class KDLanguage:
                 "japanese": "{1}件中{0}件のファイルをダウンロードしました。\n{2}件はサイトにプレビューしかありませんでした（スキップ）。\n{3}件はメディアサーバーにありませんでした。",
                 "korean": "{1}개 중 {0}개 파일을 다운로드했습니다.\n{2}개는 사이트에 미리보기만 있었습니다(건너뜀).\n{3}개는 미디어 서버에 없었습니다.",
                 "chinese-simplified": "已下载 {1} 个文件中的 {0} 个。\n{2} 个在网站上只有预览图（已跳过）。\n{3} 个不在媒体服务器上。",
+            },
+            # Tooltips and appearance
+            "tip_add_to_queue": {
+                "english": "Add the link in the box to the queue.",
+                "japanese": "入力欄のリンクをキューに追加します。",
+                "korean": "입력란의 링크를 대기열에 추가합니다.",
+                "chinese-simplified": "将输入框中的链接添加到队列。",
+            },
+            "tip_multi_url": {
+                "english": "Fast Mode: paste several links here, one per line.",
+                "japanese": "高速モード：ここに複数のリンクを 1 行に 1 つずつ貼り付けます。",
+                "korean": "빠른 모드: 여기에 여러 링크를 한 줄에 하나씩 붙여 넣으세요.",
+                "chinese-simplified": "快速模式：在此粘贴多个链接，每行一个。",
+            },
+            "tip_add_all_to_queue": {
+                "english": "Add every link above to the queue.",
+                "japanese": "上のリンクをすべてキューに追加します。",
+                "korean": "위의 링크를 모두 대기열에 추가합니다.",
+                "chinese-simplified": "将上方所有链接添加到队列。",
+            },
+            "tip_queue_view": {
+                "english": "List this link's files or posts on the right.",
+                "japanese": "このリンクのファイルまたは投稿を右側に一覧表示します。",
+                "korean": "이 링크의 파일이나 게시물을 오른쪽에 표시합니다.",
+                "chinese-simplified": "在右侧列出此链接中的文件或投稿。",
+            },
+            "tip_queue_remove": {
+                "english": "Remove this link from the queue.",
+                "japanese": "このリンクをキューから削除します。",
+                "korean": "이 링크를 대기열에서 삭제합니다.",
+                "chinese-simplified": "将此链接从队列中移除。",
+            },
+            "tip_check_all_page": {
+                "english": "Tick or untick everything shown on this page.",
+                "japanese": "このページに表示されているものをすべてチェック、またはチェックを外します。",
+                "korean": "이 페이지에 표시된 항목을 모두 선택하거나 해제합니다.",
+                "chinese-simplified": "勾选或取消勾选当前页显示的全部项目。",
+            },
+            "tip_fast_mode": {
+                "english": "Paste many links at once and download everything from them; finished links leave the queue.",
+                "japanese": "多数のリンクをまとめて貼り付け、すべてをダウンロードします。完了したリンクはキューから外れます。",
+                "korean": "여러 링크를 한꺼번에 붙여 넣고 모두 다운로드합니다. 완료된 링크는 대기열에서 빠집니다.",
+                "chinese-simplified": "一次粘贴多个链接并下载全部内容；完成的链接会移出队列。",
+            },
+            "tip_auto_rename": {
+                "english": "Put each file's position in the post in front of its name, such as 1_cover.png.",
+                "japanese": "投稿内での順番をファイル名の先頭に付けます（例：1_cover.png）。",
+                "korean": "게시물 안에서의 순서를 파일 이름 앞에 붙입니다(예: 1_cover.png).",
+                "chinese-simplified": "在文件名前加上它在投稿中的序号，例如 1_cover.png。",
+            },
+            "tip_download_text": {
+                "english": "Also save the post's text as a .txt file beside its files.",
+                "japanese": "投稿の本文も .txt ファイルとしてファイルと一緒に保存します。",
+                "korean": "게시물 본문도 .txt 파일로 파일 옆에 저장합니다.",
+                "chinese-simplified": "同时把投稿正文保存为 .txt 文件，放在其文件旁边。",
+            },
+            "tip_download_start": {
+                "english": "Start downloading what you ticked.",
+                "japanese": "チェックを入れたものをダウンロードします。",
+                "korean": "선택한 항목을 다운로드합니다.",
+                "chinese-simplified": "开始下载你勾选的内容。",
+            },
+            "tip_cancel": {
+                "english": "Stop the downloads in progress.",
+                "japanese": "進行中のダウンロードを停止します。",
+                "korean": "진행 중인 다운로드를 중지합니다.",
+                "chinese-simplified": "停止正在进行的下载。",
+            },
+            "tip_preview_selected": {
+                "english": "Preview the selected image.",
+                "japanese": "選択した画像をプレビューします。",
+                "korean": "선택한 이미지를 미리 봅니다.",
+                "chinese-simplified": "预览选中的图片。",
+            },
+            "tip_post_url": {
+                "english": "Paste a post link (…/user/ID/post/ID), then press Add to Queue.",
+                "japanese": "投稿リンク（…/user/ID/post/ID）を貼り付けて「キューに追加」を押します。",
+                "korean": "게시물 링크(…/user/ID/post/ID)를 붙여 넣고 '대기열에 추가'를 누르세요.",
+                "chinese-simplified": "粘贴投稿链接（…/user/ID/post/ID），然后点击“添加到队列”。",
+            },
+            "tip_search_files": {
+                "english": "Show only files whose name contains this text.",
+                "japanese": "名前にこの文字を含むファイルだけを表示します。",
+                "korean": "이름에 이 텍스트가 들어간 파일만 표시합니다.",
+                "chinese-simplified": "只显示名称中包含此文本的文件。",
+            },
+            "tip_download_all_links": {
+                "english": "Download every file of every queued link, without picking files.",
+                "japanese": "ファイルを選ばずに、キュー内のすべてのリンクの全ファイルをダウンロードします。",
+                "korean": "파일을 고르지 않고 대기열에 있는 모든 링크의 파일을 전부 다운로드합니다.",
+                "chinese-simplified": "无需挑选，下载队列中所有链接的全部文件。",
+            },
+            "tip_filter_type": {
+                "english": "Show files of this type in the list.",
+                "japanese": "この種類のファイルを一覧に表示します。",
+                "korean": "이 형식의 파일을 목록에 표시합니다.",
+                "chinese-simplified": "在列表中显示此类型的文件。",
+            },
+            "tip_creator_url": {
+                "english": "Paste a creator link (…/service/user/ID), then press Add to Queue.",
+                "japanese": "クリエイターのリンク（…/サービス/user/ID）を貼り付けて「キューに追加」を押します。",
+                "korean": "크리에이터 링크(…/서비스/user/ID)를 붙여 넣고 '대기열에 추가'를 누르세요.",
+                "chinese-simplified": "粘贴创作者链接（…/服务/user/ID），然后点击“添加到队列”。",
+            },
+            "tip_main_file": {
+                "english": "Download each post's main file.",
+                "japanese": "各投稿のメインファイルをダウンロードします。",
+                "korean": "각 게시물의 메인 파일을 다운로드합니다.",
+                "chinese-simplified": "下载每个投稿的主要文件。",
+            },
+            "tip_attachments": {
+                "english": "Download each post's attachments.",
+                "japanese": "各投稿の添付ファイルをダウンロードします。",
+                "korean": "각 게시물의 첨부 파일을 다운로드합니다.",
+                "chinese-simplified": "下载每个投稿的附件。",
+            },
+            "tip_content_images": {
+                "english": "Download the images placed inside each post's text.",
+                "japanese": "各投稿の本文中にある画像をダウンロードします。",
+                "korean": "각 게시물 본문 안에 있는 이미지를 다운로드합니다.",
+                "chinese-simplified": "下载每个投稿正文中的图片。",
+            },
+            "tip_file_extension": {
+                "english": "Download files of this type.",
+                "japanese": "この種類のファイルをダウンロードします。",
+                "korean": "이 형식의 파일을 다운로드합니다.",
+                "chinese-simplified": "下载此类型的文件。",
+            },
+            "tip_search_posts": {
+                "english": "Show only posts whose title contains this text.",
+                "japanese": "タイトルにこの文字を含む投稿だけを表示します。",
+                "korean": "제목에 이 텍스트가 들어간 게시물만 표시합니다.",
+                "chinese-simplified": "只显示标题中包含此文本的投稿。",
+            },
+            "tip_check_all_all": {
+                "english": "Tick or untick every post on every page.",
+                "japanese": "全ページのすべての投稿をチェック、またはチェックを外します。",
+                "korean": "모든 페이지의 게시물을 모두 선택하거나 해제합니다.",
+                "chinese-simplified": "勾选或取消勾选所有页面上的全部投稿。",
+            },
+            "tip_prev_page": {
+                "english": "Previous page",
+                "japanese": "前のページ",
+                "korean": "이전 페이지",
+                "chinese-simplified": "上一页",
+            },
+            "tip_next_page": {
+                "english": "Next page",
+                "japanese": "次のページ",
+                "korean": "다음 페이지",
+                "chinese-simplified": "下一页",
+            },
+            "tip_preview_post": {
+                "english": "Preview the selected post's thumbnail.",
+                "japanese": "選択した投稿のサムネイルをプレビューします。",
+                "korean": "선택한 게시물의 썸네일을 미리 봅니다.",
+                "chinese-simplified": "预览选中投稿的缩略图。",
+            },
+            "tip_thumb_mode": {
+                "english": "Post: add post links. Creator: add creator links to get the thumbnail of every post.",
+                "japanese": "投稿：投稿リンクを追加します。クリエイター：クリエイターのリンクを追加し、すべての投稿のサムネイルを取得します。",
+                "korean": "포스트: 게시물 링크를 추가합니다. 크리에이터: 크리에이터 링크를 추가해 모든 게시물의 썸네일을 받습니다.",
+                "chinese-simplified": "帖子：添加投稿链接。创作者：添加创作者链接，获取其每个投稿的缩略图。",
+            },
+            "tip_thumb_url": {
+                "english": "Paste a post or creator link that matches the download mode.",
+                "japanese": "ダウンロードモードに合った投稿またはクリエイターのリンクを貼り付けます。",
+                "korean": "다운로드 모드에 맞는 게시물 또는 크리에이터 링크를 붙여 넣으세요.",
+                "chinese-simplified": "粘贴与下载模式相符的投稿或创作者链接。",
+            },
+            "tip_remove_selected": {
+                "english": "Remove the selected links from the queue.",
+                "japanese": "選択したリンクをキューから削除します。",
+                "korean": "선택한 링크를 대기열에서 삭제합니다.",
+                "chinese-simplified": "将选中的链接从队列中移除。",
+            },
+            "tip_clear_queue": {
+                "english": "Remove every link from the queue.",
+                "japanese": "キューからすべてのリンクを削除します。",
+                "korean": "대기열의 링크를 모두 삭제합니다.",
+                "chinese-simplified": "清空队列中的所有链接。",
+            },
+            "tip_detect_thumbnails": {
+                "english": "Find the thumbnails of the queued links.",
+                "japanese": "キュー内のリンクのサムネイルを探します。",
+                "korean": "대기열에 있는 링크의 썸네일을 찾습니다.",
+                "chinese-simplified": "查找队列中链接的缩略图。",
+            },
+            "tip_thumb_threads": {
+                "english": "How many thumbnails download at the same time.",
+                "japanese": "同時にダウンロードするサムネイルの数です。",
+                "korean": "동시에 다운로드할 썸네일 수입니다.",
+                "chinese-simplified": "同时下载的缩略图数量。",
+            },
+            "tip_skip_existing": {
+                "english": "Keep thumbnails you already have instead of downloading them again.",
+                "japanese": "既にあるサムネイルは、もう一度ダウンロードせずにそのままにします。",
+                "korean": "이미 있는 썸네일은 다시 받지 않고 그대로 둡니다.",
+                "chinese-simplified": "保留已有的缩略图，不再重新下载。",
+            },
+            "tip_filter_thumbnails": {
+                "english": "Show only thumbnails whose name contains this text.",
+                "japanese": "名前にこの文字を含むサムネイルだけを表示します。",
+                "korean": "이름에 이 텍스트가 들어간 썸네일만 표시합니다.",
+                "chinese-simplified": "只显示名称中包含此文本的缩略图。",
+            },
+            "tip_folder_name": {
+                "english": "The folder that holds everything, inside the save directory.",
+                "japanese": "保存ディレクトリ内に作られる、すべてを入れるフォルダです。",
+                "korean": "저장 디렉토리 안에 만들어지는, 모든 데이터를 담는 폴더입니다.",
+                "chinese-simplified": "保存目录中存放所有内容的文件夹。",
+            },
+            "tip_save_directory": {
+                "english": "Where the app's folder is created.",
+                "japanese": "アプリのフォルダを作成する場所です。",
+                "korean": "앱 폴더가 만들어지는 위치입니다.",
+                "chinese-simplified": "应用文件夹的创建位置。",
+            },
+            "tip_browse_directory": {
+                "english": "Choose the save directory.",
+                "japanese": "保存ディレクトリを選びます。",
+                "korean": "저장 디렉토리를 고릅니다.",
+                "chinese-simplified": "选择保存目录。",
+            },
+            "tip_open_directory": {
+                "english": "Open the app's folder in your file manager.",
+                "japanese": "アプリのフォルダをファイルマネージャーで開きます。",
+                "korean": "앱 폴더를 파일 관리자에서 엽니다.",
+                "chinese-simplified": "在文件管理器中打开应用文件夹。",
+            },
+            "tip_simultaneous_downloads": {
+                "english": "How many files download at once (1–20).",
+                "japanese": "同時にダウンロードするファイル数（1〜20）です。",
+                "korean": "동시에 다운로드할 파일 수(1~20)입니다.",
+                "chinese-simplified": "同时下载的文件数量（1–20）。",
+            },
+            "tip_creator_posts_attempts": {
+                "english": "Most requests made while loading a creator's post list, read 50 posts at a time.",
+                "japanese": "クリエイターの投稿一覧（50 件ずつ）を読み込むときのリクエスト数の上限です。",
+                "korean": "크리에이터의 게시물 목록(한 번에 50개)을 불러올 때의 최대 요청 수입니다.",
+                "chinese-simplified": "加载创作者投稿列表（每次 50 个）时的最大请求次数。",
+            },
+            "tip_post_data_retries": {
+                "english": "How many times to retry loading a post's details.",
+                "japanese": "投稿の詳細の読み込みを再試行する回数です。",
+                "korean": "게시물 상세 정보 불러오기를 다시 시도하는 횟수입니다.",
+                "chinese-simplified": "重试加载投稿详情的次数。",
+            },
+            "tip_file_retries": {
+                "english": "How many times to retry each file before giving up.",
+                "japanese": "各ファイルをあきらめる前に再試行する回数です。",
+                "korean": "각 파일을 포기하기 전에 다시 시도하는 횟수입니다.",
+                "chinese-simplified": "放弃每个文件之前的重试次数。",
+            },
+            "tip_api_retries": {
+                "english": "How many times to retry link checks and other site requests.",
+                "japanese": "リンクの確認など、サイトへのその他のリクエストを再試行する回数です。",
+                "korean": "링크 확인 등 사이트에 대한 기타 요청을 다시 시도하는 횟수입니다.",
+                "chinese-simplified": "重试链接检查和其他网站请求的次数。",
+            },
+            "tip_filename_template": {
+                "english": "How files from the Creator tab are named. Pick a preset or type your own.",
+                "japanese": "クリエイタータブのファイルの名前の付け方です。プリセットを選ぶか、独自に入力します。",
+                "korean": "크리에이터 탭 파일의 이름 규칙입니다. 미리 정의된 것을 고르거나 직접 입력하세요.",
+                "chinese-simplified": "创作者选项卡中文件的命名方式。可选择预设或自行输入。",
+            },
+            "tip_folder_strategy": {
+                "english": "How files from the Creator tab are arranged in folders.",
+                "japanese": "クリエイタータブのファイルをフォルダにどう分けるかです。",
+                "korean": "크리에이터 탭 파일을 폴더에 어떻게 나눌지 정합니다.",
+                "chinese-simplified": "创作者选项卡中的文件如何分文件夹存放。",
+            },
+            "tip_auto_update": {
+                "english": "Check GitHub for a newer version when the app starts.",
+                "japanese": "起動時に GitHub で新しいバージョンを確認します。",
+                "korean": "앱을 시작할 때 GitHub에서 새 버전을 확인합니다.",
+                "chinese-simplified": "启动时在 GitHub 上检查新版本。",
+            },
+            "tip_log_debug": {
+                "english": "Technical details, mostly useful when reporting a problem.",
+                "japanese": "技術的な詳細です。主に問題を報告するときに役立ちます。",
+                "korean": "기술적인 세부 정보로, 주로 문제를 보고할 때 유용합니다.",
+                "chinese-simplified": "技术细节，主要在报告问题时有用。",
+            },
+            "tip_log_info": {
+                "english": "What the app is doing: links checked, files downloaded.",
+                "japanese": "アプリの動作：確認したリンク、ダウンロードしたファイルなど。",
+                "korean": "앱이 하는 일: 확인한 링크, 다운로드한 파일 등.",
+                "chinese-simplified": "应用正在做的事：检查的链接、下载的文件等。",
+            },
+            "tip_log_warning": {
+                "english": "Things worth knowing that didn't stop the download, such as skipped files.",
+                "japanese": "スキップしたファイルなど、ダウンロードは止まらなかったが知っておくべきことです。",
+                "korean": "건너뛴 파일처럼 다운로드를 멈추지는 않았지만 알아 둘 만한 일입니다.",
+                "chinese-simplified": "值得注意但没有中断下载的情况，例如被跳过的文件。",
+            },
+            "tip_log_error": {
+                "english": "Things that failed.",
+                "japanese": "失敗したことです。",
+                "korean": "실패한 일입니다.",
+                "chinese-simplified": "失败的操作。",
+            },
+            "tip_language": {
+                "english": "The language of the whole app.",
+                "japanese": "アプリ全体の言語です。",
+                "korean": "앱 전체의 언어입니다.",
+                "chinese-simplified": "整个应用的语言。",
+            },
+            "tip_font": {
+                "english": "The font of the whole app.",
+                "japanese": "アプリ全体のフォントです。",
+                "korean": "앱 전체의 글꼴입니다.",
+                "chinese-simplified": "整个应用的字体。",
+            },
+            "tip_theme": {
+                "english": "The colours of the whole app. Applies straight away.",
+                "japanese": "アプリ全体の配色です。すぐに反映されます。",
+                "korean": "앱 전체의 색상입니다. 바로 적용됩니다.",
+                "chinese-simplified": "整个应用的配色。立即生效。",
+            },
+            "tip_use_proxy": {
+                "english": "Send downloads through a proxy or Tor. Saved straight away.",
+                "japanese": "ダウンロードをプロキシまたは Tor 経由にします。すぐに保存されます。",
+                "korean": "다운로드를 프록시나 Tor를 통해 보냅니다. 바로 저장됩니다.",
+                "chinese-simplified": "通过代理或 Tor 进行下载。设置会立即保存。",
+            },
+            "tip_proxy_type": {
+                "english": "Your own proxy server, or the Tor network.",
+                "japanese": "自分のプロキシサーバー、または Tor ネットワークです。",
+                "korean": "직접 지정한 프록시 서버 또는 Tor 네트워크입니다.",
+                "chinese-simplified": "你自己的代理服务器，或 Tor 网络。",
+            },
+            "tip_custom_proxy": {
+                "english": "The proxy's address, such as 127.0.0.1:8080.",
+                "japanese": "プロキシのアドレスです（例：127.0.0.1:8080）。",
+                "korean": "프록시 주소입니다(예: 127.0.0.1:8080).",
+                "chinese-simplified": "代理地址，例如 127.0.0.1:8080。",
+            },
+            "tip_test_proxy": {
+                "english": "Check that the proxy works.",
+                "japanese": "プロキシが使えるか確認します。",
+                "korean": "프록시가 작동하는지 확인합니다.",
+                "chinese-simplified": "检查代理是否可用。",
+            },
+            "tip_tor_path": {
+                "english": "The Tor program the app starts.",
+                "japanese": "アプリが起動する Tor のプログラムです。",
+                "korean": "앱이 실행하는 Tor 프로그램입니다.",
+                "chinese-simplified": "应用启动的 Tor 程序。",
+            },
+            "tip_browse_tor": {
+                "english": "Choose a Tor program you already have.",
+                "japanese": "手持ちの Tor のプログラムを選びます。",
+                "korean": "이미 있는 Tor 프로그램을 고릅니다.",
+                "chinese-simplified": "选择你已有的 Tor 程序。",
+            },
+            "tip_download_tor": {
+                "english": "Download the official Tor Expert Bundle and check it against Tor's checksum.",
+                "japanese": "公式の Tor Expert Bundle をダウンロードし、Tor のチェックサムと照合します。",
+                "korean": "공식 Tor Expert Bundle을 받아 Tor의 체크섬과 대조합니다.",
+                "chinese-simplified": "下载官方 Tor Expert Bundle，并与 Tor 的校验和核对。",
+            },
+            "tip_start_tor": {
+                "english": "Start Tor. Wait for Running before downloading.",
+                "japanese": "Tor を開始します。ダウンロードの前に「実行中」になるまで待ってください。",
+                "korean": "Tor를 시작합니다. 다운로드하기 전에 '실행 중'이 될 때까지 기다리세요.",
+                "chinese-simplified": "启动 Tor。下载前请等待状态变为“运行中”。",
+            },
+            "tip_stop_tor": {
+                "english": "Stop the Tor process the app started.",
+                "japanese": "アプリが起動した Tor を停止します。",
+                "korean": "앱이 실행한 Tor를 중지합니다.",
+                "chinese-simplified": "停止应用启动的 Tor 进程。",
+            },
+            "tip_test_tor": {
+                "english": "Check that downloads can go through Tor.",
+                "japanese": "ダウンロードが Tor を経由できるか確認します。",
+                "korean": "다운로드가 Tor를 거칠 수 있는지 확인합니다.",
+                "chinese-simplified": "检查下载能否通过 Tor 进行。",
+            },
+            "tip_tor_help": {
+                "english": "How to set up Tor, step by step.",
+                "japanese": "Tor の設定方法を順番に説明します。",
+                "korean": "Tor 설정 방법을 단계별로 안내합니다.",
+                "chinese-simplified": "分步说明如何设置 Tor。",
+            },
+            "tip_apply_changes": {
+                "english": "Save the changes. You'll be asked to confirm.",
+                "japanese": "変更を保存します。確認が表示されます。",
+                "korean": "변경 사항을 저장합니다. 확인을 묻습니다.",
+                "chinese-simplified": "保存更改。会先请你确认。",
+            },
+            "tip_reset_defaults": {
+                "english": "Fill in the default values. Press Apply Changes to keep them.",
+                "japanese": "初期値を入力します。反映するには「変更を適用」を押してください。",
+                "korean": "기본값을 채워 넣습니다. 유지하려면 '변경 적용'을 누르세요.",
+                "chinese-simplified": "填入默认值。点击“应用更改”后才会保留。",
+            },
+            "tip_history_search": {
+                "english": "Search by title, link or creator.",
+                "japanese": "タイトル、リンク、クリエイターで検索します。",
+                "korean": "제목, 링크, 크리에이터로 검색합니다.",
+                "chinese-simplified": "按标题、链接或创作者搜索。",
+            },
+            "tip_history_kind": {
+                "english": "Show one kind of download only.",
+                "japanese": "1 種類のダウンロードだけを表示します。",
+                "korean": "한 종류의 다운로드만 표시합니다.",
+                "chinese-simplified": "只显示一种类型的下载。",
+            },
+            "tip_history_record": {
+                "english": "Turn off to stop recording finished downloads.",
+                "japanese": "オフにすると、完了したダウンロードを記録しなくなります。",
+                "korean": "끄면 완료된 다운로드를 기록하지 않습니다.",
+                "chinese-simplified": "关闭后不再记录已完成的下载。",
+            },
+            "tip_history_open_folder": {
+                "english": "Open the folder of the selected download.",
+                "japanese": "選択したダウンロードのフォルダーを開きます。",
+                "korean": "선택한 다운로드의 폴더를 엽니다.",
+                "chinese-simplified": "打开选中下载的文件夹。",
+            },
+            "tip_history_copy": {
+                "english": "Copy the links of the selected rows.",
+                "japanese": "選択した行のリンクをコピーします。",
+                "korean": "선택한 행의 링크를 복사합니다.",
+                "chinese-simplified": "复制选中行的链接。",
+            },
+            "tip_history_queue": {
+                "english": "Add the selected links to the matching downloader tab.",
+                "japanese": "選択したリンクを、対応するダウンローダータブに追加します。",
+                "korean": "선택한 링크를 알맞은 다운로더 탭에 추가합니다.",
+                "chinese-simplified": "把选中的链接添加到对应的下载器选项卡。",
+            },
+            "tip_history_favorite": {
+                "english": "Save the selected links to Favorites.",
+                "japanese": "選択したリンクをお気に入りに保存します。",
+                "korean": "선택한 링크를 즐겨찾기에 저장합니다.",
+                "chinese-simplified": "把选中的链接保存到收藏夹。",
+            },
+            "tip_history_export": {
+                "english": "Save the history as a CSV file for a spreadsheet.",
+                "japanese": "履歴を表計算ソフト用の CSV ファイルとして保存します。",
+                "korean": "기록을 스프레드시트용 CSV 파일로 저장합니다.",
+                "chinese-simplified": "把历史记录保存为表格用的 CSV 文件。",
+            },
+            "tip_history_remove": {
+                "english": "Remove the selected records. Your files stay.",
+                "japanese": "選択した記録を削除します。ファイルは残ります。",
+                "korean": "선택한 기록을 삭제합니다. 파일은 그대로 남습니다.",
+                "chinese-simplified": "删除选中的记录。你的文件会保留。",
+            },
+            "tip_history_clear": {
+                "english": "Remove every record. Your files stay.",
+                "japanese": "すべての記録を削除します。ファイルは残ります。",
+                "korean": "모든 기록을 삭제합니다. 파일은 그대로 남습니다.",
+                "chinese-simplified": "删除所有记录。你的文件会保留。",
+            },
+            "tip_favorite_input": {
+                "english": "Paste a link to save it to Favorites.",
+                "japanese": "リンクを貼り付けてお気に入りに保存します。",
+                "korean": "링크를 붙여 넣어 즐겨찾기에 저장합니다.",
+                "chinese-simplified": "粘贴链接以保存到收藏夹。",
+            },
+            "tip_favorite_save": {
+                "english": "Save the link in the box to Favorites.",
+                "japanese": "入力欄のリンクをお気に入りに保存します。",
+                "korean": "입력란의 링크를 즐겨찾기에 저장합니다.",
+                "chinese-simplified": "把输入框中的链接保存到收藏夹。",
+            },
+            "tip_favorites_search": {
+                "english": "Search your favorites.",
+                "japanese": "お気に入りを検索します。",
+                "korean": "즐겨찾기를 검색합니다.",
+                "chinese-simplified": "搜索收藏夹。",
+            },
+            "tip_favorites_open": {
+                "english": "Open the selected links in your browser.",
+                "japanese": "選択したリンクをブラウザで開きます。",
+                "korean": "선택한 링크를 브라우저에서 엽니다.",
+                "chinese-simplified": "在浏览器中打开选中的链接。",
+            },
+            "tip_favorites_import": {
+                "english": "Add links from a .txt file, one per line.",
+                "japanese": "1 行に 1 リンクの .txt ファイルからリンクを追加します。",
+                "korean": "한 줄에 링크 하나씩 적힌 .txt 파일에서 링크를 추가합니다.",
+                "chinese-simplified": "从每行一个链接的 .txt 文件中添加链接。",
+            },
+            "tip_favorites_export": {
+                "english": "Save every favorite link to a .txt file.",
+                "japanese": "お気に入りのリンクをすべて .txt ファイルに保存します。",
+                "korean": "모든 즐겨찾기 링크를 .txt 파일로 저장합니다.",
+                "chinese-simplified": "把所有收藏的链接保存到 .txt 文件。",
+            },
+            "tip_logs_search": {
+                "english": "Ctrl+F. Enter finds the next match, Shift+Enter the previous one.",
+                "japanese": "Ctrl+F。Enter で次、Shift+Enter で前の一致を探します。",
+                "korean": "Ctrl+F. Enter는 다음, Shift+Enter는 이전 결과를 찾습니다.",
+                "chinese-simplified": "Ctrl+F。Enter 查找下一个，Shift+Enter 查找上一个。",
+            },
+            "tip_copy_logs": {
+                "english": "Copy every line to the clipboard.",
+                "japanese": "すべての行をクリップボードにコピーします。",
+                "korean": "모든 줄을 클립보드에 복사합니다.",
+                "chinese-simplified": "把所有行复制到剪贴板。",
+            },
+            "tip_save_logs": {
+                "english": "Save the log as a .txt file.",
+                "japanese": "ログを .txt ファイルとして保存します。",
+                "korean": "로그를 .txt 파일로 저장합니다.",
+                "chinese-simplified": "把日志保存为 .txt 文件。",
+            },
+            "tip_clear_logs": {
+                "english": "Clear this log and the tab's console.",
+                "japanese": "このログとタブのコンソールを消去します。",
+                "korean": "이 로그와 탭의 콘솔을 지웁니다.",
+                "chinese-simplified": "清除此日志和选项卡的控制台。",
+            },
+            "tip_help_search": {
+                "english": "Search every topic of the guide.",
+                "japanese": "ガイドのすべてのトピックを検索します。",
+                "korean": "안내서의 모든 주제를 검색합니다.",
+                "chinese-simplified": "搜索指南中的所有主题。",
+            },
+            "tip_open_releases": {
+                "english": "Open the GitHub release page in your browser.",
+                "japanese": "GitHub のリリースページをブラウザで開きます。",
+                "korean": "GitHub 릴리스 페이지를 브라우저에서 엽니다.",
+                "chinese-simplified": "在浏览器中打开 GitHub 发布页面。",
+            },
+            "tip_open_extension_folder": {
+                "english": "Open the extension's folder on GitHub in your browser.",
+                "japanese": "GitHub 上の拡張機能フォルダをブラウザで開きます。",
+                "korean": "GitHub의 확장 프로그램 폴더를 브라우저에서 엽니다.",
+                "chinese-simplified": "在浏览器中打开 GitHub 上的扩展文件夹。",
+            },
+            "tip_copy_command": {
+                "english": "Copy this command.",
+                "japanese": "このコマンドをコピーします。",
+                "korean": "이 명령을 복사합니다.",
+                "chinese-simplified": "复制此命令。",
+            },
+            "appearance_settings": {
+                "english": "Appearance",
+                "japanese": "外観",
+                "korean": "모양",
+                "chinese-simplified": "外观",
+            },
+            "theme_label": {
+                "english": "Theme:",
+                "japanese": "テーマ:",
+                "korean": "테마:",
+                "chinese-simplified": "主题:",
+            },
+            "theme_midnight": {
+                "english": "Midnight (default)",
+                "japanese": "ミッドナイト（デフォルト）",
+                "korean": "미드나이트(기본)",
+                "chinese-simplified": "午夜（默认）",
+            },
+            "theme_graphite": {
+                "english": "Graphite",
+                "japanese": "グラファイト",
+                "korean": "그래파이트",
+                "chinese-simplified": "石墨",
+            },
+            "theme_plum": {
+                "english": "Plum",
+                "japanese": "プラム",
+                "korean": "플럼",
+                "chinese-simplified": "梅紫",
+            },
+            "theme_forest": {
+                "english": "Forest",
+                "japanese": "フォレスト",
+                "korean": "포레스트",
+                "chinese-simplified": "森林",
+            },
+            "theme_ember": {
+                "english": "Ember",
+                "japanese": "エンバー",
+                "korean": "엠버",
+                "chinese-simplified": "余烬",
+            },
+            "note_appearance_settings": {
+                "english": "The colour theme of the whole app. It changes straight away, so you can try each one.",
+                "japanese": "アプリ全体の配色テーマです。すぐに切り替わるので、それぞれ試せます。",
+                "korean": "앱 전체의 색상 테마입니다. 바로 바뀌므로 하나씩 써 볼 수 있습니다.",
+                "chinese-simplified": "整个应用的配色主题。会立即切换，你可以逐个试用。",
+            },
+            # Help guide, section notes and the Browser Extension tab
+            "log_settings": {
+                "english": "Log Settings",
+                "japanese": "ログ設定",
+                "korean": "로그 설정",
+                "chinese-simplified": "日志设置",
+            },
+            "log_level_debug": {
+                "english": "Debug details",
+                "japanese": "デバッグ情報",
+                "korean": "디버그 정보",
+                "chinese-simplified": "调试信息",
+            },
+            "log_level_info": {
+                "english": "Progress and info",
+                "japanese": "進行状況と情報",
+                "korean": "진행 상황과 정보",
+                "chinese-simplified": "进度和信息",
+            },
+            "log_level_warning": {
+                "english": "Warnings",
+                "japanese": "警告",
+                "korean": "경고",
+                "chinese-simplified": "警告",
+            },
+            "log_level_error": {
+                "english": "Errors",
+                "japanese": "エラー",
+                "korean": "오류",
+                "chinese-simplified": "错误",
+            },
+            "note_log_settings": {
+                "english": "Which messages the consoles and the full logs show. Debug details are technical messages, mostly useful when reporting a problem. Saved straight away; applies to new messages.",
+                "japanese": "コンソールと全ログに表示するメッセージの種類です。デバッグ情報は技術的なメッセージで、主に問題を報告するときに役立ちます。すぐに保存され、新しいメッセージから反映されます。",
+                "korean": "콘솔과 전체 로그에 표시할 메시지 종류입니다. 디버그 정보는 기술적인 메시지로, 주로 문제를 보고할 때 유용합니다. 바로 저장되며 새 메시지부터 적용됩니다.",
+                "chinese-simplified": "控制台和完整日志中显示哪些消息。调试信息是技术性消息，主要在报告问题时有用。设置会立即保存，并对新消息生效。",
+            },
+            "note_folder_settings": {
+                "english": "Everything is kept in Save Directory › Folder Name: your files in Downloads, preview images in Cache, and the history and the record of downloaded files in Other Files.",
+                "japanese": "すべては「保存ディレクトリ › フォルダ名」に保存されます。ファイルは Downloads、プレビュー画像は Cache、履歴とダウンロード済みファイルの記録は Other Files に入ります。",
+                "korean": "모든 데이터는 '저장 디렉토리 › 폴더 이름'에 보관됩니다. 파일은 Downloads, 미리보기 이미지는 Cache, 기록과 다운로드한 파일 목록은 Other Files에 저장됩니다.",
+                "chinese-simplified": "所有内容都保存在“保存目录 › 文件夹名称”中：下载的文件在 Downloads，预览图在 Cache，历史记录和已下载文件的记录在 Other Files。",
+            },
+            "note_download_settings": {
+                "english": "How many files download at the same time. More is faster but uses more bandwidth; Pawchive is always limited to five at a time; the info button explains why.",
+                "japanese": "同時にダウンロードするファイル数です。多いほど速くなりますが、通信量も増えます。Pawchive は常に同時 5 件までに制限されます（理由は情報ボタンで確認できます）。",
+                "korean": "동시에 다운로드할 파일 수입니다. 많을수록 빠르지만 대역폭을 더 사용합니다. Pawchive는 항상 동시에 5개로 제한됩니다(이유는 정보 버튼에서 확인하세요).",
+                "chinese-simplified": "同时下载的文件数量。越多越快，但占用的带宽也越多；Pawchive 始终限制为同时 5 个（原因见信息按钮）。",
+            },
+            "note_retry_settings": {
+                "english": "How many times the app tries again before giving up. Raise these on an unreliable connection; lower them to give up sooner.",
+                "japanese": "あきらめる前に再試行する回数です。接続が不安定なときは増やし、早めにあきらめたいときは減らしてください。",
+                "korean": "포기하기 전에 다시 시도하는 횟수입니다. 연결이 불안정하면 늘리고, 더 빨리 포기하려면 줄이세요.",
+                "chinese-simplified": "放弃之前重试的次数。网络不稳定时可以调高，想更快放弃时可以调低。",
+            },
+            "note_creator_settings": {
+                "english": "How files from the Creator tab are named and arranged. Press ? for the placeholders a template can use.",
+                "japanese": "クリエイタータブでダウンロードしたファイルの名前と配置です。テンプレートで使えるプレースホルダーは ? で確認できます。",
+                "korean": "크리에이터 탭에서 받은 파일의 이름과 배치 방식입니다. 템플릿에 쓸 수 있는 자리 표시자는 ? 버튼에서 확인하세요.",
+                "chinese-simplified": "创作者选项卡下载的文件的命名和存放方式。按 ? 查看模板可用的占位符。",
+            },
+            "note_update_settings": {
+                "english": "Checks GitHub for a newer version when the app starts and tells you about it. Nothing is installed automatically.",
+                "japanese": "起動時に GitHub で新しいバージョンを確認し、あればお知らせします。自動でインストールされることはありません。",
+                "korean": "앱을 시작할 때 GitHub에서 새 버전을 확인하고 알려 줍니다. 자동으로 설치되지는 않습니다.",
+                "chinese-simplified": "启动时在 GitHub 上检查是否有新版本并通知你。不会自动安装任何内容。",
+            },
+            "note_language_settings": {
+                "english": "The language of the whole app, including the Help guide. Applies after Apply Changes.",
+                "japanese": "ヘルプのガイドを含む、アプリ全体の言語です。「変更を適用」の後に反映されます。",
+                "korean": "도움말 안내를 포함한 앱 전체의 언어입니다. '변경 적용'을 누르면 반영됩니다.",
+                "chinese-simplified": "整个应用（包括帮助指南）的语言。点击“应用更改”后生效。",
+            },
+            "note_font_settings": {
+                "english": "The font for the whole app, logs included. Applies after Apply Changes.",
+                "japanese": "ログを含む、アプリ全体のフォントです。「変更を適用」の後に反映されます。",
+                "korean": "로그를 포함한 앱 전체의 글꼴입니다. '변경 적용'을 누르면 반영됩니다.",
+                "chinese-simplified": "整个应用（包括日志）的字体。点击“应用更改”后生效。",
+            },
+            "note_post_queue": {
+                "english": "Add post links here, one at a time or from a .txt file. Press the eye button on a post to list its files on the right.",
+                "japanese": "投稿リンクを 1 件ずつ、または .txt ファイルから追加します。投稿の目のボタンを押すと、右側にファイルが一覧表示されます。",
+                "korean": "게시물 링크를 하나씩 또는 .txt 파일에서 추가하세요. 게시물의 눈 버튼을 누르면 오른쪽에 파일 목록이 표시됩니다.",
+                "chinese-simplified": "在这里逐个添加投稿链接，或从 .txt 文件导入。点击投稿上的眼睛按钮，右侧会列出其中的文件。",
+            },
+            "note_post_files": {
+                "english": "Tick the files to download, or tick Download All Links to take every file of every queued post. Select an image and press the eye button to preview it.",
+                "japanese": "ダウンロードするファイルにチェックを入れるか、「すべてのリンクをダウンロード」でキュー内のすべての投稿の全ファイルを取得します。画像を選んで目のボタンを押すとプレビューできます。",
+                "korean": "다운로드할 파일을 선택하거나, '모든 링크 다운로드'로 대기열에 있는 모든 게시물의 파일을 받으세요. 이미지를 선택하고 눈 버튼을 누르면 미리 볼 수 있습니다.",
+                "chinese-simplified": "勾选要下载的文件，或勾选“下载所有链接”下载队列中所有投稿的全部文件。选中图片后点击眼睛按钮即可预览。",
+            },
+            "note_creator_queue": {
+                "english": "Add creator links here, one at a time or from a .txt file. Press the eye button on a creator to list their posts on the right.",
+                "japanese": "クリエイターのリンクを 1 件ずつ、または .txt ファイルから追加します。クリエイターの目のボタンを押すと、右側に投稿が一覧表示されます。",
+                "korean": "크리에이터 링크를 하나씩 또는 .txt 파일에서 추가하세요. 크리에이터의 눈 버튼을 누르면 오른쪽에 게시물 목록이 표시됩니다.",
+                "chinese-simplified": "在这里逐个添加创作者链接，或从 .txt 文件导入。点击创作者上的眼睛按钮，右侧会列出其投稿。",
+            },
+            "note_creator_options": {
+                "english": "Choose what to take from each post, then the file types below. Fast Mode downloads everything from many links with fewer clicks; its info button explains it.",
+                "japanese": "各投稿から何を取得するかを選び、下でファイルの種類を選びます。高速モードでは、多くのリンクから少ない操作ですべてをダウンロードできます（詳しくは情報ボタンで）。",
+                "korean": "각 게시물에서 무엇을 받을지 고른 다음, 아래에서 파일 형식을 고르세요. 빠른 모드는 여러 링크의 모든 것을 적은 클릭으로 다운로드합니다(자세한 내용은 정보 버튼).",
+                "chinese-simplified": "选择要从每个投稿中获取的内容，再在下方选择文件类型。快速模式只需很少的操作，就能下载多个链接中的全部内容（详情见信息按钮）。",
+            },
+            "note_creator_posts": {
+                "english": "Tick the posts to download. Check ALL (Page) ticks this page and Check ALL (All) every page; the arrows change page.",
+                "japanese": "ダウンロードする投稿にチェックを入れます。「すべてチェック (ページ)」はこのページ、「すべてチェック (すべて)」は全ページが対象です。矢印でページを切り替えます。",
+                "korean": "다운로드할 게시물을 선택하세요. '모두 선택 (페이지)'는 이 페이지, '모두 선택 (모두)'는 모든 페이지를 선택합니다. 화살표로 페이지를 넘깁니다.",
+                "chinese-simplified": "勾选要下载的投稿。“全选 (页面)”勾选当前页，“全选 (全部)”勾选所有页；用箭头翻页。",
+            },
+            "note_thumb_mode": {
+                "english": "Post takes post links; Creator takes creator links and finds the thumbnail of every post.",
+                "japanese": "「投稿」は投稿リンク、「クリエイター」はクリエイターのリンクを受け付け、すべての投稿のサムネイルを探します。",
+                "korean": "'포스트'는 게시물 링크를, '크리에이터'는 크리에이터 링크를 받아 모든 게시물의 썸네일을 찾습니다.",
+                "chinese-simplified": "“帖子”使用投稿链接；“创作者”使用创作者链接，并查找其每个投稿的缩略图。",
+            },
+            "note_thumb_queue": {
+                "english": "Add links, then press Detect Thumbnails to find the images to download.",
+                "japanese": "リンクを追加してから「サムネイルを検出」を押すと、ダウンロードする画像が見つかります。",
+                "korean": "링크를 추가한 뒤 '썸네일 감지'를 눌러 다운로드할 이미지를 찾으세요.",
+                "chinese-simplified": "添加链接后点击“检测缩略图”，查找要下载的图片。",
+            },
+            "note_thumb_options": {
+                "english": "Thumbnails are saved in Downloads/Thumbnails. Skip existing files leaves thumbnails you already have alone.",
+                "japanese": "サムネイルは Downloads/Thumbnails に保存されます。「既存のファイルをスキップ」を使うと、既にあるサムネイルはそのままになります。",
+                "korean": "썸네일은 Downloads/Thumbnails에 저장됩니다. '기존 파일 건너뛰기'를 켜면 이미 있는 썸네일은 그대로 둡니다.",
+                "chinese-simplified": "缩略图保存在 Downloads/Thumbnails 中。勾选“跳过已存在的文件”后，已有的缩略图不会被覆盖。",
+            },
+            "note_thumb_list": {
+                "english": "Tick the thumbnails to save; the filter narrows the list and the eye button previews the selected one.",
+                "japanese": "保存するサムネイルにチェックを入れます。フィルターで一覧を絞り込み、目のボタンで選択中のサムネイルをプレビューできます。",
+                "korean": "저장할 썸네일을 선택하세요. 필터로 목록을 좁히고, 눈 버튼으로 선택한 썸네일을 미리 볼 수 있습니다.",
+                "chinese-simplified": "勾选要保存的缩略图；可用筛选框缩小列表，用眼睛按钮预览选中的缩略图。",
+            },
+            "note_history": {
+                "english": "Every finished download and where it was saved. Removing records never deletes your files.",
+                "japanese": "完了したすべてのダウンロードと保存先です。記録を削除しても、ファイルが削除されることはありません。",
+                "korean": "완료된 모든 다운로드와 저장 위치입니다. 기록을 삭제해도 파일은 삭제되지 않습니다.",
+                "chinese-simplified": "所有已完成的下载及其保存位置。删除记录绝不会删除你的文件。",
+            },
+            "note_favorites": {
+                "english": "Links you saved with ★. Double-click a row to add its link to the queue, or double-click a title or note to edit it.",
+                "japanese": "★ で保存したリンクです。行をダブルクリックするとキューに追加され、タイトルやメモをダブルクリックすると編集できます。",
+                "korean": "★로 저장한 링크입니다. 행을 더블클릭하면 대기열에 추가되고, 제목이나 메모를 더블클릭하면 편집할 수 있습니다.",
+                "chinese-simplified": "用 ★ 保存的链接。双击一行可将链接加入队列，双击标题或备注可进行编辑。",
+            },
+            "help_subtitle": {
+                "english": "Pick a topic, or search the whole guide.",
+                "japanese": "トピックを選ぶか、ガイド全体を検索してください。",
+                "korean": "주제를 고르거나 안내서 전체를 검색하세요.",
+                "chinese-simplified": "选择一个主题，或搜索整个指南。",
+            },
+            "help_search_placeholder": {
+                "english": "Search the guide…",
+                "japanese": "ガイドを検索…",
+                "korean": "안내서 검색…",
+                "chinese-simplified": "搜索指南…",
+            },
+            "help_previous": {
+                "english": "Previous",
+                "japanese": "前へ",
+                "korean": "이전",
+                "chinese-simplified": "上一页",
+            },
+            "help_next": {
+                "english": "Next",
+                "japanese": "次へ",
+                "korean": "다음",
+                "chinese-simplified": "下一页",
+            },
+            "help_no_results": {
+                "english": "No topic matches your search.",
+                "japanese": "検索に一致するトピックはありません。",
+                "korean": "검색과 일치하는 주제가 없습니다.",
+                "chinese-simplified": "没有与搜索内容匹配的主题。",
+            },
+            "guide_start_title": {
+                "english": "Getting Started",
+                "japanese": "はじめに",
+                "korean": "시작하기",
+                "chinese-simplified": "入门",
+            },
+            "guide_start_text": {
+                "english": "<p>Kemono Downloader saves posts and whole creator archives from <b>Kemono</b>, <b>Coomer</b> and <b>Pawchive</b> to your computer.</p><h3>Quick start</h3><ol><li>Copy a post link (…/user/123/post/456) or a creator link (…/user/123) from the site.</li><li>Paste it into the <b>Post Downloader</b> or <b>Creator Downloader</b> tab and press <b>Add to Queue</b>.</li><li>Press the eye button on the queued link to list its files or posts, and tick what you want.</li><li>Press <b>Download</b>. Progress and messages appear in the console.</li></ol><h3>The tabs</h3><ul><li><b>Post Downloader</b>: files from individual posts.</li><li><b>Creator Downloader</b>: posts from one or more creators.</li><li><b>Thumbnail Downloader</b>: only the preview images of posts.</li><li><b>History</b>: finished downloads and your favorite links.</li><li><b>Settings</b>: folders, speed, retries, naming, language, font, proxy and Tor.</li><li><b>Help</b>: this guide. Every section also starts with a short note, and most controls explain themselves when you hover over them.</li><li><b>Browser Extension</b>: a separate extension for downloading from your browser.</li></ul><h3>Where files go</h3><p>Everything is kept in one folder, set in Settings (Save Directory › Folder Name):</p><ul><li><b>Downloads</b>: your downloaded files (thumbnails go into Downloads/Thumbnails).</li><li><b>Cache</b>: temporary preview images.</li><li><b>Other Files</b>: the download history and the record of files already downloaded, so they are skipped next time.</li></ul>",
+                "japanese": "<p>Kemono Downloader は、<b>Kemono</b>・<b>Coomer</b>・<b>Pawchive</b> の投稿やクリエイターのアーカイブ全体をパソコンに保存するアプリです。</p><h3>クイックスタート</h3><ol><li>サイトから投稿リンク（…/user/123/post/456）またはクリエイターのリンク（…/user/123）をコピーします。</li><li><b>投稿ダウンローダー</b>または<b>クリエイターダウンローダー</b>タブに貼り付け、<b>キューに追加</b>を押します。</li><li>キュー内のリンクの目のボタンを押してファイルや投稿を一覧表示し、必要なものにチェックを入れます。</li><li><b>ダウンロード</b>を押します。進行状況とメッセージはコンソールに表示されます。</li></ol><h3>タブ</h3><ul><li><b>投稿ダウンローダー</b>：個別の投稿のファイル。</li><li><b>クリエイターダウンローダー</b>：1 人以上のクリエイターの投稿。</li><li><b>サムネイルダウンローダー</b>：投稿のプレビュー画像だけ。</li><li><b>履歴</b>：完了したダウンロードとお気に入りのリンク。</li><li><b>設定</b>：フォルダ、速度、リトライ、名前の付け方、言語、フォント、プロキシと Tor。</li><li><b>ヘルプ</b>：このガイド。各セクションの先頭には短い説明があり、ほとんどの操作部品はカーソルを合わせると説明が表示されます。</li><li><b>ブラウザ拡張機能</b>：ブラウザからダウンロードするための別の拡張機能。</li></ul><h3>ファイルの保存先</h3><p>すべては設定で指定した 1 つのフォルダ（保存ディレクトリ › フォルダ名）に保存されます。</p><ul><li><b>Downloads</b>：ダウンロードしたファイル（サムネイルは Downloads/Thumbnails）。</li><li><b>Cache</b>：一時的なプレビュー画像。</li><li><b>Other Files</b>：ダウンロード履歴と、ダウンロード済みファイルの記録（次回はスキップされます）。</li></ul>",
+                "korean": "<p>Kemono Downloader는 <b>Kemono</b>, <b>Coomer</b>, <b>Pawchive</b>의 게시물과 크리에이터 아카이브 전체를 컴퓨터에 저장하는 앱입니다.</p><h3>빠른 시작</h3><ol><li>사이트에서 게시물 링크(…/user/123/post/456)나 크리에이터 링크(…/user/123)를 복사합니다.</li><li><b>게시물 다운로더</b> 또는 <b>크리에이터 다운로더</b> 탭에 붙여 넣고 <b>대기열에 추가</b>를 누릅니다.</li><li>대기열에 있는 링크의 눈 버튼을 눌러 파일이나 게시물 목록을 보고, 원하는 항목을 선택합니다.</li><li><b>다운로드</b>를 누릅니다. 진행 상황과 메시지는 콘솔에 표시됩니다.</li></ol><h3>탭 안내</h3><ul><li><b>게시물 다운로더</b>: 개별 게시물의 파일.</li><li><b>크리에이터 다운로더</b>: 한 명 이상의 크리에이터의 게시물.</li><li><b>썸네일 다운로더</b>: 게시물의 미리보기 이미지만.</li><li><b>기록</b>: 완료된 다운로드와 즐겨찾기 링크.</li><li><b>설정</b>: 폴더, 속도, 재시도, 이름 규칙, 언어, 글꼴, 프록시와 Tor.</li><li><b>도움말</b>: 이 안내서. 각 섹션 맨 위에는 짧은 설명이 있고, 대부분의 컨트롤은 마우스를 올리면 설명이 표시됩니다.</li><li><b>브라우저 확장</b>: 브라우저에서 다운로드하기 위한 별도의 확장 프로그램.</li></ul><h3>파일 저장 위치</h3><p>모든 데이터는 설정에서 지정한 하나의 폴더(저장 디렉토리 › 폴더 이름)에 보관됩니다.</p><ul><li><b>Downloads</b>: 다운로드한 파일(썸네일은 Downloads/Thumbnails).</li><li><b>Cache</b>: 임시 미리보기 이미지.</li><li><b>Other Files</b>: 다운로드 기록과 이미 받은 파일 목록(다음에는 건너뜁니다).</li></ul>",
+                "chinese-simplified": "<p>Kemono Downloader 可以把 <b>Kemono</b>、<b>Coomer</b> 和 <b>Pawchive</b> 上的投稿以及创作者的全部存档保存到你的电脑。</p><h3>快速开始</h3><ol><li>从网站复制投稿链接（…/user/123/post/456）或创作者链接（…/user/123）。</li><li>粘贴到<b>投稿下载器</b>或<b>创作者下载器</b>选项卡，然后点击<b>添加到队列</b>。</li><li>点击队列中链接的眼睛按钮，列出其中的文件或投稿，并勾选你需要的内容。</li><li>点击<b>下载</b>。进度和消息会显示在控制台中。</li></ol><h3>各个选项卡</h3><ul><li><b>投稿下载器</b>：单个投稿中的文件。</li><li><b>创作者下载器</b>：一个或多个创作者的投稿。</li><li><b>缩略图下载器</b>：只下载投稿的预览图。</li><li><b>历史记录</b>：已完成的下载和收藏的链接。</li><li><b>设置</b>：文件夹、速度、重试、命名、语言、字体、代理和 Tor。</li><li><b>帮助</b>：本指南。每个区域顶部还有简短说明，大多数控件在鼠标悬停时也会显示说明。</li><li><b>浏览器扩展</b>：一个独立的浏览器扩展，用于在浏览器中下载。</li></ul><h3>文件保存位置</h3><p>所有内容都保存在设置中指定的一个文件夹里（保存目录 › 文件夹名称）：</p><ul><li><b>Downloads</b>：下载的文件（缩略图在 Downloads/Thumbnails 中）。</li><li><b>Cache</b>：临时预览图。</li><li><b>Other Files</b>：下载历史和已下载文件的记录（下次会跳过这些文件）。</li></ul>",
+            },
+            "guide_post_title": {
+                "english": "Post Downloader",
+                "japanese": "投稿ダウンローダー",
+                "korean": "게시물 다운로더",
+                "chinese-simplified": "投稿下载器",
+            },
+            "guide_post_text": {
+                "english": "<p>Downloads the files of individual posts.</p><h3>Add posts</h3><ul><li>Paste a post link and press <b>Add to Queue</b>, or import many from a .txt file with one link per line.</li><li>The ★ button saves the link to Favorites in the History tab.</li><li>Press the eye button on a queued post to list its files under <b>Files to Download</b>; the ✕ button removes it from the queue.</li></ul><h3>Choose files</h3><ul><li>Tick the files you want. <b>Filter by Type</b> and the search box narrow the list, and <b>Check ALL (Page)</b> ticks everything shown.</li><li><b>Download All Links</b> downloads every file of every queued post without picking files.</li><li>Select an image and press the eye button under the list to preview it.</li><li>Files marked <b>preview only</b> no longer have a full copy on the site and can't be downloaded (see Logs and Reports).</li></ul><h3>Options</h3><ul><li><b>Fast Mode</b>: paste many links at once and download everything from them with fewer clicks; finished links leave the queue automatically. Its info button explains it.</li><li><b>Auto Rename and sort File name by order</b>: puts each file's position in the post in front of its name, such as <i>1_cover.png</i>, so files sort in post order.</li><li><b>Download Post Text</b>: also saves the post's text as <i>desc.txt</i>.</li></ul><h3>Download</h3><p>Press <b>Download</b>. The two bars show the current file and the overall progress; <b>Cancel</b> stops, and <b>Expand Logs</b> opens the full log. Files are saved in <i>Downloads/&lt;service&gt;/&lt;post ID&gt;_&lt;post title&gt;</i>, and files you already downloaded are skipped.</p>",
+                "japanese": "<p>個別の投稿のファイルをダウンロードします。</p><h3>投稿を追加する</h3><ul><li>投稿リンクを貼り付けて<b>キューに追加</b>を押すか、1 行に 1 リンクの .txt ファイルからまとめて読み込みます。</li><li>★ ボタンはリンクを履歴タブのお気に入りに保存します。</li><li>キュー内の投稿の目のボタンを押すと<b>ダウンロードするファイル</b>に一覧表示され、✕ ボタンでキューから削除できます。</li></ul><h3>ファイルを選ぶ</h3><ul><li>必要なファイルにチェックを入れます。<b>タイプでフィルタリング</b>と検索ボックスで一覧を絞り込み、<b>すべてチェック (ページ)</b>で表示中のものをすべて選べます。</li><li><b>すべてのリンクをダウンロード</b>は、ファイルを選ばずにキュー内のすべての投稿の全ファイルをダウンロードします。</li><li>画像を選んで一覧の下の目のボタンを押すとプレビューできます。</li><li><b>プレビューのみ</b>と表示されたファイルは、サイト上に完全なファイルが残っておらず、ダウンロードできません（「ログとレポート」を参照）。</li></ul><h3>オプション</h3><ul><li><b>高速モード</b>：多数のリンクをまとめて貼り付け、少ない操作ですべてをダウンロードします。完了したリンクは自動でキューから外れます。詳しくは情報ボタンを参照してください。</li><li><b>自動リネームとファイル名を順序で並べ替え</b>：投稿内での順番をファイル名の先頭に付け（例：<i>1_cover.png</i>）、投稿の順に並ぶようにします。</li><li><b>投稿テキストをダウンロード</b>：投稿の本文も <i>desc.txt</i> として保存します。</li></ul><h3>ダウンロード</h3><p><b>ダウンロード</b>を押します。2 本のバーは現在のファイルと全体の進行状況を示します。<b>キャンセル</b>で停止し、<b>ログを展開</b>で全ログを開けます。ファイルは <i>Downloads/&lt;サービス&gt;/&lt;投稿ID&gt;_&lt;投稿タイトル&gt;</i> に保存され、ダウンロード済みのファイルはスキップされます。</p>",
+                "korean": "<p>개별 게시물의 파일을 다운로드합니다.</p><h3>게시물 추가</h3><ul><li>게시물 링크를 붙여 넣고 <b>대기열에 추가</b>를 누르거나, 한 줄에 링크 하나씩 적힌 .txt 파일에서 한꺼번에 가져오세요.</li><li>★ 버튼은 링크를 기록 탭의 즐겨찾기에 저장합니다.</li><li>대기열에 있는 게시물의 눈 버튼을 누르면 <b>다운로드할 파일</b>에 목록이 표시되고, ✕ 버튼은 대기열에서 삭제합니다.</li></ul><h3>파일 선택</h3><ul><li>원하는 파일을 선택하세요. <b>유형별 필터링</b>과 검색 상자로 목록을 좁히고, <b>모두 선택 (페이지)</b>로 표시된 항목을 모두 선택할 수 있습니다.</li><li><b>모든 링크 다운로드</b>는 파일을 고르지 않고 대기열에 있는 모든 게시물의 파일을 전부 다운로드합니다.</li><li>이미지를 선택하고 목록 아래의 눈 버튼을 누르면 미리 볼 수 있습니다.</li><li><b>미리보기만</b>으로 표시된 파일은 사이트에 원본이 남아 있지 않아 다운로드할 수 없습니다('로그와 보고서' 참고).</li></ul><h3>옵션</h3><ul><li><b>빠른 모드</b>: 여러 링크를 한꺼번에 붙여 넣고 적은 클릭으로 모두 다운로드합니다. 완료된 링크는 대기열에서 자동으로 빠집니다. 자세한 내용은 정보 버튼을 보세요.</li><li><b>자동 이름 바꾸기 및 순서별 파일 이름 정렬</b>: 게시물 안에서의 순서를 파일 이름 앞에 붙여(예: <i>1_cover.png</i>) 게시물 순서대로 정렬되게 합니다.</li><li><b>게시물 텍스트 다운로드</b>: 게시물 본문도 <i>desc.txt</i>로 저장합니다.</li></ul><h3>다운로드</h3><p><b>다운로드</b>를 누르세요. 두 막대는 현재 파일과 전체 진행 상황을 보여 줍니다. <b>취소</b>로 멈추고, <b>로그 확장</b>으로 전체 로그를 엽니다. 파일은 <i>Downloads/&lt;서비스&gt;/&lt;게시물 ID&gt;_&lt;게시물 제목&gt;</i>에 저장되며, 이미 받은 파일은 건너뜁니다.</p>",
+                "chinese-simplified": "<p>下载单个投稿中的文件。</p><h3>添加投稿</h3><ul><li>粘贴投稿链接并点击<b>添加到队列</b>，或从每行一个链接的 .txt 文件中批量导入。</li><li>★ 按钮会把链接保存到历史记录选项卡的收藏夹中。</li><li>点击队列中投稿的眼睛按钮，其文件会列在<b>将要下载的文件</b>中；✕ 按钮会将其从队列中移除。</li></ul><h3>选择文件</h3><ul><li>勾选需要的文件。<b>按类型过滤</b>和搜索框可以缩小列表，<b>全选 (页面)</b>会勾选当前显示的所有文件。</li><li><b>下载所有链接</b>无需挑选，直接下载队列中所有投稿的全部文件。</li><li>选中图片后点击列表下方的眼睛按钮即可预览。</li><li>标为<b>仅预览</b>的文件在网站上已没有完整副本，无法下载（参见“日志和报告”）。</li></ul><h3>选项</h3><ul><li><b>快速模式</b>：一次粘贴多个链接，只需很少的操作即可全部下载；完成的链接会自动移出队列。详情请看信息按钮。</li><li><b>自动重命名并按顺序排序文件名</b>：在文件名前加上它在投稿中的序号（例如 <i>1_cover.png</i>），让文件按投稿顺序排列。</li><li><b>下载帖子文本</b>：同时把投稿正文保存为 <i>desc.txt</i>。</li></ul><h3>下载</h3><p>点击<b>下载</b>。两个进度条分别显示当前文件和整体进度；<b>取消</b>可停止，<b>展开日志</b>可打开完整日志。文件保存在 <i>Downloads/&lt;服务&gt;/&lt;投稿 ID&gt;_&lt;投稿标题&gt;</i> 中，已下载过的文件会被跳过。</p>",
+            },
+            "guide_creator_title": {
+                "english": "Creator Downloader",
+                "japanese": "クリエイターダウンローダー",
+                "korean": "크리에이터 다운로더",
+                "chinese-simplified": "创作者下载器",
+            },
+            "guide_creator_text": {
+                "english": "<p>Downloads posts from one or more creators.</p><h3>Add creators</h3><ul><li>Paste a creator link (…/service/user/ID) and press <b>Add to Queue</b>, or import a .txt file with one link per line. ★ saves the link to Favorites.</li><li>Press the eye button on a queued creator to list their posts under <b>Posts to Download</b>.</li></ul><h3>Choose posts</h3><ul><li>Tick posts, or use <b>Check ALL (Page)</b> for the page shown and <b>Check ALL (All)</b> for every page. The arrows change page and the search box filters by title.</li><li>Select a post and press the eye button under the list to preview its thumbnail.</li></ul><h3>Choose content</h3><ul><li><b>Main File</b>, <b>Attachments</b> and <b>Content Images</b> (images inside the post text) choose what is taken from each post.</li><li><b>File Extensions</b> limits the download to the ticked file types.</li><li><b>Fast Mode</b>, <b>Auto Rename</b> and <b>Download Post Text</b> work as in the Post Downloader.</li></ul><h3>Names and folders</h3><p>File names and the folder layout come from <b>Settings › Creator Downloader</b>: one folder per post (the default), all files in the creator folder, or subfolders by file type.</p>",
+                "japanese": "<p>1 人以上のクリエイターの投稿をダウンロードします。</p><h3>クリエイターを追加する</h3><ul><li>クリエイターのリンク（…/サービス/user/ID）を貼り付けて<b>キューに追加</b>を押すか、1 行に 1 リンクの .txt ファイルを読み込みます。★ でリンクをお気に入りに保存できます。</li><li>キュー内のクリエイターの目のボタンを押すと、<b>ダウンロードする投稿</b>に投稿が一覧表示されます。</li></ul><h3>投稿を選ぶ</h3><ul><li>投稿にチェックを入れるか、表示中のページには<b>すべてチェック (ページ)</b>、全ページには<b>すべてチェック (すべて)</b>を使います。矢印でページを切り替え、検索ボックスでタイトルを絞り込めます。</li><li>投稿を選んで一覧の下の目のボタンを押すと、サムネイルをプレビューできます。</li></ul><h3>取得する内容を選ぶ</h3><ul><li><b>メインファイル</b>、<b>添付ファイル</b>、<b>コンテンツ画像</b>（本文中の画像）で、各投稿から何を取得するかを選びます。</li><li><b>ファイル拡張子</b>で、チェックした種類のファイルだけをダウンロードします。</li><li><b>高速モード</b>、<b>自動リネーム</b>、<b>投稿テキストをダウンロード</b>は投稿ダウンローダーと同じです。</li></ul><h3>名前とフォルダ</h3><p>ファイル名とフォルダ構成は<b>設定 › クリエイターダウンローダー</b>で決まります。投稿ごとのフォルダ（デフォルト）、クリエイターフォルダにすべて保存、ファイルタイプ別のサブフォルダから選べます。</p>",
+                "korean": "<p>한 명 이상의 크리에이터 게시물을 다운로드합니다.</p><h3>크리에이터 추가</h3><ul><li>크리에이터 링크(…/서비스/user/ID)를 붙여 넣고 <b>대기열에 추가</b>를 누르거나, 한 줄에 링크 하나씩 적힌 .txt 파일을 가져오세요. ★는 링크를 즐겨찾기에 저장합니다.</li><li>대기열에 있는 크리에이터의 눈 버튼을 누르면 <b>다운로드할 게시물</b>에 게시물 목록이 표시됩니다.</li></ul><h3>게시물 선택</h3><ul><li>게시물을 선택하거나, 현재 페이지는 <b>모두 선택 (페이지)</b>, 모든 페이지는 <b>모두 선택 (모두)</b>를 사용하세요. 화살표로 페이지를 넘기고, 검색 상자로 제목을 걸러 냅니다.</li><li>게시물을 선택하고 목록 아래의 눈 버튼을 누르면 썸네일을 미리 볼 수 있습니다.</li></ul><h3>받을 내용 선택</h3><ul><li><b>메인 파일</b>, <b>첨부 파일</b>, <b>콘텐츠 이미지</b>(본문 안의 이미지)로 각 게시물에서 무엇을 받을지 고릅니다.</li><li><b>파일 확장자</b>에서 선택한 형식의 파일만 다운로드합니다.</li><li><b>빠른 모드</b>, <b>자동 이름 바꾸기</b>, <b>게시물 텍스트 다운로드</b>는 게시물 다운로더와 같습니다.</li></ul><h3>이름과 폴더</h3><p>파일 이름과 폴더 구조는 <b>설정 › 크리에이터 다운로더</b>에서 정합니다. 게시물별 폴더(기본), 크리에이터 폴더에 모두 저장, 파일 유형별 하위 폴더 중에서 고를 수 있습니다.</p>",
+                "chinese-simplified": "<p>下载一个或多个创作者的投稿。</p><h3>添加创作者</h3><ul><li>粘贴创作者链接（…/服务/user/ID）并点击<b>添加到队列</b>，或导入每行一个链接的 .txt 文件。★ 可以把链接保存到收藏夹。</li><li>点击队列中创作者的眼睛按钮，其投稿会列在<b>将要下载的投稿</b>中。</li></ul><h3>选择投稿</h3><ul><li>勾选投稿，或用<b>全选 (页面)</b>勾选当前页、用<b>全选 (全部)</b>勾选所有页。箭头用于翻页，搜索框可按标题筛选。</li><li>选中一个投稿并点击列表下方的眼睛按钮，可预览其缩略图。</li></ul><h3>选择内容</h3><ul><li><b>主要文件</b>、<b>附件</b>和<b>内容图片</b>（正文中的图片）决定从每个投稿中获取哪些内容。</li><li><b>文件扩展名</b>把下载范围限制为已勾选的文件类型。</li><li><b>快速模式</b>、<b>自动重命名</b>和<b>下载帖子文本</b>的作用与投稿下载器相同。</li></ul><h3>名称和文件夹</h3><p>文件名和文件夹结构由<b>设置 › 创作者下载器</b>决定：按帖子创建文件夹（默认）、全部保存在创作者文件夹中，或按文件类型创建子文件夹。</p>",
+            },
+            "guide_thumbnails_title": {
+                "english": "Thumbnail Downloader",
+                "japanese": "サムネイルダウンローダー",
+                "korean": "썸네일 다운로더",
+                "chinese-simplified": "缩略图下载器",
+            },
+            "guide_thumbnails_text": {
+                "english": "<p>Saves only the preview images (thumbnails) of posts, which is much faster than downloading the files.</p><ul><li>Choose <b>Post</b> or <b>Creator</b> as the download mode, then add links of that kind, or import a .txt file. Switching mode asks before clearing the queue.</li><li>Press <b>Detect Thumbnails</b> to find them, then tick the ones to save. The filter box narrows the list and the eye button previews the selected one.</li><li>Options: how many download at once (1–10), <b>Skip existing files</b>, <b>Auto Rename</b> and <b>Download Post Text</b>.</li><li>Press <b>Start Download</b>. Thumbnails are saved in <i>Downloads/Thumbnails</i>, and the log console on the right shows what happens.</li></ul>",
+                "japanese": "<p>投稿のプレビュー画像（サムネイル）だけを保存します。ファイルをダウンロードするよりずっと速く終わります。</p><ul><li>ダウンロードモードで<b>投稿</b>か<b>クリエイター</b>を選び、その種類のリンクを追加するか .txt ファイルを読み込みます。モードを切り替えると、キューを消去する前に確認されます。</li><li><b>サムネイルを検出</b>を押して探し、保存するものにチェックを入れます。フィルターで一覧を絞り込み、目のボタンで選択中のものをプレビューできます。</li><li>オプション：同時ダウンロード数（1〜10）、<b>既存のファイルをスキップ</b>、<b>自動リネーム</b>、<b>投稿テキストをダウンロード</b>。</li><li><b>ダウンロード開始</b>を押します。サムネイルは <i>Downloads/Thumbnails</i> に保存され、右側のログコンソールに経過が表示されます。</li></ul>",
+                "korean": "<p>게시물의 미리보기 이미지(썸네일)만 저장합니다. 파일을 다운로드하는 것보다 훨씬 빠릅니다.</p><ul><li>다운로드 모드에서 <b>포스트</b> 또는 <b>크리에이터</b>를 고른 뒤, 그 종류의 링크를 추가하거나 .txt 파일을 가져오세요. 모드를 바꾸면 대기열을 지우기 전에 확인합니다.</li><li><b>썸네일 감지</b>를 눌러 찾은 다음, 저장할 항목을 선택하세요. 필터로 목록을 좁히고, 눈 버튼으로 선택한 항목을 미리 볼 수 있습니다.</li><li>옵션: 동시 다운로드 수(1~10), <b>기존 파일 건너뛰기</b>, <b>자동 이름 바꾸기</b>, <b>게시물 텍스트 다운로드</b>.</li><li><b>다운로드 시작</b>을 누르세요. 썸네일은 <i>Downloads/Thumbnails</i>에 저장되고, 오른쪽 로그 콘솔에 진행 상황이 표시됩니다.</li></ul>",
+                "chinese-simplified": "<p>只保存投稿的预览图（缩略图），比下载文件快得多。</p><ul><li>选择<b>帖子</b>或<b>创作者</b>下载模式，然后添加对应类型的链接，或导入 .txt 文件。切换模式时，会在清空队列前询问你。</li><li>点击<b>检测缩略图</b>进行查找，然后勾选要保存的缩略图。筛选框可以缩小列表，眼睛按钮可以预览选中的缩略图。</li><li>选项：同时下载数量（1–10）、<b>跳过已存在的文件</b>、<b>自动重命名</b>和<b>下载帖子文本</b>。</li><li>点击<b>开始下载</b>。缩略图保存在 <i>Downloads/Thumbnails</i> 中，右侧的日志控制台会显示过程。</li></ul>",
+            },
+            "guide_history_title": {
+                "english": "History and Favorites",
+                "japanese": "履歴とお気に入り",
+                "korean": "기록과 즐겨찾기",
+                "chinese-simplified": "历史记录和收藏夹",
+            },
+            "guide_history_text": {
+                "english": "<h3>Download History</h3><ul><li>Every finished post, creator and thumbnail download is listed with its date, type, files (done/total and failures), posts, size on disk, duration and status. Hover the files column for how many were preview-only or missing from the server.</li><li>Search by title, link or creator and filter by type; the line above the table adds up what is shown.</li><li><b>Open Folder</b> (or a double-click) opens where the files were saved. If the folder was moved or deleted, the app offers to locate it, open the nearest parent folder, or download it again.</li><li><b>Copy Link</b>, <b>Add to Queue</b> and <b>Add to Favorites</b> work on several rows at once. <b>Remove</b> and <b>Clear History</b> delete only the records, never your files.</li><li>Untick <b>Record download history</b> to stop recording; <b>Export CSV</b> saves the list for a spreadsheet.</li></ul><h3>Favorites</h3><ul><li>Save links with ★ in the Post or Creator tab, from the history, or by pasting a link into the Favorites view.</li><li>Double-click a title or note to edit it; double-click elsewhere on a row to add the link to the queue.</li><li>Copy links, open them in your browser, or import and export them as a .txt file with one link per line.</li></ul>",
+                "japanese": "<h3>ダウンロード履歴</h3><ul><li>完了した投稿・クリエイター・サムネイルのダウンロードが、日時、種類、ファイル数（完了/合計と失敗）、投稿数、ディスク上のサイズ、所要時間、状態とともに一覧表示されます。ファイル列にカーソルを合わせると、プレビューのみやサーバーになかったファイルの数が表示されます。</li><li>タイトル・リンク・クリエイターで検索し、種類で絞り込めます。表の上の行に表示中の合計が出ます。</li><li><b>フォルダーを開く</b>（またはダブルクリック）で保存先を開きます。フォルダーが移動・削除されていた場合は、場所の指定、最も近い親フォルダーを開く、再ダウンロードのいずれかを選べます。</li><li><b>リンクをコピー</b>、<b>キューに追加</b>、<b>お気に入りに追加</b>は複数の行にまとめて使えます。<b>削除</b>と<b>履歴を消去</b>は記録だけを消し、ファイルは削除しません。</li><li><b>ダウンロード履歴を記録</b>のチェックを外すと記録を止めます。<b>CSVにエクスポート</b>で一覧を表計算ソフト用に保存できます。</li></ul><h3>お気に入り</h3><ul><li>投稿・クリエイタータブの ★、履歴、またはお気に入り画面にリンクを貼り付けて保存します。</li><li>タイトルやメモをダブルクリックすると編集でき、行のそれ以外の場所をダブルクリックするとリンクがキューに追加されます。</li><li>リンクのコピー、ブラウザで開く、1 行に 1 リンクの .txt ファイルとしてのインポートとエクスポートができます。</li></ul>",
+                "korean": "<h3>다운로드 기록</h3><ul><li>완료된 게시물·크리에이터·썸네일 다운로드가 날짜, 유형, 파일 수(완료/전체와 실패), 게시물 수, 디스크 크기, 소요 시간, 상태와 함께 표시됩니다. 파일 열에 마우스를 올리면 미리보기만 있었거나 서버에 없던 파일 수를 볼 수 있습니다.</li><li>제목·링크·크리에이터로 검색하고 유형으로 걸러 낼 수 있습니다. 표 위의 줄에 표시된 항목의 합계가 나옵니다.</li><li><b>폴더 열기</b>(또는 더블클릭)로 저장 위치를 엽니다. 폴더가 이동되거나 삭제되었으면 위치 찾기, 가장 가까운 상위 폴더 열기, 다시 다운로드 중에서 고를 수 있습니다.</li><li><b>링크 복사</b>, <b>대기열에 추가</b>, <b>즐겨찾기에 추가</b>는 여러 행에 한꺼번에 쓸 수 있습니다. <b>삭제</b>와 <b>기록 지우기</b>는 기록만 지우고 파일은 지우지 않습니다.</li><li><b>다운로드 기록 저장</b>을 해제하면 기록을 멈춥니다. <b>CSV로 내보내기</b>로 목록을 스프레드시트용으로 저장합니다.</li></ul><h3>즐겨찾기</h3><ul><li>게시물·크리에이터 탭의 ★, 기록, 또는 즐겨찾기 화면에 링크를 붙여 넣어 저장합니다.</li><li>제목이나 메모를 더블클릭하면 편집하고, 행의 다른 곳을 더블클릭하면 링크가 대기열에 추가됩니다.</li><li>링크를 복사하거나, 브라우저에서 열거나, 한 줄에 링크 하나씩 적힌 .txt 파일로 가져오고 내보낼 수 있습니다.</li></ul>",
+                "chinese-simplified": "<h3>下载历史</h3><ul><li>所有已完成的投稿、创作者和缩略图下载都会列出，包括日期、类型、文件数（完成/总数及失败数）、投稿数、磁盘大小、耗时和状态。把鼠标悬停在文件列上，可以看到仅预览和服务器上缺失的文件数量。</li><li>可按标题、链接或创作者搜索，并按类型筛选；表格上方一行会汇总当前显示的内容。</li><li><b>打开文件夹</b>（或双击）会打开文件的保存位置。如果文件夹已被移动或删除，应用会让你选择定位文件夹、打开最近的上级文件夹或重新下载。</li><li><b>复制链接</b>、<b>添加到队列</b>和<b>添加到收藏夹</b>可以同时作用于多行。<b>删除</b>和<b>清除历史</b>只删除记录，绝不删除你的文件。</li><li>取消勾选<b>记录下载历史</b>即可停止记录；<b>导出 CSV</b> 可把列表保存为表格文件。</li></ul><h3>收藏夹</h3><ul><li>可通过投稿或创作者选项卡中的 ★、历史记录，或把链接粘贴到收藏夹视图来保存链接。</li><li>双击标题或备注可以编辑；双击行的其他位置会把链接加入队列。</li><li>可以复制链接、在浏览器中打开，或以每行一个链接的 .txt 文件导入和导出。</li></ul>",
+            },
+            "guide_settings_title": {
+                "english": "Settings",
+                "japanese": "設定",
+                "korean": "설정",
+                "chinese-simplified": "设置",
+            },
+            "guide_settings_text": {
+                "english": "<p>Change settings, then press <b>Apply Changes</b> and confirm. <b>Reset to Defaults</b> fills in the default values, which also need Apply Changes. The Use Proxy switch and proxy type are saved straight away.</p><ul><li><b>Folder Settings</b>: where everything is kept (Save Directory › Folder Name). <b>Open Directory</b> opens it.</li><li><b>Download Settings</b>: how many files download at once (1–20, default 5). Pawchive is always limited to five at a time; the info button next to it explains why. The preview image option saves the preview of files the site only has a preview of, named like <i>00501_preview.png</i>.</li><li><b>Retry Settings</b>: how many times to try before giving up. <b>Creator Posts Max Attempts</b> covers loading a creator's post list (read 50 posts at a time), <b>Post Data Max Retries</b> a post's details, <b>File Download Max Retries</b> each file, and <b>API Request Max Retries</b> link checks and other site requests.</li><li><b>Creator Downloader</b>: the file name template, from a preset or your own (press <b>?</b> for placeholders such as {post_title} and {file_index}), and the folder layout.</li><li><b>Update Settings</b>: check GitHub for a new version at startup. The app tells you and links to the release; nothing is installed for you.</li><li><b>Log Settings</b>: which messages the consoles show: debug details (off by default), progress and info, warnings and errors. Saved straight away; applies to new messages.</li><li><b>Language</b> and <b>Font</b>: apply to the whole app, logs included.</li><li><b>Appearance</b>: the colour theme (Midnight, Graphite, Plum, Forest or Ember). It changes straight away. Hover over a setting for a short explanation of it.</li><li><b>Proxy Settings</b>: see Proxy and Tor.</li></ul>",
+                "japanese": "<p>設定を変更したら<b>変更を適用</b>を押して確認します。<b>デフォルトにリセット</b>は初期値を入力するだけなので、反映するには「変更を適用」も押してください。「プロキシを使用」とプロキシの種類はすぐに保存されます。</p><ul><li><b>フォルダ設定</b>：すべての保存先（保存ディレクトリ › フォルダ名）。<b>ディレクトリを開く</b>で開けます。</li><li><b>ダウンロード設定</b>：同時にダウンロードするファイル数（1〜20、デフォルト 5）。Pawchive は常に同時 5 件までに制限されます（理由は横の情報ボタンで確認できます）。プレビュー画像のオプションを使うと、サイトにプレビューしかないファイルのプレビューを <i>00501_preview.png</i> のような名前で保存します。</li><li><b>リトライ設定</b>：あきらめる前に試す回数です。<b>クリエイター投稿最大試行回数</b>はクリエイターの投稿一覧の読み込み（50 件ずつ）、<b>投稿データ最大リトライ回数</b>は投稿の詳細、<b>ファイルダウンロード最大リトライ回数</b>は各ファイル、<b>APIリクエスト最大リトライ回数</b>はリンクの確認などサイトへのその他のリクエストが対象です。</li><li><b>クリエイターダウンローダー</b>：ファイル名テンプレート（プリセットまたは独自のもの。{post_title} や {file_index} などのプレースホルダーは <b>?</b> で確認）とフォルダ構造。</li><li><b>更新設定</b>：起動時に GitHub で新しいバージョンを確認します。お知らせとリリースへのリンクを表示するだけで、自動でインストールはしません。</li><li><b>ログ設定</b>：コンソールに表示するメッセージの種類（デバッグ情報〔デフォルトはオフ〕、進行状況と情報、警告、エラー）。すぐに保存され、新しいメッセージから反映されます。</li><li><b>言語</b>と<b>フォント</b>：ログを含むアプリ全体に適用されます。</li><li><b>外観</b>：配色テーマ（ミッドナイト、グラファイト、プラム、フォレスト、エンバー）。すぐに切り替わります。各設定にカーソルを合わせると、短い説明が表示されます。</li><li><b>プロキシ設定</b>：「プロキシと Tor」を参照してください。</li></ul>",
+                "korean": "<p>설정을 바꾼 뒤 <b>변경 적용</b>을 누르고 확인하세요. <b>기본값으로 재설정</b>은 기본값을 채워 넣을 뿐이므로, 반영하려면 '변경 적용'도 누르세요. '프록시 사용'과 프록시 종류는 바로 저장됩니다.</p><ul><li><b>폴더 설정</b>: 모든 데이터를 보관하는 위치(저장 디렉토리 › 폴더 이름). <b>디렉토리 열기</b>로 열 수 있습니다.</li><li><b>다운로드 설정</b>: 동시에 다운로드할 파일 수(1~20, 기본 5). Pawchive는 항상 동시에 5개로 제한됩니다(이유는 옆의 정보 버튼에서 확인). 미리보기 이미지 옵션을 켜면 사이트에 미리보기만 있는 파일의 미리보기를 <i>00501_preview.png</i> 같은 이름으로 저장합니다.</li><li><b>재시도 설정</b>: 포기하기 전에 시도하는 횟수입니다. <b>크리에이터 게시물 최대 시도 횟수</b>는 크리에이터의 게시물 목록 불러오기(한 번에 50개), <b>게시물 데이터 최대 재시도 횟수</b>는 게시물 상세 정보, <b>파일 다운로드 최대 재시도 횟수</b>는 각 파일, <b>API 요청 최대 재시도 횟수</b>는 링크 확인 등 사이트에 대한 기타 요청에 적용됩니다.</li><li><b>크리에이터 다운로더</b>: 파일 이름 템플릿(미리 정의된 것 또는 직접 입력. {post_title}, {file_index} 같은 자리 표시자는 <b>?</b>에서 확인)과 폴더 구조.</li><li><b>업데이트 설정</b>: 시작할 때 GitHub에서 새 버전을 확인합니다. 알림과 릴리스 링크만 보여 주며, 자동으로 설치하지는 않습니다.</li><li><b>로그 설정</b>: 콘솔에 표시할 메시지 종류(디버그 정보[기본값은 꺼짐], 진행 상황과 정보, 경고, 오류). 바로 저장되며 새 메시지부터 적용됩니다.</li><li><b>언어</b>와 <b>글꼴</b>: 로그를 포함한 앱 전체에 적용됩니다.</li><li><b>모양</b>: 색상 테마(미드나이트, 그래파이트, 플럼, 포레스트, 엠버). 바로 바뀝니다. 설정에 마우스를 올리면 짧은 설명이 표시됩니다.</li><li><b>프록시 설정</b>: '프록시와 Tor'를 보세요.</li></ul>",
+                "chinese-simplified": "<p>修改设置后，点击<b>应用更改</b>并确认。<b>重置为默认值</b>只会填入默认值，仍需点击“应用更改”才会生效。“使用代理”开关和代理类型会立即保存。</p><ul><li><b>文件夹设置</b>：所有内容的保存位置（保存目录 › 文件夹名称）。<b>打开目录</b>可打开它。</li><li><b>下载设置</b>：同时下载的文件数量（1–20，默认 5）。Pawchive 始终限制为同时 5 个，原因见旁边的信息按钮。开启预览图选项后，网站上只有预览图的文件会以 <i>00501_preview.png</i> 这样的名称保存其预览图。</li><li><b>重试设置</b>：放弃之前尝试的次数。<b>创作者帖子最大尝试次数</b>用于加载创作者的投稿列表（每次 50 个），<b>帖子数据最大重试次数</b>用于投稿详情，<b>文件下载最大重试次数</b>用于每个文件，<b>API请求最大重试次数</b>用于链接检查和其他网站请求。</li><li><b>创作者下载器</b>：文件名模板（可选预设或自己输入，按 <b>?</b> 查看 {post_title}、{file_index} 等占位符）和文件夹结构。</li><li><b>更新设置</b>：启动时在 GitHub 上检查新版本。应用只会通知你并提供发布页面链接，不会替你安装任何内容。</li><li><b>日志设置</b>：控制台显示哪些消息：调试信息（默认关闭）、进度和信息、警告和错误。设置会立即保存，并对新消息生效。</li><li><b>语言</b>和<b>字体</b>：应用于整个应用，包括日志。</li><li><b>外观</b>：配色主题（午夜、石墨、梅紫、森林或余烬），会立即切换。把鼠标悬停在某项设置上，可以看到简短说明。</li><li><b>代理设置</b>：参见“代理和 Tor”。</li></ul>",
+            },
+            "guide_proxy_title": {
+                "english": "Proxy and Tor",
+                "japanese": "プロキシと Tor",
+                "korean": "프록시와 Tor",
+                "chinese-simplified": "代理和 Tor",
+            },
+            "guide_proxy_text": {
+                "english": "<p>Tick <b>Use Proxy</b> in Settings to send downloads through a proxy. The choice is saved straight away.</p><h3>Custom proxy</h3><ul><li>Enter the address as <i>host:port</i>, <i>http://host:port</i> or <i>socks5h://host:port</i>, adding <i>user:password@</i> before the host if the proxy needs a login.</li><li><b>Test Proxy</b> checks that it works.</li></ul><h3>Tor</h3><ol><li>Press <b>Download Tor</b>. The app downloads the official Tor Expert Bundle and checks it against Tor's published checksum before using it. Or press <b>Browse</b> to use a Tor program you already have.</li><li>Press <b>Start Tor</b> and wait until the status reads <i>Running</i>.</li><li>Press <b>Test Tor</b> to check the connection.</li></ol><p>Downloads always go through Tor's port (9050), so a Tor service you run yourself works too. If Tor isn't running, downloads fail instead of using your own connection, so your IP address is never used by accident.</p>",
+                "japanese": "<p>設定で<b>プロキシを使用</b>にチェックを入れると、ダウンロードがプロキシを経由します。この選択はすぐに保存されます。</p><h3>カスタムプロキシ</h3><ul><li>アドレスを <i>host:port</i>、<i>http://host:port</i>、<i>socks5h://host:port</i> の形式で入力します。ログインが必要な場合は、ホストの前に <i>user:password@</i> を付けます。</li><li><b>プロキシをテスト</b>で動作を確認できます。</li></ul><h3>Tor</h3><ol><li><b>Torをダウンロード</b>を押します。アプリは公式の Tor Expert Bundle をダウンロードし、使う前に Tor が公開しているチェックサムと照合します。手持ちの Tor を使う場合は<b>参照</b>を押します。</li><li><b>Torを開始</b>を押し、状態が<i>実行中</i>になるまで待ちます。</li><li><b>Torをテスト</b>で接続を確認します。</li></ol><p>ダウンロードは常に Tor のポート（9050）を経由するため、自分で実行している Tor サービスも使えます。Tor が動いていない場合、ダウンロードは自分の接続を使わずに失敗するので、IP アドレスが誤って使われることはありません。</p>",
+                "korean": "<p>설정에서 <b>프록시 사용</b>을 선택하면 다운로드가 프록시를 거칩니다. 이 선택은 바로 저장됩니다.</p><h3>사용자 지정 프록시</h3><ul><li>주소를 <i>host:port</i>, <i>http://host:port</i>, <i>socks5h://host:port</i> 형식으로 입력하세요. 로그인이 필요하면 호스트 앞에 <i>user:password@</i>를 붙입니다.</li><li><b>프록시 테스트</b>로 작동하는지 확인합니다.</li></ul><h3>Tor</h3><ol><li><b>Tor 다운로드</b>를 누르세요. 앱이 공식 Tor Expert Bundle을 받아, 사용하기 전에 Tor가 공개한 체크섬과 대조합니다. 이미 있는 Tor 프로그램을 쓰려면 <b>찾아보기</b>를 누르세요.</li><li><b>Tor 시작</b>을 누르고 상태가 <i>실행 중</i>이 될 때까지 기다리세요.</li><li><b>Tor 테스트</b>로 연결을 확인합니다.</li></ol><p>다운로드는 항상 Tor의 포트(9050)를 거치므로, 직접 실행 중인 Tor 서비스도 사용할 수 있습니다. Tor가 실행 중이 아니면 내 연결을 쓰지 않고 다운로드가 실패하므로, IP 주소가 실수로 노출되지 않습니다.</p>",
+                "chinese-simplified": "<p>在设置中勾选<b>使用代理</b>后，下载会通过代理进行。这个选择会立即保存。</p><h3>自定义代理</h3><ul><li>按 <i>host:port</i>、<i>http://host:port</i> 或 <i>socks5h://host:port</i> 格式输入地址；如果代理需要登录，请在主机前加上 <i>user:password@</i>。</li><li><b>测试代理</b>可检查代理是否可用。</li></ul><h3>Tor</h3><ol><li>点击<b>下载Tor</b>。应用会下载官方的 Tor Expert Bundle，并在使用前与 Tor 公布的校验和进行核对。若要使用你已有的 Tor 程序，请点击<b>浏览</b>。</li><li>点击<b>启动Tor</b>，等待状态变为<i>运行中</i>。</li><li>点击<b>测试Tor</b>检查连接。</li></ol><p>下载始终通过 Tor 的端口（9050）进行，因此你自己运行的 Tor 服务也可以使用。如果 Tor 未运行，下载会失败，而不会使用你自己的网络连接，因此你的 IP 地址不会被意外暴露。</p>",
+            },
+            "guide_logs_title": {
+                "english": "Logs and Reports",
+                "japanese": "ログとレポート",
+                "korean": "로그와 보고서",
+                "chinese-simplified": "日志和报告",
+            },
+            "guide_logs_text": {
+                "english": "<ul><li>The console in each downloader tab shows what is happening: green for progress, yellow for warnings and red for errors. Debug details, in grey-blue, show only if you turn them on in Settings › Log Settings.</li><li><b>Expand Logs</b> opens the full log. It keeps your place while new lines arrive (<b>Jump to Latest</b> returns to the newest), and you can search it (Ctrl+F; Enter for the next match, Shift+Enter for the previous), copy everything, save it as a .txt file, or clear it.</li><li>Each download ends with a summary of how many files were downloaded, were only previews, were not on the server, or failed.</li><li><b>Preview only</b>: the site lists the file, but only its preview image remains, so it is skipped. A window lists these files, and Settings can save their previews instead.</li><li><b>Not on the media server</b>: the site lists the file, but its server answers that the file doesn't exist (HTTP 404). Retrying doesn't help and it isn't a problem with the app. A window lists these files.</li><li>If something unexpected goes wrong, a window shows details to include in a bug report, and the app keeps running.</li></ul>",
+                "japanese": "<ul><li>各ダウンローダータブのコンソールに経過が表示されます。緑は進行状況、黄色は警告、赤はエラーです。灰青色のデバッグ情報は、設定 › ログ設定でオンにした場合だけ表示されます。</li><li><b>ログを展開</b>で全ログを開きます。新しい行が届いても読んでいる位置を保ち（<b>最新へ移動</b>で最新に戻れます）、検索（Ctrl+F、Enter で次、Shift+Enter で前）、すべてコピー、.txt ファイルへの保存、クリアができます。</li><li>ダウンロードの終わりに、ダウンロードできた数、プレビューのみだった数、サーバーになかった数、失敗した数のまとめが表示されます。</li><li><b>プレビューのみ</b>：サイトにはファイルが掲載されていますが、プレビュー画像しか残っていないためスキップされます。該当ファイルはウィンドウに一覧表示され、設定でプレビューを代わりに保存することもできます。</li><li><b>メディアサーバーにない</b>：サイトにはファイルが掲載されていますが、サーバーがファイルは存在しないと応答します（HTTP 404）。再試行しても解決せず、アプリの問題でもありません。該当ファイルはウィンドウに一覧表示されます。</li><li>予期しない問題が起きた場合は、バグ報告に含める詳細がウィンドウに表示され、アプリはそのまま動き続けます。</li></ul>",
+                "korean": "<ul><li>각 다운로더 탭의 콘솔에 진행 상황이 표시됩니다. 초록색은 진행, 노란색은 경고, 빨간색은 오류입니다. 회청색의 디버그 정보는 설정 › 로그 설정에서 켠 경우에만 표시됩니다.</li><li><b>로그 확장</b>은 전체 로그를 엽니다. 새 줄이 들어와도 읽던 위치를 유지하고(<b>최신으로 이동</b>으로 최신 줄로 돌아감), 검색(Ctrl+F, Enter는 다음, Shift+Enter는 이전), 모두 복사, .txt 파일로 저장, 지우기를 할 수 있습니다.</li><li>다운로드가 끝나면 받은 파일, 미리보기만 있던 파일, 서버에 없던 파일, 실패한 파일의 수를 요약해 보여 줍니다.</li><li><b>미리보기만</b>: 사이트에 파일이 올라와 있지만 미리보기 이미지만 남아 있어 건너뜁니다. 해당 파일은 창에 표시되며, 설정에서 대신 미리보기를 저장하게 할 수 있습니다.</li><li><b>미디어 서버에 없음</b>: 사이트에 파일이 올라와 있지만 서버가 파일이 없다고 응답합니다(HTTP 404). 다시 시도해도 해결되지 않으며 앱의 문제도 아닙니다. 해당 파일은 창에 표시됩니다.</li><li>예상치 못한 문제가 생기면 버그 보고에 넣을 세부 정보가 창에 표시되고, 앱은 계속 실행됩니다.</li></ul>",
+                "chinese-simplified": "<ul><li>每个下载器选项卡的控制台会显示正在发生的事情：绿色表示进度，黄色表示警告，红色表示错误。灰蓝色的调试信息只有在“设置 › 日志设置”中开启后才会显示。</li><li><b>展开日志</b>会打开完整日志。新日志到来时会保持你正在阅读的位置（<b>跳到最新</b>可回到最新一行），还可以搜索（Ctrl+F；Enter 查找下一个，Shift+Enter 查找上一个）、全部复制、保存为 .txt 文件或清除。</li><li>每次下载结束时会显示汇总：已下载、仅有预览、服务器上没有以及失败的文件数量。</li><li><b>仅预览</b>：网站列出了该文件，但只剩下预览图，因此会被跳过。窗口会列出这些文件，你也可以在设置中改为保存它们的预览图。</li><li><b>不在媒体服务器上</b>：网站列出了该文件，但其服务器回应文件不存在（HTTP 404）。重试也无济于事，这也不是应用的问题。窗口会列出这些文件。</li><li>如果发生意外问题，窗口会显示可附在错误报告中的详细信息，应用会继续运行。</li></ul>",
+            },
+            "guide_troubleshooting_title": {
+                "english": "Troubleshooting",
+                "japanese": "トラブルシューティング",
+                "korean": "문제 해결",
+                "chinese-simplified": "故障排除",
+            },
+            "guide_troubleshooting_text": {
+                "english": "<h3>Connection errors or nothing downloads</h3><p>Check your internet connection and that the site opens in your browser; sites are sometimes down for a while. If you use a proxy or Tor, test it in Settings or turn the proxy off.</p><h3>No files or posts appear</h3><p>Make sure the link suits the tab: a post link (…/user/ID/post/ID) for the Post Downloader, a creator link (…/user/ID) for the Creator Downloader. Press the eye button on the queued link, and tick files or posts (or Download All Links) before pressing Download.</p><h3>Files are skipped or reported missing</h3><p>Files marked preview only, and files the media server reports as not found (HTTP 404), can't be downloaded from the site. See Logs and Reports.</p><h3>Downloads are slow</h3><p>Try a different Simultaneous Downloads value in Settings. Pawchive is limited on purpose to five downloads at a time and one new file request per second. Tor is slower than a direct connection.</p><h3>Tor doesn't work</h3><p>Use Download Tor (or Browse to your Tor program), press Start Tor, wait for Running, then press Test Tor. Tor Output shows Tor's own messages if it can't connect.</p><h3>A setting didn't change</h3><p>Most settings, including language and font, take effect only after Apply Changes and its confirmation.</p><h3>Where are my files?</h3><p>Open Directory in Settings › Folder Settings opens the main folder, and Open Folder in the History tab opens the folder of a finished download.</p>",
+                "japanese": "<h3>接続エラーが出る、何もダウンロードされない</h3><p>インターネット接続と、ブラウザでサイトが開けるかを確認してください。サイトが一時的に停止していることがあります。プロキシや Tor を使っている場合は、設定でテストするか、プロキシをオフにしてください。</p><h3>ファイルや投稿が表示されない</h3><p>タブに合ったリンクか確認してください。投稿ダウンローダーには投稿リンク（…/user/ID/post/ID）、クリエイターダウンローダーにはクリエイターのリンク（…/user/ID）を使います。キュー内のリンクの目のボタンを押し、ダウンロードの前にファイルや投稿にチェックを入れて（または「すべてのリンクをダウンロード」を使って）ください。</p><h3>ファイルがスキップされる、見つからないと表示される</h3><p>プレビューのみのファイルと、メディアサーバーが見つからないと応答したファイル（HTTP 404）は、サイトからダウンロードできません。「ログとレポート」を参照してください。</p><h3>ダウンロードが遅い</h3><p>設定の同時ダウンロード数を変えてみてください。Pawchive は意図的に、同時 5 件まで、新しいファイルの要求は 1 秒に 1 回までに制限されています。Tor は直接接続より遅くなります。</p><h3>Tor が使えない</h3><p>「Torをダウンロード」を使う（または「参照」で Tor のプログラムを選ぶ）、「Torを開始」を押して「実行中」になるのを待ち、「Torをテスト」を押してください。接続できない場合は、Tor出力に Tor 自身のメッセージが表示されます。</p><h3>設定が変わらない</h3><p>言語やフォントを含むほとんどの設定は、「変更を適用」を押して確認した後に反映されます。</p><h3>ファイルはどこ？</h3><p>設定 › フォルダ設定の「ディレクトリを開く」でメインフォルダを、履歴タブの「フォルダーを開く」で完了したダウンロードのフォルダを開けます。</p>",
+                "korean": "<h3>연결 오류가 나거나 아무것도 다운로드되지 않음</h3><p>인터넷 연결과 브라우저에서 사이트가 열리는지 확인하세요. 사이트가 잠시 중단될 때가 있습니다. 프록시나 Tor를 쓰고 있다면 설정에서 테스트하거나 프록시를 끄세요.</p><h3>파일이나 게시물이 표시되지 않음</h3><p>탭에 맞는 링크인지 확인하세요. 게시물 다운로더에는 게시물 링크(…/user/ID/post/ID), 크리에이터 다운로더에는 크리에이터 링크(…/user/ID)를 씁니다. 대기열에 있는 링크의 눈 버튼을 누르고, 다운로드하기 전에 파일이나 게시물을 선택하세요(또는 '모든 링크 다운로드' 사용).</p><h3>파일을 건너뛰거나 없다고 표시됨</h3><p>미리보기만 있는 파일과 미디어 서버가 찾을 수 없다고 응답한 파일(HTTP 404)은 사이트에서 다운로드할 수 없습니다. '로그와 보고서'를 보세요.</p><h3>다운로드가 느림</h3><p>설정에서 동시 다운로드 값을 바꿔 보세요. Pawchive는 일부러 동시에 5개, 새 파일 요청은 1초에 한 번으로 제한됩니다. Tor는 직접 연결보다 느립니다.</p><h3>Tor가 작동하지 않음</h3><p>'Tor 다운로드'를 쓰거나 '찾아보기'로 Tor 프로그램을 고른 뒤, 'Tor 시작'을 누르고 '실행 중'이 되면 'Tor 테스트'를 누르세요. 연결되지 않으면 Tor 출력에 Tor 자체 메시지가 표시됩니다.</p><h3>설정이 바뀌지 않음</h3><p>언어와 글꼴을 포함한 대부분의 설정은 '변경 적용'을 누르고 확인한 뒤에 반영됩니다.</p><h3>파일은 어디에 있나요?</h3><p>설정 › 폴더 설정의 '디렉토리 열기'는 메인 폴더를, 기록 탭의 '폴더 열기'는 완료된 다운로드의 폴더를 엽니다.</p>",
+                "chinese-simplified": "<h3>出现连接错误或没有任何下载</h3><p>请检查网络连接，并确认网站能在浏览器中打开；网站有时会暂时无法访问。如果使用了代理或 Tor，请在设置中测试，或关闭代理。</p><h3>没有显示文件或投稿</h3><p>请确认链接与选项卡相符：投稿下载器使用投稿链接（…/user/ID/post/ID），创作者下载器使用创作者链接（…/user/ID）。点击队列中链接的眼睛按钮，并在下载前勾选文件或投稿（或使用“下载所有链接”）。</p><h3>文件被跳过或显示缺失</h3><p>标为仅预览的文件，以及媒体服务器回应找不到的文件（HTTP 404），都无法从网站下载。参见“日志和报告”。</p><h3>下载很慢</h3><p>在设置中尝试调整并行下载数。Pawchive 被有意限制为同时 5 个下载、每秒最多发起一个新的文件请求。Tor 比直接连接慢。</p><h3>Tor 无法使用</h3><p>使用“下载Tor”（或点击“浏览”选择你的 Tor 程序），点击“启动Tor”，等待状态变为“运行中”，然后点击“测试Tor”。如果无法连接，Tor输出中会显示 Tor 自己的消息。</p><h3>设置没有改变</h3><p>包括语言和字体在内的大多数设置，需要点击“应用更改”并确认后才会生效。</p><h3>我的文件在哪里？</h3><p>设置 › 文件夹设置中的“打开目录”会打开主文件夹，历史记录选项卡中的“打开文件夹”会打开已完成下载的文件夹。</p>",
+            },
+            "guide_support_title": {
+                "english": "Support and Updates",
+                "japanese": "サポートと更新",
+                "korean": "지원과 업데이트",
+                "chinese-simplified": "支持与更新",
+            },
+            "guide_support_text": {
+                "english": "<ul><li>Report bugs or suggest features on GitHub: <a href='https://github.com/VoxDroid/KemonoDownloader/issues'>github.com/VoxDroid/KemonoDownloader/issues</a>. Say what you did and what happened, and attach the log (Expand Logs › Download Logs). Turning on Debug details in Settings › Log Settings first makes the log more useful.</li><li>Please report security problems privately through the repository's Security tab rather than in a public issue.</li><li>With Auto Check for Updates on, the app tells you when a new version is out. All releases are at <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a>.</li><li>Kemono Downloader is free, open-source software by VoxDroid, released under the MIT license.</li></ul>",
+                "japanese": "<ul><li>バグの報告や機能の提案は GitHub へ：<a href='https://github.com/VoxDroid/KemonoDownloader/issues'>github.com/VoxDroid/KemonoDownloader/issues</a>。行った操作と起きたことを書き、ログ（ログを展開 › ログをダウンロード）を添付してください。先に設定 › ログ設定でデバッグ情報をオンにすると、より役立つログになります。</li><li>セキュリティ上の問題は、公開の issue ではなく、リポジトリの Security タブから非公開で報告してください。</li><li>自動更新チェックがオンなら、新しいバージョンが出たときにお知らせします。すべてのリリースは <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a> にあります。</li><li>Kemono Downloader は VoxDroid による無料のオープンソースソフトウェアで、MIT ライセンスで公開されています。</li></ul>",
+                "korean": "<ul><li>버그 신고나 기능 제안은 GitHub에서 해 주세요: <a href='https://github.com/VoxDroid/KemonoDownloader/issues'>github.com/VoxDroid/KemonoDownloader/issues</a>. 무엇을 했고 어떤 일이 일어났는지 적고, 로그(로그 확장 › 로그 다운로드)를 첨부하세요. 먼저 설정 › 로그 설정에서 디버그 정보를 켜면 더 유용한 로그가 됩니다.</li><li>보안 문제는 공개 이슈 대신 저장소의 Security 탭을 통해 비공개로 알려 주세요.</li><li>자동 업데이트 확인을 켜 두면 새 버전이 나왔을 때 알려 줍니다. 모든 릴리스는 <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a>에 있습니다.</li><li>Kemono Downloader는 VoxDroid가 만든 무료 오픈 소스 소프트웨어이며 MIT 라이선스로 배포됩니다.</li></ul>",
+                "chinese-simplified": "<ul><li>在 GitHub 上报告错误或提出功能建议：<a href='https://github.com/VoxDroid/KemonoDownloader/issues'>github.com/VoxDroid/KemonoDownloader/issues</a>。请说明你做了什么、发生了什么，并附上日志（展开日志 › 下载日志）。先在“设置 › 日志设置”中开启调试信息，日志会更有用。</li><li>安全问题请通过仓库的 Security 选项卡私下报告，不要发布在公开的 issue 中。</li><li>开启自动检查更新后，有新版本时应用会通知你。所有版本都在 <a href='https://github.com/VoxDroid/KemonoDownloader/releases'>GitHub Releases</a> 上。</li><li>Kemono Downloader 是由 VoxDroid 开发的免费开源软件，采用 MIT 许可证发布。</li></ul>",
+            },
+            "ext_subtitle": {
+                "english": "A separate extension that adds download controls to Kemono and Coomer post pages. It works without the desktop app and saves files through your browser's downloads.",
+                "japanese": "Kemono と Coomer の投稿ページにダウンロード機能を追加する、別の拡張機能です。デスクトップアプリなしで動作し、ブラウザのダウンロード機能でファイルを保存します。",
+                "korean": "Kemono와 Coomer 게시물 페이지에 다운로드 기능을 추가하는 별도의 확장 프로그램입니다. 데스크톱 앱 없이 작동하며, 브라우저의 다운로드 기능으로 파일을 저장합니다.",
+                "chinese-simplified": "一个独立的扩展，会在 Kemono 和 Coomer 的投稿页面上添加下载功能。它无需桌面应用即可使用，并通过浏览器的下载功能保存文件。",
+            },
+            "ext_feature_pick_title": {
+                "english": "Pick files",
+                "japanese": "ファイルを選ぶ",
+                "korean": "파일 선택",
+                "chinese-simplified": "挑选文件",
+            },
+            "ext_feature_pick_text": {
+                "english": "Choose a post's files with checkboxes.",
+                "japanese": "投稿のファイルをチェックボックスで選べます。",
+                "korean": "체크박스로 게시물의 파일을 고릅니다.",
+                "chinese-simplified": "用复选框选择投稿中的文件。",
+            },
+            "ext_feature_zip_title": {
+                "english": "ZIP or separate",
+                "japanese": "ZIP または個別",
+                "korean": "ZIP 또는 개별",
+                "chinese-simplified": "ZIP 或单独下载",
+            },
+            "ext_feature_zip_text": {
+                "english": "Get several files as one ZIP, or each on its own, which suits large videos.",
+                "japanese": "複数のファイルを 1 つの ZIP にまとめるか、1 つずつ保存できます（大きな動画向き）。",
+                "korean": "여러 파일을 ZIP 하나로 받거나 하나씩 받을 수 있습니다(큰 동영상에 적합).",
+                "chinese-simplified": "可以把多个文件打包成一个 ZIP，也可以逐个下载（适合大型视频）。",
+            },
+            "ext_feature_progress_title": {
+                "english": "Progress",
+                "japanese": "進行状況",
+                "korean": "진행 상황",
+                "chinese-simplified": "进度",
+            },
+            "ext_feature_progress_text": {
+                "english": "Follow each download while it runs.",
+                "japanese": "ダウンロード中の進行状況を確認できます。",
+                "korean": "다운로드 진행 상황을 실시간으로 볼 수 있습니다.",
+                "chinese-simplified": "实时查看每个下载的进度。",
+            },
+            "ext_feature_sites_title": {
+                "english": "Kemono and Coomer",
+                "japanese": "Kemono と Coomer",
+                "korean": "Kemono와 Coomer",
+                "chinese-simplified": "Kemono 和 Coomer",
+            },
+            "ext_feature_sites_text": {
+                "english": "Works on kemono.cr and coomer.st post pages.",
+                "japanese": "kemono.cr と coomer.st の投稿ページで動作します。",
+                "korean": "kemono.cr와 coomer.st 게시물 페이지에서 작동합니다.",
+                "chinese-simplified": "适用于 kemono.cr 和 coomer.st 的投稿页面。",
+            },
+            "ext_install_heading": {
+                "english": "Install it",
+                "japanese": "インストール方法",
+                "korean": "설치 방법",
+                "chinese-simplified": "安装方法",
+            },
+            "ext_step_get_title": {
+                "english": "1. Get the extension",
+                "japanese": "1. 拡張機能を入手する",
+                "korean": "1. 확장 프로그램 받기",
+                "chinese-simplified": "1. 获取扩展",
+            },
+            "ext_step_get_text": {
+                "english": "On the release page, download <b>Source code (zip)</b> and unzip it. The extension is the <b>browser-extension</b> folder inside. You can also browse that folder on GitHub.",
+                "japanese": "リリースページで <b>Source code (zip)</b> をダウンロードして展開します。拡張機能は中の <b>browser-extension</b> フォルダです。GitHub でこのフォルダを見ることもできます。",
+                "korean": "릴리스 페이지에서 <b>Source code (zip)</b>를 받아 압축을 푸세요. 확장 프로그램은 그 안의 <b>browser-extension</b> 폴더입니다. GitHub에서 이 폴더를 볼 수도 있습니다.",
+                "chinese-simplified": "在发布页面下载 <b>Source code (zip)</b> 并解压。扩展就是其中的 <b>browser-extension</b> 文件夹。你也可以在 GitHub 上查看这个文件夹。",
+            },
+            "ext_step_manifest_title": {
+                "english": "2. Choose your browser's manifest",
+                "japanese": "2. ブラウザ用のマニフェストを選ぶ",
+                "korean": "2. 브라우저용 매니페스트 고르기",
+                "chinese-simplified": "2. 选择对应浏览器的清单文件",
+            },
+            "ext_step_manifest_text": {
+                "english": "The folder has one manifest per browser. Copy the right one over <b>manifest.json</b>; the manifest.json there by default is only a placeholder and won't load.<br>• Chrome, Edge and other Chromium browsers: <b>chrome_manifest.json</b><br>• Firefox: <b>firefox_manifest.json</b>",
+                "japanese": "フォルダにはブラウザごとのマニフェストがあります。正しいものを <b>manifest.json</b> に上書きコピーしてください。最初からある manifest.json は仮のもので、読み込めません。<br>• Chrome、Edge などの Chromium 系ブラウザ：<b>chrome_manifest.json</b><br>• Firefox：<b>firefox_manifest.json</b>",
+                "korean": "폴더에는 브라우저별 매니페스트가 있습니다. 알맞은 파일을 <b>manifest.json</b>에 덮어 복사하세요. 기본으로 들어 있는 manifest.json은 임시 파일이라 로드되지 않습니다.<br>• Chrome, Edge 등 Chromium 브라우저: <b>chrome_manifest.json</b><br>• Firefox: <b>firefox_manifest.json</b>",
+                "chinese-simplified": "文件夹中为每种浏览器准备了一个清单文件。请把对应的文件复制并覆盖 <b>manifest.json</b>；默认的 manifest.json 只是占位文件，无法加载。<br>• Chrome、Edge 等 Chromium 浏览器：<b>chrome_manifest.json</b><br>• Firefox：<b>firefox_manifest.json</b>",
+            },
+            "ext_commands_label": {
+                "english": "Or run one of these in the browser-extension folder:",
+                "japanese": "または browser-extension フォルダで次のいずれかを実行します：",
+                "korean": "또는 browser-extension 폴더에서 다음 중 하나를 실행하세요:",
+                "chinese-simplified": "或在 browser-extension 文件夹中运行以下命令之一：",
+            },
+            "ext_step_chrome_title": {
+                "english": "3. Load it in Chrome or Edge",
+                "japanese": "3. Chrome または Edge で読み込む",
+                "korean": "3. Chrome 또는 Edge에서 로드",
+                "chinese-simplified": "3. 在 Chrome 或 Edge 中加载",
+            },
+            "ext_step_chrome_text": {
+                "english": "Open <b>chrome://extensions</b> (or <b>edge://extensions</b>), turn on <b>Developer mode</b>, press <b>Load unpacked</b> and choose the browser-extension folder.",
+                "japanese": "<b>chrome://extensions</b>（または <b>edge://extensions</b>）を開き、<b>デベロッパー モード</b>をオンにして<b>パッケージ化されていない拡張機能を読み込む</b>を押し、browser-extension フォルダを選びます。",
+                "korean": "<b>chrome://extensions</b>(또는 <b>edge://extensions</b>)를 열고 <b>개발자 모드</b>를 켠 다음 <b>압축해제된 확장 프로그램을 로드합니다</b>를 눌러 browser-extension 폴더를 고르세요.",
+                "chinese-simplified": "打开 <b>chrome://extensions</b>（或 <b>edge://extensions</b>），开启<b>开发者模式</b>，点击<b>加载已解压的扩展程序</b>，然后选择 browser-extension 文件夹。",
+            },
+            "ext_step_firefox_title": {
+                "english": "3. Load it in Firefox",
+                "japanese": "3. Firefox で読み込む",
+                "korean": "3. Firefox에서 로드",
+                "chinese-simplified": "3. 在 Firefox 中加载",
+            },
+            "ext_step_firefox_text": {
+                "english": "Open <b>about:debugging#/runtime/this-firefox</b>, press <b>Load Temporary Add-on…</b> and choose the folder's manifest.json. Firefox removes temporary add-ons when it restarts, so load it again after a restart.",
+                "japanese": "<b>about:debugging#/runtime/this-firefox</b> を開き、<b>一時的なアドオンを読み込む…</b>を押してフォルダ内の manifest.json を選びます。Firefox は再起動すると一時的なアドオンを削除するので、再起動後はもう一度読み込んでください。",
+                "korean": "<b>about:debugging#/runtime/this-firefox</b>를 열고 <b>임시 부가 기능 로드…</b>를 눌러 폴더의 manifest.json을 고르세요. Firefox는 다시 시작하면 임시 부가 기능을 제거하므로, 재시작 후에는 다시 로드해야 합니다.",
+                "chinese-simplified": "打开 <b>about:debugging#/runtime/this-firefox</b>，点击<b>临时载入附加组件…</b>，然后选择文件夹中的 manifest.json。Firefox 重启时会移除临时附加组件，所以重启后需要重新加载。",
+            },
+            "ext_use_title": {
+                "english": "Using it",
+                "japanese": "使い方",
+                "korean": "사용 방법",
+                "chinese-simplified": "使用方法",
+            },
+            "ext_use_text": {
+                "english": "Open a post on kemono.cr or coomer.st. The extension adds its download controls to the page: tick the files, choose a ZIP or separate files, and download. Files go to your browser's download folder.",
+                "japanese": "kemono.cr または coomer.st で投稿を開きます。拡張機能がページにダウンロード機能を追加するので、ファイルにチェックを入れ、ZIP か個別かを選んでダウンロードします。ファイルはブラウザのダウンロードフォルダに保存されます。",
+                "korean": "kemono.cr나 coomer.st에서 게시물을 여세요. 확장 프로그램이 페이지에 다운로드 기능을 추가합니다. 파일을 선택하고 ZIP 또는 개별 파일을 고른 뒤 다운로드하세요. 파일은 브라우저의 다운로드 폴더에 저장됩니다.",
+                "chinese-simplified": "在 kemono.cr 或 coomer.st 上打开一个投稿。扩展会在页面上添加下载功能：勾选文件，选择 ZIP 或单独文件，然后下载。文件会保存到浏览器的下载文件夹。",
+            },
+            "ext_trouble_title": {
+                "english": "If something doesn't work",
+                "japanese": "うまくいかないとき",
+                "korean": "문제가 있을 때",
+                "chinese-simplified": "遇到问题时",
+            },
+            "ext_trouble_text": {
+                "english": "<ul><li><b>No download controls</b>: make sure you're on a post page (…/post/…) of kemono.cr or coomer.st, then reload the page.</li><li><b>Manifest or service worker errors when loading</b>: the placeholder manifest.json was loaded. Copy your browser's manifest over it (step 2) and load the folder again.</li><li><b>The extension disappeared in Firefox</b>: temporary add-ons are removed on restart; load it again.</li><li><b>Downloads blocked</b>: if your browser asks, allow the site to download multiple files.</li></ul>",
+                "japanese": "<ul><li><b>ダウンロード機能が表示されない</b>：kemono.cr または coomer.st の投稿ページ（…/post/…）にいることを確認し、ページを再読み込みしてください。</li><li><b>読み込み時にマニフェストや service worker のエラーが出る</b>：仮の manifest.json が読み込まれています。ブラウザ用のマニフェストを上書きコピー（手順 2）してから、もう一度フォルダを読み込んでください。</li><li><b>Firefox で拡張機能が消えた</b>：一時的なアドオンは再起動で削除されます。もう一度読み込んでください。</li><li><b>ダウンロードがブロックされる</b>：ブラウザに聞かれたら、そのサイトに複数ファイルのダウンロードを許可してください。</li></ul>",
+                "korean": "<ul><li><b>다운로드 기능이 보이지 않음</b>: kemono.cr나 coomer.st의 게시물 페이지(…/post/…)인지 확인하고 페이지를 새로고침하세요.</li><li><b>로드할 때 매니페스트나 service worker 오류</b>: 임시 manifest.json이 로드된 것입니다. 브라우저용 매니페스트를 덮어 복사(2단계)한 뒤 폴더를 다시 로드하세요.</li><li><b>Firefox에서 확장 프로그램이 사라짐</b>: 임시 부가 기능은 재시작하면 제거됩니다. 다시 로드하세요.</li><li><b>다운로드가 차단됨</b>: 브라우저가 물어보면 해당 사이트의 여러 파일 다운로드를 허용하세요.</li></ul>",
+                "chinese-simplified": "<ul><li><b>没有出现下载功能</b>：请确认你在 kemono.cr 或 coomer.st 的投稿页面（…/post/…）上，然后刷新页面。</li><li><b>加载时出现清单或 service worker 错误</b>：加载的是占位用的 manifest.json。请把对应浏览器的清单文件复制覆盖它（第 2 步），然后重新加载文件夹。</li><li><b>Firefox 中扩展消失了</b>：临时附加组件会在重启时被移除，请重新加载。</li><li><b>下载被阻止</b>：如果浏览器询问，请允许该网站下载多个文件。</li></ul>",
+            },
+            "ext_open_releases": {
+                "english": "Release Page",
+                "japanese": "リリースページ",
+                "korean": "릴리스 페이지",
+                "chinese-simplified": "发布页面",
+            },
+            "ext_open_folder": {
+                "english": "Extension Folder on GitHub",
+                "japanese": "GitHub の拡張機能フォルダ",
+                "korean": "GitHub의 확장 프로그램 폴더",
+                "chinese-simplified": "GitHub 上的扩展文件夹",
+            },
+            "ext_copy_command": {
+                "english": "Copy",
+                "japanese": "コピー",
+                "korean": "복사",
+                "chinese-simplified": "复制",
+            },
+            "ext_copied": {
+                "english": "Copied!",
+                "japanese": "コピーしました",
+                "korean": "복사됨",
+                "chinese-simplified": "已复制",
+            },
+            # Proxy settings
+            "proxy_intro": {
+                "english": "Send downloads through your own proxy server or the Tor network.",
+                "japanese": "ダウンロードを自分のプロキシサーバーまたは Tor ネットワーク経由で行います。",
+                "korean": "다운로드를 직접 지정한 프록시 서버나 Tor 네트워크를 통해 보냅니다.",
+                "chinese-simplified": "通过你自己的代理服务器或 Tor 网络进行下载。",
+            },
+            "custom_proxy_hint": {
+                "english": "Accepts host:port, http://host:port or socks5h://host:port. Add user:password@ before the host if the proxy needs a login.",
+                "japanese": "host:port、http://host:port、socks5h://host:port の形式に対応しています。ログインが必要なプロキシでは、ホストの前に user:password@ を付けてください。",
+                "korean": "host:port, http://host:port, socks5h://host:port 형식을 지원합니다. 로그인이 필요한 프록시라면 호스트 앞에 user:password@를 붙이세요.",
+                "chinese-simplified": "支持 host:port、http://host:port 或 socks5h://host:port 格式。如果代理需要登录，请在主机前加上 user:password@。",
+            },
+            "tor_hint": {
+                "english": "Downloads go through Tor (port 9050), including a Tor service you run yourself. If Tor isn't running, downloads fail instead of using your own connection.",
+                "japanese": "ダウンロードは Tor（ポート 9050）を経由します。自分で実行している Tor サービスも使えます。Tor が動いていない場合、自分の接続を使わずにダウンロードは失敗します。",
+                "korean": "다운로드는 Tor(포트 9050)를 통해 이루어지며, 직접 실행 중인 Tor 서비스도 사용할 수 있습니다. Tor가 실행 중이 아니면 내 연결을 사용하지 않고 다운로드가 실패합니다.",
+                "chinese-simplified": "下载会通过 Tor（端口 9050）进行，也可以使用你自己运行的 Tor 服务。如果 Tor 未运行，下载会失败，而不会使用你自己的网络连接。",
+            },
+            # Full logs window
+            "copy_logs": {
+                "english": "Copy All",
+                "japanese": "すべてコピー",
+                "korean": "모두 복사",
+                "chinese-simplified": "全部复制",
+            },
+            "logs_copied": {
+                "english": "Copied!",
+                "japanese": "コピーしました",
+                "korean": "복사됨",
+                "chinese-simplified": "已复制",
+            },
+            "logs_search_placeholder": {
+                "english": "Search logs…",
+                "japanese": "ログを検索…",
+                "korean": "로그 검색…",
+                "chinese-simplified": "搜索日志…",
+            },
+            "logs_find_previous": {
+                "english": "Previous match (Shift+Enter)",
+                "japanese": "前の一致 (Shift+Enter)",
+                "korean": "이전 결과 (Shift+Enter)",
+                "chinese-simplified": "上一个匹配（Shift+Enter）",
+            },
+            "logs_find_next": {
+                "english": "Next match (Enter)",
+                "japanese": "次の一致 (Enter)",
+                "korean": "다음 결과 (Enter)",
+                "chinese-simplified": "下一个匹配（Enter）",
+            },
+            "logs_match_count": {
+                "english": "{0} matches",
+                "japanese": "{0}件一致",
+                "korean": "{0}개 일치",
+                "chinese-simplified": "{0} 个匹配",
+            },
+            "logs_match_count_one": {
+                "english": "1 match",
+                "japanese": "1件一致",
+                "korean": "1개 일치",
+                "chinese-simplified": "1 个匹配",
+            },
+            "logs_no_matches": {
+                "english": "No matches",
+                "japanese": "一致なし",
+                "korean": "일치 항목 없음",
+                "chinese-simplified": "无匹配",
+            },
+            "logs_line_count": {
+                "english": "{0} lines",
+                "japanese": "{0}行",
+                "korean": "{0}줄",
+                "chinese-simplified": "{0} 行",
+            },
+            "logs_line_count_one": {
+                "english": "1 line",
+                "japanese": "1行",
+                "korean": "1줄",
+                "chinese-simplified": "1 行",
+            },
+            "logs_jump_to_latest": {
+                "english": "Jump to Latest",
+                "japanese": "最新へ移動",
+                "korean": "최신으로 이동",
+                "chinese-simplified": "跳到最新",
+            },
+            "logs_new_lines": {
+                "english": "{0} New Lines",
+                "japanese": "新しい行 {0}件",
+                "korean": "새 줄 {0}개",
+                "chinese-simplified": "{0} 条新日志",
+            },
+            "logs_new_lines_one": {
+                "english": "1 New Line",
+                "japanese": "新しい行 1件",
+                "korean": "새 줄 1개",
+                "chinese-simplified": "1 条新日志",
+            },
+            "logs_follow_tooltip": {
+                "english": "Auto-scroll pauses while you scroll up and resumes when you reach the bottom.",
+                "japanese": "上にスクロールすると自動スクロールが一時停止し、一番下まで戻ると再開します。",
+                "korean": "위로 스크롤하면 자동 스크롤이 일시 중지되고, 맨 아래로 돌아오면 다시 시작됩니다.",
+                "chinese-simplified": "向上滚动时自动滚动会暂停，回到底部后自动恢复。",
             },
         }
 

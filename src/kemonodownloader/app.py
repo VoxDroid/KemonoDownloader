@@ -8,16 +8,7 @@ import qtawesome as qta
 import requests
 from bs4 import MarkupResemblesLocatorWarning
 from packaging import version
-from PyQt6.QtCore import (
-    QEasingCurve,
-    QPoint,
-    QPropertyAnimation,
-    QRect,
-    Qt,
-    QThread,
-    QTimer,
-    pyqtSignal,
-)
+from PyQt6.QtCore import QPoint, QRect, Qt, QThread, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QCursor, QFont, QFontDatabase, QIcon, QPalette, QPixmap
 from PyQt6.QtWidgets import (
     QApplication,
@@ -49,6 +40,16 @@ from kemonodownloader.kd_motion import (
     fade_out_snapshot,
 )
 from kemonodownloader.kd_settings import SettingsTab
+from kemonodownloader.kd_theme import (
+    apply_theme,
+    color,
+    is_themed,
+    qt_palette,
+    repolish,
+    restyle_rows,
+    set_role,
+    use_theme,
+)
 from kemonodownloader.kd_thumbnaildl import ThumbnailDownloaderTab
 from kemonodownloader.post_downloader import PostDownloaderTab
 
@@ -117,7 +118,7 @@ class IntroScreen(QWidget):
         self._parent.settings_tab.language_changed.connect(self.update_ui_text)
 
     def setup_ui(self):
-        self.setStyleSheet("background-color: #1A2A44; border: none;")
+        self.setStyleSheet(f"background-color: {color('BG')}; border: none;")
         main_layout = QVBoxLayout(self)
         main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.setSpacing(20)
@@ -145,7 +146,9 @@ class IntroScreen(QWidget):
         # Version Label
         self.version_label = QLabel(f"Version {CURRENT_VERSION}")
         self.version_label.setFont(QFont(self._get_font_family(), 12))
-        self.version_label.setStyleSheet("color: #CCCCCC; background: transparent;")
+        self.version_label.setStyleSheet(
+            f"color: {color('TEXT_SOFT')}; background: transparent;"
+        )
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(
             self.version_label, alignment=Qt.AlignmentFlag.AlignCenter
@@ -158,20 +161,27 @@ class IntroScreen(QWidget):
         )
         # larger width for launch button
         self.launch_button.setFixedSize(300, 60)
+        accent, hover, pressed = (
+            color("ACCENT"),
+            color("ACCENT_HOVER"),
+            color("ACCENT_PRESSED"),
+        )
+        deepest = QColor(pressed).darker(125).name()
+        gradient = "qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 {}, stop:1 {})"
         self.launch_button.setStyleSheet(
-            """
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4A6B9A, stop:1 #3A5B7A);
-                color: #FFFFFF;
+            f"""
+            QPushButton {{
+                background: {gradient.format(accent, pressed)};
+                color: {color('TEXT')};
                 border-radius: 18px;
-                border: 2px solid #5A7BA9;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5A7BA9, stop:1 #4A6B9A);
-            }
-            QPushButton:pressed {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3A5B7A, stop:1 #2A4B6A);
-            }
+                border: 2px solid {hover};
+            }}
+            QPushButton:hover {{
+                background: {gradient.format(hover, accent)};
+            }}
+            QPushButton:pressed {{
+                background: {gradient.format(pressed, deepest)};
+            }}
         """
         )
         button_shadow = QGraphicsDropShadowEffect()
@@ -195,23 +205,29 @@ class IntroScreen(QWidget):
 
         self.title = QLabel(translate("app_title"))
         self.title.setFont(QFont(self._get_font_family(), 14, QFont.Weight.Bold))
-        self.title.setStyleSheet("color: #FFFFFF; background: transparent;")
+        self.title.setStyleSheet(f"color: {color('TEXT')}; background: transparent;")
         self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(self.title)
 
         self.dev_label = QLabel(translate("developed_by"))
         self.dev_label.setFont(QFont(self._get_font_family(), 10))
-        self.dev_label.setStyleSheet("color: #CCCCCC; background: transparent;")
+        self.dev_label.setStyleSheet(
+            f"color: {color('TEXT_SOFT')}; background: transparent;"
+        )
         self.dev_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         footer_layout.addWidget(self.dev_label)
 
         self.github_label = QLabel(
-            '<a href="https://github.com/VoxDroid" style="color: #A0C0FF; text-decoration: none; font-size: 10px;">github.com/VoxDroid</a>'
+            '<a href="https://github.com/VoxDroid" style="color: '
+            + color("INFO")
+            + '; text-decoration: none; font-size: 10px;">github.com/VoxDroid</a>'
         )
         self.github_label.setFont(QFont(self._get_font_family(), 10))
         self.github_label.setOpenExternalLinks(True)
         self.github_label.setStyleSheet(
-            "QLabel { background: transparent; } QLabel:hover { color: #C0E0FF; }"
+            "QLabel { background: transparent; } QLabel:hover { color: "
+            + QColor(color("INFO")).lighter(115).name()
+            + "; }"
         )
         self.github_label.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.github_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -256,6 +272,12 @@ class KemonoDownloader(QMainWindow):
         self.setGeometry(100, 100, 1000, 700)
 
         self.settings_tab = SettingsTab(self)
+        # The saved theme, before anything else is drawn.
+        get_theme = getattr(self.settings_tab, "get_theme", None)
+        self.apply_app_theme(get_theme() if callable(get_theme) else None)
+        theme_changed = getattr(self.settings_tab, "theme_changed", None)
+        if theme_changed is not None:
+            theme_changed.connect(self.apply_app_theme)
         self.settings_tab.download_started.connect(self.disable_other_tabs)
         self.settings_tab.download_finished.connect(self.enable_other_tabs)
         self.base_folder = os.path.join(
@@ -320,15 +342,30 @@ class KemonoDownloader(QMainWindow):
             child.setFont(child_font)
 
     def apply_palette(self):
-        palette = QPalette()
-        palette.setColor(QPalette.ColorRole.Window, QColor("#1A2A44"))
-        palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
-        palette.setColor(QPalette.ColorRole.Base, QColor("#2A3B5A"))
-        palette.setColor(QPalette.ColorRole.AlternateBase, QColor("#3A4B6A"))
-        palette.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
-        palette.setColor(QPalette.ColorRole.Button, QColor("#3A5B7A"))
-        palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
-        self.setPalette(palette)
+        self.setPalette(qt_palette(QPalette()))
+
+    def apply_app_theme(self, theme):
+        """Show the app in *theme*, restyling everything already on screen."""
+        theme = use_theme(theme)
+        app = QApplication.instance()
+        # Only an application main() has styled: elsewhere (tests) there is
+        # no app-wide style sheet to swap.
+        if app is not None and is_themed(app):
+            apply_theme(app, theme)
+        self.apply_palette()
+        # The tab widget keeps the background colour its style gave it, and
+        # its pages inherit that: the tab-switch fade (and a page's first
+        # frame) showed the previous theme until they are polished again.
+        tabs = getattr(self, "tabs", None)
+        if tabs is not None:
+            for widget in (tabs, *(tabs.widget(i) for i in range(tabs.count()))):
+                repolish(widget)
+        restyle_rows(self)
+        # Pages that draw icons and documents in theme colours.
+        for name in ("help_tab", "extension_tab"):
+            tab = getattr(self, name, None)
+            if tab is not None:
+                tab.update_ui_text()
 
     def ensure_folders_exist(self):
         for folder in [
@@ -417,40 +454,10 @@ class KemonoDownloader(QMainWindow):
         main_layout = QVBoxLayout(main_widget)
         main_layout.setContentsMargins(15, 15, 15, 15)
         main_layout.setSpacing(15)
-        main_widget.setStyleSheet("background: #1A2A44;")
+        main_widget.setObjectName("kdMain")
 
         # Tab Widget
         self.tabs = QTabWidget()
-        self.tabs.setStyleSheet(
-            """
-            QTabWidget::pane {
-                border: none;
-                background: #1A2A44;
-            }
-            QTabBar::tab {
-                background: #3A4B6A;
-                color: white;
-                padding: 10px 14px;
-                margin-right: 2px;
-                border-top-left-radius: 8px;
-                border-top-right-radius: 8px;
-                min-width: 70px;
-            }
-            QTabBar::tab:selected {
-                background: #4A5B7A;
-                color: white;
-            }
-            QTabBar::tab:!selected {
-                margin-top: 2px;
-            }
-            QTabBar::tab:disabled {
-                color: gray;
-            }
-            * {
-                color: white;
-            }
-        """
-        )
         # Seven tabs: shorten labels when the window is narrow instead of
         # hiding tabs behind scroll arrows.
         self.tabs.tabBar().setElideMode(Qt.TextElideMode.ElideRight)
@@ -536,7 +543,6 @@ class KemonoDownloader(QMainWindow):
         footer_layout = QHBoxLayout(footer)
         footer_layout.setContentsMargins(10, 5, 10, 5)
         self.status_label = QLabel(translate("idle"))
-        self.status_label.setStyleSheet("color: white; font-size: 12px;")
         footer_layout.addWidget(self.status_label)
         footer_layout.addStretch()
         self.dev_label = QLabel(
@@ -621,9 +627,24 @@ class KemonoDownloader(QMainWindow):
 
     def _finish_intro_transition(self):
         """Complete the intro-to-main transition and release the intro screen."""
+        size = self.size()
         self.setCentralWidget(self.main_widget)
         self.main_widget.show()
         self.intro_screen = None
+        # While its word-wrapped labels are still unmeasured, the new screen
+        # asks for more height than it needs, and Qt grows the window to fit
+        # (past the bottom of smaller screens). Put the size back once the
+        # layout has settled.
+        QTimer.singleShot(0, lambda: self._restore_size(size))
+
+    def _restore_size(self, size):
+        """Return to *size*, or the smallest size the window can take."""
+        if self.isMaximized() or self.isFullScreen():
+            return
+        minimum = self.minimumSizeHint()
+        self.resize(
+            max(size.width(), minimum.width()), max(size.height(), minimum.height())
+        )
 
     def check_for_updates(self):
         self.version_checker = VersionChecker()
@@ -637,42 +658,17 @@ class KemonoDownloader(QMainWindow):
         msg.setText(translate("update_available_message", new_version))
         msg.setInformativeText(
             f"{translate('current_version', CURRENT_VERSION)}\n"
-            f'<a href="{url}" style="color: #A0C0FF; text-decoration: none;">{translate("click_release_page")}</a>'
+            f'<a href="{url}" style="color: {color("INFO")}; text-decoration: none;">'
+            f'{translate("click_release_page")}</a>'
         )
         msg.setStandardButtons(
             QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Ignore
         )
         msg.setDefaultButton(QMessageBox.StandardButton.Ok)
+        ok_button = msg.button(QMessageBox.StandardButton.Ok)
+        if ok_button is not None:
+            set_role(ok_button, "primary")
         msg.setTextFormat(Qt.TextFormat.RichText)
-        msg.setStyleSheet(
-            """
-            QMessageBox {
-                background-color: #2A3B5A;
-                border: 1px solid #3A4B6A;
-                border-radius: 8px;
-            }
-            QMessageBox QLabel {
-                color: #FFFFFF;
-                font-size: 14px;
-                padding: 5px;
-            }
-            QPushButton {
-                background-color: #4A6B9A;
-                color: #FFFFFF;
-                border: none;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 12px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #5A7BA9;
-            }
-            QPushButton:pressed {
-                background-color: #3A5B7A;
-            }
-        """
-        )
         reply = msg.exec()
         if reply == QMessageBox.StandardButton.Ok:
             import webbrowser
@@ -685,49 +681,7 @@ class KemonoDownloader(QMainWindow):
         msg.setText(translate("unable_check_updates"))
         msg.setInformativeText(error_message)
         msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-        msg.setStyleSheet(
-            """
-            QMessageBox {
-                background-color: #2A3B5A;
-                border: 1px solid #3A4B6A;
-                border-radius: 8px;
-            }
-            QMessageBox QLabel {
-                color: #FFFFFF;
-                font-size: 14px;
-                padding: 5px;
-            }
-            QPushButton {
-                background-color: #4A6B9A;
-                color: #FFFFFF;
-                border: none;
-                border-radius: 5px;
-                padding: 8px 20px;
-                font-size: 12px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #5A7BA9;
-            }
-            QPushButton:pressed {
-                background-color: #3A5B7A;
-            }
-        """
-        )
         msg.exec()
-
-    def animate_button(self, button, enter):
-        # Owned by the button: a parentless local animation is garbage-collected
-        # before it plays a single frame.
-        anim = QPropertyAnimation(button, b"geometry", button)
-        anim.setDuration(200)
-        anim.setEasingCurve(QEasingCurve.Type.InOutQuad)
-        rect = button.geometry()
-        if enter:
-            anim.setEndValue(rect.adjusted(-3, -3, 3, 3))
-        else:
-            anim.setEndValue(rect.adjusted(3, 3, -3, -3))
-        anim.start(QPropertyAnimation.DeletionPolicy.DeleteWhenStopped)
 
     def log(self, message):
         self.status_label.setText(message)
@@ -739,6 +693,7 @@ def main():
     # Without this, any exception that escapes a slot or thread aborts the app.
     install_exception_hook()
     app.setStyle("Fusion")
+    apply_theme(app)
     load_bundled_fonts()
     install_filter = getattr(app, "installEventFilter", None)
     if install_filter is not None:

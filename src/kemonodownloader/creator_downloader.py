@@ -82,7 +82,12 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
-from kemonodownloader.kd_logs import format_log_line, share_console_document
+from kemonodownloader.kd_logs import (
+    LogsWindowBase,
+    format_log_line,
+    log_level_shown,
+    message_level,
+)
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     _thread_local,
@@ -91,7 +96,9 @@ from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     get_session,
     get_user_agent,
 )
+from kemonodownloader.kd_notes import retranslate_notes, tip, tips, with_note
 from kemonodownloader.kd_preview_notice import MissingFilesNotice, PreviewOnlyNotice
+from kemonodownloader.kd_theme import set_progress_state, set_role, style_row
 
 # get_domain_config is imported from domain_config; re-exported for
 # any callers that import it directly from this module.
@@ -204,9 +211,6 @@ class ImageModal(QDialog):
         self._label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._layout.addWidget(self._label)
         self._progress_bar = QProgressBar()
-        self._progress_bar.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self._layout.addWidget(self._progress_bar)
         self.setLayout(self._layout)
 
@@ -307,12 +311,12 @@ class PostDetectionThread(QThread):
                 "log_debug",
                 translate("parsed_url_service_creator", service, creator_id),
             ),
-            "INFO",
+            "DEBUG",
         )
 
         base_api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}"
         self.log.emit(
-            translate("log_debug", translate("base_api_url", base_api_url)), "INFO"
+            translate("log_debug", translate("base_api_url", base_api_url)), "DEBUG"
         )
 
         # Parse query parameters
@@ -779,7 +783,7 @@ class PostPopulationThread(QThread):
                     len(post_url_map),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.finished.emit(post_url_map, self.detected_posts)
 
@@ -860,7 +864,7 @@ class FilePreparationThread(QThread):
                 self.preview_only_files.append(record)
         self.log.emit(
             translate("log_debug", translate("preview_only_file_skipped", entry.name)),
-            "INFO",
+            "DEBUG",
         )
 
     def detect_files(self, post, allowed_extensions, domain_config):
@@ -869,7 +873,7 @@ class FilePreparationThread(QThread):
             translate(
                 "log_debug", translate("detecting_files_for_post", allowed_extensions)
             ),
-            "INFO",
+            "DEBUG",
         )
 
         labels = {
@@ -887,7 +891,7 @@ class FilePreparationThread(QThread):
             kind, name, url, ext = entry[:4]
             checking_key, added_key = labels[kind]
             self.log.emit(
-                translate("log_debug", translate(checking_key, name, ext)), "INFO"
+                translate("log_debug", translate(checking_key, name, ext)), "DEBUG"
             )
             if extension_allowed(ext, allowed_extensions):
                 if entry.preview_only:
@@ -906,7 +910,7 @@ class FilePreparationThread(QThread):
                 if direct_url:
                     remember_direct_url(url, direct_url)
                 self.log.emit(
-                    translate("log_debug", translate(added_key, name)), "INFO"
+                    translate("log_debug", translate(added_key, name)), "DEBUG"
                 )
                 files_to_download.append((name, url))
 
@@ -914,7 +918,7 @@ class FilePreparationThread(QThread):
             translate(
                 "log_debug", translate("total_files_detected", len(files_to_download))
             ),
-            "INFO",
+            "DEBUG",
         )
         return list(dict.fromkeys(files_to_download))
 
@@ -1031,7 +1035,7 @@ class FilePreparationThread(QThread):
                 "log_debug",
                 translate("allowed_extensions_for_download", allowed_extensions),
             ),
-            "INFO",
+            "DEBUG",
         )
 
         total_posts = len(self.post_ids)
@@ -1086,7 +1090,7 @@ class FilePreparationThread(QThread):
                                         "log_debug",
                                         translate("detected_file", file_name, file_url),
                                     ),
-                                    "INFO",
+                                    "DEBUG",
                                 )
                             except RuntimeError:
                                 pass
@@ -1132,7 +1136,7 @@ class FilePreparationThread(QThread):
                     "log_debug",
                     translate("total_files_to_download", len(files_to_download)),
                 ),
-                "INFO",
+                "DEBUG",
             )
             self.finished.emit(files_to_download, files_to_posts_map)
 
@@ -2179,94 +2183,26 @@ class CheckboxToggleThread(QThread):
                     len(posts_to_download),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.finished.emit(self.checked_urls, posts_to_download)
 
 
-class LogsWindow(QDialog):
+class LogsWindow(LogsWindowBase):
+    """Full logs window for the Creator tab; mirrors ``creator_console``."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._parent = parent
-        self.setWindowTitle(translate("full_logs"))
-        self.setModal(False)
-        self.resize(800, 600)
-        self.setStyleSheet("background: #1A2B4A; color: white;")
+        self.refresh_now()
 
-        layout = QVBoxLayout(self)
+    def _console(self):
+        return getattr(self._parent, "creator_console", None)
 
-        # Logs display
-        self.logs_display = QTextEdit()
-        self.logs_display.setReadOnly(True)
-        self.logs_display.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px;"
-        )
-        layout.addWidget(self.logs_display)
-
-        # Buttons layout
-        buttons_layout = QHBoxLayout()
-
-        self.clear_logs_btn = QPushButton(translate("clear_logs"))
-        self.clear_logs_btn.clicked.connect(self.clear_logs)
-        self.clear_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
-        buttons_layout.addWidget(self.clear_logs_btn)
-
-        self.download_logs_btn = QPushButton(translate("download_logs"))
-        self.download_logs_btn.clicked.connect(self.download_logs)
-        self.download_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
-        buttons_layout.addWidget(self.download_logs_btn)
-
-        buttons_layout.addStretch()
-        layout.addLayout(buttons_layout)
-
-        # Batch update with timer to reduce UI updates
-        from PyQt6.QtCore import QTimer
-
-        self.update_timer = QTimer()
-        self.update_timer.timeout.connect(self._do_update)
-        self.update_timer.setInterval(500)  # Update every 500ms instead of every log
-        self.needs_update = False
-
-        self._shares_console = self._parent is not None and share_console_document(
-            self.logs_display, getattr(self._parent, "creator_console", None)
-        )
-
-        # Update logs content
-        self.update_logs_content()
-
+    # The Creator tab's name for update_logs.
     def update_logs_content(self):
         """Schedule a batched update instead of updating immediately"""
-        self.needs_update = True
-        if not self.update_timer.isActive():
-            self.update_timer.start()
-
-    def _do_update(self):
-        """Actually perform the update (called by timer)"""
-        if (
-            self.needs_update
-            and self._parent
-            and hasattr(self._parent, "creator_console")
-        ):
-            if not self._shares_console:
-                self.logs_display.setHtml(self._parent.creator_console.toHtml())
-            self.needs_update = False
-
-    def closeEvent(self, a0):
-        """Stop timer when window closes"""
-        if hasattr(self, "update_timer"):
-            self.update_timer.stop()
-        if a0 is not None:
-            a0.accept()
-
-    def clear_logs(self):
-        """Clear both the logs window and parent console"""
-        self.logs_display.clear()
-        if self._parent and hasattr(self._parent, "creator_console"):
-            self._parent.creator_console.clear()
+        self.update_logs()
 
     def download_logs(self):
         """Download logs as a txt file"""
@@ -2392,32 +2328,22 @@ class CreatorDownloaderTab(QWidget):
         # Creator URL input layout
         creator_url_layout = QHBoxLayout()
         self.creator_url_input = QLineEdit()
-        self.creator_url_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         creator_url_layout.addWidget(self.creator_url_input)
 
         self.creator_add_to_queue_btn = QPushButton(
             qta.icon("fa5s.plus", color="white"), ""
         )
         self.creator_add_to_queue_btn.clicked.connect(self.add_creator_to_queue)
-        self.creator_add_to_queue_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         creator_url_layout.addWidget(self.creator_add_to_queue_btn)
 
         self.creator_add_from_file_btn = QPushButton(
             qta.icon("fa5s.file-import", color="white"), ""
         )
         self.creator_add_from_file_btn.clicked.connect(self.add_creators_from_file)
-        self.creator_add_from_file_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.creator_bookmark_btn = QPushButton(
             qta.icon("fa5s.star", color="white"), ""
         )
         self.creator_bookmark_btn.clicked.connect(self.bookmark_current_link)
-        self.creator_bookmark_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.creator_bookmark_btn.setToolTip(translate("bookmark_button_tooltip"))
         self.creator_add_from_file_btn.setToolTip(translate("add_links_from_file"))
         creator_url_layout.addWidget(self.creator_add_from_file_btn)
@@ -2429,9 +2355,6 @@ class CreatorDownloaderTab(QWidget):
         self.creator_multi_url_input.setPlaceholderText(
             translate("multi_url_placeholder_creator")
         )
-        self.creator_multi_url_input.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px; color: white;"
-        )
         self.creator_multi_url_input.setFixedHeight(80)
         self.creator_multi_url_input.setVisible(False)
         left_layout.addWidget(self.creator_multi_url_input)
@@ -2442,32 +2365,22 @@ class CreatorDownloaderTab(QWidget):
         self.creator_multi_url_add_btn.clicked.connect(
             self.add_multiple_creators_to_queue
         )
-        self.creator_multi_url_add_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 5px; border-radius: 5px;"
-        )
         self.creator_multi_url_add_btn.setVisible(False)
         left_layout.addWidget(self.creator_multi_url_add_btn)
 
         # Creator Queue Group
         self.creator_queue_group = QGroupBox()
-        self.creator_queue_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         creator_queue_layout = QVBoxLayout()
         self.creator_queue_list = QListWidget()
         self.creator_queue_list.setFixedHeight(100)
-        self.creator_queue_list.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px;"
-        )
         creator_queue_layout.addWidget(self.creator_queue_list)
-        self.creator_queue_group.setLayout(creator_queue_layout)
+        self.creator_queue_group.setLayout(
+            with_note(creator_queue_layout, "note_creator_queue")
+        )
         left_layout.addWidget(self.creator_queue_group)
 
         # Download Options Group
         self.creator_options_group = QGroupBox()
-        self.creator_options_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         creator_options_layout = QVBoxLayout()
 
         creator_categories_layout = QHBoxLayout()
@@ -2489,7 +2402,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_fast_mode_check = QCheckBox()
         self.creator_fast_mode_check.setChecked(False)
         self.creator_fast_mode_check.setIcon(qta.icon("fa5s.bolt", color="#FFD700"))
-        self.creator_fast_mode_check.setStyleSheet("color: white; font-weight: bold;")
+        set_role(self.creator_fast_mode_check, "heading")
         self.creator_fast_mode_check.stateChanged.connect(self.toggle_fast_mode)
         creator_fast_mode_layout.addWidget(self.creator_fast_mode_check)
 
@@ -2497,9 +2410,7 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.info-circle", color="#A0C0FF"), ""
         )
         self.creator_fast_mode_info_btn.setFixedSize(26, 26)
-        self.creator_fast_mode_info_btn.setStyleSheet(
-            "background: #4A5B7A; border-radius: 5px;"
-        )
+        set_role(self.creator_fast_mode_info_btn, "icon")
         self.creator_fast_mode_info_btn.setToolTip(translate("fast_mode_info_title"))
         self.creator_fast_mode_info_btn.clicked.connect(self.show_fast_mode_info)
         creator_fast_mode_layout.addWidget(self.creator_fast_mode_info_btn)
@@ -2509,17 +2420,14 @@ class CreatorDownloaderTab(QWidget):
         # Auto rename checkbox
         self.creator_auto_rename_check = QCheckBox()
         self.creator_auto_rename_check.setChecked(True)  # Default to enabled
-        self.creator_auto_rename_check.setStyleSheet("color: white;")
         creator_options_layout.addWidget(self.creator_auto_rename_check)
 
         # Download text checkbox
         self.creator_download_text_check = QCheckBox(translate("download_text"))
         self.creator_download_text_check.setChecked(True)
-        self.creator_download_text_check.setStyleSheet("color: white;")
         creator_options_layout.addWidget(self.creator_download_text_check)
 
         self.creator_ext_group = QGroupBox()
-        self.creator_ext_group.setStyleSheet("QGroupBox { color: white; }")
         creator_ext_layout = QGridLayout()
         creator_ext_layout.setHorizontalSpacing(20)
         creator_ext_layout.setVerticalSpacing(10)
@@ -2549,7 +2457,9 @@ class CreatorDownloaderTab(QWidget):
             creator_ext_layout.addWidget(check, i // 5, i % 5)
         self.creator_ext_group.setLayout(creator_ext_layout)
         creator_options_layout.addWidget(self.creator_ext_group)
-        self.creator_options_group.setLayout(creator_options_layout)
+        self.creator_options_group.setLayout(
+            with_note(creator_options_layout, "note_creator_options")
+        )
         left_layout.addWidget(self.creator_options_group)
 
         # Progress layout
@@ -2557,17 +2467,11 @@ class CreatorDownloaderTab(QWidget):
         self.creator_file_progress_label = QLabel()
         creator_progress_layout.addWidget(self.creator_file_progress_label)
         self.creator_file_progress = SmoothProgressBar()
-        self.creator_file_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.creator_file_progress.setRange(0, 100)
         creator_progress_layout.addWidget(self.creator_file_progress)
         self.creator_overall_progress_label = QLabel()
         creator_progress_layout.addWidget(self.creator_overall_progress_label)
         self.creator_overall_progress = SmoothProgressBar()
-        self.creator_overall_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.creator_overall_progress.setRange(0, 100)
         creator_progress_layout.addWidget(self.creator_overall_progress)
         left_layout.addLayout(creator_progress_layout)
@@ -2575,9 +2479,7 @@ class CreatorDownloaderTab(QWidget):
         # Console
         self.creator_console = QTextEdit()
         self.creator_console.setReadOnly(True)
-        self.creator_console.setStyleSheet(
-            "background: #2A3B5A; border-radius: 5px; padding: 5px;"
-        )
+        set_role(self.creator_console, "console")
         left_layout.addWidget(self.creator_console)
 
         # Buttons layout
@@ -2586,15 +2488,11 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.download", color="white"), ""
         )
         self.creator_download_btn.clicked.connect(self.start_creator_download)
-        self.creator_download_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        set_role(self.creator_download_btn, "primary")
         creator_btn_layout.addWidget(self.creator_download_btn)
         self.creator_cancel_btn = QPushButton(qta.icon("fa5s.times", color="white"), "")
         self.creator_cancel_btn.clicked.connect(self.cancel_creator_download)
-        self.creator_cancel_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
+        set_role(self.creator_cancel_btn, "danger")
         self.creator_cancel_btn.setEnabled(False)
         creator_btn_layout.addWidget(self.creator_cancel_btn)
 
@@ -2602,9 +2500,6 @@ class CreatorDownloaderTab(QWidget):
             qta.icon("fa5s.expand", color="white"), ""
         )
         self.creator_expand_logs_btn.clicked.connect(self.expand_logs)
-        self.creator_expand_logs_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 8px; border-radius: 5px;"
-        )
         self.creator_expand_logs_btn.setToolTip(translate("expand_logs"))
         creator_btn_layout.addWidget(self.creator_expand_logs_btn)
 
@@ -2619,10 +2514,6 @@ class CreatorDownloaderTab(QWidget):
         left_scroll.setWidgetResizable(True)
         left_scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        left_scroll.setStyleSheet(
-            "QScrollArea { background: transparent; }"
-            "QScrollArea > QWidget > QWidget { background: transparent; }"
-        )
         layout.addWidget(left_scroll, stretch=2)
 
         # Right widget
@@ -2631,33 +2522,26 @@ class CreatorDownloaderTab(QWidget):
 
         # Posts to Download Group
         self.post_list_group = QGroupBox()
-        self.post_list_group.setStyleSheet(
-            "QGroupBox { color: white; font-weight: bold; padding: 10px; }"
-        )
         post_list_layout = QVBoxLayout()
 
         self.creator_search_input = QLineEdit()
-        self.creator_search_input.setStyleSheet("padding: 5px; border-radius: 5px;")
         self.creator_search_input.textChanged.connect(self.filter_items)
         post_list_layout.addWidget(self.creator_search_input)
 
         checkbox_layout = QHBoxLayout()
         self.creator_check_all = QCheckBox()
         self.creator_check_all.setChecked(False)
-        self.creator_check_all.setStyleSheet("color: white;")
         self.creator_check_all.stateChanged.connect(self.toggle_check_all)
         checkbox_layout.addWidget(self.creator_check_all)
 
         self.creator_check_all_all = QCheckBox()
         self.creator_check_all_all.setChecked(False)
-        self.creator_check_all_all.setStyleSheet("color: white;")
         self.creator_check_all_all.stateChanged.connect(self.toggle_check_all_all)
         checkbox_layout.addWidget(self.creator_check_all_all)
 
         post_list_layout.addLayout(checkbox_layout)
 
         self.creator_post_list = QListWidget()
-        self.creator_post_list.setStyleSheet("background: #2A3B5A; border-radius: 5px;")
         self.creator_post_list.setSelectionMode(
             QAbstractItemView.SelectionMode.ExtendedSelection
         )
@@ -2669,21 +2553,18 @@ class CreatorDownloaderTab(QWidget):
 
         bottom_layout = QHBoxLayout()
         self.creator_post_count_label = QLabel()
-        self.creator_post_count_label.setStyleSheet("color: white;")
         bottom_layout.addWidget(self.creator_post_count_label)
 
         # Pagination controls
         self.page_label = QLabel()
-        self.page_label.setStyleSheet("color: white;")
         bottom_layout.addStretch()
         bottom_layout.addWidget(self.page_label)
 
         self.prev_page_btn = QPushButton(
             qta.icon("fa5s.chevron-left", color="white"), ""
         )
-        self.prev_page_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-        )
+        set_role(self.prev_page_btn, "icon")
+        self.prev_page_btn.setFixedSize(30, 30)
         self.prev_page_btn.clicked.connect(self.prev_page)
         self.prev_page_btn.setEnabled(False)
         bottom_layout.addWidget(self.prev_page_btn)
@@ -2691,35 +2572,31 @@ class CreatorDownloaderTab(QWidget):
         self.next_page_btn = QPushButton(
             qta.icon("fa5s.chevron-right", color="white"), ""
         )
-        self.next_page_btn.setStyleSheet(
-            "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-        )
+        set_role(self.next_page_btn, "icon")
+        self.next_page_btn.setFixedSize(30, 30)
         self.next_page_btn.clicked.connect(self.next_page)
         self.next_page_btn.setEnabled(False)
         bottom_layout.addWidget(self.next_page_btn)
 
         bottom_layout.addStretch()
         self.creator_view_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-        self.creator_view_button.setStyleSheet(
-            "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-        )
+        set_role(self.creator_view_button, "icon")
+        self.creator_view_button.setFixedSize(30, 30)
         self.creator_view_button.clicked.connect(self.view_current_item)
         self.creator_view_button.setEnabled(False)
         bottom_layout.addWidget(self.creator_view_button)
 
         post_list_layout.addLayout(bottom_layout)
-        self.post_list_group.setLayout(post_list_layout)
+        self.post_list_group.setLayout(
+            with_note(post_list_layout, "note_creator_posts")
+        )
         right_layout.addWidget(self.post_list_group)
 
         # Background task indicators
         self.background_task_label = QLabel()
-        self.background_task_label.setStyleSheet("color: white;")
         right_layout.addWidget(self.background_task_label)
 
         self.background_task_progress = QProgressBar()
-        self.background_task_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
         right_layout.addWidget(self.background_task_progress)
@@ -2727,33 +2604,31 @@ class CreatorDownloaderTab(QWidget):
         right_layout.addStretch()
         layout.addWidget(right_widget, stretch=1)
 
-        # Button hover animations
-        if self._parent:
-            self.creator_download_btn.enterEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_download_btn, True
-                )
-            )
-            self.creator_download_btn.leaveEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_download_btn, False
-                )
-            )
-            self.creator_cancel_btn.enterEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_cancel_btn, True
-                )
-            )
-            self.creator_cancel_btn.leaveEvent = (
-                lambda *a, **k: self._parent.animate_button(
-                    self.creator_cancel_btn, False
-                )
-            )
-
         # Initial text update
+        # Tooltips, for when a section's note isn't enough.
+        tip(self.creator_url_input, "tip_creator_url")
+        tip(self.creator_add_to_queue_btn, "tip_add_to_queue")
+        tip(self.creator_multi_url_input, "tip_multi_url")
+        tip(self.creator_multi_url_add_btn, "tip_add_all_to_queue")
+        tip(self.creator_main_check, "tip_main_file")
+        tip(self.creator_attachments_check, "tip_attachments")
+        tip(self.creator_content_check, "tip_content_images")
+        tip(self.creator_fast_mode_check, "tip_fast_mode")
+        tip(self.creator_auto_rename_check, "tip_auto_rename")
+        tip(self.creator_download_text_check, "tip_download_text")
+        tips(self.creator_ext_checks.values(), "tip_file_extension")
+        tip(self.creator_search_input, "tip_search_posts")
+        tip(self.creator_check_all, "tip_check_all_page")
+        tip(self.creator_check_all_all, "tip_check_all_all")
+        tip(self.prev_page_btn, "tip_prev_page")
+        tip(self.next_page_btn, "tip_next_page")
+        tip(self.creator_view_button, "tip_preview_post")
+        tip(self.creator_download_btn, "tip_download_start")
+        tip(self.creator_cancel_btn, "tip_cancel")
         self.update_ui_text()
 
     def update_ui_text(self):
+        retranslate_notes(self)
         self.creator_url_input.setPlaceholderText(translate("enter_creator_url"))
         self.creator_add_to_queue_btn.setText(translate("add_to_queue"))
         self.creator_add_from_file_btn.setToolTip(translate("add_links_from_file"))
@@ -2795,10 +2670,9 @@ class CreatorDownloaderTab(QWidget):
         self.update_creator_queue_list()
 
     def update_progress_bar_style(self):
-        separator_style = "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #4A5B7A; }"
-        self.creator_file_progress.setStyleSheet(separator_style)
-        self.creator_overall_progress.setStyleSheet(separator_style)
-        self.background_task_progress.setStyleSheet(separator_style)
+        set_progress_state(self.creator_file_progress, None)
+        set_progress_state(self.creator_overall_progress, None)
+        set_progress_state(self.background_task_progress, None)
 
     def refresh_ui(self):
         self.update_progress_bar_style()
@@ -3121,24 +2995,23 @@ class CreatorDownloaderTab(QWidget):
             layout.setSpacing(5)
 
             view_button = QPushButton(qta.icon("fa5s.eye", color="white"), "")
-            view_button.setStyleSheet(
-                "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-            )
+            set_role(view_button, "icon")
+            view_button.setFixedSize(30, 30)
             view_button.clicked.connect(self.create_view_handler(url, checked))
+            tip(view_button, "tip_queue_view")
             layout.addWidget(view_button)
 
             label = QLabel(url)
-            label.setStyleSheet("color: white;")
             label.setAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
             )
             layout.addWidget(label, stretch=1)
 
             remove_button = QPushButton(qta.icon("fa5s.times", color="white"), "")
-            remove_button.setStyleSheet(
-                "background: #4A5B7A; padding: 2px; border-radius: 5px; min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;"
-            )
+            set_role(remove_button, "icon")
+            remove_button.setFixedSize(30, 30)
             remove_button.clicked.connect(self.create_remove_handler(url))
+            tip(remove_button, "tip_queue_remove")
             layout.addWidget(remove_button)
 
             widget.setLayout(layout)
@@ -3291,7 +3164,7 @@ class CreatorDownloaderTab(QWidget):
                 "log_debug",
                 translate("incremental_filtering_added_posts", len(filtered_batch)),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def set_fetching_ui_state(self, is_fetching):
@@ -3443,7 +3316,7 @@ class CreatorDownloaderTab(QWidget):
                     len(self.filtered_posts[start_idx:end_idx]),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def update_pagination_controls(self):
@@ -3500,7 +3373,7 @@ class CreatorDownloaderTab(QWidget):
                     self.current_creator_url,
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
@@ -3827,7 +3700,7 @@ class CreatorDownloaderTab(QWidget):
                 "log_debug",
                 translate("prepared_files_for_download", self.total_files_to_download),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
@@ -3951,7 +3824,7 @@ class CreatorDownloaderTab(QWidget):
                                 thread.__class__.__name__,
                             ),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
                 except Exception:
                     pass
@@ -3963,7 +3836,7 @@ class CreatorDownloaderTab(QWidget):
                 translate(
                     "log_debug", translate("remove_thread", thread.__class__.__name__)
                 ),
-                "INFO",
+                "DEBUG",
             )
             # Transfer failed files from thread to tab if present
             try:
@@ -3986,7 +3859,7 @@ class CreatorDownloaderTab(QWidget):
                                     thread.__class__.__name__,
                                 ),
                             ),
-                            "INFO",
+                            "DEBUG",
                         )
                     except Exception:
                         # Ignore failures during transfer to avoid breaking cleanup
@@ -4012,7 +3885,7 @@ class CreatorDownloaderTab(QWidget):
         ):
             self.append_log_to_console(
                 translate("log_debug", translate("all_files_attempted_for_creator")),
-                "INFO",
+                "DEBUG",
             )
             # Clear any remaining active threads
             for t in self.active_threads[:]:
@@ -4047,7 +3920,7 @@ class CreatorDownloaderTab(QWidget):
                 self.creator_download_finished()
         elif not self.active_threads and not remaining_urls:
             self.append_log_to_console(
-                translate("log_debug", translate("no_more_active_threads")), "INFO"
+                translate("log_debug", translate("no_more_active_threads")), "DEBUG"
             )
             self.creator_download_finished()
         else:
@@ -4062,7 +3935,7 @@ class CreatorDownloaderTab(QWidget):
                         len(self.active_threads),
                     ),
                 ),
-                "INFO",
+                "DEBUG",
             )
 
         # Ensure failed files from the thread are preserved in the tab
@@ -4176,7 +4049,7 @@ class CreatorDownloaderTab(QWidget):
                         "log_debug",
                         translate("deleting_thread", thread.__class__.__name__),
                     ),
-                    "INFO",
+                    "DEBUG",
                 )
                 thread.deleteLater()
             except RuntimeError:
@@ -4194,12 +4067,8 @@ class CreatorDownloaderTab(QWidget):
             self._cancellation_thread.deleteLater()
             self._cancellation_thread = None
 
-        self.creator_file_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
-        )
-        self.creator_overall_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: #D4A017; }"
-        )
+        set_progress_state(self.creator_file_progress, "paused")
+        set_progress_state(self.creator_overall_progress, "paused")
         self.creator_file_progress_label.setText(translate("downloads_terminated"))
         self.creator_overall_progress_label.setText(translate("downloads_terminated"))
         self.downloading = False
@@ -4248,7 +4117,7 @@ class CreatorDownloaderTab(QWidget):
                                 self.total_files_to_download,
                             ),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
             else:
                 if file_url not in self.failed_files:
@@ -4266,7 +4135,7 @@ class CreatorDownloaderTab(QWidget):
                             "log_debug",
                             translate("file_failed", file_url, len(self.failed_files)),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
             self.update_overall_progress()
             if (
@@ -4275,7 +4144,7 @@ class CreatorDownloaderTab(QWidget):
                 >= self.total_files_to_download
             ):
                 self.append_log_to_console(
-                    translate("log_debug", translate("all_files_attempted")), "INFO"
+                    translate("log_debug", translate("all_files_attempted")), "DEBUG"
                 )
                 self.creator_download_finished()
         if self.current_file_index == file_index:
@@ -4300,7 +4169,7 @@ class CreatorDownloaderTab(QWidget):
                         percentage,
                     ),
                 ),
-                "INFO",
+                "DEBUG",
             )
 
             self.creator_overall_progress_label.setText(
@@ -4364,7 +4233,7 @@ class CreatorDownloaderTab(QWidget):
         ):
             self.append_log_to_console(
                 translate("log_debug", translate("all_posts_and_files_completed")),
-                "INFO",
+                "DEBUG",
             )
             # self.creator_download_finished()
 
@@ -4419,12 +4288,8 @@ class CreatorDownloaderTab(QWidget):
         self.missing_files_notice.show(self.unavailable_files & set(self.failed_files))
 
         # Always show Downloads Complete, even if some files failed
-        self.creator_file_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
-        )
-        self.creator_overall_progress.setStyleSheet(
-            "QProgressBar { border: 1px solid #4A5B7A; border-radius: 5px; background: #2A3B5A; } QProgressBar::chunk { background: green; }"
-        )
+        set_progress_state(self.creator_file_progress, "done")
+        set_progress_state(self.creator_overall_progress, "done")
         self.creator_file_progress_label.setText(translate("downloads_complete"))
         self.creator_overall_progress_label.setText(translate("downloads_complete"))
 
@@ -4574,7 +4439,7 @@ class CreatorDownloaderTab(QWidget):
                     visible_count,
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def update_checked_posts(self):
@@ -4624,7 +4489,7 @@ class CreatorDownloaderTab(QWidget):
                     abbreviate(self.posts_to_download),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def filter_items(self):
@@ -4677,7 +4542,7 @@ class CreatorDownloaderTab(QWidget):
                 "log_debug",
                 translate("filtering_completed_displayed_posts", len(filtered_items)),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def cleanup_filter_thread(self):
@@ -4699,17 +4564,15 @@ class CreatorDownloaderTab(QWidget):
         item.setData(Qt.UserRole + 1, post_id)
         widget = QWidget()
         layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(6, 3, 6, 3)
         layout.setSpacing(5)
 
         check_box = QCheckBox()
-        check_box.setStyleSheet("color: white;")
         check_box.setChecked(is_checked)
         check_box.clicked.connect(lambda: self.toggle_checkbox_state(text))
         layout.addWidget(check_box)
 
         label = QLabel(text)
-        label.setStyleSheet("color: white;")
         label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(label, stretch=1)
 
@@ -4719,7 +4582,7 @@ class CreatorDownloaderTab(QWidget):
         self.creator_post_list.setItemWidget(item, widget)
         widget.check_box = check_box
         widget.label = label
-        widget.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+        style_row(widget)
 
         # Cache the widget for O(1) lookups
         self.post_widget_cache[text] = (item, widget)
@@ -4784,7 +4647,7 @@ class CreatorDownloaderTab(QWidget):
                 )
                 + f" (Applied to {count} items)",
             ),
-            "INFO",
+            "DEBUG",
         )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
@@ -4825,7 +4688,7 @@ class CreatorDownloaderTab(QWidget):
             translate(
                 "log_debug", translate("check_all_state_updated", all_visible_checked)
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def update_current_preview_url(self, current, previous):
@@ -4864,7 +4727,7 @@ class CreatorDownloaderTab(QWidget):
         if hasattr(self, "previous_selected_widgets"):
             for w in self.previous_selected_widgets:
                 try:
-                    w.setStyleSheet("background-color: #2A3B5A; border-radius: 5px;")
+                    style_row(w)
                 except RuntimeError:
                     pass
 
@@ -4873,10 +4736,14 @@ class CreatorDownloaderTab(QWidget):
         for item in selected_items:
             widget = self.creator_post_list.itemWidget(item)
             if widget:
-                widget.setStyleSheet("background-color: #4A5B7A; border-radius: 5px;")
+                style_row(widget, selected=True)
                 self.previous_selected_widgets.append(widget)
 
     def append_log_to_console(self, message, level="INFO"):
+        level = message_level(message, level)
+        settings_tab = getattr(self._parent, "settings_tab", None)
+        if not log_level_shown(settings_tab, level):
+            return  # hidden in Settings › Log Settings
         self.creator_console.append(format_log_line(message, level))
 
         if hasattr(self, "logs_window") and self.logs_window.isVisible():
@@ -5010,7 +4877,7 @@ class CancellationThread(QThread):
                                 "signaled_stop_for_thread", thread.__class__.__name__
                             ),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
                 except RuntimeError:
                     self.log.emit(
