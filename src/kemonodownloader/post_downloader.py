@@ -86,7 +86,12 @@ from kemonodownloader.history_store import (
     link_kind,
     normalize_link,
 )
-from kemonodownloader.kd_logs import LogsWindowBase, format_log_line
+from kemonodownloader.kd_logs import (
+    LogsWindowBase,
+    format_log_line,
+    log_level_shown,
+    message_level,
+)
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     accept_language,
@@ -837,7 +842,7 @@ class FilePreparationThread(QThread):
                 self.preview_only_files.append(record)
         self.log.emit(
             translate("log_debug", translate("preview_only_file_skipped", entry.name)),
-            "INFO",
+            "DEBUG",
         )
 
     def detect_files(self, post, allowed_extensions):
@@ -847,7 +852,7 @@ class FilePreparationThread(QThread):
                 "log_debug",
                 f"Detecting files for post with allowed extensions: {allowed_extensions}",
             ),
-            "INFO",
+            "DEBUG",
         )
 
         labels = {
@@ -859,7 +864,7 @@ class FilePreparationThread(QThread):
             kind, name, url, ext = entry[:4]
             label = labels[kind]
             self.log.emit(
-                translate("log_debug", f"Checking {label}: {name} ({ext})"), "INFO"
+                translate("log_debug", f"Checking {label}: {name} ({ext})"), "DEBUG"
             )
             if extension_allowed(ext, allowed_extensions):
                 if entry.preview_only:
@@ -877,12 +882,12 @@ class FilePreparationThread(QThread):
                 direct_url = direct_download_url(entry, self.domain_config)
                 if direct_url:
                     remember_direct_url(url, direct_url)
-                self.log.emit(translate("log_debug", f"Added {label}: {name}"), "INFO")
+                self.log.emit(translate("log_debug", f"Added {label}: {name}"), "DEBUG")
                 files_to_download.append((name, url))
 
         self.log.emit(
             translate("log_debug", f"Total files detected: {len(files_to_download)}"),
-            "INFO",
+            "DEBUG",
         )
         return list(dict.fromkeys(files_to_download))
 
@@ -1023,7 +1028,7 @@ class FilePreparationThread(QThread):
             translate(
                 "log_debug", f"Allowed extensions for download: {allowed_extensions}"
             ),
-            "INFO",
+            "DEBUG",
         )
 
         total_posts = len(self.post_ids)
@@ -1060,7 +1065,7 @@ class FilePreparationThread(QThread):
                                         "log_debug",
                                         f"Detected file: {file_name} from {file_url}",
                                     ),
-                                    "INFO",
+                                    "DEBUG",
                                 )
                             except RuntimeError:
                                 pass
@@ -1105,7 +1110,7 @@ class FilePreparationThread(QThread):
                 translate(
                     "log_debug", f"Total files to download: {len(files_to_download)}"
                 ),
-                "INFO",
+                "DEBUG",
             )
             self.finished.emit(files_to_download, files_to_posts_map)
         else:
@@ -1477,7 +1482,7 @@ class DownloadThread(QThread):
                             f"Direct server failed for {file_url} ({e}); "
                             "using the main file server",
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
                     attempt -= 1
                     continue
@@ -2457,7 +2462,7 @@ class PostDownloaderTab(QWidget):
                     "log_debug",
                     translate("total_detected_posts", len(self.all_detected_posts)),
                 ),
-                "INFO",
+                "DEBUG",
             )
             self.display_files_for_post(url)
             for i, (queue_url, _) in enumerate(self.post_queue):
@@ -2469,7 +2474,7 @@ class PostDownloaderTab(QWidget):
             self.filter_items()
             self.append_log_to_console(
                 translate("log_debug", translate("displayed_files_for_post", url)),
-                "INFO",
+                "DEBUG",
             )
             self.background_task_progress.setRange(0, 100)
             self.background_task_progress.setValue(0)
@@ -2503,7 +2508,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("total_detected_posts", len(self.all_detected_posts)),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.display_files_for_post(self.current_post_url)
         for i, (queue_url, _) in enumerate(self.post_queue):
@@ -2518,7 +2523,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("displayed_files_for_post", self.current_post_url),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
@@ -2679,7 +2684,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("files_detected_so_far", len(self.files_to_download)),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def on_check_all_posts_detected(self, url, posts):
@@ -2774,7 +2779,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("checked_files_for_download", abbreviate(checked_files)),
             ),
-            "INFO",
+            "DEBUG",
         )
         if not checked_files:
             self.append_log_to_console(
@@ -2874,7 +2879,7 @@ class PostDownloaderTab(QWidget):
 
     def prepare_files_for_download(self, urls):
         self.append_log_to_console(
-            translate("log_debug", translate("preparing_files_for_urls", urls)), "INFO"
+            translate("log_debug", translate("preparing_files_for_urls", urls)), "DEBUG"
         )
         if not urls:
             self.append_log_to_console(
@@ -2962,7 +2967,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("files_prepared_for_urls", urls, len(files_to_download)),
             ),
-            "INFO",
+            "DEBUG",
         )
         skipped = list(
             getattr(
@@ -2981,7 +2986,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("updated_checked_urls", abbreviate(self.checked_urls)),
             ),
-            "INFO",
+            "DEBUG",
         )
 
         active_filters = [
@@ -3006,13 +3011,13 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("checked_files_after_filtering", len(checked_files)),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.append_log_to_console(
             translate(
                 "log_debug", translate("checked_files_list", abbreviate(checked_files))
             ),
-            "INFO",
+            "DEBUG",
         )
 
         if not checked_files:
@@ -3102,7 +3107,7 @@ class PostDownloaderTab(QWidget):
                     "log_debug",
                     translate("removed_thread_active", len(self.active_threads)),
                 ),
-                "INFO",
+                "DEBUG",
             )
         else:
             self.append_log_to_console(
@@ -3129,7 +3134,7 @@ class PostDownloaderTab(QWidget):
                     "active_download_threads_remaining", len(active_download_threads)
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
 
         if not active_download_threads:
@@ -3145,7 +3150,7 @@ class PostDownloaderTab(QWidget):
                         "active_download_threads_running", len(active_download_threads)
                     ),
                 ),
-                "INFO",
+                "DEBUG",
             )
 
     def cancel_post_download(self):
@@ -3213,7 +3218,7 @@ class PostDownloaderTab(QWidget):
                             self.total_files_to_download,
                         ),
                     ),
-                    "INFO",
+                    "DEBUG",
                 )
         else:
             thread = getattr(self, "thread", None)
@@ -3227,7 +3232,7 @@ class PostDownloaderTab(QWidget):
                         f"File failed: {file_url} "
                         f"({len(self.failed_files)} failed)",
                     ),
-                    "INFO",
+                    "DEBUG",
                 )
         self.update_overall_progress()
         if self.current_file_index == file_index:
@@ -3246,7 +3251,7 @@ class PostDownloaderTab(QWidget):
                     "log_debug",
                     f"Overall progress updated: {completed_count}/{self.total_files_to_download} files, {percentage}%",
                 ),
-                "INFO",
+                "DEBUG",
             )
             self.post_overall_progress_label.setText(
                 translate(
@@ -3385,7 +3390,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 translate("check_all_toggled", is_checked, len(visible_urls)),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def toggle_download_all_links(self, state):
@@ -3450,7 +3455,7 @@ class PostDownloaderTab(QWidget):
                 "log_debug",
                 f"Updated checked files count: {len(self.files_to_download)}, checked_urls: {len(self.checked_urls)}",
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def filter_items(self):
@@ -3589,7 +3594,7 @@ class PostDownloaderTab(QWidget):
                 translate("checkbox_toggled", url, new_state, len(self.checked_urls))
                 + f" (Applied to {count} items)",
             ),
-            "INFO",
+            "DEBUG",
         )
         self.update_checked_files()
         self.update_check_all_state()
@@ -3622,7 +3627,7 @@ class PostDownloaderTab(QWidget):
             translate(
                 "log_debug", translate("check_all_state_updated", all_visible_checked)
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def update_current_preview_url(self, current, previous):
@@ -3724,6 +3729,10 @@ class PostDownloaderTab(QWidget):
             self.logs_window.activateWindow()
 
     def append_log_to_console(self, message, level="INFO"):
+        level = message_level(message, level)
+        settings_tab = getattr(self.parent, "settings_tab", None)
+        if not log_level_shown(settings_tab, level):
+            return  # hidden in Settings › Log Settings
         self.post_console.append(format_log_line(message, level))
 
         if hasattr(self, "logs_window") and self.logs_window.isVisible():

@@ -210,7 +210,8 @@ def test_counted_uses_the_singular_form():
 def test_log_colours_are_readable_hex_values():
     assert "color:#6FD08C" in format_log_line("ok")
     assert "color:#F5C451" in format_log_line("careful", "WARNING")
-    assert "color:#E6EDF7" in format_log_line("plain", "DEBUG")
+    assert "color:#9FB3D9" in format_log_line("details", "DEBUG")
+    assert "color:#E6EDF7" in format_log_line("plain", "TRACE")
 
 
 def test_creator_window_follows_the_creator_console(qapp):

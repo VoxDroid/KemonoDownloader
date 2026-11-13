@@ -32,6 +32,15 @@ from kemonodownloader.kd_theme import set_role, set_tone
 # default). socks5h makes Tor resolve host names too, so DNS doesn't leak.
 TOR_SOCKS_PROXY = "socks5h://127.0.0.1:9050"
 
+# Which console messages to show: log level -> (setting, label, default).
+# Debug details are mostly of use when reporting a problem, so they start off.
+LOG_LEVEL_SETTINGS = {
+    "DEBUG": ("show_debug_logs", "log_level_debug", False),
+    "INFO": ("show_info_logs", "log_level_info", True),
+    "WARNING": ("show_warning_logs", "log_level_warning", True),
+    "ERROR": ("show_error_logs", "log_level_error", True),
+}
+
 # Tor Expert Bundle fetched by "Download Tor", and the SHA-256 of each archive.
 # The hashes are copied from the release's sha256sums-signed-build.txt after
 # checking its signature against the Tor Browser Developers signing key
@@ -91,6 +100,7 @@ class SettingsTab(QWidget):
             "auto_check_updates": True,
             # Save the preview image of files the site only has previews of.
             "save_preview_images": False,
+            **{key: default for key, _label, default in LOG_LEVEL_SETTINGS.values()},
             "language": "english",
             "creator_posts_max_attempts": 200,
             "post_data_max_retries": 7,
@@ -154,6 +164,10 @@ class SettingsTab(QWidget):
             self.default_settings.get("save_preview_images", False),
             type=bool,
         )
+        for key, _label, default in LOG_LEVEL_SETTINGS.values():
+            settings_dict[key] = self.qsettings.value(
+                key, self.default_settings.get(key, default), type=bool
+            )
         settings_dict["language"] = self.qsettings.value(
             "language", self.default_settings["language"], type=str
         )
@@ -221,6 +235,8 @@ class SettingsTab(QWidget):
         self.qsettings.setValue(
             "save_preview_images", self.settings.get("save_preview_images", False)
         )
+        for key, _label, default in LOG_LEVEL_SETTINGS.values():
+            self.qsettings.setValue(key, self.settings.get(key, default))
         self.qsettings.setValue("language", self.settings["language"])
         self.qsettings.setValue(
             "creator_posts_max_attempts", self.settings["creator_posts_max_attempts"]
@@ -501,6 +517,26 @@ class SettingsTab(QWidget):
 
         self.update_group.setLayout(with_note(update_layout, "note_update_settings"))
         layout.addWidget(self.update_group)
+
+        # Log Settings Group: which messages the consoles show. Saved straight
+        # away, like the proxy switch, since it only changes what is shown.
+        self.log_group = QGroupBox()
+        log_layout = QHBoxLayout()
+        log_layout.setSpacing(18)
+        self.log_level_checkboxes = {}
+        for level, (key, _label, default) in LOG_LEVEL_SETTINGS.items():
+            checkbox = QCheckBox()
+            checkbox.setChecked(bool(self.temp_settings.get(key, default)))
+            checkbox.stateChanged.connect(
+                lambda state, k=key: self.set_log_level_shown(
+                    k, state == Qt.CheckState.Checked.value
+                )
+            )
+            log_layout.addWidget(checkbox)
+            self.log_level_checkboxes[level] = checkbox
+        log_layout.addStretch()
+        self.log_group.setLayout(with_note(log_layout, "note_log_settings"))
+        layout.addWidget(self.log_group)
 
         # Language Settings Group
         self.language_group = QGroupBox()
@@ -1253,6 +1289,10 @@ class SettingsTab(QWidget):
         self.download_slider.setValue(self.temp_settings["simultaneous_downloads"])
         self.download_spinbox.setValue(self.temp_settings["simultaneous_downloads"])
         self.auto_update_checkbox.setChecked(self.temp_settings["auto_check_updates"])
+        for level, (key, _label, default) in LOG_LEVEL_SETTINGS.items():
+            self.log_level_checkboxes[level].setChecked(
+                bool(self.temp_settings.get(key, default))
+            )
         self.save_previews_checkbox.setChecked(
             self.temp_settings.get("save_preview_images", False)
         )
@@ -1327,6 +1367,9 @@ class SettingsTab(QWidget):
         self.api_request_max_retries_label.setText(translate("api_request_max_retries"))
 
         self.update_group.setTitle(translate("update_settings"))
+        self.log_group.setTitle(translate("log_settings"))
+        for level, (_key, label, _default) in LOG_LEVEL_SETTINGS.items():
+            self.log_level_checkboxes[level].setText(translate(label))
 
         # Creator downloader customization texts
         self.creator_custom_group.setTitle(translate("creator_downloader_settings"))
@@ -1449,6 +1492,20 @@ class SettingsTab(QWidget):
 
     def get_simultaneous_downloads(self):
         return self.settings["simultaneous_downloads"]
+
+    def set_log_level_shown(self, key, shown):
+        """Show or hide one level of console messages, saved straight away."""
+        self.temp_settings[key] = shown
+        self.settings[key] = shown
+        self.save_settings()
+
+    def is_log_level_shown(self, level):
+        """Whether the consoles show messages of *level* (DEBUG, INFO, ...)."""
+        entry = LOG_LEVEL_SETTINGS.get(str(level).upper())
+        if entry is None:
+            return True
+        key, _label, default = entry
+        return bool(self.settings.get(key, default))
 
     def is_auto_check_updates_enabled(self):
         return self.settings["auto_check_updates"]

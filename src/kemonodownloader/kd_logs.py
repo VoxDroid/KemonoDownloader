@@ -29,11 +29,23 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_language import language_manager, translate
 from kemonodownloader.kd_theme import set_role, set_tone
 
 # Bright enough to read on the consoles' navy backgrounds.
-_LEVEL_COLORS = {"INFO": "#6FD08C", "WARNING": "#F5C451", "ERROR": "#FF7A7A"}
+_LEVEL_COLORS = {
+    "DEBUG": "#9FB3D9",
+    "INFO": "#6FD08C",
+    "WARNING": "#F5C451",
+    "ERROR": "#FF7A7A",
+}
+LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR")
+# The translation that puts each level's tag ("[DEBUG] ...") on a message.
+_LEVEL_PREFIX_KEYS = {
+    "DEBUG": "log_debug",
+    "WARNING": "log_warning",
+    "ERROR": "log_error",
+}
 _DEFAULT_COLOR = "#E6EDF7"
 
 SYNC_INTERVAL_MS = 250
@@ -56,6 +68,39 @@ def format_log_line(message: Any, level: str = "INFO") -> str:
     """Return the rich-text form of a console log line."""
     color = _LEVEL_COLORS.get(level, _DEFAULT_COLOR)
     return f"<span style='color:{color}'>{escape_log_text(message)}</span>"
+
+
+def message_level(message: Any, level: Optional[str] = "INFO") -> str:
+    """Return the level a console message really has.
+
+    A message's tag wins over the level it was sent with: a few messages
+    tagged [DEBUG] (or [WARNING], [ERROR]) are sent as INFO. Tags are read
+    in the current language and in English.
+    """
+    text = str(message).lstrip()
+    for name, key in _LEVEL_PREFIX_KEYS.items():
+        for prefix in {
+            translate(key, "").strip(),
+            language_manager.get_text(key, "english", "").strip(),
+        }:
+            if prefix and text.startswith(prefix):
+                return name
+    name = str(level or "INFO").upper()
+    return name if name in LOG_LEVELS else "INFO"
+
+
+def log_level_shown(settings_tab: Any, level: str) -> bool:
+    """Whether Settings asks for messages of *level* to be shown.
+
+    Without a settings tab to ask (or if it can't answer), everything shows.
+    """
+    check = getattr(settings_tab, "is_log_level_shown", None)
+    if not callable(check):
+        return True
+    try:
+        return bool(check(level))
+    except Exception:
+        return True
 
 
 def counted(key: str, count: int) -> str:

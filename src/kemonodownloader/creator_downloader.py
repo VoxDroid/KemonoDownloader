@@ -82,7 +82,12 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
-from kemonodownloader.kd_logs import LogsWindowBase, format_log_line
+from kemonodownloader.kd_logs import (
+    LogsWindowBase,
+    format_log_line,
+    log_level_shown,
+    message_level,
+)
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import (  # noqa: F401  (re-exported)
     _thread_local,
@@ -306,12 +311,12 @@ class PostDetectionThread(QThread):
                 "log_debug",
                 translate("parsed_url_service_creator", service, creator_id),
             ),
-            "INFO",
+            "DEBUG",
         )
 
         base_api_url = f"{self.domain_config['api_base']}/{service}/user/{creator_id}"
         self.log.emit(
-            translate("log_debug", translate("base_api_url", base_api_url)), "INFO"
+            translate("log_debug", translate("base_api_url", base_api_url)), "DEBUG"
         )
 
         # Parse query parameters
@@ -778,7 +783,7 @@ class PostPopulationThread(QThread):
                     len(post_url_map),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.finished.emit(post_url_map, self.detected_posts)
 
@@ -859,7 +864,7 @@ class FilePreparationThread(QThread):
                 self.preview_only_files.append(record)
         self.log.emit(
             translate("log_debug", translate("preview_only_file_skipped", entry.name)),
-            "INFO",
+            "DEBUG",
         )
 
     def detect_files(self, post, allowed_extensions, domain_config):
@@ -868,7 +873,7 @@ class FilePreparationThread(QThread):
             translate(
                 "log_debug", translate("detecting_files_for_post", allowed_extensions)
             ),
-            "INFO",
+            "DEBUG",
         )
 
         labels = {
@@ -886,7 +891,7 @@ class FilePreparationThread(QThread):
             kind, name, url, ext = entry[:4]
             checking_key, added_key = labels[kind]
             self.log.emit(
-                translate("log_debug", translate(checking_key, name, ext)), "INFO"
+                translate("log_debug", translate(checking_key, name, ext)), "DEBUG"
             )
             if extension_allowed(ext, allowed_extensions):
                 if entry.preview_only:
@@ -905,7 +910,7 @@ class FilePreparationThread(QThread):
                 if direct_url:
                     remember_direct_url(url, direct_url)
                 self.log.emit(
-                    translate("log_debug", translate(added_key, name)), "INFO"
+                    translate("log_debug", translate(added_key, name)), "DEBUG"
                 )
                 files_to_download.append((name, url))
 
@@ -913,7 +918,7 @@ class FilePreparationThread(QThread):
             translate(
                 "log_debug", translate("total_files_detected", len(files_to_download))
             ),
-            "INFO",
+            "DEBUG",
         )
         return list(dict.fromkeys(files_to_download))
 
@@ -1030,7 +1035,7 @@ class FilePreparationThread(QThread):
                 "log_debug",
                 translate("allowed_extensions_for_download", allowed_extensions),
             ),
-            "INFO",
+            "DEBUG",
         )
 
         total_posts = len(self.post_ids)
@@ -1085,7 +1090,7 @@ class FilePreparationThread(QThread):
                                         "log_debug",
                                         translate("detected_file", file_name, file_url),
                                     ),
-                                    "INFO",
+                                    "DEBUG",
                                 )
                             except RuntimeError:
                                 pass
@@ -1131,7 +1136,7 @@ class FilePreparationThread(QThread):
                     "log_debug",
                     translate("total_files_to_download", len(files_to_download)),
                 ),
-                "INFO",
+                "DEBUG",
             )
             self.finished.emit(files_to_download, files_to_posts_map)
 
@@ -2178,7 +2183,7 @@ class CheckboxToggleThread(QThread):
                     len(posts_to_download),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.finished.emit(self.checked_urls, posts_to_download)
 
@@ -3137,7 +3142,7 @@ class CreatorDownloaderTab(QWidget):
                 "log_debug",
                 translate("incremental_filtering_added_posts", len(filtered_batch)),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def set_fetching_ui_state(self, is_fetching):
@@ -3289,7 +3294,7 @@ class CreatorDownloaderTab(QWidget):
                     len(self.filtered_posts[start_idx:end_idx]),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def update_pagination_controls(self):
@@ -3346,7 +3351,7 @@ class CreatorDownloaderTab(QWidget):
                     self.current_creator_url,
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
@@ -3673,7 +3678,7 @@ class CreatorDownloaderTab(QWidget):
                 "log_debug",
                 translate("prepared_files_for_download", self.total_files_to_download),
             ),
-            "INFO",
+            "DEBUG",
         )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
@@ -3797,7 +3802,7 @@ class CreatorDownloaderTab(QWidget):
                                 thread.__class__.__name__,
                             ),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
                 except Exception:
                     pass
@@ -3809,7 +3814,7 @@ class CreatorDownloaderTab(QWidget):
                 translate(
                     "log_debug", translate("remove_thread", thread.__class__.__name__)
                 ),
-                "INFO",
+                "DEBUG",
             )
             # Transfer failed files from thread to tab if present
             try:
@@ -3832,7 +3837,7 @@ class CreatorDownloaderTab(QWidget):
                                     thread.__class__.__name__,
                                 ),
                             ),
-                            "INFO",
+                            "DEBUG",
                         )
                     except Exception:
                         # Ignore failures during transfer to avoid breaking cleanup
@@ -3858,7 +3863,7 @@ class CreatorDownloaderTab(QWidget):
         ):
             self.append_log_to_console(
                 translate("log_debug", translate("all_files_attempted_for_creator")),
-                "INFO",
+                "DEBUG",
             )
             # Clear any remaining active threads
             for t in self.active_threads[:]:
@@ -3893,7 +3898,7 @@ class CreatorDownloaderTab(QWidget):
                 self.creator_download_finished()
         elif not self.active_threads and not remaining_urls:
             self.append_log_to_console(
-                translate("log_debug", translate("no_more_active_threads")), "INFO"
+                translate("log_debug", translate("no_more_active_threads")), "DEBUG"
             )
             self.creator_download_finished()
         else:
@@ -3908,7 +3913,7 @@ class CreatorDownloaderTab(QWidget):
                         len(self.active_threads),
                     ),
                 ),
-                "INFO",
+                "DEBUG",
             )
 
         # Ensure failed files from the thread are preserved in the tab
@@ -4022,7 +4027,7 @@ class CreatorDownloaderTab(QWidget):
                         "log_debug",
                         translate("deleting_thread", thread.__class__.__name__),
                     ),
-                    "INFO",
+                    "DEBUG",
                 )
                 thread.deleteLater()
             except RuntimeError:
@@ -4090,7 +4095,7 @@ class CreatorDownloaderTab(QWidget):
                                 self.total_files_to_download,
                             ),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
             else:
                 if file_url not in self.failed_files:
@@ -4108,7 +4113,7 @@ class CreatorDownloaderTab(QWidget):
                             "log_debug",
                             translate("file_failed", file_url, len(self.failed_files)),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
             self.update_overall_progress()
             if (
@@ -4117,7 +4122,7 @@ class CreatorDownloaderTab(QWidget):
                 >= self.total_files_to_download
             ):
                 self.append_log_to_console(
-                    translate("log_debug", translate("all_files_attempted")), "INFO"
+                    translate("log_debug", translate("all_files_attempted")), "DEBUG"
                 )
                 self.creator_download_finished()
         if self.current_file_index == file_index:
@@ -4142,7 +4147,7 @@ class CreatorDownloaderTab(QWidget):
                         percentage,
                     ),
                 ),
-                "INFO",
+                "DEBUG",
             )
 
             self.creator_overall_progress_label.setText(
@@ -4206,7 +4211,7 @@ class CreatorDownloaderTab(QWidget):
         ):
             self.append_log_to_console(
                 translate("log_debug", translate("all_posts_and_files_completed")),
-                "INFO",
+                "DEBUG",
             )
             # self.creator_download_finished()
 
@@ -4412,7 +4417,7 @@ class CreatorDownloaderTab(QWidget):
                     visible_count,
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def update_checked_posts(self):
@@ -4462,7 +4467,7 @@ class CreatorDownloaderTab(QWidget):
                     abbreviate(self.posts_to_download),
                 ),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def filter_items(self):
@@ -4515,7 +4520,7 @@ class CreatorDownloaderTab(QWidget):
                 "log_debug",
                 translate("filtering_completed_displayed_posts", len(filtered_items)),
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def cleanup_filter_thread(self):
@@ -4620,7 +4625,7 @@ class CreatorDownloaderTab(QWidget):
                 )
                 + f" (Applied to {count} items)",
             ),
-            "INFO",
+            "DEBUG",
         )
         self.background_task_progress.setRange(0, 100)
         self.background_task_progress.setValue(0)
@@ -4661,7 +4666,7 @@ class CreatorDownloaderTab(QWidget):
             translate(
                 "log_debug", translate("check_all_state_updated", all_visible_checked)
             ),
-            "INFO",
+            "DEBUG",
         )
 
     def update_current_preview_url(self, current, previous):
@@ -4713,6 +4718,10 @@ class CreatorDownloaderTab(QWidget):
                 self.previous_selected_widgets.append(widget)
 
     def append_log_to_console(self, message, level="INFO"):
+        level = message_level(message, level)
+        settings_tab = getattr(self._parent, "settings_tab", None)
+        if not log_level_shown(settings_tab, level):
+            return  # hidden in Settings › Log Settings
         self.creator_console.append(format_log_line(message, level))
 
         if hasattr(self, "logs_window") and self.logs_window.isVisible():
@@ -4846,7 +4855,7 @@ class CancellationThread(QThread):
                                 "signaled_stop_for_thread", thread.__class__.__name__
                             ),
                         ),
-                        "INFO",
+                        "DEBUG",
                     )
                 except RuntimeError:
                     self.log.emit(

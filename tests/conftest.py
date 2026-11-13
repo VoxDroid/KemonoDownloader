@@ -56,6 +56,40 @@ def _block_real_network():
     socket.socket.connect_ex = connect_ex
 
 
+def _isolate_settings_store():
+    """Keep every test away from the real settings store.
+
+    ``QSettings("VoxDroid", "KemonoDownloader")`` opens the app's real
+    settings (the registry on Windows). Tests that saved or cleared settings
+    through it replaced the developer's own save directory, proxy and
+    language with test values. Each organisation/application pair now gets a
+    throwaway INI file instead, for the whole run. This runs before any test
+    module is imported, so ``from PyQt6.QtCore import QSettings`` there, and
+    in the app, both pick up the isolated class.
+    """
+    import tempfile
+
+    from PyQt6 import QtCore
+
+    real = QtCore.QSettings
+    if getattr(real, "_kd_isolated", False):
+        return
+    store = tempfile.mkdtemp(prefix="kd-test-settings-")
+
+    class IsolatedQSettings(real):
+        _kd_isolated = True
+        _kd_store = store
+
+        def __init__(self, *args, **kwargs):
+            if len(args) == 2 and all(isinstance(a, str) for a in args) and not kwargs:
+                path = os.path.join(store, f"{args[0]}__{args[1]}.ini")
+                super().__init__(path, real.Format.IniFormat)
+            else:
+                super().__init__(*args, **kwargs)
+
+    QtCore.QSettings = IsolatedQSettings
+
+
 def pytest_configure(config):
     """Create a QApplication early so modules that import Qt at import-time can succeed.
 
@@ -67,6 +101,7 @@ def pytest_configure(config):
     # Before anything is imported: importing the app starts a background
     # domain-list refresh.
     _block_real_network()
+    _isolate_settings_store()
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         import faulthandler

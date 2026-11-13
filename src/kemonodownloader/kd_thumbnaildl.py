@@ -52,6 +52,7 @@ from kemonodownloader.history_store import (
     normalize_link,
 )
 from kemonodownloader.kd_language import translate
+from kemonodownloader.kd_logs import log_level_shown, message_level
 from kemonodownloader.kd_motion import SmoothProgressBar
 from kemonodownloader.kd_network import get_session
 from kemonodownloader.kd_notes import add_note, retranslate_notes, section_note
@@ -1578,4 +1579,8 @@ class ThumbnailDownloaderTab(QWidget):
         self.toggle_logs_btn.setIcon(qta.icon(icon_name, color="white"))
 
     def append_log(self, text: str):
+        # Messages here carry their level only as a tag ("[WARNING] ...").
+        settings_tab = getattr(self.parent, "settings_tab", None)
+        if not log_level_shown(settings_tab, message_level(text)):
+            return  # hidden in Settings › Log Settings
         self.log_console.append(text)
