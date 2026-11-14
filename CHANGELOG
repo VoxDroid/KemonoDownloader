@@ -67,7 +67,7 @@
   The download range is 1-20 with a default of 5 everywhere (the docs and in-app Help said 1-10 and 10), and the README's retry limits match the app. The READMEs explain how to install `xcb-cursor` on Linux and where builds are available. The security policy covers the latest release and offers private vulnerability reports, and the Code of Conduct and Support page no longer suggest "private issues", which GitHub doesn't have. The in-app Help documents the new setting and has a troubleshooting entry for preview-only and missing files. On the website the build steps show their commands again, the Support, Contributing and License links are back, Pawchive is listed, the Simplified Chinese page no longer shows "undefined" on its language button, and the Korean page names the languages in Korean.
 
 - Strengthen CI and tests.
-  Tests run on Python 3.9 to 3.14 on Windows, macOS and Linux, including the new Ubuntu 26.04 runners, with the code checks in their own job and pyright pinned. Flaky thread tests were fixed, tests no longer write into the repository or `/tmp`, and over 100 tests were added.
+  Tests run on Python 3.9 to 3.14 on Windows, macOS and Linux, including the new Ubuntu 26.04 runners, with the code checks in their own job and pyright pinned. Flaky thread tests were fixed, tests no longer write into the repository or `/tmp`, and over 100 tests were added. Type checking no longer fails with PyQt6 6.12, whose type hints wrongly mark every `pyqtSignal(...)` as missing an argument.
 
 ## v5.14.0 (03 November 2026)
 **feat: History tab with download history and favorites, a smoother and faster interface, and download reliability fixes**
