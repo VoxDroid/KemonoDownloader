@@ -11,5 +11,10 @@
   "reportAttributeAccessIssue": false,
   "reportArgumentType": false,
   "reportGeneralTypeIssues": false,
-  "reportIncompatibleMethodOverride": false
+  "reportIncompatibleMethodOverride": false,
+  // PyQt6 6.12's type hints declare pyqtSignal's new "arguments" parameter
+  // without a default, so every pyqtSignal(...) is reported as a call missing
+  // an argument. It is optional at runtime. Turn this back on once PyQt6
+  // gives it a default.
+  "reportCallIssue": false
 }
