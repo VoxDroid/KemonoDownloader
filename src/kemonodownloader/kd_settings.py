@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from kemonodownloader.history_store import HistoryStore
 from kemonodownloader.kd_language import language_manager, translate
 from kemonodownloader.kd_notes import retranslate_notes, tip, tips, with_note
 from kemonodownloader.kd_theme import (
@@ -1273,10 +1274,7 @@ class SettingsTab(QWidget):
         self.parent.ensure_folders_exist()
 
         if old_base_folder != self.parent.base_folder:
-            self.parent.post_tab.cache_dir = self.parent.cache_folder
-            self.parent.post_tab.other_files_dir = self.parent.other_files_folder
-            self.parent.creator_tab.cache_dir = self.parent.cache_folder
-            self.parent.creator_tab.other_files_dir = self.parent.other_files_folder
+            self._move_to_new_folder()
 
         if language_changed:
             language_manager.set_language(self.settings["language"])
@@ -1334,6 +1332,29 @@ class SettingsTab(QWidget):
                 self.settings.get("font", "JetBrains Mono"),
             ),
         )
+
+    def _move_to_new_folder(self):
+        """Point every tab and the library at the save folder just applied."""
+        window = self.parent
+        for name in ("post_tab", "creator_tab", "thumbnail_tab"):
+            tab = getattr(window, name, None)
+            if tab is not None:
+                tab.cache_dir = window.cache_folder
+                tab.other_files_dir = window.other_files_folder
+        # History and favorites live in the save folder too. Without this they
+        # kept being written to the old folder for the rest of the session,
+        # and the next launch opened the new, empty one.
+        store = getattr(window, "history_store", None)
+        if isinstance(store, HistoryStore) and not store.relocate(
+            window.other_files_folder
+        ):
+            QMessageBox.warning(
+                self,
+                translate("library_move_failed_title"),
+                translate(
+                    "library_move_failed", window.other_files_folder, store.error or ""
+                ),
+            )
 
     def confirm_and_reset_settings(self):
         """Confirm and reset settings to defaults."""

@@ -2,8 +2,12 @@
 
 Stored in one SQLite file beside the hash database. The store never takes the
 app down: a damaged file is set aside and a fresh one started, and when the
-folder cannot be written at all the store keeps working in memory for the
-session and reports why through :attr:`HistoryStore.error`.
+file cannot be opened (locked, unwritable folder) the store keeps working in
+memory and reports why through :attr:`HistoryStore.error`. It keeps trying to
+open the file, and moves what was saved in memory into it once it can.
+
+A file that is merely locked or unreachable is never set aside: only one
+SQLite says is damaged or not a database.
 
 Everything here is plain Python. Folder sizes are measured on a background
 thread, which writes only to the database; views notice through
@@ -168,8 +172,56 @@ _ADDED_COLUMNS = (
 )
 
 
+def _same_path(a: str, b: str) -> bool:
+    return os.path.normcase(os.path.abspath(a)) == os.path.normcase(os.path.abspath(b))
+
+
+def _describe(exc: BaseException) -> str:
+    return str(exc) or exc.__class__.__name__
+
+
+def _copy_library(source: sqlite3.Connection, target: sqlite3.Connection) -> None:
+    """Merge every favorite, history entry and setting of *source* into *target*.
+
+    Safe to repeat: a favorite already in *target* (same link) and a history
+    entry already there (same kind, link and finish time) are not added twice.
+    The recording setting of *source* wins, as it's the one in use.
+    """
+    favorites = source.execute(
+        "SELECT url, kind, title, note, added_at FROM favorites"
+    ).fetchall()
+    history = source.execute(f"SELECT {_HISTORY_COLUMNS} FROM history").fetchall()
+    meta = source.execute("SELECT key, value FROM meta").fetchall()
+    known = {
+        (kind, url, finished)
+        for kind, url, finished in target.execute(
+            "SELECT kind, url, finished_at FROM history"
+        )
+    }
+    try:
+        target.executemany(
+            "INSERT OR IGNORE INTO favorites (url, kind, title, note, added_at) "
+            "VALUES (?, ?, ?, ?, ?)",
+            favorites,
+        )
+        target.executemany(
+            f"INSERT INTO history ({_HISTORY_COLUMNS}) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [row for row in history if (row[0], row[1], row[13]) not in known],
+        )
+        target.executemany(
+            "INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)", meta
+        )
+        target.commit()
+    except sqlite3.Error:
+        target.rollback()
+        raise
+
+
 class HistoryStore:
     DB_FILENAME = "library.db"
+    # While the store runs in memory, how often a write retries the file.
+    REOPEN_INTERVAL = 5.0
 
     def __init__(self, directory: str) -> None:
         self._lock = threading.Lock()
@@ -177,6 +229,11 @@ class HistoryStore:
         self.path: Optional[str] = None
         self.revision = 0
         self._closed = False
+        self._directory = directory
+        self._last_open_attempt = time.monotonic()
+        # Bumped whenever the connection is replaced, so a folder size
+        # measured for a row of the old file isn't written to the new one.
+        self._generation = 0
         self._conn = self._open(directory)
 
     # ------------------------------------------------------------------
@@ -189,14 +246,19 @@ class HistoryStore:
             os.makedirs(directory, exist_ok=True)
             try:
                 conn = self._connect(path)
+            except sqlite3.OperationalError:
+                # Locked, busy, unreadable folder, disk error: the file itself
+                # may be fine, so leave it alone and work in memory for now.
+                raise
             except sqlite3.DatabaseError:
-                # Unreadable file: keep it for inspection, start a new one.
+                # Damaged or not a database: keep it for inspection, start a
+                # new one.
                 os.replace(path, f"{path}.corrupt-{int(time.time())}")
                 conn = self._connect(path)
             self.path = path
             return conn
         except (OSError, sqlite3.Error) as exc:
-            self.error = str(exc) or exc.__class__.__name__
+            self.error = _describe(exc)
             return self._connect(":memory:")
 
     @staticmethod
@@ -230,11 +292,83 @@ class HistoryStore:
                 self._closed = True
                 self._conn.close()
 
+    def relocate(self, directory: str) -> bool:
+        """Keep the library in *directory* from now on, bringing its contents.
+
+        Called when the save folder changes, so the next launch, which opens
+        the library in the new folder, still finds every favorite and history
+        entry. If that folder already has a library (the user switched back to
+        an earlier folder), the two are merged. The old file is left where it
+        was. Returns False, and keeps using the current library, when the new
+        folder can't hold one.
+        """
+        with self._lock:
+            if self._closed:
+                return False
+            self._directory = directory
+            target = os.path.join(directory, self.DB_FILENAME)
+            if self.path is not None and _same_path(self.path, target):
+                return True
+            try:
+                os.makedirs(directory, exist_ok=True)
+                conn = self._connect(target)
+            except (OSError, sqlite3.Error) as exc:
+                self.error = _describe(exc)
+                self.revision += 1
+                return False
+            moved = self._switch_to(conn, target)
+        if moved:
+            self._measure_missing_sizes_later()
+        return moved
+
+    def _switch_to(self, conn: sqlite3.Connection, path: str) -> bool:
+        """Copy everything into *conn* and use it from now on (lock held)."""
+        try:
+            _copy_library(self._conn, conn)
+        except sqlite3.Error as exc:
+            conn.close()
+            self.error = _describe(exc)
+            self.revision += 1
+            return False
+        old, self._conn = self._conn, conn
+        old.close()
+        self.path = path
+        self.error = None
+        self._generation += 1
+        self.revision += 1
+        return True
+
+    def _retry_file(self) -> None:
+        """While running in memory, try the file again (lock held).
+
+        A library that couldn't be opened at launch, because another program
+        briefly had it locked for instance, would otherwise lose everything
+        saved for the rest of the session.
+        """
+        if self.path is not None or self._closed:
+            return
+        now = time.monotonic()
+        if now - self._last_open_attempt < self.REOPEN_INTERVAL:
+            return
+        self._last_open_attempt = now
+        target = os.path.join(self._directory, self.DB_FILENAME)
+        try:
+            os.makedirs(self._directory, exist_ok=True)
+            conn = self._connect(target)
+        except (OSError, sqlite3.Error):
+            return
+        if self._switch_to(conn, target):
+            # Sizes measured meanwhile were for the in-memory rows. Measure
+            # again on a thread, which waits for this caller's lock.
+            self._measure_missing_sizes_later()
+
     def _execute(self, sql: str, params: Iterable = ()) -> List[tuple]:
         """Run one statement; a closed or failing store behaves as empty."""
         with self._lock:
             if self._closed:
                 return []
+            if not sql.lstrip().upper().startswith("SELECT"):
+                self._retry_file()
             try:
                 rows = self._conn.execute(sql, tuple(params)).fetchall()
                 self._conn.commit()
@@ -274,6 +408,7 @@ class HistoryStore:
         with self._lock:
             if self._closed:
                 return None
+            self._retry_file()
             try:
                 cursor = self._conn.execute(
                     f"INSERT INTO history ({_HISTORY_COLUMNS}) "
@@ -374,10 +509,14 @@ class HistoryStore:
 
     def measure_folder_later(self, entry_id: int, folder: str) -> None:
         threading.Thread(
-            target=self._measure_folder, args=(entry_id, folder), daemon=True
+            target=self._measure_folder,
+            args=(entry_id, folder, self._generation),
+            daemon=True,
         ).start()
 
-    def _measure_folder(self, entry_id: int, folder: str) -> None:
+    def _measure_folder(
+        self, entry_id: int, folder: str, generation: Optional[int] = None
+    ) -> None:
         total = 0
         for root, _dirs, files in os.walk(folder):
             for name in files:
@@ -385,9 +524,38 @@ class HistoryStore:
                     total += os.path.getsize(os.path.join(root, name))
                 except OSError:
                     pass
-        self._execute(
-            "UPDATE history SET size_bytes = ? WHERE id = ?", (total, entry_id)
+        with self._lock:
+            if self._closed:
+                return
+            if generation is not None and generation != self._generation:
+                # The library moved meanwhile and the row has a new id there
+                # (the move measures it again); don't write to another row.
+                return
+            try:
+                self._conn.execute(
+                    "UPDATE history SET size_bytes = ? WHERE id = ?",
+                    (total, entry_id),
+                )
+                self._conn.commit()
+            except sqlite3.Error as exc:
+                self.error = str(exc)
+                return
+            self.revision += 1
+
+    def _measure_missing_sizes_later(self) -> None:
+        threading.Thread(target=self._measure_missing_sizes, daemon=True).start()
+
+    def _measure_missing_sizes(self) -> None:
+        """Measure, one at a time, entries whose folder size isn't known yet."""
+        generation = self._generation
+        rows = self._execute(
+            "SELECT id, folder FROM history WHERE size_bytes IS NULL AND folder != ''"
         )
+        for entry_id, folder in rows:
+            if self._closed or generation != self._generation:
+                return
+            if os.path.isdir(folder):
+                self._measure_folder(entry_id, folder, generation)
 
     # ------------------------------------------------------------------
     # Favorites

@@ -1,5 +1,15 @@
 # Kemono Downloader Release Notes
 
+## Unreleased
+
+- Keep history and favorites when the save folder changes (#98).
+  History and favorites live in the save folder's Other Files. After you applied a new Save Directory or Folder Name, they kept being written to the old folder for the rest of the session, and the next launch opened the new, empty one, so every bookmark seemed to vanish. Applying a new folder now copies them into it, merging with a library already there without duplicates, and leaves the old file in place. If the new folder can't hold them, a message says so and explains how to get them back. The Thumbnail tab also now follows the new folder for its preview cache.
+
+- Never set aside a library that is only locked.
+  If `library.db` couldn't be opened at launch for any reason, including another program briefly holding it, it was treated as damaged: renamed to `library.db.corrupt-…` and replaced by an empty one (macOS and Linux), or replaced by an in-memory library for the session (Windows). Only a file SQLite reports as damaged is set aside now. When the file can't be opened, the app keeps the library in memory, tries the file again on the next change, and saves everything into it once it opens. The History tab's warning appears and clears accordingly.
+
+- Tests no longer open the developer's own history and favorites: the default save folder points at a temporary folder during test runs.
+
 ## v5.15.0 (13 November 2026)
 **feat: clear handling of preview-only and missing files, crash protection, Tor that never bypasses itself, one consistent look across the app, and download reliability fixes**
 

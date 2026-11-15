@@ -90,6 +90,23 @@ def _isolate_settings_store():
     QtCore.QSettings = IsolatedQSettings
 
 
+def _isolate_default_save_folder():
+    """Keep windows built by tests out of the real save folder.
+
+    Without a saved Save Directory the app uses %APPDATA% (Windows) or
+    $XDG_DATA_HOME (Linux), so every test that built the main window opened
+    the developer's own history and favorites (library.db) and created
+    folders next to them. Point both at a throwaway folder for the run;
+    tests that set them themselves still win. (macOS derives the folder from
+    $HOME, which is left alone.)
+    """
+    import tempfile
+
+    data_home = tempfile.mkdtemp(prefix="kd-test-data-")
+    os.environ["APPDATA"] = data_home
+    os.environ["XDG_DATA_HOME"] = data_home
+
+
 def pytest_configure(config):
     """Create a QApplication early so modules that import Qt at import-time can succeed.
 
@@ -102,6 +119,7 @@ def pytest_configure(config):
     # domain-list refresh.
     _block_real_network()
     _isolate_settings_store()
+    _isolate_default_save_folder()
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         import faulthandler
