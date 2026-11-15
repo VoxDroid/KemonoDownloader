@@ -740,11 +740,6 @@ class HistoryTab(QWidget):
 
         self.history_empty.setText(translate("history_empty"))
         self.favorites_empty.setText(translate("favorites_empty"))
-        if self.store.error:
-            self.storage_warning.setText(
-                translate("history_storage_error", self.store.error)
-            )
-        self.storage_warning.setVisible(bool(self.store.error))
         models: Tuple[QAbstractTableModel, ...] = (
             self.history_model,
             self.favorites_model,
@@ -771,6 +766,17 @@ class HistoryTab(QWidget):
         self._update_summary()
         self._update_empty_states()
         self._update_buttons()
+        self._update_storage_warning()
+
+    def _update_storage_warning(self) -> None:
+        # Here rather than only on a language change: a store running in
+        # memory reconnects to its file once it can (HistoryStore._retry_file).
+        in_memory = not self.store.is_persistent
+        if in_memory:
+            self.storage_warning.setText(
+                translate("history_storage_error", self.store.error or "")
+            )
+        self.storage_warning.setVisible(in_memory)
 
     def _refresh_if_changed(self) -> None:
         if self.store.revision != self._seen_revision:

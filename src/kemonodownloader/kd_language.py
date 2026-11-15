@@ -2894,10 +2894,22 @@ class KDLanguage:
                 "chinese-simplified": "请先选择一项。",
             },
             "history_storage_error": {
-                "english": "History can't be saved to disk ({0}). It will be kept only until the app closes.",
-                "japanese": "履歴をディスクに保存できません（{0}）。アプリを閉じるまでの間だけ保持されます。",
-                "korean": "기록을 디스크에 저장할 수 없습니다({0}). 앱을 닫을 때까지만 유지됩니다.",
-                "chinese-simplified": "无法将历史记录保存到磁盘（{0}）。仅在应用关闭前保留。",
+                "english": "History and favorites can't be saved to disk right now ({0}). They are kept in memory and saved as soon as the file can be opened again. Anything not saved by the time the app closes is lost.",
+                "japanese": "現在、履歴とお気に入りをディスクに保存できません（{0}）。メモリに保持され、ファイルを開けるようになりしだい保存されます。アプリを閉じるまでに保存されなかった内容は失われます。",
+                "korean": "지금은 기록과 즐겨찾기를 디스크에 저장할 수 없습니다({0}). 메모리에 보관되며, 파일을 다시 열 수 있게 되면 바로 저장됩니다. 앱을 닫을 때까지 저장되지 않은 내용은 사라집니다.",
+                "chinese-simplified": "目前无法将历史记录和收藏保存到磁盘（{0}）。它们暂存在内存中，文件可以重新打开时会立即保存。应用关闭前仍未保存的内容将会丢失。",
+            },
+            "library_move_failed_title": {
+                "english": "History and favorites not moved",
+                "japanese": "履歴とお気に入りを移動できませんでした",
+                "korean": "기록과 즐겨찾기를 옮기지 못했습니다",
+                "chinese-simplified": "未能移动历史记录和收藏",
+            },
+            "library_move_failed": {
+                "english": "Your history and favorites couldn't be copied to the new save folder:\n{0}\n\n{1}\n\nThey are still in the previous folder and stay in use until you close the app. Next time, the app opens the library in the new folder; to bring them back, switch the Save Directory back, or copy library.db from the old Other Files folder into the new one while the app is closed.",
+                "japanese": "履歴とお気に入りを新しい保存フォルダにコピーできませんでした：\n{0}\n\n{1}\n\nこれらは以前のフォルダに残っており、アプリを閉じるまではそのまま使われます。次回の起動では新しいフォルダのライブラリが開かれます。元に戻すには、保存ディレクトリを元に戻すか、アプリを閉じた状態で古い Other Files フォルダの library.db を新しいフォルダにコピーしてください。",
+                "korean": "기록과 즐겨찾기를 새 저장 폴더로 복사하지 못했습니다:\n{0}\n\n{1}\n\n이전 폴더에 그대로 있으며, 앱을 닫을 때까지는 계속 사용됩니다. 다음 실행 때는 새 폴더의 라이브러리가 열립니다. 되돌리려면 저장 디렉토리를 원래대로 바꾸거나, 앱을 닫은 상태에서 이전 Other Files 폴더의 library.db를 새 폴더로 복사하세요.",
+                "chinese-simplified": "无法将历史记录和收藏复制到新的保存文件夹：\n{0}\n\n{1}\n\n它们仍在之前的文件夹中，在关闭应用前会继续使用。下次启动时，应用会打开新文件夹中的资料库；若要找回，请把保存目录改回原来的位置，或在关闭应用后，将旧 Other Files 文件夹中的 library.db 复制到新文件夹。",
             },
             "history_empty": {
                 "english": "No downloads recorded yet.\nFinished post, creator and thumbnail downloads will appear here.",
@@ -3880,10 +3892,10 @@ class KDLanguage:
                 "chinese-simplified": "控制台和完整日志中显示哪些消息。调试信息是技术性消息，主要在报告问题时有用。设置会立即保存，并对新消息生效。",
             },
             "note_folder_settings": {
-                "english": "Everything is kept in Save Directory › Folder Name: your files in Downloads, preview images in Cache, and the history and the record of downloaded files in Other Files.",
-                "japanese": "すべては「保存ディレクトリ › フォルダ名」に保存されます。ファイルは Downloads、プレビュー画像は Cache、履歴とダウンロード済みファイルの記録は Other Files に入ります。",
-                "korean": "모든 데이터는 '저장 디렉토리 › 폴더 이름'에 보관됩니다. 파일은 Downloads, 미리보기 이미지는 Cache, 기록과 다운로드한 파일 목록은 Other Files에 저장됩니다.",
-                "chinese-simplified": "所有内容都保存在“保存目录 › 文件夹名称”中：下载的文件在 Downloads，预览图在 Cache，历史记录和已下载文件的记录在 Other Files。",
+                "english": "Everything is kept in Save Directory › Folder Name: your files in Downloads, preview images in Cache, and the history and the record of downloaded files in Other Files. When you apply a new folder, your history and favorites come along; downloaded files stay where they are.",
+                "japanese": "すべては「保存ディレクトリ › フォルダ名」に保存されます。ファイルは Downloads、プレビュー画像は Cache、履歴とダウンロード済みファイルの記録は Other Files に入ります。新しいフォルダを適用すると履歴とお気に入りも引き継がれますが、ダウンロード済みのファイルは元の場所に残ります。",
+                "korean": "모든 데이터는 '저장 디렉토리 › 폴더 이름'에 보관됩니다. 파일은 Downloads, 미리보기 이미지는 Cache, 기록과 다운로드한 파일 목록은 Other Files에 저장됩니다. 새 폴더를 적용하면 기록과 즐겨찾기도 함께 옮겨지며, 다운로드한 파일은 원래 위치에 남습니다.",
+                "chinese-simplified": "所有内容都保存在“保存目录 › 文件夹名称”中：下载的文件在 Downloads，预览图在 Cache，历史记录和已下载文件的记录在 Other Files。应用新文件夹后，历史记录和收藏会一并迁移，已下载的文件则留在原处。",
             },
             "note_download_settings": {
                 "english": "How many files download at the same time. More is faster but uses more bandwidth; Pawchive is always limited to five at a time; the info button explains why.",
