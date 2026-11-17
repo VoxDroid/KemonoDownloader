@@ -1,4 +1,5 @@
 import os
+import socket
 import subprocess
 import sys
 
@@ -47,6 +48,43 @@ LOG_LEVEL_SETTINGS = {
     "WARNING": ("show_warning_logs", "log_level_warning", True),
     "ERROR": ("show_error_logs", "log_level_error", True),
 }
+
+FOLDER_STRATEGY_LABELS = {
+    "per_post": "per_post_folders",
+    "single_folder": "single_creator_folder",
+    "by_file_type": "subfolders_by_file_type",
+}
+
+# Every setting Apply Changes applies, as (key, label key), in the order the
+# tab shows them; the confirmation lists the changed ones in this order.
+SETTING_LABELS = [
+    ("base_folder_name", "folder_name"),
+    ("base_directory", "save_directory"),
+    ("simultaneous_downloads", "simultaneous_downloads"),
+    ("save_preview_images", "save_preview_images"),
+    ("creator_posts_max_attempts", "creator_posts_max_attempts"),
+    ("post_data_max_retries", "post_data_max_retries"),
+    ("file_download_max_retries", "file_download_max_retries"),
+    ("api_request_max_retries", "api_request_max_retries"),
+    ("creator_filename_template", "filename_template"),
+    ("creator_folder_strategy", "folder_strategy"),
+    ("auto_check_updates", "auto_check_updates"),
+    *[(key, label) for key, label, _default in LOG_LEVEL_SETTINGS.values()],
+    ("language", "language"),
+    ("font", "font"),
+    ("theme", "theme_label"),
+    ("use_proxy", "use_proxy"),
+    ("proxy_type", "proxy_type"),
+    ("custom_proxy_url", "custom_proxy_url"),
+    ("tor_path", "tor_path"),
+]
+
+# Where Tor listens: the Tor this tab starts, or a Tor service of the user's.
+TOR_SOCKS_ADDRESS = ("127.0.0.1", 9050)
+
+# What applying a new proxy route should do about Tor (_prepare_route).
+ROUTE_OK = "ok"
+ROUTE_STOP_TOR = "stop_tor"
 
 # Tor Expert Bundle fetched by "Download Tor", and the SHA-256 of each archive.
 # The hashes are copied from the release's sha256sums-signed-build.txt after
@@ -459,18 +497,10 @@ class SettingsTab(QWidget):
 
         # Connect both change events
         self.creator_filename_combo.currentIndexChanged.connect(
-            lambda idx: self.update_temp_setting(
-                "creator_filename_template",
-                (
-                    self.creator_filename_combo.itemData(idx)
-                    if idx < self.creator_filename_combo.count() - 1
-                    else self.creator_filename_combo.currentText()
-                ),
-            )
+            self._on_template_choice
         )
-        # Update temp setting when editing text
         self.creator_filename_combo.lineEdit().textChanged.connect(
-            lambda text: self.update_temp_setting("creator_filename_template", text)
+            self._on_template_text
         )
         creator_custom_layout.addWidget(self.creator_filename_combo, 0, 1)
 
@@ -531,8 +561,7 @@ class SettingsTab(QWidget):
         self.update_group.setLayout(with_note(update_layout, "note_update_settings"))
         layout.addWidget(self.update_group)
 
-        # Log Settings Group: which messages the consoles show. Saved straight
-        # away, like the proxy switch, since it only changes what is shown.
+        # Log Settings Group: which messages the consoles show.
         self.log_group = QGroupBox()
         log_layout = QHBoxLayout()
         log_layout.setSpacing(18)
@@ -596,8 +625,7 @@ class SettingsTab(QWidget):
         self.font_group.setLayout(with_note(font_layout, "note_font_settings"))
         layout.addWidget(self.font_group)
 
-        # Appearance Group: the colour theme. Applied and saved straight away,
-        # so each theme can be tried on the spot.
+        # Appearance Group: the colour theme, switched on Apply Changes.
         self.appearance_group = QGroupBox()
         appearance_layout = QGridLayout()
         self.theme_label = QLabel()
@@ -796,21 +824,32 @@ class SettingsTab(QWidget):
         self.tor_output_text.setVisible(False)
         self.on_use_proxy_changed(self.temp_settings["use_proxy"])
 
-        # Buttons Layout
+        # Buttons Layout. Nothing above takes effect until Apply Changes; the
+        # pill says when something is waiting, and Discard puts it back.
         buttons_layout = QHBoxLayout()
 
         self.apply_button = QPushButton()
-        set_role(self.apply_button, "primary")
         self.apply_button.clicked.connect(self.confirm_and_apply_settings)
         buttons_layout.addWidget(self.apply_button)
+
+        self.discard_button = QPushButton()
+        self.discard_button.clicked.connect(self.discard_changes)
+        buttons_layout.addWidget(self.discard_button)
 
         self.reset_button = QPushButton(translate("reset_to_defaults"))
         set_role(self.reset_button, "danger")
         self.reset_button.clicked.connect(self.confirm_and_reset_settings)
         buttons_layout.addWidget(self.reset_button)
 
+        buttons_layout.addStretch()
+        self.pending_label = QLabel()
+        set_role(self.pending_label, "pill")
+        set_tone(self.pending_label, "warning")
+        buttons_layout.addWidget(self.pending_label)
+
         layout.addLayout(buttons_layout)
         layout.addStretch()
+        self._refresh_pending_state()
 
         # Make the settings page scrollable
         container = QWidget()
@@ -859,11 +898,30 @@ class SettingsTab(QWidget):
         tip(self.test_tor_button, "tip_test_tor")
         tip(self.help_tor_button, "tip_tor_help")
         tip(self.apply_button, "tip_apply_changes")
+        tip(self.discard_button, "tip_discard_changes")
         tip(self.reset_button, "tip_reset_defaults")
         self.update_ui_text()
 
         # Initialize Tor button states
         self.update_tor_button_states()
+
+    def _on_template_choice(self, index):
+        combo = self.creator_filename_combo
+        if index < combo.count() - 1:
+            self.update_temp_setting("creator_filename_template", combo.itemData(index))
+            return
+        # "Custom...": start editing from the template in use. The combo has
+        # just put the label "Custom..." in the box, which used to become the
+        # template itself, naming every downloaded file "Custom...".
+        combo.setEditText(
+            self.temp_settings.get("creator_filename_template")
+            or "{post_id}_{orig_name}"
+        )
+
+    def _on_template_text(self, text):
+        if text == translate("tmpl_custom"):
+            return  # the "Custom..." label, not a template (see above)
+        self.update_temp_setting("creator_filename_template", text)
 
     def update_language_combo(self):
         self.language_combo.blockSignals(True)
@@ -1159,10 +1217,61 @@ class SettingsTab(QWidget):
         return None
 
     def update_temp_setting(self, key, value):
+        """Record a pending change; nothing takes effect before Apply Changes."""
         self.temp_settings[key] = value
+        self._refresh_pending_state()
+
+    # ----------------------------------------------------- pending changes --
+
+    def pending_changes(self):
+        """Keys whose value differs from what is applied, in on-screen order."""
+        return [
+            key
+            for key, _label in SETTING_LABELS
+            if self.temp_settings.get(key) != self.settings.get(key)
+        ]
+
+    def has_pending_changes(self):
+        return bool(self.pending_changes())
+
+    def _refresh_pending_state(self):
+        """Show whether anything is waiting for Apply Changes."""
+        label = getattr(self, "pending_label", None)
+        if label is None:
+            return  # still building the tab
+        pending = self.has_pending_changes()
+        label.setVisible(pending)
+        self.discard_button.setEnabled(pending)
+        set_role(self.apply_button, "primary" if pending else None)
+
+    def _display_value(self, key, value):
+        """*value* of setting *key* as the user knows it."""
+        if isinstance(value, bool):
+            return translate("enabled" if value else "disabled")
+        if key == "language":
+            return translate(value)
+        if key == "theme":
+            return translate(f"theme_{theme_name(value)}")
+        if key == "creator_folder_strategy":
+            return translate(FOLDER_STRATEGY_LABELS.get(value, "per_post_folders"))
+        if key == "proxy_type":
+            return translate("custom_proxy") if value == "custom" else "Tor"
+        text = "" if value is None else str(value)
+        return text if text.strip() else "—"
+
+    def describe_changes(self, keys):
+        """One "Label: before → after" line per changed setting."""
+        labels = dict(SETTING_LABELS)
+        lines = []
+        for key in keys:
+            label = translate(labels[key]).strip().rstrip(":：")
+            before = self._display_value(key, self.settings.get(key))
+            after = self._display_value(key, self.temp_settings.get(key))
+            lines.append(f"• {label}: {before} → {after}")
+        return "\n".join(lines)
 
     def update_simultaneous_downloads(self, value):
-        self.temp_settings["simultaneous_downloads"] = value
+        self.update_temp_setting("simultaneous_downloads", value)
         self.download_slider.blockSignals(True)
         self.download_spinbox.blockSignals(True)
         self.download_slider.setValue(value)
@@ -1178,69 +1287,74 @@ class SettingsTab(QWidget):
         )
 
     def confirm_and_apply_settings(self):
-        auto_check_status = (
-            translate("enabled")
-            if self.temp_settings["auto_check_updates"]
-            else translate("disabled")
-        )
-        language_name = language_manager.get_text(self.temp_settings["language"])
-        proxy_status = (
-            translate("enabled")
-            if self.temp_settings["use_proxy"]
-            else translate("disabled")
-        )
-        proxy_type_name = self.temp_settings["proxy_type"].capitalize()
+        """Apply Changes: list what changed, check it, then apply it."""
+        self.apply_pending_settings(confirm=True)
 
-        # Prepare display values for template and folder strategy
-        filename_template_display = self.temp_settings.get(
-            "creator_filename_template", "{post_id}_{orig_name}"
-        )
-        folder_strategy_key = self.temp_settings.get(
-            "creator_folder_strategy", "per_post"
-        )
-        folder_strategy_display = translate(
-            "per_post_folders"
-            if folder_strategy_key == "per_post"
-            else (
-                "single_creator_folder"
-                if folder_strategy_key == "single_folder"
-                else "subfolders_by_file_type"
+    def apply_pending_settings(self, confirm=True, closing=False):
+        """Apply every pending change. True when applied, or nothing to do.
+
+        *confirm* asks first, listing the changes, and reports the result.
+        *closing* is Apply from the close-the-app prompt, which has listed
+        the changes already; the proxy switch isn't remembered between
+        launches, so nothing about Tor needs deciding then.
+        """
+        changes = self.pending_changes()
+        if not changes:
+            if confirm:
+                QMessageBox.information(
+                    self, translate("apply_changes"), translate("nothing_to_apply")
+                )
+            return True
+        route_changes = not closing and self._route_changes()
+        if confirm:
+            message = translate(
+                "confirm_changes_message", self.describe_changes(changes)
             )
-        )
+            if route_changes and self._downloads_running():
+                message += "\n\n" + translate("route_change_during_downloads")
+            reply = QMessageBox.question(
+                self,
+                translate("confirm_settings_change"),
+                message,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if reply != QMessageBox.StandardButton.Yes:
+                return False
+        if not self._check_pending():
+            return False
+        applied = self.describe_changes(changes)  # before they stop being changes
+        stop_tor_after = False
+        if route_changes:
+            outcome = self._prepare_route()
+            if outcome is None:
+                return False
+            stop_tor_after = outcome == ROUTE_STOP_TOR
+        self._commit_pending()
+        if stop_tor_after:
+            self.stop_tor()
+        if confirm:
+            QMessageBox.information(
+                self,
+                translate("settings_applied"),
+                translate("settings_applied_list", applied),
+            )
+        return True
 
-        reply = QMessageBox.question(
-            self,
-            translate("confirm_settings_change"),
-            translate(
-                "confirm_settings_message",
-                self.temp_settings["base_folder_name"],
-                self.temp_settings["base_directory"],
-                self.temp_settings["simultaneous_downloads"],
-                auto_check_status,
-                language_name,
-                proxy_status,
-                proxy_type_name,
-                filename_template_display,
-                folder_strategy_display,
-                self.temp_settings.get("font", "JetBrains Mono"),
-            ),
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-
-        if reply == QMessageBox.StandardButton.No:
-            return
-
-        if not self.temp_settings["base_folder_name"].strip():
+    def _check_pending(self):
+        """Refuse pending values that can't work, explaining why."""
+        values = self.temp_settings
+        if not values["base_folder_name"].strip():
             QMessageBox.warning(
                 self, translate("invalid_input"), translate("folder_name_empty")
             )
+            # Both: setText alone does nothing when the box already shows it.
+            self.update_temp_setting(
+                "base_folder_name", self.settings["base_folder_name"]
+            )
             self.folder_name_input.setText(self.settings["base_folder_name"])
-            self.temp_settings["base_folder_name"] = self.settings["base_folder_name"]
-            return
-
-        # Create the base_directory if it doesn’t exist
-        base_dir = self.temp_settings["base_directory"]
+            return False
+        base_dir = values["base_directory"]
         if not os.path.isdir(base_dir):
             try:
                 os.makedirs(base_dir, exist_ok=True)
@@ -1250,88 +1364,165 @@ class SettingsTab(QWidget):
                     translate("invalid_input"),
                     translate("directory_creation_failed", str(e)),
                 )
+                self.update_temp_setting(
+                    "base_directory", self.settings["base_directory"]
+                )
                 self.directory_input.setText(self.settings["base_directory"])
-                self.temp_settings["base_directory"] = self.settings["base_directory"]
-                return
+                return False
+        if (
+            values.get("use_proxy")
+            and values.get("proxy_type") == "custom"
+            and not (values.get("custom_proxy_url") or "").strip()
+        ):
+            # Applied as is, an empty address would mean no proxy at all: a
+            # direct connection while the user believes one is in use.
+            QMessageBox.warning(
+                self, translate("invalid_input"), translate("custom_proxy_url_required")
+            )
+            return False
+        return True
 
-        language_changed = self.settings["language"] != self.temp_settings["language"]
-        font_changed = self.settings.get("font") != self.temp_settings.get("font")
+    def _route_changes(self):
+        """Whether applying would change how requests reach the sites."""
+        return proxies_for(self.temp_settings) != proxies_for(self.settings)
+
+    def _downloads_running(self):
+        window = self.parent
+        for name in ("post_tab", "creator_tab"):
+            if getattr(getattr(window, name, None), "downloading", False) is True:
+                return True
+        thumbnails = getattr(window, "thumbnail_tab", None)
+        thread = getattr(thumbnails, "download_thread", None)
+        is_running = getattr(thread, "isRunning", None)
+        return bool(callable(is_running) and is_running())
+
+    def _uses_tor(self, values):
+        return bool(values.get("use_proxy")) and values.get("proxy_type") == "tor"
+
+    def _prepare_route(self):
+        """Settle Tor before a new route takes effect.
+
+        Returns ROUTE_OK, ROUTE_STOP_TOR (stop the app's Tor once applied),
+        or None to cancel applying.
+        """
+        if self._uses_tor(self.temp_settings):
+            if self.is_tor_running() or tor_is_listening():
+                return ROUTE_OK
+            return self._ask_about_stopped_tor()
+        if self._uses_tor(self.settings) and self.is_tor_running():
+            reply = QMessageBox.question(
+                self,
+                translate("stop_tor_after_apply_title"),
+                translate("stop_tor_after_apply"),
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes,
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                return ROUTE_STOP_TOR
+        return ROUTE_OK
+
+    def _ask_about_stopped_tor(self):
+        """Tor is about to be used but nothing listens on its port."""
+        tor_path = self.temp_settings.get("tor_path") or ""
+        can_start = bool(tor_path and os.path.exists(tor_path))
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Warning)
+        box.setWindowTitle(translate("tor_not_running_title"))
+        text = translate("tor_not_running_apply")
+        if not can_start:
+            text += "\n\n" + translate("tor_not_set_up_apply")
+        box.setText(text)
+        start = None
+        if can_start:
+            start = box.addButton(
+                translate("start_tor_and_apply"), QMessageBox.ButtonRole.AcceptRole
+            )
+        anyway = box.addButton(
+            translate("apply_anyway"), QMessageBox.ButtonRole.DestructiveRole
+        )
+        cancel = box.addButton(QMessageBox.StandardButton.Cancel)
+        box.setDefaultButton(start if start is not None else cancel)
+        box.exec()
+        clicked = box.clickedButton()
+        if start is not None and clicked == start:
+            self.start_tor()
+            # start_tor explains itself when it can't start.
+            return ROUTE_OK if self.tor_process is not None else None
+        if clicked == anyway:
+            return ROUTE_OK
+        return None
+
+    def _commit_pending(self):
+        """Make the pending values the applied ones, and act on them."""
+        old = self.settings
+        language_changed = old.get("language") != self.temp_settings.get("language")
+        font_changed = old.get("font") != self.temp_settings.get("font")
+        theme_changed = theme_name(old.get("theme")) != theme_name(
+            self.temp_settings.get("theme")
+        )
 
         self.settings = self.temp_settings.copy()
-        self.settings["use_proxy"] = (
-            False  # Always keep proxy disabled in saved settings
-        )
         self.save_settings()
-        old_base_folder = self.parent.base_folder
-        self.parent.base_folder = os.path.join(
-            self.settings["base_directory"], self.settings["base_folder_name"]
-        )
-        self.parent.download_folder = os.path.join(self.parent.base_folder, "Downloads")
-        self.parent.cache_folder = os.path.join(self.parent.base_folder, "Cache")
-        self.parent.other_files_folder = os.path.join(
-            self.parent.base_folder, "Other Files"
-        )
-        self.parent.ensure_folders_exist()
 
-        if old_base_folder != self.parent.base_folder:
-            self._move_to_new_folder()
+        window = self.parent
+        if hasattr(window, "ensure_folders_exist"):
+            old_base_folder = window.base_folder
+            window.base_folder = os.path.join(
+                self.settings["base_directory"], self.settings["base_folder_name"]
+            )
+            window.download_folder = os.path.join(window.base_folder, "Downloads")
+            window.cache_folder = os.path.join(window.base_folder, "Cache")
+            window.other_files_folder = os.path.join(window.base_folder, "Other Files")
+            window.ensure_folders_exist()
+            if old_base_folder != window.base_folder:
+                self._move_to_new_folder()
 
         if language_changed:
             language_manager.set_language(self.settings["language"])
             self.language_changed.emit()
-            self.parent.log(translate("language_changed"))
+            log = getattr(window, "log", None)
+            if callable(log):
+                log(translate("language_changed"))
             self.update_ui_text()
-
         if font_changed:
             self.font_changed.emit(self.settings.get("font", "JetBrains Mono"))
+        if theme_changed:
+            self.theme_changed.emit(self.get_theme())
 
         self.settings_applied.emit()
+        self._refresh_pending_state()
 
-        auto_check_status = (
-            translate("enabled")
-            if self.settings["auto_check_updates"]
-            else translate("disabled")
-        )
-        language_name = language_manager.get_text(self.settings["language"])
-        proxy_status = (
-            translate("enabled")
-            if self.settings["use_proxy"]
-            else translate("disabled")
-        )
-        proxy_type_name = self.settings["proxy_type"].capitalize()
+    def discard_changes(self):
+        """Put every control back to the applied values."""
+        self.temp_settings = self.settings.copy()
+        self._show_values()
 
-        # Show applied message including creator filename template and folder strategy
-        filename_template_display = self.settings.get(
-            "creator_filename_template", "{post_id}_{orig_name}"
-        )
-        folder_strategy_key = self.settings.get("creator_folder_strategy", "per_post")
-        folder_strategy_display = translate(
-            "per_post_folders"
-            if folder_strategy_key == "per_post"
-            else (
-                "single_creator_folder"
-                if folder_strategy_key == "single_folder"
-                else "subfolders_by_file_type"
-            )
-        )
+    def confirm_close_with_pending_changes(self):
+        """Before the app closes: apply, discard or keep unapplied changes.
 
-        QMessageBox.information(
-            self,
-            translate("settings_applied"),
-            translate(
-                "settings_applied_message",
-                self.settings["base_folder_name"],
-                self.settings["base_directory"],
-                self.settings["simultaneous_downloads"],
-                auto_check_status,
-                language_name,
-                proxy_status,
-                proxy_type_name,
-                filename_template_display,
-                folder_strategy_display,
-                self.settings.get("font", "JetBrains Mono"),
-            ),
+        True when the app may close. The proxy switch is left out: it is
+        never remembered between launches anyway.
+        """
+        changes = [key for key in self.pending_changes() if key != "use_proxy"]
+        if not changes:
+            return True
+        box = QMessageBox(self)
+        box.setIcon(QMessageBox.Icon.Question)
+        box.setWindowTitle(translate("unapplied_changes_title"))
+        box.setText(translate("unapplied_on_close", self.describe_changes(changes)))
+        apply = box.addButton(
+            translate("apply_changes"), QMessageBox.ButtonRole.AcceptRole
         )
+        discard = box.addButton(
+            translate("discard_changes"), QMessageBox.ButtonRole.DestructiveRole
+        )
+        box.addButton(QMessageBox.StandardButton.Cancel)
+        box.setDefaultButton(apply)
+        box.exec()
+        clicked = box.clickedButton()
+        if clicked == apply:
+            return self.apply_pending_settings(confirm=False, closing=True)
+        return clicked == discard
 
     def _move_to_new_folder(self):
         """Point every tab and the library at the save folder just applied."""
@@ -1370,68 +1561,102 @@ class SettingsTab(QWidget):
             self.reset_to_defaults()
 
     def reset_to_defaults(self):
-        """Reset temp_settings to default values and update UI."""
+        """Fill in the default values, pending until Apply Changes."""
         self.temp_settings = self.default_settings.copy()
-
-        # Update UI elements to reflect default values
-        self.folder_name_input.setText(self.temp_settings["base_folder_name"])
-        self.directory_input.setText(self.temp_settings["base_directory"])
-        self.download_slider.setValue(self.temp_settings["simultaneous_downloads"])
-        self.download_spinbox.setValue(self.temp_settings["simultaneous_downloads"])
-        self.auto_update_checkbox.setChecked(self.temp_settings["auto_check_updates"])
-        for level, (key, _label, default) in LOG_LEVEL_SETTINGS.items():
-            self.log_level_checkboxes[level].setChecked(
-                bool(self.temp_settings.get(key, default))
-            )
-        self.save_previews_checkbox.setChecked(
-            self.temp_settings.get("save_preview_images", False)
-        )
-        self.creator_posts_max_attempts_spinbox.setValue(
-            self.temp_settings["creator_posts_max_attempts"]
-        )
-        self.post_data_max_retries_spinbox.setValue(
-            self.temp_settings["post_data_max_retries"]
-        )
-        self.file_download_max_retries_spinbox.setValue(
-            self.temp_settings["file_download_max_retries"]
-        )
-        self.api_request_max_retries_spinbox.setValue(
-            self.temp_settings["api_request_max_retries"]
-        )
-
-        # Update proxy settings
-        self.use_proxy_checkbox.blockSignals(True)
-        self.proxy_type_combo.blockSignals(True)
-        self.use_proxy_checkbox.setChecked(self.temp_settings["use_proxy"])
-        self.proxy_type_combo.setCurrentIndex(
-            self.get_proxy_type_index(self.temp_settings["proxy_type"])
-        )
-        self.use_proxy_checkbox.blockSignals(False)
-        self.proxy_type_combo.blockSignals(False)
-        self.custom_proxy_input.setText(self.temp_settings["custom_proxy_url"])
-        self.tor_path_input.setText(self.temp_settings["tor_path"])
-        self.on_use_proxy_changed(self.temp_settings["use_proxy"])
-
-        # Update language combo box
-        self.update_language_combo()
-
-        # Update font combo box
-        default_font = self.temp_settings.get("font", "JetBrains Mono")
-        self.font_combo.blockSignals(True)
-        for i in range(self.font_combo.count()):
-            if self.font_combo.itemData(i) == default_font:
-                self.font_combo.setCurrentIndex(i)
-                break
-        self.font_combo.blockSignals(False)
-
-        # The theme switches (and saves) on the spot, like choosing it does.
-        self.theme_combo.setCurrentIndex(
-            max(0, self.theme_combo.findData(self.temp_settings.get("theme")))
-        )
-
+        self._show_values()
         QMessageBox.information(
             self, translate("reset_to_defaults"), translate("settings_reset_message")
         )
+
+    def _show_values(self):
+        """Make every control show the pending values (temp_settings).
+
+        Signals are blocked while filling them in: the values are already in
+        temp_settings, and the handlers would only repeat that (or, for the
+        proxy type, offer to detect Tor).
+        """
+        values = self.temp_settings
+        combo = self.creator_filename_combo
+        widgets = [
+            self.folder_name_input,
+            self.directory_input,
+            self.download_slider,
+            self.download_spinbox,
+            self.save_previews_checkbox,
+            self.creator_posts_max_attempts_spinbox,
+            self.post_data_max_retries_spinbox,
+            self.file_download_max_retries_spinbox,
+            self.api_request_max_retries_spinbox,
+            combo,
+            combo.lineEdit(),
+            self.creator_folder_strategy_combo,
+            self.auto_update_checkbox,
+            *self.log_level_checkboxes.values(),
+            self.font_combo,
+            self.theme_combo,
+            self.use_proxy_checkbox,
+            self.proxy_type_combo,
+            self.custom_proxy_input,
+            self.tor_path_input,
+        ]
+        for widget in widgets:
+            widget.blockSignals(True)
+        try:
+            self.folder_name_input.setText(values["base_folder_name"])
+            self.directory_input.setText(values["base_directory"])
+            self.download_slider.setValue(values["simultaneous_downloads"])
+            self.download_spinbox.setValue(values["simultaneous_downloads"])
+            self.save_previews_checkbox.setChecked(
+                values.get("save_preview_images", False) is True
+            )
+            self.creator_posts_max_attempts_spinbox.setValue(
+                values["creator_posts_max_attempts"]
+            )
+            self.post_data_max_retries_spinbox.setValue(values["post_data_max_retries"])
+            self.file_download_max_retries_spinbox.setValue(
+                values["file_download_max_retries"]
+            )
+            self.api_request_max_retries_spinbox.setValue(
+                values["api_request_max_retries"]
+            )
+            template = (
+                values.get("creator_filename_template") or "{post_id}_{orig_name}"
+            )
+            preset = next(
+                (i for i in range(combo.count() - 1) if combo.itemData(i) == template),
+                None,
+            )
+            if preset is not None:
+                combo.setCurrentIndex(preset)
+            else:
+                combo.setCurrentIndex(combo.count() - 1)
+                combo.setEditText(template)
+            strategy = self.creator_folder_strategy_combo.findData(
+                values.get("creator_folder_strategy", "per_post")
+            )
+            self.creator_folder_strategy_combo.setCurrentIndex(max(0, strategy))
+            self.auto_update_checkbox.setChecked(values["auto_check_updates"])
+            for level, (key, _label, default) in LOG_LEVEL_SETTINGS.items():
+                self.log_level_checkboxes[level].setChecked(
+                    bool(values.get(key, default))
+                )
+            font = self.font_combo.findData(values.get("font", "JetBrains Mono"))
+            self.font_combo.setCurrentIndex(max(0, font))
+            self.theme_combo.setCurrentIndex(
+                max(0, self.theme_combo.findData(theme_name(values.get("theme"))))
+            )
+            self.use_proxy_checkbox.setChecked(bool(values["use_proxy"]))
+            self.proxy_type_combo.setCurrentIndex(
+                self.get_proxy_type_index(values["proxy_type"])
+            )
+            self.custom_proxy_input.setText(values["custom_proxy_url"])
+            self.tor_path_input.setText(values["tor_path"])
+        finally:
+            for widget in widgets:
+                widget.blockSignals(False)
+        self.update_language_combo()  # reads temp_settings itself
+        self._update_proxy_ui()
+        self._refresh_pending_state()
 
     def update_ui_text(self):
         retranslate_notes(self)
@@ -1588,16 +1813,16 @@ class SettingsTab(QWidget):
         )
 
         self.apply_button.setText(translate("apply_changes"))
+        self.discard_button.setText(translate("discard_changes"))
         self.reset_button.setText(translate("reset_to_defaults"))
+        self.pending_label.setText(translate("unapplied_changes"))
 
     def get_simultaneous_downloads(self):
         return self.settings["simultaneous_downloads"]
 
     def set_log_level_shown(self, key, shown):
-        """Show or hide one level of console messages, saved straight away."""
-        self.temp_settings[key] = shown
-        self.settings[key] = shown
-        self.save_settings()
+        """Choose whether one level of console messages shows (on Apply)."""
+        self.update_temp_setting(key, shown)
 
     def is_log_level_shown(self, level):
         """Whether the consoles show messages of *level* (DEBUG, INFO, ...)."""
@@ -1639,12 +1864,8 @@ class SettingsTab(QWidget):
         return theme_name(self.settings.get("theme"))
 
     def update_theme(self, index):
-        """Switch to the chosen theme and save it straight away."""
-        theme = theme_name(self.theme_combo.itemData(index))
-        self.temp_settings["theme"] = theme
-        self.settings["theme"] = theme
-        self.save_settings()
-        self.theme_changed.emit(theme)
+        """Choose a theme; the app switches to it on Apply Changes."""
+        self.update_temp_setting("theme", theme_name(self.theme_combo.itemData(index)))
 
     def get_proxy_type_index(self, proxy_type):
         type_map = {"custom": 0, "tor": 1}
@@ -1658,39 +1879,32 @@ class SettingsTab(QWidget):
         )
 
     def on_use_proxy_changed(self, state):
-        enabled = state == Qt.CheckState.Checked.value
+        """Turn the proxy on or off (on Apply); show its options meanwhile."""
+        # A check state from the box, or a plain bool from code.
+        enabled = state is True or state == Qt.CheckState.Checked.value
         self.update_temp_setting("use_proxy", enabled)
 
-        # Show/hide the proxy settings group (checkbox stays visible)
-        self.proxy_group.setVisible(enabled)
+        if enabled and self.temp_settings["proxy_type"] not in ["custom", "tor"]:
+            # Default to Tor when nothing valid was chosen before.
+            self.update_temp_setting("proxy_type", "tor")
+            self.proxy_type_combo.blockSignals(True)
+            self.proxy_type_combo.setCurrentIndex(1)  # Tor index
+            self.proxy_type_combo.blockSignals(False)
 
-        if enabled:
-            # When enabling proxy, default to Tor if not already set
-            if self.temp_settings["proxy_type"] not in ["custom", "tor"]:
-                self.update_temp_setting("proxy_type", "tor")
-                self.proxy_type_combo.setCurrentIndex(1)  # Tor index
-
-            # Update UI based on current proxy type
-            self.on_proxy_type_changed(self.proxy_type_combo.currentIndex())
-
-            # Save proxy settings immediately when enabled
-            self.settings["use_proxy"] = enabled
-            self.settings["proxy_type"] = self.temp_settings["proxy_type"]
-            self.save_settings()
-        else:
-            # When disabling proxy, save immediately
-            self.settings["use_proxy"] = enabled
-            self.save_settings()
-
-        # Update the UI
-        self.layout().update()
-        self.repaint()
-        self.adjustSize()
+        self._update_proxy_ui(auto_detect=enabled)
 
     def on_proxy_type_changed(self, index):
+        """Choose custom proxy or Tor (on Apply); show that type's options."""
         proxy_type = self.proxy_type_combo.itemData(index)
         self.update_temp_setting("proxy_type", proxy_type)
+        self._update_proxy_ui(auto_detect=True)
+
+    def _update_proxy_ui(self, auto_detect=False):
+        """Show the options of the proxy being set up (pending values)."""
         enabled = self.temp_settings["use_proxy"]
+        proxy_type = self.temp_settings["proxy_type"]
+        # Show/hide the proxy settings group (checkbox stays visible)
+        self.proxy_group.setVisible(enabled)
 
         # Show/hide widgets based on proxy type
         if proxy_type == "custom":
@@ -1753,13 +1967,10 @@ class SettingsTab(QWidget):
         # Update Tor button states
         self.update_tor_button_states()
 
-        # Save proxy_type immediately when changed
-        self.settings["proxy_type"] = proxy_type
-        self.save_settings()
-
         # Auto-detect Tor if switching to Tor and no path is set
         if (
-            enabled
+            auto_detect
+            and enabled
             and proxy_type == "tor"
             and not self.temp_settings["tor_path"].strip()
         ):
@@ -1943,7 +2154,11 @@ GeoIPExcludeUnknown 1
         # Disable proxy type selection while Tor is running
         self.proxy_type_combo.setEnabled(False)
 
-        QMessageBox.information(self, translate("info"), translate("tor_starting"))
+        message = translate("tor_starting")
+        if not self._uses_tor(self.settings):
+            # Running Tor doesn't route anything by itself.
+            message += "\n\n" + translate("tor_started_not_applied")
+        QMessageBox.information(self, translate("info"), message)
 
     def stop_tor(self):
         if not self.tor_process:
@@ -1976,7 +2191,11 @@ GeoIPExcludeUnknown 1
         # Re-enable proxy type selection
         self.proxy_type_combo.setEnabled(True)
 
-        QMessageBox.information(self, translate("info"), translate("tor_stopped"))
+        message = translate("tor_stopped")
+        if self._uses_tor(self.settings):
+            # Downloads still go to Tor's port, and fail: never direct.
+            message += "\n\n" + translate("tor_stopped_in_use")
+        QMessageBox.information(self, translate("info"), message)
 
     def show_tor_help(self):
         """Show help modal with Tor setup instructions."""
@@ -2156,29 +2375,41 @@ GeoIPExcludeUnknown 1
         set_tone(self.tor_status_label, "error")
 
     def get_proxy_settings(self):
-        """Return proxy settings for use with requests"""
-        # Check both saved settings and temp settings (in case settings haven't been applied yet)
-        settings_to_check = (
-            self.settings if self.settings.get("use_proxy") else self.temp_settings
-        )
+        """Proxies for requests, from the applied settings only.
 
-        if not settings_to_check["use_proxy"]:
-            return None
+        A proxy ticked but not yet applied isn't used: like every setting,
+        it takes effect with Apply Changes.
+        """
+        return proxies_for(self.settings)
 
-        if settings_to_check["proxy_type"] == "custom":
-            proxy_url = settings_to_check["custom_proxy_url"]
-            if proxy_url:
-                return {"http": proxy_url, "https": proxy_url}
-        elif settings_to_check["proxy_type"] == "tor":
-            # Always route through Tor's SOCKS port, even when the Tor process
-            # started from this tab isn't running. Falling back to a direct
-            # connection would silently expose the user's IP address; without
-            # a Tor listener the request fails instead. This also covers a Tor
-            # service the user runs on the default port. socks5h resolves host
-            # names through Tor as well. Without PySocks, requests refuses a
-            # SOCKS proxy URL rather than connecting directly.
-            return {"http": TOR_SOCKS_PROXY, "https": TOR_SOCKS_PROXY}
+
+def proxies_for(values):
+    """The ``requests`` proxies the settings *values* call for, or None."""
+    if not values.get("use_proxy"):
         return None
+    if values.get("proxy_type") == "custom":
+        proxy_url = (values.get("custom_proxy_url") or "").strip()
+        if proxy_url:
+            return {"http": proxy_url, "https": proxy_url}
+    elif values.get("proxy_type") == "tor":
+        # Always route through Tor's SOCKS port, even when the Tor process
+        # started from this tab isn't running. Falling back to a direct
+        # connection would silently expose the user's IP address; without
+        # a Tor listener the request fails instead. This also covers a Tor
+        # service the user runs on the default port. socks5h resolves host
+        # names through Tor as well. Without PySocks, requests refuses a
+        # SOCKS proxy URL rather than connecting directly.
+        return {"http": TOR_SOCKS_PROXY, "https": TOR_SOCKS_PROXY}
+    return None
+
+
+def tor_is_listening(timeout=0.3):
+    """Whether something accepts connections on Tor's SOCKS port."""
+    try:
+        with socket.create_connection(TOR_SOCKS_ADDRESS, timeout=timeout):
+            return True
+    except OSError:
+        return False
 
 
 class DownloadTorThread(QThread):

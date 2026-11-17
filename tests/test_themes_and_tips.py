@@ -149,7 +149,7 @@ def settings(qapp, default_theme):
     tab.deleteLater()
 
 
-def test_settings_lists_every_theme_and_saves_the_choice(settings, monkeypatch):
+def test_settings_lists_every_theme_and_applies_it_on_apply(settings, monkeypatch):
     saved, changed = [], []
     monkeypatch.setattr(settings, "save_settings", lambda: saved.append(True))
     settings.theme_changed.connect(changed.append)
@@ -158,9 +158,15 @@ def test_settings_lists_every_theme_and_saves_the_choice(settings, monkeypatch):
     ]
     assert names == list(THEMES)
     settings.theme_combo.setCurrentIndex(names.index("plum"))
-    assert changed == ["plum"]
-    assert saved
+    # Chosen, not applied: the app keeps its theme until Apply Changes.
+    assert changed == [] and not saved
+    assert settings.get_theme() == DEFAULT_THEME
+    assert settings.apply_pending_settings(confirm=False)
+    assert changed == ["plum"] and saved
     assert settings.get_theme() == "plum"
+    # Applying again with nothing new doesn't switch the theme again.
+    assert settings.apply_pending_settings(confirm=False)
+    assert changed == ["plum"]
 
 
 def test_saved_unknown_theme_loads_as_the_default(settings):
@@ -175,7 +181,12 @@ def test_reset_to_defaults_brings_back_the_default_theme(settings, monkeypatch):
     monkeypatch.setattr(settings, "save_settings", lambda: None)
     monkeypatch.setattr(ks.QMessageBox, "information", lambda *a, **k: None)
     settings.theme_combo.setCurrentIndex(settings.theme_combo.findData("ember"))
+    assert settings.apply_pending_settings(confirm=False)
     settings.reset_to_defaults()
+    # Filled in, waiting for Apply Changes.
+    assert settings.theme_combo.currentData() == DEFAULT_THEME
+    assert settings.get_theme() == "ember"
+    assert settings.apply_pending_settings(confirm=False)
     assert settings.get_theme() == DEFAULT_THEME
 
 

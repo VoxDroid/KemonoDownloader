@@ -33,15 +33,20 @@ def test_debug_is_off_and_the_rest_on_by_default(settings):
     assert settings.is_log_level_shown("SOMETHING_ELSE")
 
 
-def test_checkboxes_save_straight_away(settings, monkeypatch):
+def test_checkboxes_wait_for_apply_changes(settings, monkeypatch):
     saved = []
     monkeypatch.setattr(settings, "save_settings", lambda: saved.append(True))
     settings.log_level_checkboxes["DEBUG"].setChecked(True)
-    assert settings.is_log_level_shown("DEBUG")
-    assert settings.temp_settings["show_debug_logs"] is True
-    assert saved
     settings.log_level_checkboxes["WARNING"].setChecked(False)
+    # Pending: the consoles don't change and nothing is saved yet.
+    assert settings.temp_settings["show_debug_logs"] is True
+    assert not settings.is_log_level_shown("DEBUG")
+    assert settings.is_log_level_shown("WARNING")
+    assert not saved
+    assert settings.apply_pending_settings(confirm=False)
+    assert settings.is_log_level_shown("DEBUG")
     assert not settings.is_log_level_shown("WARNING")
+    assert saved
 
 
 def test_reset_to_defaults_hides_debug_again(settings, monkeypatch):
@@ -58,11 +63,14 @@ def test_reset_to_defaults_hides_debug_again(settings, monkeypatch):
 def test_settings_survive_a_restart(settings, monkeypatch):
     settings.set_log_level_shown("show_debug_logs", True)
     settings.set_log_level_shown("show_info_logs", False)
+    assert settings.load_settings()["show_debug_logs"] is False  # not applied
+    assert settings.apply_pending_settings(confirm=False)
     reloaded = settings.load_settings()
     assert reloaded["show_debug_logs"] is True
     assert reloaded["show_info_logs"] is False
     settings.set_log_level_shown("show_debug_logs", False)
     settings.set_log_level_shown("show_info_logs", True)
+    assert settings.apply_pending_settings(confirm=False)
 
 
 def test_group_has_its_note_and_translated_labels(settings, monkeypatch):

@@ -48,8 +48,9 @@ def test_auto_detect_tor_finds_executable(tmp_path, qtbot, monkeypatch):
 def test_get_proxy_settings_tor_with_socks(monkeypatch, qtbot, tmp_path):
     parent = _make_parent(tmp_path)
     st = SettingsTab(parent)
-    st.temp_settings["use_proxy"] = True
-    st.temp_settings["proxy_type"] = "tor"
+    # Applied settings route requests (pending ones don't).
+    st.settings["use_proxy"] = True
+    st.settings["proxy_type"] = "tor"
 
     class FakeProc:
         def state(self):
@@ -68,8 +69,9 @@ def test_get_proxy_settings_tor_with_socks(monkeypatch, qtbot, tmp_path):
 def test_get_proxy_settings_tor_without_socks(monkeypatch, qtbot, tmp_path):
     parent = _make_parent(tmp_path)
     st = SettingsTab(parent)
-    st.temp_settings["use_proxy"] = True
-    st.temp_settings["proxy_type"] = "tor"
+    # Applied settings route requests (pending ones don't).
+    st.settings["use_proxy"] = True
+    st.settings["proxy_type"] = "tor"
 
     class FakeProc:
         def state(self):

@@ -271,13 +271,18 @@ class TestFontInDialogs:
         try:
             st.temp_settings["base_directory"] = str(tmp_path)
             st.temp_settings["base_folder_name"] = "Kemono Downloader Test"
+            # The dialogs list changes, so start from the other font (an
+            # earlier test may have saved Poppins already).
+            st.settings["font"] = "JetBrains Mono"
             st.temp_settings["font"] = "Poppins"
 
-            monkeypatch.setattr(
-                QMessageBox,
-                "question",
-                lambda *a, **k: QMessageBox.StandardButton.Yes,
-            )
+            asked = {}
+
+            def fake_question(self_arg, title, message, *a, **k):
+                asked["message"] = message
+                return QMessageBox.StandardButton.Yes
+
+            monkeypatch.setattr(QMessageBox, "question", fake_question)
 
             captured = {}
 
@@ -288,7 +293,9 @@ class TestFontInDialogs:
 
             st.confirm_and_apply_settings()
 
-            assert "Poppins" in captured.get("message", "")
+            # Asked with the change spelled out, then told it was applied.
+            assert "JetBrains Mono → Poppins" in asked.get("message", "")
+            assert "JetBrains Mono → Poppins" in captured.get("message", "")
         finally:
             st.deleteLater()
 
