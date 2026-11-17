@@ -40,8 +40,15 @@ from kemonodownloader.domain_config import (
     get_domains,
 )
 from kemonodownloader.download_policy import (
+    PREVIEW_MAX_RATE_LIMIT_WAIT,
+    RequestCancelled,
     acquire_pawchive_download,
+    backoff_pause,
     get_request_headers,
+    is_rate_limit_error,
+    is_rate_limited,
+    is_transient_status,
+    polite_get,
     release_pawchive_download,
 )
 from kemonodownloader.download_utils import (
@@ -62,6 +69,8 @@ from kemonodownloader.download_utils import (
     iter_post_file_entries,
     md5_file,
     preview_image_url,
+    rate_limit_gave_up,
+    rate_limit_reporter,
     remember_direct_url,
     response_content_length,
     sanitize_filename,
@@ -107,6 +116,32 @@ __all__ = ["get_domain_config", "get_domains"]
 
 # API_BASE kept for backwards compatibility; resolves to first domain's api_base
 API_BASE = get_domain_config("")["api_base"]
+
+
+def _thread_log(thread):
+    """A ``(message, level)`` logger for a download thread's workers."""
+    return lambda message, level="INFO": thread._safe_emit(thread.log, message, level)
+
+
+def _give_up_file(thread, file_url, file_index, full_path, reason):
+    """Count *file_url* as failed, with no partial file left behind."""
+    with thread.failed_files_lock:
+        thread.failed_files[file_url] = reason
+    try:
+        if os.path.exists(full_path):
+            os.remove(full_path)
+    except OSError:
+        pass
+    thread._safe_emit(thread.file_progress, file_index, 0)
+    thread._safe_emit(thread.file_completed, file_index, file_url, False)
+    thread.check_post_completion(file_url)
+
+
+# Why a page of a creator's post list couldn't be read (_fetch_posts_page).
+PAGE_CANCELLED = "cancelled"
+PAGE_RATE_LIMITED = "rate_limited"
+PAGE_FAILED = "failed"
+PAGE_UNSUPPORTED = "unsupported"
 
 
 def _wait_for_thread_exit(thread, timeout_ms=5000):
@@ -156,9 +191,13 @@ class PreviewThread(QThread):
             try:
                 # Pawchive's file server rejects browser user agents (HTTP
                 # 403), so previews need the same identifiable agent as
-                # downloads.
-                response = get_session(self.settings_tab).get(
+                # downloads. A preview is waiting on screen: give up on a
+                # long rate limit at once instead of leaving it spinning.
+                response = polite_get(
+                    get_session(self.settings_tab),
                     self.url,
+                    max_wait=PREVIEW_MAX_RATE_LIMIT_WAIT,
+                    max_rate_limit_retries=1,
                     headers=get_request_headers(get_headers(), self.url),
                     stream=True,
                     timeout=(30, 30),
@@ -255,6 +294,124 @@ class PostDetectionThread(QThread):
 
     def stop(self):
         self.is_running = False
+
+    def _fetch_posts_page(self, urls, have_posts):
+        """Fetch one page of the post list, trying each URL format in *urls*.
+
+        Returns ``(response, None, "")`` on success, else ``(None, outcome,
+        detail)`` with outcome one of:
+
+        * ``PAGE_CANCELLED``: the user cancelled.
+        * ``PAGE_RATE_LIMITED``: the site kept answering 429 after the
+          shared cooldowns. A 429 says nothing about the URL format, so the
+          other formats are not tried: they would only be more requests
+          during the cooldown.
+        * ``PAGE_FAILED``: server errors or network failures that persisted
+          through every retry round; *detail* names the last one.
+        * ``PAGE_UNSUPPORTED``: every format gave a definite "no" (e.g. 400
+          or 404). Past the first page that is how the list ends.
+        """
+        session = get_session(self.settings.settings_tab)
+        report = rate_limit_reporter(self.log.emit)
+        rounds = max(1, int(getattr(self.settings, "api_request_max_retries", 3) or 1))
+        detail = ""
+        for round_index in range(rounds):
+            transient = False
+            for url in urls:
+                if not self.is_running:
+                    return None, PAGE_CANCELLED, ""
+                self.log.emit(
+                    translate("log_debug", translate("trying_endpoint", url)), "DEBUG"
+                )
+                headers = {
+                    "User-Agent": get_user_agent(),
+                    "Accept": "text/css",
+                    "Accept-Language": accept_language,
+                    "Connection": "keep-alive",
+                    "Cache-Control": "max-age=0",
+                    "Referer": self.domain_config["referer"],
+                }
+                try:
+                    response = polite_get(
+                        session,
+                        url,
+                        is_running=lambda: self.is_running,
+                        on_rate_limited=report,
+                        headers=headers,
+                        timeout=15,
+                    )
+                except RequestCancelled:
+                    return None, PAGE_CANCELLED, ""
+                except requests.RequestException as error:
+                    transient = True
+                    detail = str(error)
+                    self.log.emit(
+                        translate(
+                            "log_debug",
+                            translate(
+                                (
+                                    "endpoint_unavailable_likely_end"
+                                    if have_posts
+                                    else "endpoint_error_with_exception"
+                                ),
+                                url,
+                                str(error),
+                            ),
+                        ),
+                        "DEBUG",
+                    )
+                    continue
+                status = response.status_code
+                if status == 200:
+                    self.log.emit(
+                        translate("log_info", translate("endpoint_successful", url)),
+                        "INFO",
+                    )
+                    return response, None, ""
+                if is_rate_limited(response):
+                    return None, PAGE_RATE_LIMITED, f"HTTP {status}"
+                if is_transient_status(status):
+                    transient = True
+                    detail = f"HTTP {status}"
+                if have_posts:
+                    message = translate(
+                        "endpoint_returned_status_likely_end", status, url
+                    )
+                else:
+                    message = translate("endpoint_failed_with_status", url, status)
+                self.log.emit(translate("log_debug", message), "DEBUG")
+            if not transient:
+                return None, PAGE_UNSUPPORTED, ""
+            if round_index + 1 < rounds and not backoff_pause(
+                round_index, lambda: self.is_running
+            ):
+                return None, PAGE_CANCELLED, ""
+        return None, PAGE_FAILED, detail
+
+    def _report_unfinished_list(self, outcome, detail, creator_id, url, post_count):
+        """Log why loading stopped before a page could be read."""
+        if outcome == PAGE_UNSUPPORTED and post_count:
+            # Past the first page a definite "no" from every format is how
+            # the list ends.
+            message = translate("reached_last_page", creator_id, post_count)
+            self.log.emit(translate("log_info", message), "INFO")
+            return
+        if outcome == PAGE_RATE_LIMITED:
+            if post_count:
+                message = translate("post_list_incomplete_rate_limited", post_count)
+                self.log.emit(translate("log_warning", message), "WARNING")
+            else:
+                message = rate_limit_gave_up(url, self.url)
+                self.log.emit(translate("log_error", message), "ERROR")
+            return
+        if outcome == PAGE_FAILED and post_count:
+            message = translate("post_list_incomplete_error", post_count, detail)
+            self.log.emit(translate("log_warning", message), "WARNING")
+            return
+        message = translate("all_api_endpoints_failed", creator_id)
+        if detail:
+            message = f"{message} ({detail})"
+        self.log.emit(translate("log_error", message), "ERROR")
 
     def run(self):
         try:
@@ -376,121 +533,22 @@ class PostDetectionThread(QThread):
                 alt_suffix_4 += f"&q={search_query}"
             alternative_urls.append(f"{base_api_url}{alt_suffix_4}")
 
-            success = False
-            response = None
-            likely_last_page = len(all_posts) > 0 and len(all_posts) % page_size != 0
-
-            for alt_url in alternative_urls:
-                if not self.is_running:
-                    return
-                self.log.emit(
-                    translate("log_debug", translate("trying_endpoint", alt_url)),
-                    "DEBUG",
+            response, failure, detail = self._fetch_posts_page(
+                alternative_urls, have_posts=len(all_posts) > 0
+            )
+            if failure == PAGE_CANCELLED:
+                return
+            if response is None:
+                self._report_unfinished_list(
+                    failure, detail, creator_id, alternative_urls[0], len(all_posts)
                 )
-
-                fallback_headers = {
-                    "User-Agent": get_user_agent(),
-                    "Accept": "text/css",
-                    "Accept-Language": accept_language,
-                    "Connection": "keep-alive",
-                    "Cache-Control": "max-age=0",
-                    "Referer": self.domain_config["referer"],
-                }
-
-                try:
-                    alt_response = get_session(self.settings.settings_tab).get(
-                        alt_url, headers=fallback_headers, timeout=15
-                    )
-                    if alt_response.status_code == 200:
-                        response = alt_response
-                        self.log.emit(
-                            translate(
-                                "log_info", translate("endpoint_successful", alt_url)
-                            ),
-                            "INFO",
-                        )
-                        success = True
-                        break
-                    else:
-                        if likely_last_page or len(all_posts) > 0:
-                            self.log.emit(
-                                translate(
-                                    "log_debug",
-                                    translate(
-                                        "endpoint_returned_status_likely_end",
-                                        alt_response.status_code,
-                                        alt_url,
-                                    ),
-                                ),
-                                "DEBUG",
-                            )
-                        else:
-                            self.log.emit(
-                                translate(
-                                    "log_debug",
-                                    translate(
-                                        "endpoint_failed_with_status",
-                                        alt_url,
-                                        alt_response.status_code,
-                                    ),
-                                ),
-                                "DEBUG",
-                            )
-                except requests.RequestException as alt_e:
-                    if likely_last_page or len(all_posts) > 0:
-                        self.log.emit(
-                            translate(
-                                "log_debug",
-                                translate(
-                                    "endpoint_unavailable_likely_end",
-                                    alt_url,
-                                    str(alt_e),
-                                ),
-                            ),
-                            "DEBUG",
-                        )
-                    else:
-                        self.log.emit(
-                            translate(
-                                "log_debug",
-                                translate(
-                                    "endpoint_error_with_exception", alt_url, str(alt_e)
-                                ),
-                            ),
-                            "DEBUG",
-                        )
-
-            if not success:
-                if len(all_posts) > 0:
-                    self.log.emit(
-                        translate(
-                            "log_info",
-                            translate("reached_last_page", creator_id, len(all_posts)),
-                        ),
-                        "INFO",
-                    )
-                    break
-                else:
-                    self.log.emit(
-                        translate(
-                            "log_error",
-                            translate("all_api_endpoints_failed", creator_id),
-                        ),
-                        "ERROR",
-                    )
-                    break
+                break
 
             if not self.is_running:
                 return
 
             response_text = ""
             try:
-
-                if response is None:  # pragma: no cover
-                    self.log.emit("No response received from any endpoint", "ERROR")
-                    attempt += 1
-                    continue
-
                 is_gzipped = response.content[:2] == b"\x1f\x8b"
 
                 if is_gzipped:
@@ -703,6 +761,22 @@ class PostDetectionThread(QThread):
             offset += page_size
             attempt += 1
             time.sleep(0.5)
+        else:
+            # The loop ran out of pages without reaching the end of the list
+            # (no break): the creator may have more posts than the limit.
+            if self.is_running and attempt > max_attempts:
+                self.log.emit(
+                    translate(
+                        "log_warning",
+                        translate(
+                            "post_list_page_limit",
+                            max_attempts,
+                            len(all_posts),
+                            translate("creator_posts_max_attempts").rstrip(":："),
+                        ),
+                    ),
+                    "WARNING",
+                )
 
         if self.is_running:
             detected_posts = []
@@ -946,29 +1020,29 @@ class FilePreparationThread(QThread):
             try:
                 headers = get_headers().copy()
                 headers["Referer"] = domain_config["referer"]
-                response = get_session(self.settings.settings_tab).get(
-                    api_url, headers=headers, timeout=30
+                # Waits out the site's rate limit, shared with every other
+                # worker, instead of each worker retrying on its own timer.
+                response = polite_get(
+                    get_session(self.settings.settings_tab),
+                    api_url,
+                    is_running=lambda: self.is_running,
+                    on_rate_limited=rate_limit_reporter(self.log.emit),
+                    headers=headers,
+                    timeout=30,
                 )
                 if response.status_code != 200:
-                    if response.status_code == 429 and attempt < max_retries:
+                    if is_rate_limited(response):
+                        # Still limited after polite_get's own retries.
                         self.log.emit(
                             translate(
-                                "log_warning",
-                                translate(
-                                    "rate_limit_hit", api_url, attempt, max_retries
+                                "log_error",
+                                rate_limit_gave_up(
+                                    api_url, translate("rate_limit_post", post_id)
                                 ),
                             ),
-                            "WARNING",
+                            "ERROR",
                         )
-                        for i in range(retry_delay_seconds, 0, -1):
-                            if not self.is_running:
-                                return None  # cancelled: stop retrying
-                            self.log.emit(
-                                translate("log_info", translate("trying_again_in", i)),
-                                "INFO",
-                            )
-                            time.sleep(1)
-                        continue
+                        return None
                     self.log.emit(
                         translate(
                             "log_error",
@@ -993,6 +1067,8 @@ class FilePreparationThread(QThread):
                 ]
                 return (post_id, files_to_download)
             except Exception as e:
+                if isinstance(e, RequestCancelled) or not self.is_running:
+                    return None  # cancelled: stop retrying
                 if attempt == max_retries:
                     self.log.emit(
                         translate(
@@ -1223,8 +1299,13 @@ class CreatorDownloadThread(QThread):
         try:
             headers = get_headers().copy()
             headers["Referer"] = self.domain_config["referer"]
-            profile_response = get_session(self.settings.settings_tab).get(
-                profile_url, headers=headers, timeout=10
+            profile_response = polite_get(
+                get_session(self.settings.settings_tab),
+                profile_url,
+                is_running=lambda: self.is_running,
+                on_rate_limited=rate_limit_reporter(_thread_log(self)),
+                headers=headers,
+                timeout=10,
             )
             if profile_response.status_code == 200:
                 profile_data = profile_response.json()
@@ -1242,6 +1323,9 @@ class CreatorDownloadThread(QThread):
                     "WARNING",
                 )
         except requests.RequestException as e:
+            self.creator_name = "Unknown_Creator"
+            if isinstance(e, RequestCancelled):
+                return  # cancelled while waiting out a rate limit
             self._safe_emit(
                 self.log,
                 translate(
@@ -1249,17 +1333,23 @@ class CreatorDownloadThread(QThread):
                 ),
                 "ERROR",
             )
-            self.creator_name = "Unknown_Creator"
 
         for post_id in self.selected_posts:
+            if not self.is_running:
+                return
             key = (self.service, self.creator_id, post_id)
             if key not in self.post_titles_map:
                 post_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/post/{post_id}"
                 try:
                     headers = get_headers().copy()
                     headers["Referer"] = self.domain_config["referer"]
-                    response = get_session(self.settings.settings_tab).get(
-                        post_url, headers=headers, timeout=10
+                    response = polite_get(
+                        get_session(self.settings.settings_tab),
+                        post_url,
+                        is_running=lambda: self.is_running,
+                        on_rate_limited=rate_limit_reporter(_thread_log(self)),
+                        headers=headers,
+                        timeout=10,
                     )
                     if response.status_code == 200:
                         post_data = response.json()
@@ -1450,8 +1540,13 @@ class CreatorDownloadThread(QThread):
             api_url = f"{self.domain_config['api_base']}/{self.service}/user/{self.creator_id}/post/{post_id}"
             headers = get_headers().copy()
             headers["Referer"] = self.domain_config["referer"]
-            response = get_session(self.settings.settings_tab).get(
-                api_url, headers=headers, timeout=10
+            response = polite_get(
+                get_session(self.settings.settings_tab),
+                api_url,
+                is_running=lambda: self.is_running,
+                on_rate_limited=rate_limit_reporter(_thread_log(self)),
+                headers=headers,
+                timeout=10,
             )
             if response.status_code == 200:
                 post_data = response.json()
@@ -1473,6 +1568,19 @@ class CreatorDownloadThread(QThread):
                         ),
                         "INFO",
                     )
+            elif is_rate_limited(response):
+                self._safe_emit(
+                    self.log,
+                    translate(
+                        "log_warning",
+                        rate_limit_gave_up(
+                            api_url, translate("rate_limit_post", post_id)
+                        ),
+                    ),
+                    "WARNING",
+                )
+        except RequestCancelled:
+            return  # cancelled while waiting out a rate limit
         except Exception as e:
             self._safe_emit(
                 self.log,
@@ -1609,17 +1717,20 @@ class CreatorDownloadThread(QThread):
                     if not acquire_pawchive_download(file_url, lambda: self.is_running):
                         raise Exception("Download cancelled before rate-limit slot")
                     try:
-                        # Serialize SSL connection establishment to prevent
-                        # concurrent SSL access violations on Windows.
-                        with self._ssl_lock:
-                            if not self.is_running:
-                                raise Exception("Download cancelled before connection")
-                            response = session.get(
-                                request_url,
-                                headers=headers,
-                                stream=True,
-                                timeout=(30, 30),
-                            )
+                        # Waits out the site's rate limit first, without
+                        # holding the lock. The lock serializes only opening
+                        # the connection, to prevent concurrent SSL access
+                        # violations on Windows.
+                        response = polite_get(
+                            session,
+                            request_url,
+                            is_running=lambda: self.is_running,
+                            on_rate_limited=rate_limit_reporter(_thread_log(self)),
+                            guard=self._ssl_lock,
+                            headers=headers,
+                            stream=True,
+                            timeout=(30, 30),
+                        )
                         # After headers are received each thread has its own
                         # SSL connection and can stream data concurrently.
                         try:
@@ -1717,6 +1828,26 @@ class CreatorDownloadThread(QThread):
                 return
 
             except requests.RequestException as e:
+                if isinstance(e, RequestCancelled) or not self.is_running:
+                    # Cancelled while waiting out a rate limit: nothing was
+                    # written, and retrying would only repeat the cancel.
+                    _give_up_file(self, file_url, file_index, full_path, str(e))
+                    return
+                if is_rate_limit_error(e):
+                    # polite_get already waited and retried; the site still
+                    # refuses. More attempts would only prolong the limit.
+                    self._safe_emit(
+                        self.log,
+                        translate(
+                            "log_error",
+                            rate_limit_gave_up(
+                                request_url, filename_from_url(file_url)
+                            ),
+                        ),
+                        "ERROR",
+                    )
+                    _give_up_file(self, file_url, file_index, full_path, str(e))
+                    return
                 if request_url != file_url:
                     # The direct server failed: use the usual URL from now on.
                     # Not counted as an attempt, and not a reason to give up.
@@ -2082,8 +2213,13 @@ class ValidationThread(QThread):
                     "Referer": self.domain_config["referer"],
                 }
 
-                direct_response = get_session(self.settings.settings_tab).get(
-                    self.url, headers=fallback_headers, timeout=10
+                direct_response = polite_get(
+                    get_session(self.settings.settings_tab),
+                    self.url,
+                    is_running=lambda: self.is_running,
+                    on_rate_limited=rate_limit_reporter(self.log.emit),
+                    headers=fallback_headers,
+                    timeout=10,
                 )
                 domain_check = self.domain_config["domain"].split(".")[
                     0
@@ -2102,6 +2238,15 @@ class ValidationThread(QThread):
                     self.result.emit(True)
                     return
 
+                if is_rate_limited(direct_response):
+                    # polite_get already waited and retried; more attempts
+                    # would only prolong the limit.
+                    self.log.emit(
+                        translate("log_error", rate_limit_gave_up(self.url, self.url)),
+                        "ERROR",
+                    )
+                    break
+
                 if attempt < max_retries:
                     self.log.emit(
                         translate(
@@ -2116,6 +2261,8 @@ class ValidationThread(QThread):
                     retry_delay *= 2  # Exponential backoff
 
             except requests.RequestException as e:
+                if isinstance(e, RequestCancelled):
+                    return  # cancelled: no verdict to report
                 if attempt < max_retries:
 
                     self.log.emit(

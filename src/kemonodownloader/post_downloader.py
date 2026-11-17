@@ -42,9 +42,19 @@ from kemonodownloader.domain_config import (
     get_domains,
 )
 from kemonodownloader.download_policy import (
+    PREVIEW_MAX_RATE_LIMIT_WAIT,
+    RateLimitedError,
+    RequestCancelled,
     acquire_pawchive_download,
+    backoff_pause,
+    cooldown_remaining,
     get_request_headers,
+    is_rate_limit_error,
+    is_rate_limited,
+    is_transient_status,
+    polite_get,
     release_pawchive_download,
+    site_key,
 )
 from kemonodownloader.download_utils import (
     ALLOWED_EXTENSIONS,
@@ -66,6 +76,8 @@ from kemonodownloader.download_utils import (
     md5_file,
     parse_response_content,
     preview_image_url,
+    rate_limit_gave_up,
+    rate_limit_reporter,
     remember_direct_url,
     response_content_length,
     safe_local_filename,
@@ -169,9 +181,14 @@ class PreviewThread(QThread):
 
         try:
             # Pawchive's file server rejects browser user agents (HTTP 403),
-            # so previews need the same identifiable agent as downloads.
-            response = get_session(self.settings_tab).get(
+            # so previews need the same identifiable agent as downloads. A
+            # preview is waiting on screen: give up on a long rate limit at
+            # once instead of leaving it spinning.
+            response = polite_get(
+                get_session(self.settings_tab),
                 self.url,
+                max_wait=PREVIEW_MAX_RATE_LIMIT_WAIT,
+                max_rate_limit_retries=1,
                 headers=get_request_headers(get_headers(), self.url),
                 stream=True,
                 timeout=(30, 30),
@@ -642,6 +659,87 @@ class MediaPreviewModal(QDialog):
         super().closeEvent(event)
 
 
+# Statuses that mean the post isn't there: asking again can't change that.
+_GONE_STATUSES = (404, 410)
+
+
+def _robust_api_get(
+    get_session_for,
+    url,
+    max_retries,
+    is_running=None,
+    log=None,
+    max_wait=None,
+    rate_limit_retries=None,
+    log_final_error=False,
+):
+    """GET an API URL for the Post tab, respecting the site's rate limit.
+
+    A 403 is tried once more with other headers; network errors and server
+    errors are retried with backoff, up to *max_retries* attempts. Rate
+    limits are waited out by ``polite_get`` and don't use up attempts.
+
+    Returns the 200 response; or the rate-limited response when the site
+    kept refusing, so the caller can report that and stop rather than try
+    again; or None. With *max_wait* (the GUI thread), a longer cooldown
+    raises ``RateLimitedError`` instead of blocking.
+    """
+    report = rate_limit_reporter(log) if log is not None else None
+
+    def get(headers):
+        return polite_get(
+            get_session_for(),
+            url,
+            is_running=is_running,
+            on_rate_limited=report,
+            max_wait=max_wait,
+            max_rate_limit_retries=rate_limit_retries,
+            headers=headers,
+            timeout=10,
+        )
+
+    for attempt in range(max_retries):
+        if is_running is not None and not is_running():
+            return None  # cancelled: don't sleep through the retries
+        try:
+            response = get(get_headers())
+            if response.status_code == 403:
+                alt_headers = get_headers().copy()
+                alt_headers["Accept"] = "text/css"
+                response = get(alt_headers)
+            if is_rate_limited(response) and max_wait is not None:
+                # A caller that can't wait wants the reason, not a response.
+                raise RateLimitedError(site_key(url), cooldown_remaining(url))
+            if response.status_code == 200 or is_rate_limited(response):
+                return response
+            if response.status_code in _GONE_STATUSES:
+                return None
+            if attempt < max_retries - 1 and is_transient_status(response.status_code):
+                if not backoff_pause(attempt, is_running):
+                    return None
+        except RequestCancelled:
+            return None
+        except RateLimitedError:
+            raise
+        except Exception as e:
+            if attempt == max_retries - 1:
+                if log_final_error and log is not None:
+                    log(
+                        translate(
+                            "log_error",
+                            f"Request failed after {max_retries} attempts: {str(e)}",
+                        ),
+                        "ERROR",
+                    )
+                return None
+            time.sleep(2**attempt)  # Exponential backoff
+    return None
+
+
+def _log_rate_limit_gave_up(log, url, what):
+    log(translate("log_error", rate_limit_gave_up(url, what)), "ERROR")
+
+
 class PostDetectionThread(QThread):
     finished = pyqtSignal(list)
     log = pyqtSignal(str, str)
@@ -674,6 +772,13 @@ class PostDetectionThread(QThread):
                     translate("log_info", "PostDetectionThread stopped during request"),
                     "INFO",
                 )
+                return
+            if response is not None and is_rate_limited(response):
+                message = rate_limit_gave_up(
+                    api_url, translate("rate_limit_post", post_id)
+                )
+                self.log.emit(translate("log_error", message), "ERROR")
+                self.error.emit(translate("failed_to_fetch_post", message))
                 return
             if response is None:
                 self.log.emit(
@@ -737,36 +842,14 @@ class PostDetectionThread(QThread):
     def make_robust_request(self, url, max_retries=None):
         if max_retries is None:
             max_retries = self.settings.api_request_max_retries
-        for attempt in range(max_retries):
-            if not self.is_running:
-                return None  # cancelled: don't sleep through the retries
-            try:
-                response = get_session(self.settings.settings_tab).get(
-                    url, headers=get_headers(), timeout=10
-                )
-                if response.status_code == 200:
-                    return response
-                elif response.status_code == 403:
-                    # Try with alternative headers
-                    alt_headers = get_headers().copy()
-                    alt_headers["Accept"] = "text/css"
-                    response = get_session(self.settings.settings_tab).get(
-                        url, headers=alt_headers, timeout=10
-                    )
-                    if response.status_code == 200:
-                        return response
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    self.log.emit(
-                        translate(
-                            "log_error",
-                            f"Request failed after {max_retries} attempts: {str(e)}",
-                        ),
-                        "ERROR",
-                    )
-                    return None
-                time.sleep(2**attempt)  # Exponential backoff
-        return None
+        return _robust_api_get(
+            lambda: get_session(self.settings.settings_tab),
+            url,
+            max_retries,
+            is_running=lambda: self.is_running,
+            log=self.log.emit,
+            log_final_error=True,
+        )
 
     def parse_response_content(self, response):
         try:
@@ -910,6 +993,13 @@ class FilePreparationThread(QThread):
                         "INFO",
                     )
                     return None
+                if response is not None and is_rate_limited(response):
+                    # Already waited out and retried: more attempts would
+                    # only prolong the limit.
+                    _log_rate_limit_gave_up(
+                        self.log.emit, api_url, translate("rate_limit_post", post_id)
+                    )
+                    return None
                 if response is None:
                     if attempt < max_retries:
                         self.log.emit(
@@ -991,28 +1081,13 @@ class FilePreparationThread(QThread):
     def make_robust_request(self, url, max_retries=None):
         if max_retries is None:
             max_retries = self.settings.api_request_max_retries
-        for attempt in range(max_retries):
-            if not self.is_running:
-                return None  # cancelled: don't sleep through the retries
-            try:
-                response = get_session(self.settings.settings_tab).get(
-                    url, headers=get_headers(), timeout=10
-                )
-                if response.status_code == 200:
-                    return response
-                elif response.status_code == 403:
-                    alt_headers = get_headers().copy()
-                    alt_headers["Accept"] = "text/css"
-                    response = get_session(self.settings.settings_tab).get(
-                        url, headers=alt_headers, timeout=10
-                    )
-                    if response.status_code == 200:
-                        return response
-            except Exception:
-                if attempt == max_retries - 1:
-                    return None
-                time.sleep(2**attempt)
-        return None
+        return _robust_api_get(
+            lambda: get_session(self.settings.settings_tab),
+            url,
+            max_retries,
+            is_running=lambda: self.is_running,
+            log=self.log.emit,
+        )
 
     def parse_response_content(self, response):
         try:
@@ -1199,6 +1274,10 @@ class DownloadThread(QThread):
                 )
                 self.post_content = post.get("content", "")
             else:
+                if response is not None and is_rate_limited(response):
+                    _log_rate_limit_gave_up(
+                        self.log.emit, api_url, translate("rate_limit_post", post_id)
+                    )
                 self.log.emit(
                     translate("log_error", translate("failed_fetch_post_title")),
                     "ERROR",
@@ -1214,28 +1293,13 @@ class DownloadThread(QThread):
     def make_robust_request(self, url, max_retries=None):
         if max_retries is None:
             max_retries = self.settings.api_request_max_retries
-        for attempt in range(max_retries):
-            if not self.is_running:
-                return None  # cancelled: don't sleep through the retries
-            try:
-                response = get_session(self.settings.settings_tab).get(
-                    url, headers=get_headers(), timeout=10
-                )
-                if response.status_code == 200:
-                    return response
-                elif response.status_code == 403:
-                    alt_headers = get_headers().copy()
-                    alt_headers["Accept"] = "text/css"
-                    response = get_session(self.settings.settings_tab).get(
-                        url, headers=alt_headers, timeout=10
-                    )
-                    if response.status_code == 200:
-                        return response
-            except Exception:
-                if attempt == max_retries - 1:
-                    return None
-                time.sleep(2**attempt)
-        return None
+        return _robust_api_get(
+            lambda: get_session(self.settings.settings_tab),
+            url,
+            max_retries,
+            is_running=lambda: self.is_running,
+            log=self.log.emit,
+        )
 
     def parse_response_content(self, response):
         try:
@@ -1373,17 +1437,19 @@ class DownloadThread(QThread):
                 if not acquire_pawchive_download(file_url, lambda: self.is_running):
                     return
                 request_slot_acquired = True
-                # Serialize SSL connection establishment to prevent
-                # concurrent SSL access violations on Windows.
-                with self._ssl_lock:
-                    if not self.is_running:
-                        return
-                    response = get_session(self.settings.settings_tab).get(
-                        request_url,
-                        headers=get_request_headers(get_headers(), request_url),
-                        stream=True,
-                        timeout=(30, 30),
-                    )
+                # Waits out the site's rate limit first, without holding the
+                # lock. The lock serializes only opening the connection, to
+                # prevent concurrent SSL access violations on Windows.
+                response = polite_get(
+                    get_session(self.settings.settings_tab),
+                    request_url,
+                    is_running=lambda: self.is_running,
+                    on_rate_limited=rate_limit_reporter(self.log.emit),
+                    guard=self._ssl_lock,
+                    headers=get_request_headers(get_headers(), request_url),
+                    stream=True,
+                    timeout=(30, 30),
+                )
                 # After headers are received each thread has its own
                 # SSL connection and can stream data concurrently.
                 response.raise_for_status()
@@ -1472,6 +1538,22 @@ class DownloadThread(QThread):
                 return
 
             except Exception as e:
+                if isinstance(e, RequestCancelled) or not self.is_running:
+                    return  # cancelled while waiting out a rate limit
+                if is_rate_limit_error(e):
+                    # polite_get already waited and retried; the site still
+                    # refuses. More attempts would only prolong the limit.
+                    _log_rate_limit_gave_up(
+                        self.log.emit, request_url, filename_from_url(file_url)
+                    )
+                    try:
+                        if os.path.exists(full_path):
+                            os.remove(full_path)
+                    except OSError:
+                        pass
+                    self.file_progress.emit(file_index, 0)
+                    self.file_completed.emit(file_index, file_url, False)
+                    return
                 if request_url != file_url:
                     # The direct server failed: use the usual URL from now on.
                     # Not counted as an attempt, and not a reason to give up.
@@ -2342,9 +2424,18 @@ class PostDownloaderTab(QWidget):
                 "Referer": get_domain_config(url)["referer"],
             }
 
-            direct_response = get_session(self.parent.settings_tab).get(
-                url, headers=fallback_headers, timeout=10
+            # On the GUI thread: never wait out a cooldown. A rate limit
+            # raises RateLimitedError, logged below with how long to wait.
+            direct_response = polite_get(
+                get_session(self.parent.settings_tab),
+                url,
+                max_wait=0,
+                max_rate_limit_retries=0,
+                headers=fallback_headers,
+                timeout=10,
             )
+            if is_rate_limited(direct_response):
+                raise RateLimitedError(site_key(url), cooldown_remaining(url))
 
             if direct_response.status_code == 200:
                 content = direct_response.text.lower()
@@ -2611,26 +2702,15 @@ class PostDownloaderTab(QWidget):
         if max_retries is None:
             settings = self._create_thread_settings()
             max_retries = settings.api_request_max_retries
-        for attempt in range(max_retries):
-            try:
-                response = get_session(self.parent.settings_tab).get(
-                    url, headers=get_headers(), timeout=10
-                )
-                if response.status_code == 200:
-                    return response
-                elif response.status_code == 403:
-                    alt_headers = get_headers().copy()
-                    alt_headers["Accept"] = "text/css"
-                    response = get_session(self.parent.settings_tab).get(
-                        url, headers=alt_headers, timeout=10
-                    )
-                    if response.status_code == 200:
-                        return response
-            except Exception:
-                if attempt == max_retries - 1:
-                    return None
-                time.sleep(2**attempt)
-        return None
+        # Runs on the GUI thread, which must never wait out a cooldown: a
+        # rate limit raises RateLimitedError, whose message the caller shows.
+        return _robust_api_get(
+            lambda: get_session(self.parent.settings_tab),
+            url,
+            max_retries,
+            max_wait=0,
+            rate_limit_retries=0,
+        )
 
     def parse_response_content(self, response):
         try:

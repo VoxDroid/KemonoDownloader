@@ -111,7 +111,7 @@ We strongly encourage users to:
 
 - **Legal Risks**: Downloading content from Kemono.cr, Coomer.st, and Pawchive.pw may violate copyright laws or the terms of service of the original platforms. Users assume all legal risks associated with using this tool.
 - **Dependency on Kemono.cr, Coomer.st, and Pawchive.pw**: KemonoDownloader relies on Kemono.cr, Coomer.st, and Pawchive.pw, which have a history of inconsistent updates and downtime. If these sites become unavailable, this tool will lose its functionality.
-- **Rate Limits and Errors**: Kemono.cr, Coomer.st, and Pawchive.pw may impose rate limits or other restrictions that affect download performance. Pawchive downloads use request pacing and a five-download cap to reduce overload and help prevent transient HTTP 403 responses; this cannot guarantee uninterrupted access or bypass server-side access controls.
+- **Rate Limits and Errors**: Kemono.cr, Coomer.st, and Pawchive.pw may impose rate limits or other restrictions that affect download performance. Pawchive downloads use request pacing and a five-download cap to reduce overload and help prevent transient HTTP 403 responses; this cannot guarantee uninterrupted access or bypass server-side access controls. When a site answers HTTP 429 (Too Many Requests), every request to that site pauses for as long as the site asks (its Retry-After, or a short growing wait) and then carries on by itself.
 
 ### $\color{#90a4ae}{\sf{\text{Site Availability Status}}}$ <a name="site-availability-status"></a>
 
