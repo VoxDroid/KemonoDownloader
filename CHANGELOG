@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Every setting waits for Apply Changes.
+  The theme, which log messages show, the Use Proxy switch and the proxy type used to take effect (and be saved) the moment they were changed; worse, a proxy ticked but never applied was already used for downloads. Now nothing changes until Apply Changes. An "Unapplied changes" marker shows when something is waiting, Discard Changes puts everything back, and Reset to Defaults only fills in the defaults. The confirmation lists just what changes, as "before → after", instead of a fixed summary of ten settings, and the result lists them again. Closing the app with unapplied changes asks whether to apply or discard them.
+
+- Applying a proxy handles Tor properly.
+  Applying Tor while Tor isn't running (and nothing else listens on its port) offers to start Tor and apply, to apply anyway, or to cancel; downloads never fall back to a direct connection meanwhile. Turning the proxy off while the app's Tor runs offers to stop it, once the new setting is in effect. Starting Tor says when downloads don't use it yet, and stopping it says when downloads will fail until it runs again. A custom proxy with no address is refused instead of quietly downloading without a proxy, and changing the connection during downloads says that their next requests use it. The proxy switch is still off each time the app starts.
+
+- Choosing "Custom..." as the creator file name template no longer turns the template into the text "Custom...", which named every downloaded file that way; editing starts from the template in use. Reset to Defaults now also resets the template and the folder layout on screen.
+
 - Keep history and favorites when the save folder changes (#98).
   History and favorites live in the save folder's Other Files. After you applied a new Save Directory or Folder Name, they kept being written to the old folder for the rest of the session, and the next launch opened the new, empty one, so every bookmark seemed to vanish. Applying a new folder now copies them into it, merging with a library already there without duplicates, and leaves the old file in place. If the new folder can't hold them, a message says so and explains how to get them back. The Thumbnail tab also now follows the new folder for its preview cache.
 

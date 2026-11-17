@@ -367,6 +367,19 @@ class KemonoDownloader(QMainWindow):
             if tab is not None:
                 tab.update_ui_text()
 
+    def closeEvent(self, event):  # noqa: N802 (Qt API)
+        """Ask about settings changed but not applied before closing."""
+        check = getattr(
+            getattr(self, "settings_tab", None),
+            "confirm_close_with_pending_changes",
+            None,
+        )
+        # Only a window on screen asks; one never shown (tests) just closes.
+        if self.isVisible() and callable(check) and not check():
+            event.ignore()
+            return
+        super().closeEvent(event)
+
     def ensure_folders_exist(self):
         for folder in [
             self.base_folder,

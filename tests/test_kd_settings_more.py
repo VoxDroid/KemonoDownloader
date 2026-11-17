@@ -70,8 +70,8 @@ def make_tab(tmp_path):
 
 def test_get_proxy_settings_tor_fallback(tmp_path, monkeypatch):
     tab = make_tab(tmp_path)
-    tab.temp_settings["use_proxy"] = True
-    tab.temp_settings["proxy_type"] = "tor"
+    tab.settings["use_proxy"] = True
+    tab.settings["proxy_type"] = "tor"
 
     class FakeProc:
         def state(self):

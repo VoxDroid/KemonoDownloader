@@ -97,11 +97,14 @@ def test_proxy_type_and_get_proxy_settings(tmp_path, monkeypatch):
     tab.temp_settings["use_proxy"] = True
     tab.temp_settings["proxy_type"] = "custom"
     tab.temp_settings["custom_proxy_url"] = "http://127.0.0.1:8080"
+    # Pending, not applied: requests don't use it yet.
+    assert tab.get_proxy_settings() is None
+    tab.settings.update(tab.temp_settings)
     proxies = tab.get_proxy_settings()
     assert proxies["http"].startswith("http")
 
     # tor proxy when tor not running -> still Tor's port (fails closed)
-    tab.temp_settings["proxy_type"] = "tor"
+    tab.settings["proxy_type"] = "tor"
     tab.tor_process = None
     assert tab.get_proxy_settings()["https"].startswith("socks5h://")
 
