@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Slow down together when a site limits requests (#100, #101).
+  When Kemono, Coomer or Pawchive answers HTTP 429 (Too Many Requests), or 503 with a Retry-After, every request to that site now pauses until it may ask again, whichever download, page or preview it comes from: the site's Retry-After when it sends one (capped at 5 minutes), otherwise a wait that starts at a second or two and grows to a minute, with some randomness so workers don't all come back at once. A cooldown covers the site's file servers too (n1.kemono.cr and kemono.cr are one site). Waiting doesn't use up File Download Max Retries or any other retry setting, and Cancel stops a wait at once. A request the site still refuses after 9 tries is reported as rate limited and not tried again. Before, file downloads retried a 429 every 1-3 seconds up to 50 times in the same worker, post details waited a fixed 5 seconds in lockstep, and the Post tab retried some requests back to back with no wait at all.
+
+- Never cut a creator's post list short silently.
+  A 429, a server error or a dropped connection while loading a creator's posts (Creator and Thumbnail tabs) ended the list as if it were complete. A 429 also made the app try every other URL format straight away. Rate limits are now waited out on the same URL, server errors and dropped connections are retried with growing pauses, and if a page still can't be read, the posts loaded so far are kept and the log says the list is incomplete. Reaching the page limit set by Creator Posts Max Attempts (200 pages, 10,000 posts by default) is reported too.
+
+- A Retry-After no longer freezes downloads.
+  The network library quietly answered a 429 or 503 with Retry-After by sleeping that long inside the request, up to three times. The sleep couldn't be cancelled, held the lock other downloads need to connect, and kept the 429 from slowing the other workers. That handling is off; the shared rate limit above takes over.
+
+- Requests made on screen never wait out a rate limit.
+  Checking a post link and listing a post's files (Post tab) report "try again in N s" at once instead of freezing the window. Previews give up on a rate limit longer than 10 seconds instead of spinning. A post the site says doesn't exist (404) is no longer requested three times in a row within one attempt.
+
 - Keep history and favorites when the save folder changes (#98).
   History and favorites live in the save folder's Other Files. After you applied a new Save Directory or Folder Name, they kept being written to the old folder for the rest of the session, and the next launch opened the new, empty one, so every bookmark seemed to vanish. Applying a new folder now copies them into it, merging with a library already there without duplicates, and leaves the old file in place. If the new folder can't hold them, a message says so and explains how to get them back. The Thumbnail tab also now follows the new folder for its preview cache.
 

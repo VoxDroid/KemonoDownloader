@@ -167,6 +167,33 @@ def isolated_hash_dir(tmp_path):
 
 
 @pytest.fixture(autouse=True)
+def fresh_rate_limiter():
+    """Give every test a clean, fast shared rate limiter.
+
+    Cooldowns are shared across the whole process, so a 429 answered in one
+    test would otherwise make later tests wait for it. The fast policy keeps
+    the real logic (retries, backoff growth, the cap) but shrinks every wait
+    to milliseconds. Tests of the limiter's timing build their own instance.
+    """
+    from kemonodownloader import download_policy
+
+    limiter = download_policy.rate_limiter
+    original = limiter.policy
+    limiter.policy = download_policy.RateLimitPolicy(
+        min_cooldown=0.001,
+        max_cooldown=0.01,
+        backoff_base=0.001,
+        backoff_cap=0.004,
+        resume_spread=0.0,
+        poll_interval=0.001,
+    )
+    limiter.reset()
+    yield
+    limiter.reset()
+    limiter.policy = original
+
+
+@pytest.fixture(autouse=True)
 def restore_excepthook():
     """Undo sys.excepthook changes, e.g. from tests that run app.main()."""
     original = sys.excepthook

@@ -6,6 +6,7 @@ import contextlib
 import gzip
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -28,6 +29,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from kemonodownloader.domain_config import clean_file_url
+from kemonodownloader.download_policy import rate_limit_tries, site_key
+from kemonodownloader.kd_language import translate
 
 # Large enough to keep Python's per-chunk overhead negligible on fast links, small
 # enough that cancellation is still noticed quickly on slow ones.
@@ -402,6 +405,39 @@ def is_missing_file_error(error: BaseException) -> bool:
     response = getattr(error, "response", None)
     status = getattr(response, "status_code", None)
     return status in MISSING_FILE_STATUSES
+
+
+def rate_limit_reporter(
+    emit: Callable[[str, str], Any],
+) -> Callable[[str, float, int, int], None]:
+    """An ``on_rate_limited`` callback for ``polite_get`` that logs each wait."""
+
+    def report(site: str, wait_seconds: float, retry: int, limit: int) -> None:
+        emit(
+            translate(
+                "log_warning",
+                translate(
+                    "rate_limited_waiting",
+                    site,
+                    max(1, math.ceil(wait_seconds)),
+                    retry,
+                    limit,
+                ),
+            ),
+            "WARNING",
+        )
+
+    return report
+
+
+def rate_limit_gave_up(url: str, what: str) -> str:
+    """The error logged when a request is still rate limited after its retries."""
+    return translate(
+        "rate_limited_gave_up",
+        site_key(url),
+        what,
+        rate_limit_tries(),
+    )
 
 
 def iter_post_file_entries(

@@ -10,6 +10,7 @@ import urllib.parse
 from typing import Dict, List, Optional, Tuple
 
 import qtawesome as qta
+import requests
 from bs4 import BeautifulSoup
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -33,9 +34,18 @@ from PyQt6.QtWidgets import (
 )
 
 from kemonodownloader.domain_config import get_domain_config
+from kemonodownloader.download_policy import (
+    RequestCancelled,
+    backoff_pause,
+    is_rate_limited,
+    is_transient_status,
+    polite_get,
+)
 from kemonodownloader.download_utils import (
     DOWNLOAD_CHUNK_SIZE,
     ProgressTracker,
+    rate_limit_gave_up,
+    rate_limit_reporter,
     response_content_length,
 )
 from kemonodownloader.history_store import (
@@ -60,6 +70,26 @@ from kemonodownloader.kd_theme import set_role
 from kemonodownloader.post_downloader import MediaPreviewModal
 
 SUPPORTED_THUMBNAIL_EXTS = (".jpg", ".jpeg", ".png", ".gif", ".webp")
+
+
+# Attempts at one page of a creator's post list after server errors or dropped
+# connections (rate limits are waited out separately and don't count).
+LISTING_RETRIES = 3
+
+
+def _thread_get(thread, session, url: str, **kwargs):
+    """GET for a thumbnail thread: waits out rate limits, stops on cancel."""
+
+    def log(message: str, level: str = "INFO") -> None:
+        thread.log_message.emit(message)
+
+    return polite_get(
+        session,
+        url,
+        is_running=lambda: not thread.is_cancelled,
+        on_rate_limited=rate_limit_reporter(log),
+        **kwargs,
+    )
 
 
 def _sanitize(name: str, max_length: int = 100) -> str:
@@ -203,7 +233,9 @@ class ThumbnailDetectionThread(QThread):
                 )
 
                 try:
-                    res = session.get(api_url, headers=req_headers, timeout=15)
+                    res = _thread_get(
+                        self, session, api_url, headers=req_headers, timeout=15
+                    )
                     if res.status_code == 200:
                         post_data = res.json()
                         if isinstance(post_data, list) and post_data:
@@ -226,10 +258,18 @@ class ThumbnailDetectionThread(QThread):
                             )
                             all_detected.extend(items)
                             self.batch_received.emit(items)
+                    elif is_rate_limited(res):
+                        self.log_message.emit(
+                            rate_limit_gave_up(
+                                api_url, translate("rate_limit_post", post_id)
+                            )
+                        )
                     else:
                         self.log_message.emit(
                             f"API HTTP {res.status_code} for {api_url}"
                         )
+                except RequestCancelled:
+                    break
                 except Exception as e:
                     self.log_message.emit(f"Error fetching post {post_id}: {str(e)}")
 
@@ -254,26 +294,37 @@ class ThumbnailDetectionThread(QThread):
                 working_endpoint = endpoints[0]
                 for ep in endpoints:
                     try:
-                        test_res = session.get(
-                            f"{ep}?o=0", headers=req_headers, timeout=10
+                        test_res = _thread_get(
+                            self, session, f"{ep}?o=0", headers=req_headers, timeout=10
                         )
                         if test_res.status_code == 200:
                             test_json = test_res.json()
                             if isinstance(test_json, list):
                                 working_endpoint = ep
                                 break
+                        if is_rate_limited(test_res):
+                            # A 429 says nothing about the URL format; trying
+                            # the other one would just be one more request.
+                            break
                     except Exception:
                         pass
 
+                loaded = 0
                 while not self.is_cancelled:
                     api_url = f"{working_endpoint}?o={offset}"
+                    res, problem = self._fetch_listing_page(
+                        session, api_url, req_headers
+                    )
+                    if self.is_cancelled:
+                        break
+                    if res is None or res.status_code != 200:
+                        self._report_listing_stop(res, problem, loaded, api_url, url)
+                        break
                     try:
-                        res = session.get(api_url, headers=req_headers, timeout=15)
-                        if res.status_code != 200:
-                            break
                         posts = res.json()
                         if not isinstance(posts, list) or not posts:
                             break
+                        loaded += len(posts)
 
                         batch_items = []
                         for post in posts:
@@ -303,13 +354,68 @@ class ThumbnailDetectionThread(QThread):
 
         self.detection_finished.emit(all_detected)
 
+    def _fetch_listing_page(self, session, api_url: str, req_headers: dict):
+        """Fetch one page of a creator's posts: ``(response or None, problem)``.
+
+        Rate limits are waited out by polite_get. Server errors and network
+        failures are retried a few times with backoff, since stopping there
+        would silently cut the creator's list short.
+        """
+        res = None
+        problem = ""
+        for round_index in range(LISTING_RETRIES):
+            try:
+                res = _thread_get(
+                    self, session, api_url, headers=req_headers, timeout=15
+                )
+            except RequestCancelled:
+                return None, ""
+            except Exception as e:
+                res, problem = None, str(e)
+            else:
+                status = res.status_code
+                if (
+                    status == 200
+                    or is_rate_limited(res)
+                    or not is_transient_status(status)
+                ):
+                    return res, ""
+                problem = f"HTTP {status}"
+            if round_index + 1 < LISTING_RETRIES and not backoff_pause(
+                round_index, lambda: not self.is_cancelled
+            ):
+                return None, ""
+        return res, problem
+
+    def _report_listing_stop(
+        self, res, problem: str, loaded: int, api_url: str, creator_url: str
+    ):
+        """Explain why reading a creator's posts stopped at a failed page."""
+        if res is not None and is_rate_limited(res):
+            if loaded:
+                message = translate("post_list_incomplete_rate_limited", loaded)
+            else:
+                message = rate_limit_gave_up(api_url, creator_url)
+        elif problem:
+            if loaded:
+                message = translate("post_list_incomplete_error", loaded, problem)
+            else:
+                message = f"Error fetching creator posts ({api_url}): {problem}"
+        elif res is not None and not loaded:
+            message = f"API HTTP {res.status_code} for {api_url}"
+        else:
+            return  # a definite "no" past the first page: the list ended
+        self.log_message.emit(message)
+
     def _fetch_creator_name(
         self, session, domain: str, service: str, user_id: str, req_headers: dict
     ) -> str:
         """Fetch the creator name from the profile endpoint. Returns 'Unknown_Creator' on failure."""
         profile_url = f"https://{domain}/api/v1/{service}/user/{user_id}/profile"
         try:
-            res = session.get(profile_url, headers=req_headers, timeout=10)
+            res = _thread_get(
+                self, session, profile_url, headers=req_headers, timeout=10
+            )
             if res.status_code == 200:
                 data = res.json()
                 name = data.get("name", "") if isinstance(data, dict) else ""
@@ -507,17 +613,24 @@ class ThumbnailDownloadThread(QThread):
             res = None
             for attempt in range(3):
                 try:
-                    res = session.get(api_url, headers=req_headers, timeout=10)
-                    if res.status_code == 200:
-                        break
-                    elif res.status_code == 403:
+                    res = _thread_get(
+                        self, session, api_url, headers=req_headers, timeout=10
+                    )
+                    if res.status_code == 403:
                         alt_headers = req_headers.copy()
                         alt_headers["Accept"] = "text/css"
-                        res = session.get(api_url, headers=alt_headers, timeout=10)
-                        if res.status_code == 200:
-                            break
+                        res = _thread_get(
+                            self, session, api_url, headers=alt_headers, timeout=10
+                        )
+                    if res.status_code == 200 or is_rate_limited(res):
+                        # A rate limit was already waited out and retried.
+                        break
+                except RequestCancelled:
+                    return
                 except Exception:
                     pass
+                if self.is_cancelled:
+                    return
                 time.sleep(1)
 
             if res is None or res.status_code != 200:
@@ -691,7 +804,13 @@ class ThumbnailDownloadThread(QThread):
             temp_path = filepath + ".tmp"
             res = None
             try:
-                res = session.get(thumb_url, headers=headers, timeout=20, stream=True)
+                res = _thread_get(
+                    self, session, thumb_url, headers=headers, timeout=20, stream=True
+                )
+                if is_rate_limited(res):
+                    raise requests.HTTPError(
+                        rate_limit_gave_up(thumb_url, out_filename), response=res
+                    )
                 res.raise_for_status()
 
                 total_bytes = response_content_length(res)
@@ -730,7 +849,8 @@ class ThumbnailDownloadThread(QThread):
                 return True
 
             except Exception as e:
-                self.log_message.emit(f"Failed download ({thumb_url}): {str(e)}")
+                if not isinstance(e, RequestCancelled):
+                    self.log_message.emit(f"Failed download ({thumb_url}): {str(e)}")
                 try:
                     if os.path.exists(temp_path):
                         os.remove(temp_path)
