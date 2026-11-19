@@ -84,6 +84,13 @@
 
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
+> [!IMPORTANT]
+> **KemonoDownloader 现已成为旧版项目，5.16.0 是它的最终版本。**
+>
+> 它的继任者是 **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**，作为适用于 Windows、macOS 和 Linux 的原生桌面应用从零重写。它与 KemonoDownloader 一样可以从 Pawchive、Kemono 和 Coomer 下载，还能下载帖子中分享的 Mega、Google Drive、Dropbox、Pixeldrain、GoFile 和 MediaFire 链接，下载体积也从 130 MB 以上降到约 6 MB。官方构建可在 [Ko-fi](https://ko-fi.com/izeno) 获取。
+>
+> KemonoDownloader 将继续保留并保持开源，但不再提供新功能或网站更新。迁移原因以及两款应用的对比表请参阅[英文 README](../README.md#moving-to-pawchive-downloader)。
+
 欢迎使用 **Kemono Downloader**，这是一个基于PyQt6构建的多功能Python桌面应用程序，专为从[Kemono.cr](https://kemono.cr)下载内容而设计。此工具允许用户存档来自Patreon、Fanbox等服务的单个帖子或整个创作者档案，支持各种文件类型，具有可自定义设置和高级功能。
 
 ## 重要声明
@@ -176,16 +183,17 @@ Kemono Downloader现在使用[Briefcase](https://briefcase.readthedocs.io/)打�
 预编译二进制文件通过**Ko-fi**上的贡献提供。如果您想要即用型可执行文件的便利性而不是从源代码构建，请在这里支持项目：**[在Ko-fi获取二进制文件](https://ko-fi.com/izeno/shop)**  
 
 #### 可用二进制文件
+从 5.16.0 起，每个构建都以 zip 提供，包含安装程序、说明安装步骤的 `README.txt` 和许可证：
 - **Windows**:  
-  - **便携版**: `W-KemonoDownloader-x86_64-Portable.exe`  
-  - **安装程序**: `W-KemonoDownloader-x86_64.msi`  
+  - **便携版**: `KemonoDownloader-5.16.0-windows-x64-portable.zip`  
+  - **安装程序**: `KemonoDownloader-5.16.0-windows-x64-msi.zip`  
 - **macOS**:  
-  - `M-KemonoDownloader-arm64.dmg` (Apple Silicon)  
-  - `M-KemonoDownloader-x86_64.dmg` (Intel)  
+  - `KemonoDownloader-5.16.0-macos-apple-silicon.zip` (Apple Silicon)  
+  - `KemonoDownloader-5.16.0-macos-intel.zip` (Intel)  
 - **Linux**:  
-  - `L-KemonoDownloader-x86_64.pkg.tar.zst` (基于Arch)  
-  - `L-KemonoDownloader-x86_64.rpm` (基于Fedora/Red Hat)  
-  - `L-KemonoDownloader-amd64.deb` (基于Debian/Ubuntu)  
+  - `KemonoDownloader-5.16.0-linux-x64-arch.zip` (基于Arch)  
+  - `KemonoDownloader-5.16.0-linux-x64-rpm.zip` (基于Fedora/Red Hat)  
+  - `KemonoDownloader-5.16.0-linux-x64-deb.zip` (基于Debian/Ubuntu)  
 
 支持持续开发并在此处获得访问：**[Ko-fi二进制文件页面](https://ko-fi.com/izeno/shop)**
 
