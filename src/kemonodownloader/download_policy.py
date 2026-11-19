@@ -25,7 +25,7 @@ from urllib.parse import urlparse
 
 import requests
 
-IDENTIFIABLE_USER_AGENT = "KemonoDownloader/5.15.0 (+mailto:izeno.contact@gmail.com)"
+IDENTIFIABLE_USER_AGENT = "KemonoDownloader/5.16.0 (+mailto:izeno.contact@gmail.com)"
 PAWCHIVE_MAX_ACTIVE_DOWNLOADS = 5
 PAWCHIVE_REQUEST_INTERVAL = 1.0
 

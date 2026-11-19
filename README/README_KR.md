@@ -84,6 +84,13 @@
 
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
+> [!IMPORTANT]
+> **KemonoDownloader는 이제 레거시 프로젝트입니다. 버전 5.16.0이 마지막 릴리스입니다.**
+>
+> 후속 프로젝트는 **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)** 입니다. Windows, macOS, Linux용 네이티브 데스크톱 앱으로 처음부터 다시 만들어졌습니다. KemonoDownloader처럼 Pawchive, Kemono, Coomer에서 다운로드할 수 있고, 게시물에 공유된 Mega, Google Drive, Dropbox, Pixeldrain, GoFile, MediaFire 링크도 다운로드하며, 다운로드 크기는 130MB 이상에서 약 6MB로 줄었습니다. 공식 빌드는 [Ko-fi](https://ko-fi.com/izeno)에서 받을 수 있습니다.
+>
+> KemonoDownloader는 계속 공개되고 오픈 소스로 유지되지만, 새 기능이나 사이트 업데이트는 더 이상 없습니다. 전환 이유와 두 앱의 비교표는 [영어 README](../README.md#moving-to-pawchive-downloader)를 참조하세요.
+
 **Kemono Downloader**에 오신 것을 환영합니다. PyQt6로 구축된 다목적 Python 기반 데스크톱 애플리케이션으로, [Kemono.cr](https://kemono.cr)에서 콘텐츠를 다운로드하도록 설계되었습니다. 이 도구를 통해 사용자는 Patreon, Fanbox 등의 서비스에서 개별 게시물 또는 전체 크리에이터 프로필을 보관할 수 있으며, 사용자 지정 가능한 설정과 고급 기능을 갖춘 다양한 파일 유형을 지원합니다.
 
 ## 중요 안내사항
@@ -176,16 +183,17 @@ Kemono Downloader는 현재 [Briefcase](https://briefcase.readthedocs.io/)를 �
 미리 컴파일된 바이너리는 **Ko-fi** 기여를 통해 제공됩니다. 소스에서 빌드하는 대신 바로 실행할 수 있는 실행 파일의 편리함을 원하신다면, 여기서 프로젝트를 지원해 주세요: **[Ko-fi에서 바이너리 받기](https://ko-fi.com/izeno/shop)**  
 
 #### 사용 가능한 바이너리
+5.16.0부터 각 빌드는 설치 파일, 설치 방법이 담긴 `README.txt`, 라이선스가 들어 있는 zip으로 제공됩니다:
 - **Windows**:  
-  - **포터블**: `W-KemonoDownloader-x86_64-Portable.exe`  
-  - **인스톨러**: `W-KemonoDownloader-x86_64.msi`  
+  - **포터블**: `KemonoDownloader-5.16.0-windows-x64-portable.zip`  
+  - **인스톨러**: `KemonoDownloader-5.16.0-windows-x64-msi.zip`  
 - **macOS**:  
-  - `M-KemonoDownloader-arm64.dmg` (Apple Silicon)  
-  - `M-KemonoDownloader-x86_64.dmg` (Intel)  
+  - `KemonoDownloader-5.16.0-macos-apple-silicon.zip` (Apple Silicon)  
+  - `KemonoDownloader-5.16.0-macos-intel.zip` (Intel)  
 - **Linux**:  
-  - `L-KemonoDownloader-x86_64.pkg.tar.zst` (Arch 기반)  
-  - `L-KemonoDownloader-x86_64.rpm` (Fedora/Red Hat 기반)  
-  - `L-KemonoDownloader-amd64.deb` (Debian/Ubuntu 기반)  
+  - `KemonoDownloader-5.16.0-linux-x64-arch.zip` (Arch 기반)  
+  - `KemonoDownloader-5.16.0-linux-x64-rpm.zip` (Fedora/Red Hat 기반)  
+  - `KemonoDownloader-5.16.0-linux-x64-deb.zip` (Debian/Ubuntu 기반)  
 
 지속적인 개발을 지원하고 여기서 액세스하세요: **[Ko-fi 바이너리 페이지](https://ko-fi.com/izeno/shop)**
 

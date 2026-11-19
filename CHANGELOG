@@ -1,6 +1,10 @@
 # Kemono Downloader Release Notes
 
-## Unreleased
+## v5.16.0 (20 November 2026)
+**feat: final release: settings that wait for Apply Changes, safe proxy and Tor switching, shared rate-limit handling, history that follows the save folder, and the move to Pawchive Downloader**
+
+- Kemono Downloader becomes a legacy project.
+  This is the final release. Its successor, [Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader), does everything Kemono Downloader does for Pawchive, Kemono and Coomer, follows the Mega, Google Drive, Dropbox, Pixeldrain, GoFile and MediaFire links that posts share, and is a native app of about 6 MB instead of over 130 MB. The README explains the move and compares the two apps. Kemono Downloader stays available and open source, but new features and site updates go into Pawchive Downloader.
 
 - Every setting waits for Apply Changes.
   The theme, which log messages show, the Use Proxy switch and the proxy type used to take effect (and be saved) the moment they were changed; worse, a proxy ticked but never applied was already used for downloads. Now nothing changes until Apply Changes. An "Unapplied changes" marker shows when something is waiting, Discard Changes puts everything back, and Reset to Defaults only fills in the defaults. The confirmation lists just what changes, as "before → after", instead of a fixed summary of ten settings, and the result lists them again. Closing the app with unapplied changes asks whether to apply or discard them.

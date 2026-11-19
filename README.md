@@ -40,7 +40,7 @@
     <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey" alt="Platforms">
   </a>
   <a href="https://github.com/VoxDroid/KemonoDownloader/releases">
-    <img src="https://img.shields.io/badge/version-v5.15.0-brightgreen" alt="Version">
+    <img src="https://img.shields.io/badge/version-v5.16.0-brightgreen" alt="Version">
   </a>
   <a>
     <img src="https://img.shields.io/github/v/release/VoxDroid/KemonoDownloader?label=Latest%20Release" alt="Latest Release">
@@ -87,7 +87,65 @@
 
 <hr style="border: 1px dashed #4A6B9A; margin: 20px 0;">
 
+> [!IMPORTANT]
+> **KemonoDownloader is now a legacy project. Version 5.16.0 is its final release.**
+>
+> Its successor is **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**, rebuilt from scratch as a native desktop app for Windows, macOS and Linux. It downloads from Pawchive, Kemono and Coomer like KemonoDownloader does, also follows the Mega, Google Drive, Dropbox, Pixeldrain, GoFile and MediaFire links that posts share, and is a download of about 6 MB instead of over 130 MB. Official builds are on [Ko-fi](https://ko-fi.com/izeno).
+>
+> KemonoDownloader stays available and open source, but it gets no new features or site updates. See [Moving to Pawchive Downloader](#moving-to-pawchive-downloader) for why and how the two compare.
+
 Welcome to **$\color{#546e7a}{\sf{\text{KemonoDownloader}}}$**, a versatile Python-based desktop application built with PyQt6, designed to download content from [Kemono.cr](https://kemono.cr), [Coomer.st](https://coomer.st), and [Pawchive.pw](https://pawchive.pw). This tool enables users to archive individual posts or entire creator profiles from services like Patreon, Fanbox, and more, supporting a wide range of file types with customizable settings and advanced features.
+
+## $\color{#546e7a}{\sf{\text{Moving to Pawchive Downloader}}}$ <a name="moving-to-pawchive-downloader"></a>
+
+KemonoDownloader began as a small PyQt6 app for Kemono and grew tab by tab, release by release. Its Python and Qt foundation made it large to ship (over 130 MB on Windows) and hard to extend with things like downloads that survive a restart, outside file hosts, a watchlist and a single queue. Rather than keep patching it, the whole app was rebuilt as **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**, with a Rust download engine and a native interface (Tauri and Svelte).
+
+Pawchive Downloader keeps what KemonoDownloader does well, including the polite request limits it introduced, and adds what it never had:
+
+- **Much smaller and native:** a Windows download of about 6 MB, with a setup installer, MSI and portable build for Windows, one universal DMG for Apple Silicon and Intel Macs, and an AppImage, deb and rpm for Linux.
+- **More than the three sites:** files that posts share on Mega (decrypted on your computer), Google Drive, Dropbox, Pixeldrain, GoFile and MediaFire are downloaded with the post, and ZIP archives can be unpacked with the passwords the post mentions.
+- **Downloads that don't get stuck:** every file resumes after a pause, a dropped connection or a restart, is checked against the site's SHA-256, and is retried later by itself if it fails. Dead Kemono and Coomer media servers are noticed before a download starts, with the choice to cancel, take thumbnails instead, or queue the full files for later.
+- **Keeping up with creators:** creator search by name, a watchlist that checks for new posts and can download them automatically, read markers, statistics and a check that finds deleted or moved files.
+- **Actively developed:** new features and site updates go into Pawchive Downloader from now on.
+
+### $\color{#90a4ae}{\sf{\text{KemonoDownloader and Pawchive Downloader Compared}}}$ <a name="kemonodownloader-and-pawchive-downloader-compared"></a>
+
+| | KemonoDownloader 5.16.0 (legacy) | Pawchive Downloader 2.0.0 |
+| :--- | :--- | :--- |
+| **Status** | Final release; fixes only if something is badly broken | Actively developed |
+| **Built with** | Python and PyQt6 | Rust and Svelte (Tauri), native app |
+| **Windows download** | Over 130 MB | About 6.4 MB (zip) |
+| **Installers** | MSI, portable EXE, DMG for Apple Silicon and for Intel, deb, rpm, Arch package | Setup EXE, MSI, portable, universal DMG, AppImage, deb, rpm |
+| **Sites** | Kemono, Coomer, Pawchive | Kemono, Coomer, Pawchive, and old kemono.su and coomer.su links |
+| **Finding creators** | Paste a link | Paste a link, or search creators by name (about 100,000 on Pawchive) |
+| **Before downloading** | List a post's files with previews; list a creator's posts | Browse posts with thumbnails, creators with banner and linked accounts, recent posts per site, and an image viewer |
+| **Mega, Google Drive, Dropbox, Pixeldrain, GoFile, MediaFire** | No | Yes, Mega decrypted on your computer |
+| **ZIP archives** | Saved as they are | Optionally unpacked, trying the passwords the post mentions |
+| **Download formats** | Separate files | Separate files, one ZIP per post, or thumbnails only |
+| **Interrupted downloads** | Partial file removed and downloaded again | Resumed from where they stopped, even after a restart |
+| **File checks** | Size checked against what the server announced; duplicates skipped by URL | SHA-256 of every file; duplicates skipped by content across posts, creators and sites |
+| **Dead media servers** | Separate Thumbnail Downloader tab | Checked before each download: cancel, thumbnails instead, or queue for later |
+| **Preview-only Pawchive files** | Recognised and skipped, or preview saved | Full file fetched through the post's temporary link |
+| **Failed files** | Retried right away, then given up | Retried right away, then again by themselves after 15 minutes to 3 hours |
+| **Queue** | One queue per tab | One queue: pause, resume, reorder, retry single files; survives a crash or restart |
+| **Filters** | File types, and a post title search in the Creator tab | File types and extensions, keywords, skip words, regular expressions, date range, newest N posts |
+| **File names** | Creator file name template and folder layout | Folder, file and ZIP templates with live preview, words to remove |
+| **Post text and metadata** | Post description (Thumbnail tab) | Description as text or HTML, `post.json`, outside links and passwords, comments, announcements |
+| **Watchlist** | No | Scheduled checks, notifications, automatic downloads |
+| **History and favorites** | Yes | Yes, plus statistics and a check for deleted or moved files |
+| **Running in the background** | No | Tray, start at sign-in, notifications, quit, sleep or shut down when done |
+| **Scheduling and limits** | No | Download window (for example at night), speed limit, free-space guard, keep awake |
+| **Proxy and Tor** | Custom proxy or Tor, with a built-in verified Tor download | System proxy, custom HTTP, HTTPS or SOCKS5 proxy, or Tor |
+| **Portable mode and backup** | Portable EXE; settings kept in your user account | `data` folder next to the program; backup and restore of settings, watchlist, favorites and history |
+| **Languages** | 4 | 9 |
+| **Themes** | 5 dark themes | 6 themes including Light, Match system, and accent colors |
+
+### $\color{#90a4ae}{\sf{\text{What Happens to KemonoDownloader}}}$ <a name="what-happens-to-kemonodownloader"></a>
+
+- The source code, the releases and the 5.16.0 builds stay available, and the app keeps working as long as the sites don't change in ways that break it.
+- There will be no new features or site updates. Issues and pull requests may still be looked at, but fixes are unlikely unless something is badly broken.
+- Monthly supporters on Ko-fi get Pawchive Downloader builds as part of their support.
+- To switch, install Pawchive Downloader and point it at the same download folder. The two apps keep their settings, history and favorites separately, so nothing is moved over automatically.
 
 ## $\color{#546e7a}{\sf{\text{Important Notices}}}$ <a name="important-notices"></a>
 
@@ -134,6 +192,9 @@ We are committed to fostering a welcoming and respectful community around Kemono
 - Reporting any violations of the Code of Conduct or security issues to the maintainers via [izeno.contact@gmail.com](mailto:izeno.contact@gmail.com) or by opening a private issue labeled "Code of Conduct Violation" or "Security Violation."
 
 ## $\color{#546e7a}{\sf{\text{Table of Contents}}}$ <a name="table-of-contents"></a>
+- [Moving to Pawchive Downloader](#moving-to-pawchive-downloader)
+  - [KemonoDownloader and Pawchive Downloader Compared](#kemonodownloader-and-pawchive-downloader-compared)
+  - [What Happens to KemonoDownloader](#what-happens-to-kemonodownloader)
 - [Important Notices](#important-notices)
   - [Disclaimer](#disclaimer)
   - [Ethical Use Guidelines](#ethical-use-guidelines)
@@ -318,18 +379,19 @@ Kemono Downloader is now packaged using [Briefcase](https://briefcase.readthedoc
 Pre-compiled binaries are available through contributions on **Ko-fi**. If you’d like the convenience of ready-to-run executables instead of building from source, please support the project here: **[Get binaries on Ko-fi](https://ko-fi.com/izeno/shop)**  
 
 #### $\color{#90a4ae}{\sf{\text{Available Binaries}}}$
+From 5.16.0, each build comes as a zip holding the installer, a `README.txt` with install steps, and the license:
 - **Windows**:  
-  - **Portable**: `W-KemonoDownloader-x86_64-Portable.exe`  
-  - **Installer**: `W-KemonoDownloader-x86_64.msi`  
+  - **Installer**: `KemonoDownloader-5.16.0-windows-x64-msi.zip`  
+  - **Portable**: `KemonoDownloader-5.16.0-windows-x64-portable.zip`  
 - **macOS**:  
-  - `M-KemonoDownloader-arm64.dmg` (Apple Silicon)  
-  - `M-KemonoDownloader-x86_64.dmg` (Intel)  
+  - `KemonoDownloader-5.16.0-macos-apple-silicon.zip` (Apple Silicon)  
+  - `KemonoDownloader-5.16.0-macos-intel.zip` (Intel)  
 - **Linux**:  
-  - `L-KemonoDownloader-x86_64.pkg.tar.zst` (Arch-based)  
-  - `L-KemonoDownloader-x86_64.rpm` (Fedora/Red Hat based)  
-  - `L-KemonoDownloader-amd64.deb` (Debian/Ubuntu based)  
+  - `KemonoDownloader-5.16.0-linux-x64-arch.zip` (Arch-based)  
+  - `KemonoDownloader-5.16.0-linux-x64-rpm.zip` (Fedora/Red Hat based)  
+  - `KemonoDownloader-5.16.0-linux-x64-deb.zip` (Debian/Ubuntu based)  
 
-Support ongoing development and get access here: **[Ko-fi Binaries Page](https://ko-fi.com/izeno/shop)**
+Support ongoing development and get access here: **[Ko-fi Binaries Page](https://ko-fi.com/izeno/shop)**. Monthly supporters also get builds of [Pawchive Downloader](#moving-to-pawchive-downloader), KemonoDownloader's successor.
 
 ### $\color{#90a4ae}{\sf{\text{Building with Briefcase (All Platforms)}}}$
 1. Ensure you have **Python 3.9+** installed on your system (Windows, macOS, Linux).
@@ -447,6 +509,7 @@ Here are previews of the main tabs in Kemono Downloader:
 </table>
 
 ## $\color{#546e7a}{\sf{\text{Releases}}}$ <a name="releases"></a>
+- **5.16.0 is the final release.** New versions come from [Pawchive Downloader](#moving-to-pawchive-downloader).
 - **Pre-compiled binaries** for Windows (`.exe`, `.msi`), macOS (`.dmg` for Apple Silicon and Intel) and Linux (`.deb`, `.rpm`, `.pkg.tar.zst`) are available on [Ko-fi](https://ko-fi.com/izeno/shop). See [Pre-Compiled Binaries](#installation) for the full list.
 - The [GitHub Releases page](https://github.com/VoxDroid/KemonoDownloader/releases) has the release notes and source code for every version.
 - Building from source with Briefcase is free and works on every platform; see [Building with Briefcase](#installation).
