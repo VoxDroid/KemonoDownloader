@@ -90,7 +90,7 @@
 > [!IMPORTANT]
 > **KemonoDownloader is now a legacy project. Version 5.16.0 is its final release.**
 >
-> Its successor is **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**, rebuilt from scratch as a native desktop app for Windows, macOS and Linux. It downloads from Pawchive, Kemono and Coomer like KemonoDownloader does, also follows the Mega, Google Drive, Dropbox, Pixeldrain, GoFile and MediaFire links that posts share, and is a download of about 6 MB instead of over 130 MB. Official builds are on [Ko-fi](https://ko-fi.com/izeno).
+> Its successor is **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**, rebuilt from scratch as a native desktop app for Windows, macOS and Linux. It downloads from Pawchive, Kemono and Coomer like KemonoDownloader does, also follows the Mega, Google Drive, Dropbox, Pixeldrain, GoFile and MediaFire links that posts share, and is a download of about 6 MB instead of 54 to 82 MB. Official builds are on [Ko-fi](https://ko-fi.com/izeno).
 >
 > KemonoDownloader stays available and open source, but it gets no new features or site updates. See [Moving to Pawchive Downloader](#moving-to-pawchive-downloader) for why and how the two compare.
 
@@ -98,7 +98,7 @@ Welcome to **$\color{#546e7a}{\sf{\text{KemonoDownloader}}}$**, a versatile Pyth
 
 ## $\color{#546e7a}{\sf{\text{Moving to Pawchive Downloader}}}$ <a name="moving-to-pawchive-downloader"></a>
 
-KemonoDownloader began as a small PyQt6 app for Kemono and grew tab by tab, release by release. Its Python and Qt foundation made it large to ship (over 130 MB on Windows) and hard to extend with things like downloads that survive a restart, outside file hosts, a watchlist and a single queue. Rather than keep patching it, the whole app was rebuilt as **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**, with a Rust download engine and a native interface (Tauri and Svelte).
+KemonoDownloader began as a small PyQt6 app for Kemono and grew tab by tab, release by release. Its Python and Qt foundation made it large to ship (54 to 82 MB on Windows) and hard to extend with things like downloads that survive a restart, outside file hosts, a watchlist and a single queue. Rather than keep patching it, the whole app was rebuilt as **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**, with a Rust download engine and a native interface (Tauri and Svelte).
 
 Pawchive Downloader keeps what KemonoDownloader does well, including the polite request limits it introduced, and adds what it never had:
 
@@ -114,7 +114,7 @@ Pawchive Downloader keeps what KemonoDownloader does well, including the polite 
 | :--- | :--- | :--- |
 | **Status** | Final release; fixes only if something is badly broken | Actively developed |
 | **Built with** | Python and PyQt6 | Rust and Svelte (Tauri), native app |
-| **Windows download** | Over 130 MB | About 6.4 MB (zip) |
+| **Windows download** | 54 MB portable EXE, 82 MB MSI | About 6.4 MB (zip) |
 | **Installers** | MSI, portable EXE, DMG for Apple Silicon and for Intel, deb, rpm, Arch package | Setup EXE, MSI, portable, universal DMG, AppImage, deb, rpm |
 | **Sites** | Kemono, Coomer, Pawchive | Kemono, Coomer, Pawchive, and old kemono.su and coomer.su links |
 | **Finding creators** | Paste a link | Paste a link, or search creators by name (about 100,000 on Pawchive) |

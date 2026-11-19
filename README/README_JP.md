@@ -87,7 +87,7 @@
 > [!IMPORTANT]
 > **KemonoDownloader はレガシープロジェクトになりました。バージョン 5.16.0 が最後のリリースです。**
 >
-> 後継は **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)** です。Windows、macOS、Linux 向けのネイティブデスクトップアプリとして一から作り直されました。KemonoDownloader と同じく Pawchive、Kemono、Coomer からダウンロードでき、さらに投稿で共有された Mega、Google Drive、Dropbox、Pixeldrain、GoFile、MediaFire のリンクにも対応し、ダウンロードサイズは 130 MB 以上から約 6 MB になりました。公式ビルドは [Ko-fi](https://ko-fi.com/izeno) で入手できます。
+> 後継は **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)** です。Windows、macOS、Linux 向けのネイティブデスクトップアプリとして一から作り直されました。KemonoDownloader と同じく Pawchive、Kemono、Coomer からダウンロードでき、さらに投稿で共有された Mega、Google Drive、Dropbox、Pixeldrain、GoFile、MediaFire のリンクにも対応し、ダウンロードサイズは 54〜82 MB から約 6 MB になりました。公式ビルドは [Ko-fi](https://ko-fi.com/izeno) で入手できます。
 >
 > KemonoDownloader は引き続き公開され、オープンソースのままですが、新機能やサイト対応の更新は行われません。移行の理由と両アプリの比較表は[英語版 README](../README.md#moving-to-pawchive-downloader)をご覧ください。
 

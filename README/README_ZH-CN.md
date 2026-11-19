@@ -87,7 +87,7 @@
 > [!IMPORTANT]
 > **KemonoDownloader 现已成为旧版项目，5.16.0 是它的最终版本。**
 >
-> 它的继任者是 **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**，作为适用于 Windows、macOS 和 Linux 的原生桌面应用从零重写。它与 KemonoDownloader 一样可以从 Pawchive、Kemono 和 Coomer 下载，还能下载帖子中分享的 Mega、Google Drive、Dropbox、Pixeldrain、GoFile 和 MediaFire 链接，下载体积也从 130 MB 以上降到约 6 MB。官方构建可在 [Ko-fi](https://ko-fi.com/izeno) 获取。
+> 它的继任者是 **[Pawchive Downloader](https://github.com/VoxDroid/PawchiveDownloader)**，作为适用于 Windows、macOS 和 Linux 的原生桌面应用从零重写。它与 KemonoDownloader 一样可以从 Pawchive、Kemono 和 Coomer 下载，还能下载帖子中分享的 Mega、Google Drive、Dropbox、Pixeldrain、GoFile 和 MediaFire 链接，下载体积也从 54–82 MB 降到约 6 MB。官方构建可在 [Ko-fi](https://ko-fi.com/izeno) 获取。
 >
 > KemonoDownloader 将继续保留并保持开源，但不再提供新功能或网站更新。迁移原因以及两款应用的对比表请参阅[英文 README](../README.md#moving-to-pawchive-downloader)。
 
