@@ -61,6 +61,7 @@
  <br>
  <br>
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader for Windows, macOS and Linux" src="../assets/svg/download-button.svg" width="296" height="59"></a>
+ <a href="https://ko-fi.com/izeno"><img alt="Download Pawchive Downloader for Windows, macOS and Linux" src="../assets/svg/pawchive-download-button.svg" width="314" height="59"></a>
  <br>
  <br>
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dt/kemonodownloader.svg" ></a>
