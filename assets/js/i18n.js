@@ -1,6 +1,21 @@
 // Language translations
 const translations = {
     en: {
+      // Legacy notice and Pawchive Downloader
+      legacyBadge: "Legacy",
+      legacyBanner: "KemonoDownloader 5.16.0 is the final release. Meet its successor, <strong>Pawchive Downloader</strong>",
+      pawchiveKicker: "The successor",
+      pawchiveTitle: "Meet Pawchive Downloader",
+      pawchiveLead: "KemonoDownloader is now a legacy project: 5.16.0 is its final release. Pawchive Downloader was rebuilt from scratch as a native app for Windows, macOS and Linux, and downloads from Pawchive, Kemono and Coomer, with much more.",
+      pawchivePoint1: "<i class=\"fas fa-feather\"></i> About 6 MB instead of 54 to 82 MB",
+      pawchivePoint2: "<i class=\"fas fa-link\"></i> Downloads the Mega, Google Drive, Dropbox, Pixeldrain, GoFile and MediaFire links that posts share",
+      pawchivePoint3: "<i class=\"fas fa-redo\"></i> Resumes interrupted downloads and checks every file's SHA-256",
+      pawchivePoint4: "<i class=\"fas fa-server\"></i> Notices dead media servers and offers thumbnails or a later retry",
+      pawchivePoint5: "<i class=\"fas fa-bell\"></i> Creator search, a watchlist with notifications, the tray and 9 languages",
+      pawchiveGithub: "Pawchive Downloader on GitHub",
+      pawchiveNote: "KemonoDownloader stays available and open source, but new features and site updates now go into Pawchive Downloader. <a href=\"https://github.com/VoxDroid/KemonoDownloader#moving-to-pawchive-downloader\" target=\"_blank\">See the full comparison</a>.",
+      releasesFinal: "<strong>5.16.0 is the final release of KemonoDownloader.</strong> New versions come from its successor, <a href=\"#pawchive\">Pawchive Downloader</a>.",
+
       // Header
       appTitle: "Kemono Downloader",
       appDescription: "A cross-platform Python app built with PyQt6 to download content from Kemono.cr, Coomer.st, and Pawchive.pw",
@@ -225,6 +240,21 @@ const translations = {
       chinese: "Chinese (Simplified)",
     },
     ja: {
+      // Legacy notice and Pawchive Downloader
+      legacyBadge: "レガシー",
+      legacyBanner: "KemonoDownloader 5.16.0 が最後のリリースです。後継の <strong>Pawchive Downloader</strong> をご覧ください",
+      pawchiveKicker: "後継アプリ",
+      pawchiveTitle: "Pawchive Downloader のご紹介",
+      pawchiveLead: "KemonoDownloader はレガシープロジェクトになり、5.16.0 が最後のリリースです。Pawchive Downloader は Windows、macOS、Linux 向けのネイティブアプリとして一から作り直され、Pawchive、Kemono、Coomer からのダウンロードに加え、さらに多くの機能を備えています。",
+      pawchivePoint1: "<i class=\"fas fa-feather\"></i> サイズは 54〜82 MB から約 6 MB に",
+      pawchivePoint2: "<i class=\"fas fa-link\"></i> 投稿で共有された Mega、Google Drive、Dropbox、Pixeldrain、GoFile、MediaFire のリンクもダウンロード",
+      pawchivePoint3: "<i class=\"fas fa-redo\"></i> 中断したダウンロードを再開し、すべてのファイルの SHA-256 を確認",
+      pawchivePoint4: "<i class=\"fas fa-server\"></i> メディアサーバーの停止を検知し、サムネイルの保存や後での再試行を提案",
+      pawchivePoint5: "<i class=\"fas fa-bell\"></i> クリエイター検索、通知付きウォッチリスト、トレイ常駐、9 言語に対応",
+      pawchiveGithub: "GitHub で Pawchive Downloader を見る",
+      pawchiveNote: "KemonoDownloader は引き続き公開され、オープンソースのままですが、新機能やサイト対応の更新は Pawchive Downloader で行われます。<a href=\"https://github.com/VoxDroid/KemonoDownloader#moving-to-pawchive-downloader\" target=\"_blank\">詳しい比較を見る</a>。",
+      releasesFinal: "<strong>5.16.0 が KemonoDownloader の最後のリリースです。</strong>新しいバージョンは後継の <a href=\"#pawchive\">Pawchive Downloader</a> で提供されます。",
+
       // Header
       appTitle: "ケモノダウンローダー",
       appDescription:
@@ -453,6 +483,21 @@ const translations = {
       chinese: "中国語（簡体字）",
     },
     ko: {
+      // Legacy notice and Pawchive Downloader
+      legacyBadge: "레거시",
+      legacyBanner: "KemonoDownloader 5.16.0이 마지막 릴리스입니다. 후속작 <strong>Pawchive Downloader</strong>를 만나보세요",
+      pawchiveKicker: "후속 프로젝트",
+      pawchiveTitle: "Pawchive Downloader를 소개합니다",
+      pawchiveLead: "KemonoDownloader는 이제 레거시 프로젝트이며 5.16.0이 마지막 릴리스입니다. Pawchive Downloader는 Windows, macOS, Linux용 네이티브 앱으로 처음부터 다시 만들어졌고, Pawchive, Kemono, Coomer에서 다운로드할 수 있으며 훨씬 더 많은 기능을 갖추고 있습니다.",
+      pawchivePoint1: "<i class=\"fas fa-feather\"></i> 크기가 54~82MB에서 약 6MB로",
+      pawchivePoint2: "<i class=\"fas fa-link\"></i> 게시물에 공유된 Mega, Google Drive, Dropbox, Pixeldrain, GoFile, MediaFire 링크도 다운로드",
+      pawchivePoint3: "<i class=\"fas fa-redo\"></i> 중단된 다운로드를 이어 받고 모든 파일의 SHA-256을 확인",
+      pawchivePoint4: "<i class=\"fas fa-server\"></i> 미디어 서버 장애를 감지하고 썸네일 저장이나 나중에 다시 시도를 제안",
+      pawchivePoint5: "<i class=\"fas fa-bell\"></i> 크리에이터 검색, 알림이 있는 관심 목록, 트레이, 9개 언어",
+      pawchiveGithub: "GitHub에서 Pawchive Downloader 보기",
+      pawchiveNote: "KemonoDownloader는 계속 공개되고 오픈 소스로 유지되지만, 새 기능과 사이트 업데이트는 이제 Pawchive Downloader에 추가됩니다. <a href=\"https://github.com/VoxDroid/KemonoDownloader#moving-to-pawchive-downloader\" target=\"_blank\">전체 비교 보기</a>.",
+      releasesFinal: "<strong>5.16.0이 KemonoDownloader의 마지막 릴리스입니다.</strong> 새 버전은 후속작인 <a href=\"#pawchive\">Pawchive Downloader</a>에서 제공됩니다.",
+
       // Header
       appTitle: "케모노 다운로더",
       appDescription: "Kemono.cr, Coomer.st, Pawchive.pw에서 콘텐츠를 다운로드하기 위해 PyQt6로 구축된 크로스 플랫폼 Python 앱",
@@ -674,6 +719,21 @@ const translations = {
       chinese: "중국어(간체)",
     },
     "zh-cn": {
+      // Legacy notice and Pawchive Downloader
+      legacyBadge: "旧版",
+      legacyBanner: "KemonoDownloader 5.16.0 是最终版本。来认识它的继任者 <strong>Pawchive Downloader</strong>",
+      pawchiveKicker: "继任者",
+      pawchiveTitle: "认识 Pawchive Downloader",
+      pawchiveLead: "KemonoDownloader 现已成为旧版项目，5.16.0 是它的最终版本。Pawchive Downloader 作为适用于 Windows、macOS 和 Linux 的原生应用从零重写，可以从 Pawchive、Kemono 和 Coomer 下载，并提供更多功能。",
+      pawchivePoint1: "<i class=\"fas fa-feather\"></i> 体积从 54–82 MB 降到约 6 MB",
+      pawchivePoint2: "<i class=\"fas fa-link\"></i> 下载帖子中分享的 Mega、Google Drive、Dropbox、Pixeldrain、GoFile 和 MediaFire 链接",
+      pawchivePoint3: "<i class=\"fas fa-redo\"></i> 断点续传，并校验每个文件的 SHA-256",
+      pawchivePoint4: "<i class=\"fas fa-server\"></i> 发现媒体服务器宕机时，提供改存缩略图或稍后重试",
+      pawchivePoint5: "<i class=\"fas fa-bell\"></i> 创作者搜索、带通知的关注列表、托盘运行和 9 种语言",
+      pawchiveGithub: "在 GitHub 上查看 Pawchive Downloader",
+      pawchiveNote: "KemonoDownloader 将继续保留并保持开源，但新功能和网站更新现在都在 Pawchive Downloader 中进行。<a href=\"https://github.com/VoxDroid/KemonoDownloader#moving-to-pawchive-downloader\" target=\"_blank\">查看完整对比</a>。",
+      releasesFinal: "<strong>5.16.0 是 KemonoDownloader 的最终版本。</strong>新版本由它的继任者 <a href=\"#pawchive\">Pawchive Downloader</a> 提供。",
+
       // Header
       appTitle: "Kemono 下载器",
       appDescription: "一个用 PyQt6 构建的跨平台 Python 应用程序，用于从 Kemono.cr、Coomer.st 和 Pawchive.pw 下载内容",
