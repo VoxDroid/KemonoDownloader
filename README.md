@@ -63,7 +63,7 @@
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://sourceforge.net/sflogo.php?type=18&amp;group_id=3859460" width=200></a>
  <br>
  <br>
- <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://a.fsdn.com/con/app/sf-download-button" width=276 height=48 srcset="https://a.fsdn.com/con/app/sf-download-button?button_size=2x 2x"></a>
+ <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader for Windows, macOS and Linux" src="assets/svg/download-button.svg" width="296" height="59"></a>
  <br>
  <br>
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dt/kemonodownloader.svg" ></a>
