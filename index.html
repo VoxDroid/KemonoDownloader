@@ -24,6 +24,13 @@
 <link rel="stylesheet" href="assets/css/language-selector.css">
 </head>
 <body>
+<!-- Legacy notice -->
+<a class="legacy-banner" href="#pawchive">
+    <span class="legacy-badge" data-i18n="legacyBadge">Legacy</span>
+    <span data-i18n="legacyBanner">KemonoDownloader 5.16.0 is the final release. Meet its successor, <strong>Pawchive Downloader</strong></span>
+    <i class="fas fa-arrow-right"></i>
+</a>
+
 <!-- Header Section -->
 <header>
     <div class="animated-bg">
@@ -199,6 +206,39 @@
 </header>
 
 <!-- Section Separator - New design replacing diagonal dividers -->
+<div class="section-separator"></div>
+
+<!-- Successor Section -->
+<section class="bg-dark-section text-white" id="pawchive">
+    <div class="container section-content">
+        <div class="pawchive-card" data-aos="fade-up">
+            <img src="assets/img/pawchive-downloader.png" alt="Pawchive Downloader" class="pawchive-icon" width="128" height="128">
+            <div class="pawchive-body">
+                <span class="pawchive-kicker" data-i18n="pawchiveKicker">The successor</span>
+                <h2 data-i18n="pawchiveTitle">Meet Pawchive Downloader</h2>
+                <p data-i18n="pawchiveLead">KemonoDownloader is now a legacy project: 5.16.0 is its final release. Pawchive Downloader was rebuilt from scratch as a native app for Windows, macOS and Linux, and downloads from Pawchive, Kemono and Coomer, with much more.</p>
+                <ul class="pawchive-points">
+                    <li data-i18n="pawchivePoint1"><i class="fas fa-feather"></i> About 6 MB instead of 54 to 82 MB</li>
+                    <li data-i18n="pawchivePoint2"><i class="fas fa-link"></i> Downloads the Mega, Google Drive, Dropbox, Pixeldrain, GoFile and MediaFire links that posts share</li>
+                    <li data-i18n="pawchivePoint3"><i class="fas fa-redo"></i> Resumes interrupted downloads and checks every file's SHA-256</li>
+                    <li data-i18n="pawchivePoint4"><i class="fas fa-server"></i> Notices dead media servers and offers thumbnails or a later retry</li>
+                    <li data-i18n="pawchivePoint5"><i class="fas fa-bell"></i> Creator search, a watchlist with notifications, the tray and 9 languages</li>
+                </ul>
+                <div class="pawchive-actions">
+                    <a href="https://ko-fi.com/izeno" target="_blank" class="pawchive-download">
+                        <img src="assets/svg/pawchive-download-button.svg" alt="Download Pawchive Downloader for Windows, macOS and Linux" width="314" height="59">
+                    </a>
+                    <a href="https://github.com/VoxDroid/PawchiveDownloader" target="_blank" class="btn btn-custom">
+                        <i class="fab fa-github"></i> <span data-i18n="pawchiveGithub">Pawchive Downloader on GitHub</span>
+                    </a>
+                </div>
+                <p class="pawchive-note" data-i18n="pawchiveNote">KemonoDownloader stays available and open source, but new features and site updates now go into Pawchive Downloader. <a href="https://github.com/VoxDroid/KemonoDownloader#moving-to-pawchive-downloader" target="_blank">See the full comparison</a>.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Separator -->
 <div class="section-separator"></div>
 
 <!-- Overview Section -->
@@ -682,6 +722,7 @@ python -m pip install -r requirements.txt</code></pre></li>
         <h2 class="text-center" data-aos="fade-up" data-i18n="releasesTitle">Releases</h2>
         <div class="row">
             <div class="col-md-12" data-aos="fade-up" data-aos-delay="100">
+                <p class="releases-final" data-i18n="releasesFinal"><strong>5.16.0 is the final release of KemonoDownloader.</strong> New versions come from its successor, <a href="#pawchive">Pawchive Downloader</a>.</p>
                 <ul>
                     <li data-i18n="releasesWindows"><strong>Windows</strong>: Portable <code>.exe</code> and <code>.msi</code> installer builds are available on <a href="https://ko-fi.com/izeno/shop" target="_blank">Ko-fi</a>.</li>
                     <li data-i18n="releasesMacOS"><strong>macOS</strong>: <code>.dmg</code> builds for Apple Silicon and Intel are available on <a href="https://ko-fi.com/izeno/shop" target="_blank">Ko-fi</a>.</li>
@@ -689,9 +730,12 @@ python -m pip install -r requirements.txt</code></pre></li>
                 </ul>
                 <p data-i18n="releasesDesc">The <a href="https://github.com/VoxDroid/KemonoDownloader/releases" target="_blank">GitHub Releases page</a> has the release notes and source code for every version. Building from source with Briefcase is free and works on all platforms.</p>
                 
-                <div class="text-center mt-4">
-                    <a href="https://sourceforge.net/projects/kemonodownloader/files/latest/download" class="btn btn-custom" data-aos="zoom-in" data-aos-delay="200">
-                        <i class="fas fa-download"></i> <span data-i18n="downloadLatestRelease">Download Latest Release</span>
+                <div class="release-buttons mt-4" data-aos="zoom-in" data-aos-delay="200">
+                    <a href="https://ko-fi.com/izeno/shop" target="_blank">
+                        <img src="assets/svg/download-button.svg" alt="Download KemonoDownloader for Windows, macOS and Linux" width="296" height="59">
+                    </a>
+                    <a href="#pawchive">
+                        <img src="assets/svg/pawchive-download-button.svg" alt="Download Pawchive Downloader for Windows, macOS and Linux" width="314" height="59">
                     </a>
                 </div>
             </div>

@@ -868,3 +868,164 @@ a:hover {
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
+/* Legacy notice and the successor, Pawchive Downloader */
+.legacy-banner {
+    position: relative;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: #17132b;
+    border-bottom: 1px solid #2e2852;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    text-align: center;
+    text-decoration: none;
+}
+
+.legacy-banner:hover {
+    background-color: #201a3b;
+    color: #fff;
+}
+
+.legacy-banner strong {
+    color: #a99dff;
+}
+
+.legacy-banner .fa-arrow-right {
+    color: #8b7cf6;
+    transition: transform 0.2s ease;
+}
+
+.legacy-banner:hover .fa-arrow-right {
+    transform: translateX(4px);
+}
+
+.legacy-badge {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background-color: #8b7cf6;
+    color: #17132b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.pawchive-card {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    padding: 40px;
+    border: 1px solid #2e2852;
+    border-radius: 20px;
+    background-color: #17132b;
+    box-shadow: var(--card-shadow);
+}
+
+.pawchive-icon {
+    flex: 0 0 auto;
+    width: 128px;
+    height: 128px;
+}
+
+.pawchive-body h2 {
+    margin: 6px 0 30px;
+    text-align: left;
+}
+
+.pawchive-body h2::after {
+    left: 0;
+    transform: none;
+}
+
+.pawchive-kicker {
+    color: #a99dff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.pawchive-points {
+    list-style: none;
+    padding: 0;
+    margin: 18px 0 24px;
+}
+
+.pawchive-points li {
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.pawchive-points i {
+    width: 22px;
+    color: #8b7cf6;
+}
+
+.pawchive-actions,
+.release-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+}
+
+.release-buttons {
+    justify-content: center;
+}
+
+.pawchive-download img,
+.release-buttons img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.2s ease;
+}
+
+.pawchive-download:hover img,
+.release-buttons a:hover img {
+    transform: translateY(-2px);
+}
+
+.pawchive-note {
+    margin: 22px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.releases-final {
+    padding: 14px 18px;
+    border-left: 4px solid #8b7cf6;
+    border-radius: 8px;
+    background-color: rgba(139, 124, 246, 0.1);
+}
+
+@media (max-width: 768px) {
+    .pawchive-card {
+        flex-direction: column;
+        align-items: center;
+        padding: 28px 20px;
+        text-align: center;
+    }
+
+    .pawchive-body h2 {
+        text-align: center;
+    }
+
+    .pawchive-body h2::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .pawchive-points {
+        text-align: left;
+    }
+
+    .pawchive-actions {
+        justify-content: center;
+    }
+}
