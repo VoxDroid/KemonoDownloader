@@ -64,6 +64,7 @@
  <br>
  <br>
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader for Windows, macOS and Linux" src="assets/svg/download-button.svg" width="296" height="59"></a>
+ <a href="https://ko-fi.com/izeno/shop/pawchivedownloader"><img alt="Download Pawchive Downloader for Windows, macOS and Linux" src="assets/svg/pawchive-download-button.svg" width="314" height="59"></a>
  <br>
  <br>
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dt/kemonodownloader.svg" ></a>
@@ -107,6 +108,10 @@ Pawchive Downloader keeps what KemonoDownloader does well, including the polite 
 - **Downloads that don't get stuck:** every file resumes after a pause, a dropped connection or a restart, is checked against the site's SHA-256, and is retried later by itself if it fails. Dead Kemono and Coomer media servers are noticed before a download starts, with the choice to cancel, take thumbnails instead, or queue the full files for later.
 - **Keeping up with creators:** creator search by name, a watchlist that checks for new posts and can download them automatically, read markers, statistics and a check that finds deleted or moved files.
 - **Actively developed:** new features and site updates go into Pawchive Downloader from now on.
+
+<p align="center">
+  <a href="https://ko-fi.com/izeno/shop/pawchivedownloader"><img alt="Download Pawchive Downloader for Windows, macOS and Linux" src="assets/svg/pawchive-download-button.svg" width="314" height="59"></a>
+</p>
 
 ### $\color{#90a4ae}{\sf{\text{KemonoDownloader and Pawchive Downloader Compared}}}$ <a name="kemonodownloader-and-pawchive-downloader-compared"></a>
 
