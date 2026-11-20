@@ -64,7 +64,7 @@
  <br>
  <br>
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader for Windows, macOS and Linux" src="assets/svg/download-button.svg" width="296" height="59"></a>
- <a href="https://ko-fi.com/izeno"><img alt="Download Pawchive Downloader for Windows, macOS and Linux" src="assets/svg/pawchive-download-button.svg" width="314" height="59"></a>
+ <a href="https://ko-fi.com/izeno/shop/pawchivedownloader"><img alt="Download Pawchive Downloader for Windows, macOS and Linux" src="assets/svg/pawchive-download-button.svg" width="314" height="59"></a>
  <br>
  <br>
  <a href="https://ko-fi.com/izeno/shop"><img alt="Download KemonoDownloader" src="https://img.shields.io/sourceforge/dt/kemonodownloader.svg" ></a>
@@ -110,7 +110,7 @@ Pawchive Downloader keeps what KemonoDownloader does well, including the polite 
 - **Actively developed:** new features and site updates go into Pawchive Downloader from now on.
 
 <p align="center">
-  <a href="https://ko-fi.com/izeno"><img alt="Download Pawchive Downloader for Windows, macOS and Linux" src="assets/svg/pawchive-download-button.svg" width="314" height="59"></a>
+  <a href="https://ko-fi.com/izeno/shop/pawchivedownloader"><img alt="Download Pawchive Downloader for Windows, macOS and Linux" src="assets/svg/pawchive-download-button.svg" width="314" height="59"></a>
 </p>
 
 ### $\color{#90a4ae}{\sf{\text{KemonoDownloader and Pawchive Downloader Compared}}}$ <a name="kemonodownloader-and-pawchive-downloader-compared"></a>
