@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import datetime
 import gzip
 import hashlib
 import json
@@ -61,6 +62,79 @@ ALLOWED_EXTENSIONS = (
     ".jpe",
     ".webp",
 )
+
+
+def parse_post_datetime(value: Any) -> Optional[datetime.datetime]:
+    """Parse a post timestamp from the API into a naive datetime.
+
+    The Kemono/Coomer/Pawchive APIs mostly return timezone-less ISO strings
+    such as ``2026-01-07T17:20:52``; older mirrors may use Unix timestamps and
+    some responses carry microseconds or a trailing ``Z``.  All forms are
+    accepted and normalised to a naive datetime so that range comparisons are
+    consistent.
+    """
+    if value is None or value == "":
+        return None
+    if isinstance(value, datetime.datetime):
+        parsed = value
+    elif isinstance(value, datetime.date):
+        parsed = datetime.datetime.combine(value, datetime.time.min)
+    elif isinstance(value, (int, float)) and not isinstance(value, bool):
+        try:
+            parsed = datetime.datetime.fromtimestamp(value)
+        except (OverflowError, OSError, ValueError):
+            return None
+    elif isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        if text.endswith("Z"):
+            text = text[:-1] + "+00:00"
+        try:
+            parsed = datetime.datetime.fromisoformat(text)
+        except ValueError:
+            try:
+                parsed = datetime.datetime.fromisoformat(text[:19])
+            except ValueError:
+                return None
+    else:
+        return None
+    return parsed.replace(tzinfo=None)
+
+
+def post_in_date_range(
+    post: Any,
+    start_date: Optional[datetime.date],
+    end_date: Optional[datetime.date],
+) -> bool:
+    """Return whether *post* was published within the inclusive date range.
+
+    ``published`` is the field present in creator post lists.  ``added`` and
+    ``edited`` are used as fallbacks for list payloads from older mirrors.
+    Posts without a usable timestamp are excluded when a range is active.
+    """
+    if not isinstance(post, dict):
+        return False
+    if start_date is None and end_date is None:
+        return True
+
+    published = None
+    for key in ("published", "added", "edited"):
+        published = parse_post_datetime(post.get(key))
+        if published is not None:
+            break
+    if published is None:
+        return False
+
+    if start_date is not None:
+        start = datetime.datetime.combine(start_date, datetime.time.min)
+        if published < start:
+            return False
+    if end_date is not None:
+        end = datetime.datetime.combine(end_date, datetime.time.max)
+        if published > end:
+            return False
+    return True
 
 
 class ThreadSettings:

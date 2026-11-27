@@ -11,11 +11,12 @@ from urllib.parse import parse_qs, urlparse
 import qtawesome as qta
 import requests
 from bs4 import BeautifulSoup
-from PyQt6.QtCore import QByteArray, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QDate, QByteArray, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
+    QDateEdit,
     QDialog,
     QFileDialog,
     QGridLayout,
@@ -68,6 +69,7 @@ from kemonodownloader.download_utils import (
     is_missing_file_error,
     iter_post_file_entries,
     md5_file,
+    post_in_date_range,
     preview_image_url,
     rate_limit_gave_up,
     rate_limit_reporter,
@@ -284,13 +286,18 @@ class PostDetectionThread(QThread):
     log = pyqtSignal(str, str)
     error = pyqtSignal(str)
 
-    def __init__(self, url, post_titles_map, settings):
+    def __init__(self, url, post_titles_map, settings, date_range=None):
         super().__init__()
         self.url = url
         self.post_titles_map = post_titles_map  # Shared dictionary to store post titles
         self.settings = settings
         self.is_running = True
         self.domain_config = get_domain_config(url)
+        # Optional (start_date, end_date) tuple. Posts outside this inclusive
+        # publish-date range are dropped before they reach the UI.
+        self.date_range = date_range
+        self._date_filter_skipped = 0
+        self._date_filter_total = 0
 
     def stop(self):
         self.is_running = False
@@ -650,15 +657,39 @@ class PostDetectionThread(QThread):
                 "DEBUG",
             )
 
-            if len(posts_data) < page_size and len(posts_data) > 0:
+            raw_post_count = len(posts_data)
+            if raw_post_count < page_size and raw_post_count > 0:
                 self.log.emit(
                     translate(
                         "log_info",
                         translate(
-                            "received_less_than_page_size", len(posts_data), page_size
+                            "received_less_than_page_size", raw_post_count, page_size
                         ),
                     ),
                     "INFO",
+                )
+
+            if self.date_range:
+                start_date, end_date = self.date_range
+                filtered_posts_data = [
+                    post
+                    for post in posts_data
+                    if post_in_date_range(post, start_date, end_date)
+                ]
+                self._date_filter_total += raw_post_count
+                self._date_filter_skipped += raw_post_count - len(filtered_posts_data)
+                posts_data = filtered_posts_data
+                self.log.emit(
+                    translate(
+                        "log_debug",
+                        translate(
+                            "date_range_page_filtered",
+                            len(posts_data),
+                            raw_post_count,
+                            offset,
+                        ),
+                    ),
+                    "DEBUG",
                 )
 
             for post in posts_data:
@@ -679,7 +710,7 @@ class PostDetectionThread(QThread):
                     sanitize_filename(title)
                 )
 
-            if not posts_data:
+            if not raw_post_count:
                 self.log.emit(
                     translate("log_info", translate("no_more_posts_at_offset", offset)),
                     "INFO",
@@ -743,13 +774,13 @@ class PostDetectionThread(QThread):
                 )
                 break
 
-            if len(posts_data) < page_size:
+            if raw_post_count < page_size:
                 self.log.emit(
                     translate(
                         "log_info",
                         translate(
                             "last_page_reached_with_counts",
-                            len(posts_data),
+                            raw_post_count,
                             page_size,
                             len(all_posts),
                         ),
@@ -826,6 +857,23 @@ class PostDetectionThread(QThread):
                 ),
                 "INFO",
             )
+            if self.date_range:
+                self.log.emit(
+                    translate(
+                        "log_info",
+                        translate(
+                            "date_range_summary",
+                            len(detected_posts),
+                            self._date_filter_skipped,
+                        ),
+                    ),
+                    "INFO",
+                )
+                if not detected_posts:
+                    self.log.emit(
+                        translate("log_warning", translate("date_range_no_posts")),
+                        "WARNING",
+                    )
             self.finished.emit(detected_posts)
 
 
@@ -2675,6 +2723,40 @@ class CreatorDownloaderTab(QWidget):
         self.creator_search_input.textChanged.connect(self.filter_items)
         post_list_layout.addWidget(self.creator_search_input)
 
+        # Publish-date range filter. Posts outside the inclusive range are
+        # dropped while the creator's post list is detected, so every download
+        # path (normal selection, check-all and fast mode) honours it.
+        date_range_layout = QHBoxLayout()
+        date_range_layout.setContentsMargins(0, 0, 0, 0)
+        self.creator_date_filter_check = QCheckBox()
+        self.creator_date_filter_check.setChecked(False)
+        date_range_layout.addWidget(self.creator_date_filter_check)
+
+        self.creator_date_start = QDateEdit()
+        self.creator_date_start.setCalendarPopup(True)
+        self.creator_date_start.setDisplayFormat("yyyy-MM-dd")
+        self.creator_date_start.setDate(QDate.currentDate().addMonths(-1))
+        date_range_layout.addWidget(self.creator_date_start)
+
+        self.creator_date_separator = QLabel("→")
+        date_range_layout.addWidget(self.creator_date_separator)
+
+        self.creator_date_end = QDateEdit()
+        self.creator_date_end.setCalendarPopup(True)
+        self.creator_date_end.setDisplayFormat("yyyy-MM-dd")
+        self.creator_date_end.setDate(QDate.currentDate())
+        date_range_layout.addWidget(self.creator_date_end)
+
+        self.creator_date_apply_btn = QPushButton(
+            qta.icon("fa5s.filter", color="white"), ""
+        )
+        self.creator_date_apply_btn.clicked.connect(self.apply_date_filter)
+        set_role(self.creator_date_apply_btn, "icon")
+        self.creator_date_apply_btn.setFixedSize(30, 30)
+        date_range_layout.addWidget(self.creator_date_apply_btn)
+        date_range_layout.addStretch()
+        post_list_layout.addLayout(date_range_layout)
+
         checkbox_layout = QHBoxLayout()
         self.creator_check_all = QCheckBox()
         self.creator_check_all.setChecked(False)
@@ -2765,6 +2847,10 @@ class CreatorDownloaderTab(QWidget):
         tip(self.creator_download_text_check, "tip_download_text")
         tips(self.creator_ext_checks.values(), "tip_file_extension")
         tip(self.creator_search_input, "tip_search_posts")
+        tip(self.creator_date_filter_check, "tip_date_range_filter")
+        tip(self.creator_date_start, "tip_date_range_start")
+        tip(self.creator_date_end, "tip_date_range_end")
+        tip(self.creator_date_apply_btn, "tip_date_range_apply")
         tip(self.creator_check_all, "tip_check_all_page")
         tip(self.creator_check_all_all, "tip_check_all_all")
         tip(self.prev_page_btn, "tip_prev_page")
@@ -2813,6 +2899,8 @@ class CreatorDownloaderTab(QWidget):
         self.creator_expand_logs_btn.setToolTip(translate("expand_logs"))
 
         self.creator_search_input.setPlaceholderText(translate("search_posts"))
+        self.creator_date_filter_check.setText(translate("date_range_filter"))
+        self.creator_date_apply_btn.setToolTip(translate("tip_date_range_apply"))
 
         self.update_creator_queue_list()
 
@@ -3169,6 +3257,51 @@ class CreatorDownloaderTab(QWidget):
             setattr(widget, "label", label)
             setattr(widget, "remove_button", remove_button)
 
+    def get_date_range(self):
+        """Return the active inclusive publish-date range, or None."""
+        if not getattr(self, "creator_date_filter_check", None):
+            return None
+        if not self.creator_date_filter_check.isChecked():
+            return None
+        start = self.creator_date_start.date().toPyDate()
+        end = self.creator_date_end.date().toPyDate()
+        if start > end:
+            return None
+        return start, end
+
+    def apply_date_filter(self):
+        """Re-fetch the current creator with the chosen date range."""
+        if not getattr(self, "creator_date_filter_check", None):
+            return
+        if self.creator_date_filter_check.isChecked():
+            start = self.creator_date_start.date().toPyDate()
+            end = self.creator_date_end.date().toPyDate()
+            if start > end:
+                self.append_log_to_console(
+                    translate("log_error", translate("date_range_invalid")), "ERROR"
+                )
+                return
+            self.append_log_to_console(
+                translate(
+                    "log_info",
+                    translate(
+                        "date_range_applied", start.isoformat(), end.isoformat()
+                    ),
+                ),
+                "INFO",
+            )
+        else:
+            self.append_log_to_console(
+                translate("log_info", translate("date_range_disabled")), "INFO"
+            )
+
+        if self.current_creator_url:
+            self.check_creator_from_queue(self.current_creator_url)
+        else:
+            self.append_log_to_console(
+                translate("log_info", translate("date_range_ready")), "INFO"
+            )
+
     def check_creator_from_queue(self, url):
         if not isinstance(url, str):
             self.append_log_to_console(
@@ -3222,6 +3355,9 @@ class CreatorDownloaderTab(QWidget):
         self.post_detection_thread = PostDetectionThread(
             url, self.post_titles_map, self._create_thread_settings()
         )
+        # Set after construction so test doubles that only implement the
+        # original three-argument constructor keep working.
+        self.post_detection_thread.date_range = self.get_date_range()
         self.post_detection_thread.finished.connect(self.on_post_detection_finished)
         self.post_detection_thread.posts_batch.connect(self.on_posts_batch_received)
         self.post_detection_thread.log.connect(self.append_log_to_console)
@@ -3339,6 +3475,10 @@ class CreatorDownloaderTab(QWidget):
 
         # Post operations
         self.creator_search_input.setEnabled(not is_fetching)
+        self.creator_date_filter_check.setEnabled(not is_fetching)
+        self.creator_date_start.setEnabled(not is_fetching)
+        self.creator_date_end.setEnabled(not is_fetching)
+        self.creator_date_apply_btn.setEnabled(not is_fetching)
         self.creator_check_all.setEnabled(not is_fetching)
         self.creator_check_all_all.setEnabled(not is_fetching)
         self.creator_post_list.setEnabled(not is_fetching)
@@ -3395,6 +3535,10 @@ class CreatorDownloaderTab(QWidget):
 
         # Post selection
         self.creator_search_input.setEnabled(enabled)
+        self.creator_date_filter_check.setEnabled(enabled)
+        self.creator_date_start.setEnabled(enabled)
+        self.creator_date_end.setEnabled(enabled)
+        self.creator_date_apply_btn.setEnabled(enabled)
         self.creator_check_all.setEnabled(enabled)
         self.creator_check_all_all.setEnabled(enabled)
         self.creator_post_list.setEnabled(enabled)
